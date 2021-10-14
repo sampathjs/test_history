@@ -1,0 +1,16 @@
+:host {
+  display: flex;
+  margin: 20px auto;
+  width: 640px;
+  position: relative;
+}
+
+.mat-card {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+}
+
+.mat-form-field {
+  flex: 0 0 280px;
+}

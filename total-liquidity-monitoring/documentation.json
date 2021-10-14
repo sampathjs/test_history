@@ -1,0 +1,2399 @@
+{
+    "pipes": [],
+    "interfaces": [
+        {
+            "name": "Forecast",
+            "id": "interface-Forecast-ff14791b961dc66e102a0d9a3422fe0c",
+            "file": "src/app/services/forecast.ts",
+            "type": "interface",
+            "sourceCode": "import { Balance } from \"../balance-form/balance\";\n\nexport interface Forecast {\n\tgroup: string;\n\tbalanceDate: string;\n\tmetal: string;\n\n\tuser: string;\n\tcompanyCode: string;\n\tunit: string;\n\tcomments: string;\n\tdeliverable: number;\n\tbalances: Balance[];\n}\n",
+            "properties": [
+                {
+                    "name": "balanceDate",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 5
+                },
+                {
+                    "name": "balances",
+                    "type": "Balance[]",
+                    "optional": false,
+                    "description": "",
+                    "line": 13
+                },
+                {
+                    "name": "comments",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 11
+                },
+                {
+                    "name": "companyCode",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 9
+                },
+                {
+                    "name": "deliverable",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 12
+                },
+                {
+                    "name": "group",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 4
+                },
+                {
+                    "name": "metal",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 6
+                },
+                {
+                    "name": "unit",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 10
+                },
+                {
+                    "name": "user",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 8
+                }
+            ],
+            "indexSignatures": [],
+            "kind": 150,
+            "methods": []
+        },
+        {
+            "name": "Group",
+            "id": "interface-Group-f23b5cd355d5d9d313450e0855556e5d",
+            "file": "src/app/common-info/group.ts",
+            "type": "interface",
+            "sourceCode": "export interface Group {\n\tname: string;\n\tcompanyCode: string;\n}\n",
+            "properties": [
+                {
+                    "name": "companyCode",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 3
+                },
+                {
+                    "name": "name",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 2
+                }
+            ],
+            "indexSignatures": [],
+            "kind": 150,
+            "methods": []
+        },
+        {
+            "name": "User",
+            "id": "interface-User-e33072624880eb854a0ddf7fef82ef8a",
+            "file": "src/app/services/user.ts",
+            "type": "interface",
+            "sourceCode": "export interface User {\n\tname: string;\n\tpassword?: string;\n\tneedPassword?: boolean;\n}\n",
+            "properties": [
+                {
+                    "name": "name",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 2
+                },
+                {
+                    "name": "needPassword",
+                    "type": "boolean",
+                    "optional": true,
+                    "description": "",
+                    "line": 4
+                },
+                {
+                    "name": "password",
+                    "type": "string",
+                    "optional": true,
+                    "description": "",
+                    "line": 3
+                }
+            ],
+            "indexSignatures": [],
+            "kind": 150,
+            "methods": []
+        }
+    ],
+    "injectables": [
+        {
+            "name": "DataService",
+            "id": "injectable-DataService-9680db689f222ade7a2a8112f44dcdce",
+            "file": "src/app/services/data-service.ts",
+            "properties": [
+                {
+                    "name": "_serviceError",
+                    "type": "ServiceError",
+                    "optional": true,
+                    "description": "",
+                    "line": 16,
+                    "modifierKind": [
+                        112
+                    ]
+                },
+                {
+                    "name": "waitingCalls",
+                    "defaultValue": "[]",
+                    "type": "unknown[]",
+                    "optional": false,
+                    "description": "",
+                    "line": 15,
+                    "modifierKind": [
+                        112
+                    ]
+                }
+            ],
+            "methods": [
+                {
+                    "name": "getBalanceDates",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Observable<string[]>",
+                    "typeParameters": [],
+                    "line": 62
+                },
+                {
+                    "name": "getBasisOfAssumptions",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Observable<string[]>",
+                    "typeParameters": [],
+                    "line": 78
+                },
+                {
+                    "name": "getCustomers",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Observable<string[]>",
+                    "typeParameters": [],
+                    "line": 74
+                },
+                {
+                    "name": "getData",
+                    "args": [
+                        {
+                            "name": "endpoint",
+                            "type": "string"
+                        },
+                        {
+                            "name": "headers",
+                            "type": "HttpHeaders",
+                            "optional": true
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Observable<T>",
+                    "typeParameters": [
+                        "T"
+                    ],
+                    "line": 86,
+                    "modifierKind": [
+                        112
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "endpoint",
+                            "type": "string",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "headers",
+                            "type": "HttpHeaders",
+                            "optional": true,
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "getForecasts",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Observable<Forecast[]>",
+                    "typeParameters": [],
+                    "line": 82
+                },
+                {
+                    "name": "getGroups",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Observable<Group[]>",
+                    "typeParameters": [],
+                    "line": 58
+                },
+                {
+                    "name": "getMetals",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Observable<string[]>",
+                    "typeParameters": [],
+                    "line": 70
+                },
+                {
+                    "name": "getUnits",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Observable<string[]>",
+                    "typeParameters": [],
+                    "line": 66
+                },
+                {
+                    "name": "getUsers",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Observable<User[]>",
+                    "typeParameters": [],
+                    "line": 39
+                },
+                {
+                    "name": "isBusy",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "boolean",
+                    "typeParameters": [],
+                    "line": 18
+                },
+                {
+                    "name": "login",
+                    "args": [
+                        {
+                            "name": "credential",
+                            "type": "User",
+                            "optional": true
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Observable<User>",
+                    "typeParameters": [],
+                    "line": 28,
+                    "jsdoctags": [
+                        {
+                            "name": "credential",
+                            "type": "User",
+                            "optional": true,
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "resetPassword",
+                    "args": [
+                        {
+                            "name": "userName",
+                            "type": "string"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Observable<unknown>",
+                    "typeParameters": [],
+                    "line": 43,
+                    "jsdoctags": [
+                        {
+                            "name": "userName",
+                            "type": "string",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "saveForecast",
+                    "args": [
+                        {
+                            "name": "forecast",
+                            "type": "Forecast"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "Observable<unknown>",
+                    "typeParameters": [],
+                    "line": 107,
+                    "jsdoctags": [
+                        {
+                            "name": "forecast",
+                            "type": "Forecast",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "serviceError",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "ServiceError | undefined",
+                    "typeParameters": [],
+                    "line": 22
+                }
+            ],
+            "description": "",
+            "sourceCode": "import { EMPTY, Observable } from \"rxjs\";\nimport { User } from \"./user\";\nimport { HttpClient, HttpHeaders } from \"@angular/common/http\";\nimport { catchError, finalize } from \"rxjs/operators\";\nimport { ServiceError } from \"../error-indicator/service-error\";\nimport { Group } from \"../common-info/group\";\nimport { MetalTab } from \"../balance-form/metal-tab\";\nimport { Injectable } from \"@angular/core\";\nimport { Forecast } from \"./forecast\";\n\n@Injectable({\n\tprovidedIn: \"root\"\n})\nexport class DataService {\n\tprivate waitingCalls: unknown[] = [];\n\tprivate _serviceError?: ServiceError;\n\n\tisBusy(): boolean {\n\t\treturn this.waitingCalls.length > 0;\n\t}\n\n\tserviceError(): ServiceError | undefined {\n\t\treturn this._serviceError;\n\t}\n\n\tconstructor(private http: HttpClient) {}\n\n\tlogin(credential?: User): Observable<User> {\n\t\tconst headers = new HttpHeaders(\n\t\t\tcredential\n\t\t\t\t? {\n\t\t\t\t\t\tauthorization: \"Basic \" + btoa(credential.name + \":\" + (credential.password ?? \"\"))\n\t\t\t\t  }\n\t\t\t\t: {}\n\t\t);\n\t\treturn this.getData(\"/login_user\", headers);\n\t}\n\n\tgetUsers(): Observable<User[]> {\n\t\treturn this.getData(\"/users\");\n\t}\n\n\tresetPassword(userName: string): Observable<unknown> {\n\t\tthis.waitingCalls.push({});\n\t\treturn this.http\n\t\t\t.post<User[]>(`/users/${userName}/password`, {})\n\t\t\t.pipe(finalize(() => this.waitingCalls.pop()))\n\t\t\t.pipe(\n\t\t\t\tcatchError((err) => {\n\t\t\t\t\t{\n\t\t\t\t\t\tthis._serviceError = err as ServiceError;\n\t\t\t\t\t\treturn EMPTY;\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t);\n\t}\n\n\tgetGroups(): Observable<Group[]> {\n\t\treturn this.getData(\"/groups\");\n\t}\n\n\tgetBalanceDates(): Observable<string[]> {\n\t\treturn this.getData(\"/balance_dates\");\n\t}\n\n\tgetUnits(): Observable<string[]> {\n\t\treturn this.getData(\"/units\");\n\t}\n\n\tgetMetals(): Observable<string[]> {\n\t\treturn this.getData(\"/metals\");\n\t}\n\n\tgetCustomers(): Observable<string[]> {\n\t\treturn this.getData(\"/customers\");\n\t}\n\n\tgetBasisOfAssumptions(): Observable<string[]> {\n\t\treturn this.getData(\"/basis_of_assumptions\");\n\t}\n\n\tgetForecasts(): Observable<Forecast[]> {\n\t\treturn this.getData(\"/forecasts\");\n\t}\n\n\tprivate getData<T>(endpoint: string, headers?: HttpHeaders): Observable<T> {\n\t\tthis.waitingCalls.push({});\n\t\tconsole.log(`retrieving data from ${endpoint}`);\n\t\treturn this.http\n\t\t\t.get<T>(endpoint, headers ? { headers: headers } : undefined)\n\t\t\t.pipe(\n\t\t\t\tfinalize(() => {\n\t\t\t\t\tthis.waitingCalls.pop();\n\t\t\t\t\tconsole.log(`retrieved data from ${endpoint}`);\n\t\t\t\t})\n\t\t\t)\n\t\t\t.pipe(\n\t\t\t\tcatchError((err) => {\n\t\t\t\t\t{\n\t\t\t\t\t\tthis._serviceError = err as ServiceError;\n\t\t\t\t\t\treturn EMPTY;\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t);\n\t}\n\n\tsaveForecast(forecast: Forecast): Observable<unknown> {\n\t\tthis.waitingCalls.push({});\n\t\treturn this.http\n\t\t\t.post<User[]>(`/forecasts`, forecast)\n\t\t\t.pipe(finalize(() => this.waitingCalls.pop()))\n\t\t\t.pipe(\n\t\t\t\tcatchError((err) => {\n\t\t\t\t\t{\n\t\t\t\t\t\tthis._serviceError = err as ServiceError;\n\t\t\t\t\t\treturn EMPTY;\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t);\n\t}\n}\n",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "http",
+                        "type": "HttpClient"
+                    }
+                ],
+                "line": 24,
+                "jsdoctags": [
+                    {
+                        "name": "http",
+                        "type": "HttpClient",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            "type": "injectable"
+        }
+    ],
+    "classes": [
+        {
+            "name": "AppPage",
+            "id": "class-AppPage-ee2067dfb1c303f41003aea7d82d51e0",
+            "file": "e2e/src/app.po.ts",
+            "type": "class",
+            "sourceCode": "import { browser, by, element } from 'protractor';\n\nexport class AppPage {\n  async navigateTo(): Promise<unknown> {\n    return browser.get(browser.baseUrl);\n  }\n\n  async getTitleText(): Promise<string> {\n    return element(by.css('app-root .content span')).getText();\n  }\n}\n",
+            "properties": [],
+            "methods": [
+                {
+                    "name": "getTitleText",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Promise<string>",
+                    "typeParameters": [],
+                    "line": 8,
+                    "modifierKind": [
+                        120
+                    ]
+                },
+                {
+                    "name": "navigateTo",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "Promise<unknown>",
+                    "typeParameters": [],
+                    "line": 4,
+                    "modifierKind": [
+                        120
+                    ]
+                }
+            ],
+            "indexSignatures": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        },
+        {
+            "name": "Balance",
+            "id": "class-Balance-91ef758325b5a016b4fd51eb5f117482",
+            "file": "src/app/balance-form/balance.ts",
+            "type": "class",
+            "sourceCode": "export class Balance {\n\tconstructor(\n\t\tpublic customer = \"\",\n\t\tpublic currentBalance = 0,\n\t\tpublic shipmentVolume = 0,\n\t\tpublic shipmentWindow?: number,\n\t\tpublic basisOfAssumption?: string\n\t) {}\n\n\texcessMetal(): number {\n\t\treturn this.currentBalance - this.shipmentVolume;\n\t}\n\n\tvalidate(validCustomers: string[], validBasisOfAssumptions: string[]): string | undefined {\n\t\tlet error = \"\";\n\t\tif (!validCustomers.includes(this.customer)) {\n\t\t\terror += `invalid customer: ${this.customer};`;\n\t\t}\n\t\tif (!(this.currentBalance && this.shipmentVolume)) {\n\t\t\terror += \"current balance/shipment volume are required\";\n\t\t}\n\t\tif (this.basisOfAssumption && !validBasisOfAssumptions.includes(this.basisOfAssumption)) {\n\t\t\terror += `invalid basis of assumption: ${this.basisOfAssumption}`;\n\t\t}\n\t\treturn error ? error : undefined;\n\t}\n}\n",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "customer",
+                        "type": "string",
+                        "defaultValue": "\"\""
+                    },
+                    {
+                        "name": "currentBalance",
+                        "type": "number",
+                        "defaultValue": "0"
+                    },
+                    {
+                        "name": "shipmentVolume",
+                        "type": "number",
+                        "defaultValue": "0"
+                    },
+                    {
+                        "name": "shipmentWindow",
+                        "type": "number",
+                        "optional": true
+                    },
+                    {
+                        "name": "basisOfAssumption",
+                        "type": "string",
+                        "optional": true
+                    }
+                ],
+                "line": 1,
+                "jsdoctags": [
+                    {
+                        "name": "customer",
+                        "type": "string",
+                        "defaultValue": "\"\"",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    },
+                    {
+                        "name": "currentBalance",
+                        "type": "number",
+                        "defaultValue": "0",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    },
+                    {
+                        "name": "shipmentVolume",
+                        "type": "number",
+                        "defaultValue": "0",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    },
+                    {
+                        "name": "shipmentWindow",
+                        "type": "number",
+                        "optional": true,
+                        "tagName": {
+                            "text": "param"
+                        }
+                    },
+                    {
+                        "name": "basisOfAssumption",
+                        "type": "string",
+                        "optional": true,
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            "properties": [
+                {
+                    "name": "basisOfAssumption",
+                    "type": "string",
+                    "optional": true,
+                    "description": "",
+                    "line": 7,
+                    "modifierKind": [
+                        114
+                    ]
+                },
+                {
+                    "name": "currentBalance",
+                    "defaultValue": "0",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 4,
+                    "modifierKind": [
+                        114
+                    ]
+                },
+                {
+                    "name": "customer",
+                    "defaultValue": "\"\"",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 3,
+                    "modifierKind": [
+                        114
+                    ]
+                },
+                {
+                    "name": "shipmentVolume",
+                    "defaultValue": "0",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 5,
+                    "modifierKind": [
+                        114
+                    ]
+                },
+                {
+                    "name": "shipmentWindow",
+                    "type": "number",
+                    "optional": true,
+                    "description": "",
+                    "line": 6,
+                    "modifierKind": [
+                        114
+                    ]
+                }
+            ],
+            "methods": [
+                {
+                    "name": "excessMetal",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "number",
+                    "typeParameters": [],
+                    "line": 10
+                },
+                {
+                    "name": "validate",
+                    "args": [
+                        {
+                            "name": "validCustomers",
+                            "type": "string[]"
+                        },
+                        {
+                            "name": "validBasisOfAssumptions",
+                            "type": "string[]"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "string | undefined",
+                    "typeParameters": [],
+                    "line": 14,
+                    "jsdoctags": [
+                        {
+                            "name": "validCustomers",
+                            "type": "string[]",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "validBasisOfAssumptions",
+                            "type": "string[]",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "indexSignatures": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        },
+        {
+            "name": "MetalTab",
+            "id": "class-MetalTab-9e63370546e2cec169aa789040d13409",
+            "file": "src/app/balance-form/metal-tab.ts",
+            "type": "class",
+            "sourceCode": "import { Balance } from \"./balance\";\n\nexport class MetalTab {\n\tmetal: string;\n\tdeliverable: number;\n\tbalances: Balance[];\n\n\tconstructor(metal: string) {\n\t\tthis.metal = metal;\n\t\tthis.deliverable = 0;\n\t\tthis.balances = [];\n\t}\n\n\ttotalCurrentBalance(): number | undefined {\n\t\treturn this.calculateTotal((balance) => balance.currentBalance);\n\t}\n\n\ttotalShipmentVolume(): number | undefined {\n\t\treturn this.calculateTotal((balance) => balance.shipmentVolume);\n\t}\n\n\ttotalExcessMetal(): number | undefined {\n\t\treturn this.calculateTotal((balance) => balance.excessMetal());\n\t}\n\n\tcalculateTotal(fn: (balance: Balance) => number): number | undefined {\n\t\treturn this.balances.reduce((accum, curr) => accum + fn(curr), 0);\n\t}\n\n\tisEmpty(): boolean {\n\t\treturn !this.balances.length;\n\t}\n\n\tclear(): void {\n\t\tthis.balances = [];\n\t}\n\n\tvalidate(validCustomers: string[], validBasisOfAssumptions: string[]): string | undefined {\n\t\tlet allErrors = \"\";\n\t\tfor (let idx = 0; idx < this.balances.length; idx++) {\n\t\t\tconst error = this.balances[idx].validate(validCustomers, validBasisOfAssumptions);\n\t\t\tif (error) {\n\t\t\t\tallErrors += `row ${idx + 1} has issues: ${error}`;\n\t\t\t}\n\t\t}\n\t\treturn allErrors ? allErrors : undefined;\n\t}\n}\n",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "metal",
+                        "type": "string"
+                    }
+                ],
+                "line": 6,
+                "jsdoctags": [
+                    {
+                        "name": "metal",
+                        "type": "string",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            "properties": [
+                {
+                    "name": "balances",
+                    "type": "Balance[]",
+                    "optional": false,
+                    "description": "",
+                    "line": 6
+                },
+                {
+                    "name": "deliverable",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 5
+                },
+                {
+                    "name": "metal",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 4
+                }
+            ],
+            "methods": [
+                {
+                    "name": "calculateTotal",
+                    "args": [
+                        {
+                            "name": "fn",
+                            "type": "function",
+                            "function": [
+                                {
+                                    "name": "balance",
+                                    "type": "Balance"
+                                }
+                            ]
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "number | undefined",
+                    "typeParameters": [],
+                    "line": 26,
+                    "jsdoctags": [
+                        {
+                            "name": "fn",
+                            "type": "function",
+                            "function": [
+                                {
+                                    "name": "balance",
+                                    "type": "Balance"
+                                }
+                            ],
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "clear",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 34
+                },
+                {
+                    "name": "isEmpty",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "boolean",
+                    "typeParameters": [],
+                    "line": 30
+                },
+                {
+                    "name": "totalCurrentBalance",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "number | undefined",
+                    "typeParameters": [],
+                    "line": 14
+                },
+                {
+                    "name": "totalExcessMetal",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "number | undefined",
+                    "typeParameters": [],
+                    "line": 22
+                },
+                {
+                    "name": "totalShipmentVolume",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "number | undefined",
+                    "typeParameters": [],
+                    "line": 18
+                },
+                {
+                    "name": "validate",
+                    "args": [
+                        {
+                            "name": "validCustomers",
+                            "type": "string[]"
+                        },
+                        {
+                            "name": "validBasisOfAssumptions",
+                            "type": "string[]"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "string | undefined",
+                    "typeParameters": [],
+                    "line": 38,
+                    "jsdoctags": [
+                        {
+                            "name": "validCustomers",
+                            "type": "string[]",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "validBasisOfAssumptions",
+                            "type": "string[]",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "indexSignatures": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        },
+        {
+            "name": "ServiceError",
+            "id": "class-ServiceError-d17824d44c93e782188105f610fe4a72",
+            "file": "src/app/error-indicator/service-error.ts",
+            "type": "class",
+            "sourceCode": "export class ServiceError {\n\tconstructor(private readonly status: string, private readonly error?: { message: string }) {}\n\n\tformatError(): string {\n\t\tconst msg = this.error?.message ?? (this.status === \"401\" ? \"Incorrect password\" : \"No message available\");\n\t\treturn `${this.status} - ${msg}`;\n\t}\n}\n",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "status",
+                        "type": "string"
+                    },
+                    {
+                        "name": "error",
+                        "type": "literal type",
+                        "optional": true
+                    }
+                ],
+                "line": 1,
+                "jsdoctags": [
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    },
+                    {
+                        "name": "error",
+                        "type": "literal type",
+                        "optional": true,
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            "properties": [],
+            "methods": [
+                {
+                    "name": "formatError",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "string",
+                    "typeParameters": [],
+                    "line": 4
+                }
+            ],
+            "indexSignatures": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        }
+    ],
+    "directives": [],
+    "components": [
+        {
+            "name": "AppComponent",
+            "id": "component-AppComponent-70f385ed4029b47cd2da6cec7e921139",
+            "file": "src/app/app.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-root",
+            "styleUrls": [
+                "./app.component.scss"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./app.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "propertiesClass": [
+                {
+                    "name": "balanceDates",
+                    "type": "Observable<string[]>",
+                    "optional": true,
+                    "description": "",
+                    "line": 21
+                },
+                {
+                    "name": "basisOfAssumptions",
+                    "type": "Observable<string[]>",
+                    "optional": true,
+                    "description": "",
+                    "line": 25
+                },
+                {
+                    "name": "commonInfoComponent",
+                    "type": "CommonInfoComponent",
+                    "optional": true,
+                    "description": "",
+                    "line": 32,
+                    "decorators": [
+                        {
+                            "name": "ViewChild",
+                            "stringifiedArguments": "CommonInfoComponent"
+                        }
+                    ],
+                    "modifierKind": [
+                        112
+                    ]
+                },
+                {
+                    "name": "currentUser",
+                    "type": "User",
+                    "optional": true,
+                    "description": "",
+                    "line": 18
+                },
+                {
+                    "name": "customers",
+                    "type": "Observable<string[]>",
+                    "optional": true,
+                    "description": "",
+                    "line": 24
+                },
+                {
+                    "name": "dataService",
+                    "type": "DataService",
+                    "optional": false,
+                    "description": "",
+                    "line": 34,
+                    "modifierKind": [
+                        114
+                    ]
+                },
+                {
+                    "name": "error",
+                    "type": "string",
+                    "optional": true,
+                    "description": "",
+                    "line": 27
+                },
+                {
+                    "name": "existingForecasts",
+                    "type": "Observable<Forecast[]>",
+                    "optional": true,
+                    "description": "",
+                    "line": 26
+                },
+                {
+                    "name": "groups",
+                    "type": "Observable<Group[]>",
+                    "optional": true,
+                    "description": "",
+                    "line": 20
+                },
+                {
+                    "name": "loadData",
+                    "defaultValue": "() => {...}",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 40,
+                    "modifierKind": [
+                        112
+                    ]
+                },
+                {
+                    "name": "loginUserChecked",
+                    "defaultValue": "false",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 29
+                },
+                {
+                    "name": "metals",
+                    "type": "Observable<string[]>",
+                    "optional": true,
+                    "description": "",
+                    "line": 23
+                },
+                {
+                    "name": "title",
+                    "defaultValue": "\"total-liquidity-monitoring\"",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 16
+                },
+                {
+                    "name": "units",
+                    "type": "Observable<string[]>",
+                    "optional": true,
+                    "description": "",
+                    "line": 22
+                },
+                {
+                    "name": "users",
+                    "type": "Observable<User[]>",
+                    "optional": true,
+                    "description": "",
+                    "line": 19
+                }
+            ],
+            "methodsClass": [
+                {
+                    "name": "login",
+                    "args": [
+                        {
+                            "name": "credentials",
+                            "type": "User"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 56,
+                    "jsdoctags": [
+                        {
+                            "name": "credentials",
+                            "type": "User",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ngOnInit",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 36
+                },
+                {
+                    "name": "save",
+                    "args": [
+                        {
+                            "name": "metalBalance",
+                            "type": "MetalTab"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 60,
+                    "jsdoctags": [
+                        {
+                            "name": "metalBalance",
+                            "type": "MetalTab",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                }
+            ],
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "",
+            "type": "component",
+            "sourceCode": "import { Component, OnInit, ViewChild } from \"@angular/core\";\nimport { DataService } from \"./services/data-service\";\nimport { User } from \"./services/user\";\nimport { Observable } from \"rxjs\";\nimport { Group } from \"./common-info/group\";\nimport { CommonInfoComponent } from \"./common-info/common-info.component\";\nimport { MetalTab } from \"./balance-form/metal-tab\";\nimport { Forecast } from \"./services/forecast\";\n\n@Component({\n\tselector: \"app-root\",\n\ttemplateUrl: \"./app.component.html\",\n\tstyleUrls: [\"./app.component.scss\"]\n})\nexport class AppComponent implements OnInit {\n\ttitle = \"total-liquidity-monitoring\";\n\n\tcurrentUser?: User;\n\tusers?: Observable<User[]>;\n\tgroups?: Observable<Group[]>;\n\tbalanceDates?: Observable<string[]>;\n\tunits?: Observable<string[]>;\n\tmetals?: Observable<string[]>;\n\tcustomers?: Observable<string[]>;\n\tbasisOfAssumptions?: Observable<string[]>;\n\texistingForecasts?: Observable<Forecast[]>;\n\terror?: string;\n\n\tloginUserChecked = false;\n\n\t@ViewChild(CommonInfoComponent)\n\tprivate commonInfoComponent?: CommonInfoComponent;\n\n\tconstructor(public dataService: DataService) {}\n\n\tngOnInit(): void {\n\t\tthis.dataService.login().subscribe(this.loadData);\n\t}\n\n\tprivate loadData = (user: User) => {\n\t\tthis.currentUser = user;\n\t\tthis.loginUserChecked = true;\n\t\tif (user?.name) {\n\t\t\tthis.metals = this.dataService.getMetals();\n\t\t\tthis.basisOfAssumptions = this.dataService.getBasisOfAssumptions();\n\t\t\tthis.balanceDates = this.dataService.getBalanceDates();\n\t\t\tthis.units = this.dataService.getUnits();\n\t\t\tthis.groups = this.dataService.getGroups();\n\t\t\tthis.customers = this.dataService.getCustomers();\n\t\t\tthis.existingForecasts = this.dataService.getForecasts();\n\t\t} else {\n\t\t\tthis.users = this.dataService.getUsers();\n\t\t}\n\t};\n\n\tlogin(credentials: User): void {\n\t\tthis.dataService.login(credentials).subscribe(this.loadData);\n\t}\n\n\tsave(metalBalance: MetalTab): void {\n\t\tif (\n\t\t\tthis.currentUser &&\n\t\t\tthis.commonInfoComponent?.selectedGroup &&\n\t\t\tthis.commonInfoComponent.selectedBalanceDate &&\n\t\t\tthis.commonInfoComponent?.selectedUnit\n\t\t) {\n\t\t\tconst forecast: Forecast = {\n\t\t\t\tuser: this.currentUser.name,\n\t\t\t\tgroup: this.commonInfoComponent?.selectedGroup.name,\n\t\t\t\tcompanyCode: this.commonInfoComponent.selectedGroup.companyCode,\n\t\t\t\tbalanceDate: this.commonInfoComponent.selectedBalanceDate,\n\t\t\t\tunit: this.commonInfoComponent.selectedUnit,\n\t\t\t\tcomments: this.commonInfoComponent.comments ?? \"\",\n\t\t\t\tmetal: metalBalance.metal,\n\t\t\t\tdeliverable: metalBalance.deliverable,\n\t\t\t\tbalances: metalBalance.balances\n\t\t\t};\n\t\t\tthis.dataService.saveForecast(forecast);\n\t\t}\n\t}\n}\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": ":host {\r\n  display: block;\r\n  margin-bottom: 60px;\r\n}\r\n\r\n.title {\r\n  color: white;\r\n  background-color: #1e22aa;\r\n  background-image: url(\"../assets/logo.png\");\r\n  background-repeat: no-repeat;\r\n  background-position: right;\r\n  height: 75px;\r\n  display: flex;\r\n  flex-direction: row;\r\n  align-items: center;\r\n  font-size: 2em;\r\n  font-weight: bold;\r\n  padding-left: 20px;\r\n}\r\n",
+                    "styleUrl": "./app.component.scss"
+                }
+            ],
+            "stylesData": "",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "dataService",
+                        "type": "DataService"
+                    }
+                ],
+                "line": 32,
+                "jsdoctags": [
+                    {
+                        "name": "dataService",
+                        "type": "DataService",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            "implements": [
+                "OnInit"
+            ],
+            "templateData": "<div class=\"title\">Total Liquidity Monitoring</div>\n<ng-container *ngIf=\"loginUserChecked\">\n\t<ng-container *ngIf=\"currentUser?.name; then main; else user_login\"></ng-container>\n\t<ng-template #main>\n\t\t<app-common-info\n\t\t\t[balanceDates]=\"balanceDates | async\"\n\t\t\t[currentUser]=\"currentUser!.name\"\n\t\t\t[groups]=\"groups | async\"\n\t\t\t[units]=\"units | async\"\n\t\t></app-common-info>\n\t\t<app-balance-form\n\t\t\t(saveEvent)=\"save($event)\"\n\t\t\t(errorEvent)=\"error = $event\"\n\t\t\t[currentUser]=\"currentUser!.name\"\n\t\t\t[basisOfAssumptions]=\"basisOfAssumptions | async\"\n\t\t\t[customers]=\"customers | async\"\n\t\t\t[metals]=\"metals | async\"\n\t\t\t[existingForecasts]=\"existingForecasts | async\"\n\t\t></app-balance-form>\n\t</ng-template>\n\t<ng-template #user_login>\n\t\t<app-user-login\n\t\t\t[userList]=\"users | async\"\n\t\t\t(userSelectedEvent)=\"dataService.resetPassword($event)\"\n\t\t\t(loginEvent)=\"login($event)\"\n\t\t></app-user-login>\n\t</ng-template>\n</ng-container>\n<app-busy-indicator *ngIf=\"dataService.isBusy()\"></app-busy-indicator>\n<app-error-indicator *ngIf=\"error\" [error]=\"error\"></app-error-indicator>\n"
+        },
+        {
+            "name": "BalanceFormComponent",
+            "id": "component-BalanceFormComponent-458d3488ac2791dc076b5b13c029073c",
+            "file": "src/app/balance-form/balance-form.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-balance-form",
+            "styleUrls": [
+                "./balance-form.component.scss"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./balance-form.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [
+                {
+                    "name": "balanceDate",
+                    "line": 23,
+                    "type": "string"
+                },
+                {
+                    "name": "basisOfAssumptions",
+                    "defaultValue": "[]",
+                    "line": 26,
+                    "type": "string[] | null"
+                },
+                {
+                    "name": "currentUser",
+                    "line": 21,
+                    "type": "string"
+                },
+                {
+                    "name": "customers",
+                    "defaultValue": "[]",
+                    "line": 25,
+                    "type": "string[] | null"
+                },
+                {
+                    "name": "existingForecasts",
+                    "defaultValue": "[]",
+                    "line": 24,
+                    "type": "Forecast[] | null"
+                },
+                {
+                    "name": "group",
+                    "line": 22,
+                    "type": "string"
+                },
+                {
+                    "name": "metals",
+                    "line": 28,
+                    "type": "string[] | null | undefined"
+                }
+            ],
+            "outputsClass": [
+                {
+                    "name": "errorEvent",
+                    "defaultValue": "new EventEmitter<string>()",
+                    "line": 53,
+                    "type": "EventEmitter"
+                },
+                {
+                    "name": "saveEvent",
+                    "defaultValue": "new EventEmitter<MetalTab>()",
+                    "line": 52,
+                    "type": "EventEmitter"
+                }
+            ],
+            "propertiesClass": [
+                {
+                    "name": "_metals",
+                    "type": "string[] | null",
+                    "optional": true,
+                    "description": "",
+                    "line": 27,
+                    "modifierKind": [
+                        112
+                    ]
+                },
+                {
+                    "name": "columns",
+                    "defaultValue": "[\n\t\t\"customer\",\n\t\t\"currentBalance\",\n\t\t\"shipmentVolume\",\n\t\t\"shipmentWindow\",\n\t\t\"basisOfAssumption\",\n\t\t\"excessMetal\",\n\t\t\"action\"\n\t]",
+                    "type": "[]",
+                    "optional": false,
+                    "description": "",
+                    "line": 42,
+                    "modifierKind": [
+                        132
+                    ]
+                },
+                {
+                    "name": "metalTabs",
+                    "defaultValue": "new Map<string, MetalTab>()",
+                    "type": "Map<string | MetalTab>",
+                    "optional": false,
+                    "description": "",
+                    "line": 39
+                },
+                {
+                    "name": "selectedMetalTab",
+                    "type": "MetalTab",
+                    "optional": true,
+                    "description": "",
+                    "line": 40
+                }
+            ],
+            "methodsClass": [
+                {
+                    "name": "add",
+                    "args": [
+                        {
+                            "name": "form",
+                            "type": "MatTable<Balance>"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 99,
+                    "jsdoctags": [
+                        {
+                            "name": "form",
+                            "type": "MatTable<Balance>",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "changeTab",
+                    "args": [
+                        {
+                            "name": "event",
+                            "type": "MatTabChangeEvent"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 55,
+                    "jsdoctags": [
+                        {
+                            "name": "event",
+                            "type": "MatTabChangeEvent",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "createMetalTab",
+                    "args": [
+                        {
+                            "name": "metal",
+                            "type": "string"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "MetalTab",
+                    "typeParameters": [],
+                    "line": 68,
+                    "modifierKind": [
+                        112
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "metal",
+                            "type": "string",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "delete",
+                    "args": [
+                        {
+                            "name": "idx",
+                            "type": "number"
+                        },
+                        {
+                            "name": "form",
+                            "type": "MatTable<Balance>"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 94,
+                    "jsdoctags": [
+                        {
+                            "name": "idx",
+                            "type": "number",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        },
+                        {
+                            "name": "form",
+                            "type": "MatTable<Balance>",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "doesForecastExist",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "boolean",
+                    "typeParameters": [],
+                    "line": 140
+                },
+                {
+                    "name": "paste",
+                    "args": [
+                        {
+                            "name": "form",
+                            "type": "MatTable<Balance>"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 104,
+                    "jsdoctags": [
+                        {
+                            "name": "form",
+                            "type": "MatTable<Balance>",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "save",
+                    "args": [
+                        {
+                            "name": "ngForm",
+                            "type": "NgForm"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 84,
+                    "jsdoctags": [
+                        {
+                            "name": "ngForm",
+                            "type": "NgForm",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "switchMetalTab",
+                    "args": [
+                        {
+                            "name": "metal",
+                            "type": "string"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 61,
+                    "modifierKind": [
+                        112
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": "metal",
+                            "type": "string",
+                            "tagName": {
+                                "text": "param"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "validate",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "string | undefined",
+                    "typeParameters": [],
+                    "line": 134
+                }
+            ],
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "",
+            "type": "component",
+            "sourceCode": "import { Component, EventEmitter, Input, Output } from \"@angular/core\";\nimport { Balance } from \"./balance\";\nimport { MatTable } from \"@angular/material/table\";\nimport { MatTabChangeEvent } from \"@angular/material/tabs\";\nimport { MetalTab } from \"./metal-tab\";\nimport { NgForm } from \"@angular/forms\";\nimport { Forecast } from \"../services/forecast\";\n\n/*\nTODO:\n  add warning for existing forecast\n  add the component interaction for user, group, balance date\n  get real data from Endur\n */\n@Component({\n\tselector: \"app-balance-form\",\n\ttemplateUrl: \"./balance-form.component.html\",\n\tstyleUrls: [\"./balance-form.component.scss\"]\n})\nexport class BalanceFormComponent {\n\t@Input() currentUser?: string;\n\t@Input() group?: string;\n\t@Input() balanceDate?: string;\n\t@Input() existingForecasts: Forecast[] | null = [];\n\t@Input() customers: string[] | null = [];\n\t@Input() basisOfAssumptions: string[] | null = [];\n\tprivate _metals?: string[] | null;\n\t@Input() get metals(): string[] | null | undefined {\n\t\treturn this._metals;\n\t}\n\n\tset metals(metals: string[] | null | undefined) {\n\t\tthis._metals = metals;\n\t\tif (metals) {\n\t\t\tthis.switchMetalTab(metals[0]);\n\t\t}\n\t}\n\n\tmetalTabs: Map<string, MetalTab> = new Map<string, MetalTab>();\n\tselectedMetalTab?: MetalTab;\n\n\treadonly columns = [\n\t\t\"customer\",\n\t\t\"currentBalance\",\n\t\t\"shipmentVolume\",\n\t\t\"shipmentWindow\",\n\t\t\"basisOfAssumption\",\n\t\t\"excessMetal\",\n\t\t\"action\"\n\t];\n\n\t@Output() saveEvent = new EventEmitter<MetalTab>();\n\t@Output() errorEvent = new EventEmitter<string>();\n\n\tchangeTab(event: MatTabChangeEvent): void {\n\t\tif (event?.tab?.textLabel) {\n\t\t\tthis.switchMetalTab(event.tab.textLabel);\n\t\t}\n\t}\n\n\tprivate switchMetalTab(metal: string): void {\n\t\tconst metalTab = this.metalTabs.get(metal) ?? this.createMetalTab(metal);\n\t\tthis.metalTabs.set(metal, metalTab);\n\t\tthis.selectedMetalTab = metalTab;\n\t\tconsole.log(`switch metal tab: ${JSON.stringify(this.selectedMetalTab)}`);\n\t}\n\n\tprivate createMetalTab(metal: string): MetalTab {\n\t\tconst metalTab = new MetalTab(metal);\n\t\tif (this.existingForecasts && this.existingForecasts.length > 0) {\n\t\t\tmetalTab.balances = this.existingForecasts\n\t\t\t\t.filter((forecast) => forecast.group == this.group && forecast.metal == this.selectedMetalTab?.metal)\n\t\t\t\t.sort()\n\t\t\t\t.reverse()[0]\n\t\t\t\t.balances.map((balance) => {\n\t\t\t\t\tconst newBalance = new Balance(metal);\n\t\t\t\t\tnewBalance.customer = balance.customer;\n\t\t\t\t\treturn newBalance;\n\t\t\t\t});\n\t\t}\n\t\treturn metalTab;\n\t}\n\n\tsave(ngForm: NgForm): void {\n\t\tconst error = this.selectedMetalTab?.validate(this.customers ?? [], this.basisOfAssumptions ?? []);\n\t\tif (error) {\n\t\t\tthis.errorEvent.emit(error);\n\t\t} else {\n\t\t\tthis.saveEvent.emit(this.selectedMetalTab);\n\t\t\tngForm.form.markAsPristine();\n\t\t}\n\t}\n\n\tdelete(idx: number, form: MatTable<Balance>): void {\n\t\tthis.selectedMetalTab?.balances.splice(idx, 1);\n\t\tform.renderRows();\n\t}\n\n\tadd(form: MatTable<Balance>): void {\n\t\tthis.selectedMetalTab?.balances.push(new Balance());\n\t\tform.renderRows();\n\t}\n\n\tpaste(form: MatTable<Balance>): void {\n\t\tnavigator.clipboard\n\t\t\t.readText()\n\t\t\t.then((data) => {\n\t\t\t\tif (this.selectedMetalTab) {\n\t\t\t\t\tthis.selectedMetalTab.balances = data\n\t\t\t\t\t\t.split(\"\\r\\n\")\n\t\t\t\t\t\t.filter((line) => line.length > 0)\n\t\t\t\t\t\t.map((line) => {\n\t\t\t\t\t\t\tconst cells = line.split(\"\\t\");\n\t\t\t\t\t\t\tconst balance = new Balance(\n\t\t\t\t\t\t\t\tcells[0],\n\t\t\t\t\t\t\t\tparseInt(cells[1]),\n\t\t\t\t\t\t\t\tparseInt(cells[2]),\n\t\t\t\t\t\t\t\tparseInt(cells[3]),\n\t\t\t\t\t\t\t\tcells[4]\n\t\t\t\t\t\t\t);\n\t\t\t\t\t\t\tconst error = balance.validate(this.customers ?? [], this.basisOfAssumptions ?? []);\n\t\t\t\t\t\t\tif (error) {\n\t\t\t\t\t\t\t\tthrow new Error(`invalid data row from the clipboard: ${line}; error: ${error}`);\n\t\t\t\t\t\t\t} else {\n\t\t\t\t\t\t\t\treturn balance;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t});\n\t\t\t\t\tform.renderRows();\n\t\t\t\t}\n\t\t\t})\n\t\t\t.catch((error) => this.errorEvent.emit(JSON.stringify(error)));\n\t}\n\n\tvalidate(): string | undefined {\n\t\treturn this.customers && this.basisOfAssumptions && this.selectedMetalTab\n\t\t\t? this.selectedMetalTab.validate(this.customers, this.basisOfAssumptions)\n\t\t\t: undefined;\n\t}\n\n\tdoesForecastExist(): boolean {\n\t\treturn this.existingForecasts && this.existingForecasts.length > 0\n\t\t\t? this.existingForecasts.filter(\n\t\t\t\t\t(forecast) =>\n\t\t\t\t\t\tforecast.group == this.group &&\n\t\t\t\t\t\tforecast.balanceDate == this.balanceDate &&\n\t\t\t\t\t\tforecast.metal == this.selectedMetalTab?.metal\n\t\t\t  ).length > 0\n\t\t\t: false;\n\t}\n}\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": ":host {\r\n  display: flex;\r\n  flex-direction: column;\r\n  margin: 20px auto;\r\n  position: relative;\r\n  width: 1280px;\r\n}\r\n\r\n.mat-tab-group {\r\n  padding: 16px;\r\n}\r\n\r\n.deliverable-metal {\r\n  width: 100%;\r\n  padding-top: 20px;\r\n  display: flex;\r\n  flex-direction: row;\r\n  justify-content: center;\r\n}\r\n\r\n.mat-header-cell {\r\n  font-weight: bold;\r\n  width: 150px;\r\n  padding-left: 24px;\r\n}\r\n\r\n.mat-header-cell:last-of-type {\r\n  width: 75px;\r\n}\r\n\r\n.mat-cell {\r\n  width: 150px;\r\n  padding-left: 24px;\r\n}\r\n\r\n.mat-cell:last-of-type {\r\n  width: 75px;\r\n}\r\n\r\n.mat-icon {\r\n  cursor: pointer;\r\n}\r\n\r\n.mat-table {\r\n  width: 100%;\r\n  padding-top: 20px;\r\n}\r\n\r\ntd > mat-form-field {\r\n  width: 150px;\r\n}\r\n\r\n.mat-footer-cell {\r\n  font-weight: bold;\r\n}\r\n\r\nth.mat-header-cell, td.mat-cell, td.mat-footer-cell {\r\n  border-bottom-width: 1px;\r\n  border-bottom-style: solid;\r\n}\r\n\r\n.delete-icon {\r\n  padding-top: 25px;\r\n}\r\n\r\n.add-icon {\r\n  padding-top: 10px;\r\n}\r\n\r\n.buttons {\r\n  display: flex;\r\n  flex-direction: row;\r\n  justify-content: flex-start;\r\n  align-items: baseline;\r\n  margin-top: 20px;\r\n  margin-left: 24px;\r\n}\r\n\r\n.buttons > * {\r\n  margin-right: 20px;\r\n}\r\n",
+                    "styleUrl": "./balance-form.component.scss"
+                }
+            ],
+            "stylesData": "",
+            "accessors": {
+                "metals": {
+                    "name": "metals",
+                    "setSignature": {
+                        "name": "metals",
+                        "type": "void",
+                        "args": [
+                            {
+                                "name": "metals",
+                                "type": ""
+                            }
+                        ],
+                        "returnType": "void",
+                        "line": 32,
+                        "jsdoctags": [
+                            {
+                                "name": "metals",
+                                "type": "",
+                                "tagName": {
+                                    "text": "param"
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "templateData": "<!--suppress HtmlUnknownAttribute, TypeScriptValidateTypes -->\n<mat-tab-group (selectedTabChange)=\"changeTab($event)\" mat-stretch-tabs class=\"mat-elevation-z6\">\n\t<mat-tab *ngFor=\"let metal of metals\" [label]=\"metal\">\n\t\t<form #balanceForm=\"ngForm\">\n\t\t\t<div class=\"deliverable-metal\">\n\t\t\t\t<mat-form-field>\n\t\t\t\t\t<label>\n\t\t\t\t\t\t<input\n\t\t\t\t\t\t\t[(ngModel)]=\"selectedMetalTab.deliverable\"\n\t\t\t\t\t\t\ttype=\"number\"\n\t\t\t\t\t\t\tmatInput\n\t\t\t\t\t\t\trequired\n\t\t\t\t\t\t\tplaceholder=\"Deliverable Metal\"\n\t\t\t\t\t\t\t[name]=\"metal + '-deliverable'\"\n\t\t\t\t\t\t/>\n\t\t\t\t\t</label>\n\t\t\t\t</mat-form-field>\n\t\t\t</div>\n\t\t\t<table mat-table [dataSource]=\"selectedMetalTab.balances\" #form>\n\t\t\t\t<ng-container matColumnDef=\"customer\">\n\t\t\t\t\t<th mat-header-cell *matHeaderCellDef>Customer</th>\n\t\t\t\t\t<td mat-cell *matCellDef=\"let balance; index as idx\">\n\t\t\t\t\t\t<mat-form-field>\n\t\t\t\t\t\t\t<mat-select [(ngModel)]=\"balance.customer\" required [name]=\"metal + '-customer-' + idx\">\n\t\t\t\t\t\t\t\t<mat-option *ngFor=\"let customer of customers\" [value]=\"customer\"\n\t\t\t\t\t\t\t\t\t>{{customer}}</mat-option\n\t\t\t\t\t\t\t\t>\n\t\t\t\t\t\t\t</mat-select>\n\t\t\t\t\t\t</mat-form-field>\n\t\t\t\t\t</td>\n\t\t\t\t\t<td mat-footer-cell *matFooterCellDef>\n\t\t\t\t\t\t<mat-icon class=\"add-icon\" (click)=\"add(form)\" matSuffix color=\"primary\"\n\t\t\t\t\t\t\t>add_circle_outline</mat-icon\n\t\t\t\t\t\t>\n\t\t\t\t\t</td>\n\t\t\t\t</ng-container>\n\t\t\t\t<ng-container matColumnDef=\"currentBalance\">\n\t\t\t\t\t<th mat-header-cell *matHeaderCellDef>Current Balance</th>\n\t\t\t\t\t<td mat-cell *matCellDef=\"let balance; index as idx\">\n\t\t\t\t\t\t<mat-form-field>\n\t\t\t\t\t\t\t<label>\n\t\t\t\t\t\t\t\t<input\n\t\t\t\t\t\t\t\t\t[(ngModel)]=\"balance.currentBalance\"\n\t\t\t\t\t\t\t\t\ttype=\"number\"\n\t\t\t\t\t\t\t\t\tmatInput\n\t\t\t\t\t\t\t\t\trequired\n\t\t\t\t\t\t\t\t\t[name]=\"metal + '-currentBalance-' + idx\"\n\t\t\t\t\t\t\t\t/>\n\t\t\t\t\t\t\t</label>\n\t\t\t\t\t\t</mat-form-field>\n\t\t\t\t\t</td>\n\t\t\t\t\t<td mat-footer-cell *matFooterCellDef>{{selectedMetalTab.totalCurrentBalance()}}</td>\n\t\t\t\t</ng-container>\n\t\t\t\t<ng-container matColumnDef=\"shipmentVolume\">\n\t\t\t\t\t<th mat-header-cell *matHeaderCellDef>Shipment Volume</th>\n\t\t\t\t\t<td mat-cell *matCellDef=\"let balance; index as idx\">\n\t\t\t\t\t\t<mat-form-field>\n\t\t\t\t\t\t\t<label>\n\t\t\t\t\t\t\t\t<input\n\t\t\t\t\t\t\t\t\t[(ngModel)]=\"balance.shipmentVolume\"\n\t\t\t\t\t\t\t\t\ttype=\"number\"\n\t\t\t\t\t\t\t\t\tmatInput\n\t\t\t\t\t\t\t\t\trequired\n\t\t\t\t\t\t\t\t\t[name]=\"metal + '-shipmentVolume-' + idx\"\n\t\t\t\t\t\t\t\t/>\n\t\t\t\t\t\t\t</label>\n\t\t\t\t\t\t</mat-form-field>\n\t\t\t\t\t</td>\n\t\t\t\t\t<td mat-footer-cell *matFooterCellDef>{{selectedMetalTab.totalShipmentVolume()}}</td>\n\t\t\t\t</ng-container>\n\t\t\t\t<ng-container matColumnDef=\"shipmentWindow\">\n\t\t\t\t\t<th mat-header-cell *matHeaderCellDef>Shipment Window</th>\n\t\t\t\t\t<td mat-cell *matCellDef=\"let balance; index as idx\">\n\t\t\t\t\t\t<mat-form-field>\n\t\t\t\t\t\t\t<label>\n\t\t\t\t\t\t\t\t<input\n\t\t\t\t\t\t\t\t\t[(ngModel)]=\"balance.shipmentWindow\"\n\t\t\t\t\t\t\t\t\ttype=\"number\"\n\t\t\t\t\t\t\t\t\tmatInput\n\t\t\t\t\t\t\t\t\t[name]=\"metal + '-shipmentWindow-' + idx\"\n\t\t\t\t\t\t\t\t/>\n\t\t\t\t\t\t\t</label>\n\t\t\t\t\t\t</mat-form-field>\n\t\t\t\t\t</td>\n\t\t\t\t\t<td mat-footer-cell *matFooterCellDef></td>\n\t\t\t\t</ng-container>\n\t\t\t\t<ng-container matColumnDef=\"basisOfAssumption\">\n\t\t\t\t\t<th mat-header-cell *matHeaderCellDef>Basis Of Assumption</th>\n\t\t\t\t\t<td mat-cell *matCellDef=\"let balance; index as idx\">\n\t\t\t\t\t\t<mat-form-field>\n\t\t\t\t\t\t\t<mat-select\n\t\t\t\t\t\t\t\t[(ngModel)]=\"balance.basisOfAssumption\"\n\t\t\t\t\t\t\t\trequired\n\t\t\t\t\t\t\t\t[name]=\"metal + '-basisOfAssumption-' + idx\"\n\t\t\t\t\t\t\t>\n\t\t\t\t\t\t\t\t<mat-option\n\t\t\t\t\t\t\t\t\t*ngFor=\"let basisOfAssumption of basisOfAssumptions\"\n\t\t\t\t\t\t\t\t\t[value]=\"basisOfAssumption\"\n\t\t\t\t\t\t\t\t\t>{{basisOfAssumption}}</mat-option\n\t\t\t\t\t\t\t\t>\n\t\t\t\t\t\t\t</mat-select>\n\t\t\t\t\t\t</mat-form-field>\n\t\t\t\t\t</td>\n\t\t\t\t\t<td mat-footer-cell *matFooterCellDef></td>\n\t\t\t\t</ng-container>\n\t\t\t\t<ng-container matColumnDef=\"excessMetal\">\n\t\t\t\t\t<th mat-header-cell *matHeaderCellDef>Excess Metal</th>\n\t\t\t\t\t<td mat-cell *matCellDef=\"let balance\">\n\t\t\t\t\t\t<mat-form-field>\n\t\t\t\t\t\t\t<label>\n\t\t\t\t\t\t\t\t<input [value]=\"balance.excessMetal()\" type=\"number\" matInput readonly />\n\t\t\t\t\t\t\t</label>\n\t\t\t\t\t\t</mat-form-field>\n\t\t\t\t\t</td>\n\t\t\t\t\t<td mat-footer-cell *matFooterCellDef>{{selectedMetalTab.totalExcessMetal()}}</td>\n\t\t\t\t</ng-container>\n\t\t\t\t<ng-container matColumnDef=\"action\">\n\t\t\t\t\t<th mat-header-cell *matHeaderCellDef></th>\n\t\t\t\t\t<td mat-cell *matCellDef=\"let balance, index as idx\">\n\t\t\t\t\t\t<mat-icon class=\"delete-icon\" (click)=\"delete(idx, form)\" matSuffix color=\"warn\"\n\t\t\t\t\t\t\t>remove_circle_outline</mat-icon\n\t\t\t\t\t\t>\n\t\t\t\t\t</td>\n\t\t\t\t\t<td mat-footer-cell *matFooterCellDef></td>\n\t\t\t\t</ng-container>\n\t\t\t\t<tr mat-header-row *matHeaderRowDef=\"columns\"></tr>\n\t\t\t\t<tr mat-row *matRowDef=\"let row; columns: columns;\"></tr>\n\t\t\t\t<tr mat-footer-row *matFooterRowDef=\"columns\"></tr>\n\t\t\t</table>\n\t\t</form>\n\t\t<div class=\"buttons\">\n\t\t\t<button (click)=\"paste(form)\" color=\"primary\" mat-raised-button>From Clipboard</button>\n\t\t\t<button\n\t\t\t\t[disabled]=\"selectedMetalTab.isEmpty()\"\n\t\t\t\t(click)=\"selectedMetalTab.clear();\"\n\t\t\t\tcolor=\"primary\"\n\t\t\t\tmat-raised-button\n\t\t\t>\n\t\t\t\tClear\n\t\t\t</button>\n\t\t\t<button [disabled]=\"balanceForm.pristine\" (click)=\"save(balanceForm)\" color=\"primary\" mat-raised-button>\n\t\t\t\tSave\n\t\t\t</button>\n\t\t</div>\n\t</mat-tab>\n</mat-tab-group>\n"
+        },
+        {
+            "name": "BusyIndicatorComponent",
+            "id": "component-BusyIndicatorComponent-86f17b9a691a88fc6f14024fd3b71993",
+            "file": "src/app/busy-indicator/busy-indicator.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-busy-indicator",
+            "styleUrls": [
+                "./busy-indicator.component.scss"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./busy-indicator.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "propertiesClass": [],
+            "methodsClass": [],
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "",
+            "type": "component",
+            "sourceCode": "import { Component } from \"@angular/core\";\n\n@Component({\n\tselector: \"app-busy-indicator\",\n\ttemplateUrl: \"./busy-indicator.component.html\",\n\tstyleUrls: [\"./busy-indicator.component.scss\"]\n})\nexport class BusyIndicatorComponent {}\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": ":host {\r\n  z-index: 1;\r\n  background-color: rgba(255, 255, 255, 0.5);\r\n  position: absolute;\r\n  top: 0;\r\n  width: 100%;\r\n  height: 100%;\r\n  display: flex;\r\n  align-items: center;\r\n  justify-content: center;\r\n}\r\n",
+                    "styleUrl": "./busy-indicator.component.scss"
+                }
+            ],
+            "stylesData": "",
+            "templateData": "<mat-spinner diameter=\"30\" mode=\"indeterminate\"></mat-spinner>\n"
+        },
+        {
+            "name": "CommonInfoComponent",
+            "id": "component-CommonInfoComponent-c26d12b9c41722a368161bc86df569f4",
+            "file": "src/app/common-info/common-info.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-common-info",
+            "styleUrls": [
+                "./common-info.component.scss"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./common-info.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [
+                {
+                    "name": "balanceDates",
+                    "defaultValue": "[]",
+                    "line": 12,
+                    "type": "string[] | null"
+                },
+                {
+                    "name": "currentUser",
+                    "line": 10,
+                    "type": "string"
+                },
+                {
+                    "name": "groups",
+                    "defaultValue": "[]",
+                    "line": 11,
+                    "type": "Group[] | null"
+                },
+                {
+                    "name": "units",
+                    "defaultValue": "[]",
+                    "line": 13,
+                    "type": "string[] | null"
+                }
+            ],
+            "outputsClass": [],
+            "propertiesClass": [
+                {
+                    "name": "comments",
+                    "type": "string",
+                    "optional": true,
+                    "description": "",
+                    "line": 18
+                },
+                {
+                    "name": "selectedBalanceDate",
+                    "type": "string",
+                    "optional": true,
+                    "description": "",
+                    "line": 16
+                },
+                {
+                    "name": "selectedGroup",
+                    "type": "Group",
+                    "optional": true,
+                    "description": "",
+                    "line": 15
+                },
+                {
+                    "name": "selectedUnit",
+                    "type": "string",
+                    "optional": true,
+                    "description": "",
+                    "line": 17
+                }
+            ],
+            "methodsClass": [],
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "",
+            "type": "component",
+            "sourceCode": "import { Component, Input } from \"@angular/core\";\nimport { Group } from \"./group\";\n\n@Component({\n\tselector: \"app-common-info\",\n\ttemplateUrl: \"./common-info.component.html\",\n\tstyleUrls: [\"./common-info.component.scss\"]\n})\nexport class CommonInfoComponent {\n\t@Input() currentUser?: string;\n\t@Input() groups: Group[] | null = [];\n\t@Input() balanceDates?: string[] | null = [];\n\t@Input() units?: string[] | null = [];\n\n\tselectedGroup?: Group;\n\tselectedBalanceDate?: string;\n\tselectedUnit?: string;\n\tcomments?: string;\n}\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": ":host {\r\n  display: flex;\r\n  margin: 20px auto;\r\n  width: 640px;\r\n  position: relative;\r\n}\r\n\r\n.mat-card {\r\n  display: flex;\r\n  flex-flow: row wrap;\r\n  justify-content: space-between;\r\n}\r\n\r\n.mat-form-field {\r\n  flex: 0 0 280px;\r\n}\r\n",
+                    "styleUrl": "./common-info.component.scss"
+                }
+            ],
+            "stylesData": "",
+            "templateData": "<mat-card class=\"mat-elevation-z6\">\n\t<mat-form-field>\n\t\t<label>\n\t\t\t<input [(ngModel)]=\"currentUser\" [type]=\"'text'\" matInput readonly placeholder=\"User\" />\n\t\t</label>\n\t</mat-form-field>\n\t<mat-form-field>\n\t\t<label>\n\t\t\t<input [(ngModel)]=\"comments\" [type]=\"'text'\" matInput placeholder=\"Comments\" />\n\t\t</label>\n\t</mat-form-field>\n\t<mat-form-field>\n\t\t<mat-label>Group</mat-label>\n\t\t<mat-select [(value)]=\"selectedGroup\" required>\n\t\t\t<mat-option *ngFor=\"let group of groups\" [value]=\"group\">{{group.name}}</mat-option>\n\t\t</mat-select>\n\t</mat-form-field>\n\t<mat-form-field>\n\t\t<label>\n\t\t\t<input\n\t\t\t\t[value]=\"selectedGroup ? selectedGroup.companyCode : ''\"\n\t\t\t\t[type]=\"'text'\"\n\t\t\t\tmatInput\n\t\t\t\treadonly\n\t\t\t\tplaceholder=\"Company Code\"\n\t\t\t/>\n\t\t</label>\n\t</mat-form-field>\n\t<mat-form-field>\n\t\t<mat-label>Balance Date</mat-label>\n\t\t<mat-select [(value)]=\"selectedBalanceDate\" required>\n\t\t\t<mat-option *ngFor=\"let balanceDate of balanceDates\" [value]=\"balanceDate\">{{balanceDate}}</mat-option>\n\t\t</mat-select>\n\t</mat-form-field>\n\t<mat-form-field>\n\t\t<mat-label>Metal Unit of Measure</mat-label>\n\t\t<mat-select [(value)]=\"selectedUnit\" required>\n\t\t\t<mat-option *ngFor=\"let unit of units\" [value]=\"unit\">{{unit}}</mat-option>\n\t\t</mat-select>\n\t</mat-form-field>\n</mat-card>\n"
+        },
+        {
+            "name": "ErrorIndicatorComponent",
+            "id": "component-ErrorIndicatorComponent-b52ee30676500b1a4462063d0779577a",
+            "file": "src/app/error-indicator/error-indicator.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-error-indicator",
+            "styleUrls": [
+                "./error-indicator.component.scss"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./error-indicator.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "propertiesClass": [
+                {
+                    "name": "error",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 10,
+                    "decorators": [
+                        {
+                            "name": "Inject",
+                            "stringifiedArguments": "MAT_DIALOG_DATA"
+                        }
+                    ],
+                    "modifierKind": [
+                        114
+                    ]
+                }
+            ],
+            "methodsClass": [
+                {
+                    "name": "displayError",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "string",
+                    "typeParameters": [],
+                    "line": 12
+                }
+            ],
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "",
+            "type": "component",
+            "sourceCode": "import { Component, Inject } from \"@angular/core\";\nimport { MAT_DIALOG_DATA } from \"@angular/material/dialog\";\n\n@Component({\n\tselector: \"app-error-indicator\",\n\ttemplateUrl: \"./error-indicator.component.html\",\n\tstyleUrls: [\"./error-indicator.component.scss\"]\n})\nexport class ErrorIndicatorComponent {\n\tconstructor(@Inject(MAT_DIALOG_DATA) public error: string) {}\n\n\tdisplayError(): string {\n\t\treturn this.error ? `An error has occurred: <br><br>${this.error}` : \"\";\n\t}\n}\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": ".content-section {\r\n  padding: 20px;\r\n  color: red;\r\n}\r\n\r\n.action-section {\r\n  justify-content: center;\r\n}\r\n",
+                    "styleUrl": "./error-indicator.component.scss"
+                }
+            ],
+            "stylesData": "",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "error",
+                        "type": "string"
+                    }
+                ],
+                "line": 9,
+                "jsdoctags": [
+                    {
+                        "name": "error",
+                        "type": "string",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            "templateData": "<div mat-dialog-content class=\"content-section\" *ngIf=\"error\" [innerHTML]=\"displayError()\"></div>\n<div mat-dialog-actions class=\"action-section\">\n\t<button mat-raised-button mat-dialog-close cdkFocusInitial color=\"primary\">OK</button>\n</div>\n"
+        },
+        {
+            "name": "LaunchComponent",
+            "id": "component-LaunchComponent-7098a8a432aa161de30718c49907e6c4",
+            "file": "src/app/error-indicator/error-indicator.stories.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "styleUrls": [],
+            "styles": [],
+            "template": "<button mat-raised-button (click)=\"launch()\">Open Error Indicator</button>",
+            "templateUrl": [],
+            "viewProviders": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "propertiesClass": [
+                {
+                    "name": "error",
+                    "defaultValue": "\"there is an error<br>the new line should work\"",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 15,
+                    "modifierKind": [
+                        112,
+                        132
+                    ]
+                }
+            ],
+            "methodsClass": [
+                {
+                    "name": "launch",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 19,
+                    "modifierKind": [
+                        114
+                    ]
+                }
+            ],
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "",
+            "type": "component",
+            "sourceCode": "import { Meta, Story } from \"@storybook/angular/types-6-0\";\nimport { ErrorIndicatorComponent } from \"./error-indicator.component\";\nimport { moduleMetadata } from \"@storybook/angular\";\nimport { BrowserModule } from \"@angular/platform-browser\";\nimport { BrowserAnimationsModule } from \"@angular/platform-browser/animations\";\nimport { MatButtonModule } from \"@angular/material/button\";\nimport { MatDialog, MatDialogModule } from \"@angular/material/dialog\";\nimport { Component } from \"@angular/core\";\n\n// noinspection AngularMissingOrInvalidDeclarationInModule\n@Component({\n\ttemplate: `<button mat-raised-button (click)=\"launch()\">Open Error Indicator</button> `\n})\nclass LaunchComponent {\n\tprivate readonly error = \"there is an error<br>the new line should work\";\n\n\tconstructor(private dialog: MatDialog) {}\n\n\tpublic launch(): void {\n\t\tthis.dialog.open(ErrorIndicatorComponent, { data: this.error });\n\t}\n}\n\nexport default {\n\ttitle: \"Components/Error Indicator\",\n\tdecorators: [\n\t\tmoduleMetadata({\n\t\t\timports: [BrowserModule, BrowserAnimationsModule, MatButtonModule, MatDialogModule],\n\t\t\tentryComponents: [LaunchComponent, ErrorIndicatorComponent],\n\t\t\tdeclarations: [LaunchComponent, ErrorIndicatorComponent]\n\t\t})\n\t],\n\tcomponent: LaunchComponent\n} as Meta;\n\nconst Template: Story<LaunchComponent> = (args) => ({\n\tprops: args\n});\n\nexport const primary = Template.bind({});\n",
+            "assetsDirs": [],
+            "styleUrlsData": "",
+            "stylesData": "",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "dialog",
+                        "type": "MatDialog"
+                    }
+                ],
+                "line": 15,
+                "jsdoctags": [
+                    {
+                        "name": "dialog",
+                        "type": "MatDialog",
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "UserLoginComponent",
+            "id": "component-UserLoginComponent-08aba6b20bb45396509af3e2a6e3433c",
+            "file": "src/app/user-login/user-login.component.ts",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-user-login",
+            "styleUrls": [
+                "./user-login.component.scss"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./user-login.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [
+                {
+                    "name": "userList",
+                    "defaultValue": "[]",
+                    "line": 10,
+                    "type": "User[] | null"
+                }
+            ],
+            "outputsClass": [
+                {
+                    "name": "loginEvent",
+                    "defaultValue": "new EventEmitter<User>()",
+                    "line": 13,
+                    "type": "EventEmitter"
+                },
+                {
+                    "name": "userSelectedEvent",
+                    "defaultValue": "new EventEmitter<string>()",
+                    "line": 12,
+                    "type": "EventEmitter"
+                }
+            ],
+            "propertiesClass": [
+                {
+                    "name": "hidePassword",
+                    "defaultValue": "true",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 18
+                },
+                {
+                    "name": "nextPressed",
+                    "defaultValue": "false",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 17
+                },
+                {
+                    "name": "password",
+                    "defaultValue": "\"\"",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 19
+                },
+                {
+                    "name": "resetPassword",
+                    "defaultValue": "false",
+                    "type": "",
+                    "optional": false,
+                    "description": "",
+                    "line": 16
+                },
+                {
+                    "name": "selectedUser",
+                    "type": "User | undefined",
+                    "optional": false,
+                    "description": "",
+                    "line": 15
+                }
+            ],
+            "methodsClass": [
+                {
+                    "name": "login",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 31
+                },
+                {
+                    "name": "next",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 21
+                }
+            ],
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "",
+            "type": "component",
+            "sourceCode": "import { Component, EventEmitter, Input, Output } from \"@angular/core\";\nimport { User } from \"../services/user\";\n\n@Component({\n\tselector: \"app-user-login\",\n\ttemplateUrl: \"./user-login.component.html\",\n\tstyleUrls: [\"./user-login.component.scss\"]\n})\nexport class UserLoginComponent {\n\t@Input() userList: User[] | null = [];\n\n\t@Output() userSelectedEvent = new EventEmitter<string>();\n\t@Output() loginEvent = new EventEmitter<User>();\n\n\tselectedUser: User | undefined;\n\tresetPassword = false;\n\tnextPressed = false;\n\thidePassword = true;\n\tpassword = \"\";\n\n\tnext(): void {\n\t\tif (!this.selectedUser) {\n\t\t\treturn;\n\t\t}\n\t\tif (this.resetPassword || this.selectedUser.needPassword) {\n\t\t\tthis.userSelectedEvent.emit(this.selectedUser.name);\n\t\t}\n\t\tthis.nextPressed = true;\n\t}\n\n\tlogin(): void {\n\t\tif (!this.selectedUser) {\n\t\t\treturn;\n\t\t}\n\t\tthis.loginEvent.emit(this.selectedUser);\n\t}\n}\n",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": ":host {\r\n  display: flex;\r\n  flex-direction: column;\r\n  padding-top: 20px;\r\n  position: relative;\r\n}\r\n\r\n.mat-icon {\r\n  cursor: pointer;\r\n}\r\n\r\n.user-login-section {\r\n  display: flex;\r\n  flex-direction: row;\r\n  justify-content: center;\r\n  align-items: baseline;\r\n  padding-bottom: 20px;\r\n}\r\n\r\n.mat-form-field, .mat-checkbox {\r\n  padding-left: 20px;\r\n}\r\n\r\n.mat-form-field {\r\n  width: 100%;\r\n}\r\n\r\nbutton {\r\n  width: 100%;\r\n}\r\n",
+                    "styleUrl": "./user-login.component.scss"
+                }
+            ],
+            "stylesData": "",
+            "templateData": "<mat-card>\n\t<mat-card-header>\n\t\t<mat-card-title>Login</mat-card-title>\n\t</mat-card-header>\n\t<mat-card-content>\n\t\t<ng-container *ngIf=\"!nextPressed\">\n\t\t\t<div class=\"user-login-section\">\n\t\t\t\t<mat-form-field>\n\t\t\t\t\t<mat-label>Your Name</mat-label>\n\t\t\t\t\t<mat-select [(ngModel)]=\"selectedUser\" required>\n\t\t\t\t\t\t<mat-option *ngFor=\"let user of userList\" [value]=\"user\">{{user.name}}</mat-option>\n\t\t\t\t\t</mat-select>\n\t\t\t\t</mat-form-field>\n\t\t\t\t<mat-checkbox [(ngModel)]=\"resetPassword\" color=\"primary\">Reset Password </mat-checkbox>\n\t\t\t</div>\n\t\t\t<button (click)=\"next()\" color=\"primary\" mat-raised-button>Next</button>\n\t\t</ng-container>\n\t\t<ng-container *ngIf=\"nextPressed\">\n\t\t\t<div class=\"user-login-section\">\n\t\t\t\t<mat-form-field>\n\t\t\t\t\t<label>\n\t\t\t\t\t\t<input\n\t\t\t\t\t\t\t(keydown.enter)=\"login()\"\n\t\t\t\t\t\t\t[(ngModel)]=\"password\"\n\t\t\t\t\t\t\t[type]=\"hidePassword ? 'password' : 'text'\"\n\t\t\t\t\t\t\tmatInput\n\t\t\t\t\t\t\tplaceholder=\"Password\"\n\t\t\t\t\t\t\trequired\n\t\t\t\t\t\t/>\n\t\t\t\t\t</label>\n\t\t\t\t\t<mat-icon (click)=\"hidePassword  = !hidePassword \" matSuffix\n\t\t\t\t\t\t>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon\n\t\t\t\t\t>\n\t\t\t\t\t<mat-hint\n\t\t\t\t\t\t>If it's your first time login or you select \"Reset Password\" in the previous step, you should\n\t\t\t\t\t\thave received an email contains your password\n\t\t\t\t\t</mat-hint>\n\t\t\t\t</mat-form-field>\n\t\t\t</div>\n\t\t\t<button (click)=\"login()\" color=\"primary\" mat-raised-button>Login</button>\n\t\t</ng-container>\n\t</mat-card-content>\n</mat-card>\n"
+        }
+    ],
+    "modules": [
+        {
+            "name": "AppModule",
+            "children": [
+                {
+                    "type": "providers",
+                    "elements": [
+                        {
+                            "name": "XhrInterceptor"
+                        }
+                    ]
+                },
+                {
+                    "type": "declarations",
+                    "elements": [
+                        {
+                            "name": "AppComponent"
+                        },
+                        {
+                            "name": "BalanceFormComponent"
+                        },
+                        {
+                            "name": "BusyIndicatorComponent"
+                        },
+                        {
+                            "name": "CommonInfoComponent"
+                        },
+                        {
+                            "name": "ErrorIndicatorComponent"
+                        },
+                        {
+                            "name": "UserLoginComponent"
+                        }
+                    ]
+                },
+                {
+                    "type": "imports",
+                    "elements": [
+                        {
+                            "name": "AppRoutingModule"
+                        }
+                    ]
+                },
+                {
+                    "type": "exports",
+                    "elements": []
+                },
+                {
+                    "type": "bootstrap",
+                    "elements": [
+                        {
+                            "name": "AppComponent"
+                        }
+                    ]
+                },
+                {
+                    "type": "classes",
+                    "elements": []
+                }
+            ]
+        },
+        {
+            "name": "AppRoutingModule",
+            "children": [
+                {
+                    "type": "providers",
+                    "elements": []
+                },
+                {
+                    "type": "declarations",
+                    "elements": []
+                },
+                {
+                    "type": "imports",
+                    "elements": []
+                },
+                {
+                    "type": "exports",
+                    "elements": []
+                },
+                {
+                    "type": "bootstrap",
+                    "elements": []
+                },
+                {
+                    "type": "classes",
+                    "elements": []
+                }
+            ]
+        }
+    ],
+    "miscellaneous": {
+        "variables": [
+            {
+                "name": "context",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/test.ts",
+                "type": "",
+                "defaultValue": "require.context(\"./\", true, /\\.spec\\.ts$/)"
+            },
+            {
+                "name": "environment",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/environments/environment.prod.ts",
+                "type": "object",
+                "defaultValue": "{\n\tproduction: true\n}"
+            },
+            {
+                "name": "environment",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/environments/environment.ts",
+                "type": "object",
+                "defaultValue": "{\n\tproduction: false\n}"
+            },
+            {
+                "name": "primary",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/balance-form/balance-form.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
+            },
+            {
+                "name": "primary",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/common-info/common-info.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
+            },
+            {
+                "name": "primary",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/error-indicator/error-indicator.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
+            },
+            {
+                "name": "primary",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/user-login/user-login.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
+            },
+            {
+                "name": "require",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/test.ts",
+                "type": "literal type"
+            },
+            {
+                "name": "Template",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/balance-form/balance-form.stories.ts",
+                "type": "Story<BalanceFormComponent>",
+                "defaultValue": "(args) => ({\n\tprops: {\n\t\t...args,\n\t\tsaveEvent: action(\"saveEvent\")\n\t}\n})"
+            },
+            {
+                "name": "Template",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/common-info/common-info.stories.ts",
+                "type": "Story<CommonInfoComponent>",
+                "defaultValue": "(args) => ({\n\tprops: args\n})"
+            },
+            {
+                "name": "Template",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/error-indicator/error-indicator.stories.ts",
+                "type": "Story<LaunchComponent>",
+                "defaultValue": "(args) => ({\n\tprops: args\n})"
+            },
+            {
+                "name": "Template",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/app/user-login/user-login.stories.ts",
+                "type": "Story<UserLoginComponent>",
+                "defaultValue": "(args) => ({\n\tprops: {\n\t\t...args,\n\t\tuserSelectedEvent: action(\"userSelectedEvent\"),\n\t\tloginEvent: action(\"loginEvent\")\n\t}\n})"
+            }
+        ],
+        "functions": [],
+        "typealiases": [],
+        "enumerations": [],
+        "groupedVariables": {
+            "src/test.ts": [
+                {
+                    "name": "context",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/test.ts",
+                    "type": "",
+                    "defaultValue": "require.context(\"./\", true, /\\.spec\\.ts$/)"
+                },
+                {
+                    "name": "require",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/test.ts",
+                    "type": "literal type"
+                }
+            ],
+            "src/environments/environment.prod.ts": [
+                {
+                    "name": "environment",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/environments/environment.prod.ts",
+                    "type": "object",
+                    "defaultValue": "{\n\tproduction: true\n}"
+                }
+            ],
+            "src/environments/environment.ts": [
+                {
+                    "name": "environment",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/environments/environment.ts",
+                    "type": "object",
+                    "defaultValue": "{\n\tproduction: false\n}"
+                }
+            ],
+            "src/app/balance-form/balance-form.stories.ts": [
+                {
+                    "name": "primary",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/balance-form/balance-form.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/balance-form/balance-form.stories.ts",
+                    "type": "Story<BalanceFormComponent>",
+                    "defaultValue": "(args) => ({\n\tprops: {\n\t\t...args,\n\t\tsaveEvent: action(\"saveEvent\")\n\t}\n})"
+                }
+            ],
+            "src/app/common-info/common-info.stories.ts": [
+                {
+                    "name": "primary",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/common-info/common-info.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/common-info/common-info.stories.ts",
+                    "type": "Story<CommonInfoComponent>",
+                    "defaultValue": "(args) => ({\n\tprops: args\n})"
+                }
+            ],
+            "src/app/error-indicator/error-indicator.stories.ts": [
+                {
+                    "name": "primary",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/error-indicator/error-indicator.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/error-indicator/error-indicator.stories.ts",
+                    "type": "Story<LaunchComponent>",
+                    "defaultValue": "(args) => ({\n\tprops: args\n})"
+                }
+            ],
+            "src/app/user-login/user-login.stories.ts": [
+                {
+                    "name": "primary",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/user-login/user-login.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/app/user-login/user-login.stories.ts",
+                    "type": "Story<UserLoginComponent>",
+                    "defaultValue": "(args) => ({\n\tprops: {\n\t\t...args,\n\t\tuserSelectedEvent: action(\"userSelectedEvent\"),\n\t\tloginEvent: action(\"loginEvent\")\n\t}\n})"
+                }
+            ]
+        },
+        "groupedFunctions": {},
+        "groupedEnumerations": {},
+        "groupedTypeAliases": {}
+    },
+    "routes": {
+        "name": "<root>",
+        "kind": "module",
+        "className": "AppModule",
+        "children": [
+            {
+                "name": "routes",
+                "filename": "src/app/app-routing.module.ts",
+                "module": "AppRoutingModule",
+                "children": [],
+                "kind": "module"
+            }
+        ]
+    },
+    "coverage": {
+        "count": 0,
+        "status": "low",
+        "files": [
+            {
+                "filePath": "e2e/src/app.po.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "AppPage",
+                "coveragePercent": 0,
+                "coverageCount": "0/3",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/app.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "AppComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/20",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/app.module.ts",
+                "type": "interceptor",
+                "linktype": "interceptor",
+                "name": "XhrInterceptor",
+                "coveragePercent": 0,
+                "coverageCount": "0/2",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/balance-form/balance-form.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "BalanceFormComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/23",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/balance-form/balance-form.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "primary",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/balance-form/balance-form.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Template",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/balance-form/balance.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "Balance",
+                "coveragePercent": 0,
+                "coverageCount": "0/9",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/balance-form/metal-tab.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "MetalTab",
+                "coveragePercent": 0,
+                "coverageCount": "0/12",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/busy-indicator/busy-indicator.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "BusyIndicatorComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/common-info/common-info.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "CommonInfoComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/9",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/common-info/common-info.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "primary",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/common-info/common-info.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Template",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/common-info/group.ts",
+                "type": "interface",
+                "linktype": "interface",
+                "name": "Group",
+                "coveragePercent": 0,
+                "coverageCount": "0/3",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/error-indicator/error-indicator.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "ErrorIndicatorComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/4",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/error-indicator/error-indicator.stories.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "LaunchComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/4",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/error-indicator/error-indicator.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "primary",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/error-indicator/error-indicator.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Template",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/error-indicator/service-error.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "ServiceError",
+                "coveragePercent": 0,
+                "coverageCount": "0/3",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/services/data-service.ts",
+                "type": "injectable",
+                "linktype": "injectable",
+                "name": "DataService",
+                "coveragePercent": 0,
+                "coverageCount": "0/18",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/services/forecast.ts",
+                "type": "interface",
+                "linktype": "interface",
+                "name": "Forecast",
+                "coveragePercent": 0,
+                "coverageCount": "0/10",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/services/user.ts",
+                "type": "interface",
+                "linktype": "interface",
+                "name": "User",
+                "coveragePercent": 0,
+                "coverageCount": "0/4",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/user-login/user-login.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "UserLoginComponent",
+                "coveragePercent": 0,
+                "coverageCount": "0/11",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/user-login/user-login.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "primary",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/user-login/user-login.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Template",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/environments/environment.prod.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "environment",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/environments/environment.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "environment",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/test.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "context",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/test.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "require",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            }
+        ]
+    }
+}
