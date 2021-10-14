@@ -15,7 +15,7 @@ import com.olf.jm.SapInterface.util.Utility;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
-import com.olf.openrisk.io.IOFactory;
+import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.Table;
 import com.olf.jm.logging.Logging;
 
@@ -165,7 +165,10 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 		Table metalStmtRun = null;
 		int jdStmtRunDate = 0;
 		try {
-			String sql = " SELECT TOP 1 statement_period" + " FROM USER_jm_monthly_metal_statement" + " ORDER BY metal_statement_production_date  DESC";
+			String sql = " SELECT TOP 1 statement_period " 
+						+ " FROM USER_jm_monthly_metal_statement" 
+						+ " WHERE internal_bunit = " + context.getStaticDataFactory().getId(EnumReferenceTable.Party, "JM PMM UK")
+						+ " ORDER BY metal_statement_production_date  DESC";
 			Logging.debug("Running SQL \n. " + sql);
 			metalStmtRun = Utility.runSql(sql);
 			if (metalStmtRun.getRowCount() < 1) {
