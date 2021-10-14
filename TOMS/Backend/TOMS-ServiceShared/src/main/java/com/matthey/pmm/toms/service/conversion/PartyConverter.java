@@ -53,7 +53,7 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 		Party party;
 		if (existingEntity.isPresent()) {
 			party = existingEntity.get();
-			party.setLegalEntity(legalEntity.get());
+			party.setLegalEntity(legalEntity.isPresent()?legalEntity.get():null);
 			party.setType(type);
 			party.setName(to.name());
 		} else {
