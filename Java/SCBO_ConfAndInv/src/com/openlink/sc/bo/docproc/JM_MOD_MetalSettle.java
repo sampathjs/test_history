@@ -88,7 +88,6 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 	private String _stldoc_info_use_ext_fx_rate = "Apply ext. FX Rate";//< ConstRep; default
 	private final String EVENT_INFO_TAX_RATE_NAME = "Tax Rate Name";
 	private final String EVENT_INFO_METAL_VALUE_DATE = "Metal Value Date";
-	private final String EVENT_INFO_JDE_CORRECTION_DATE = "JDE Correction Date";
 	private final String STLDOC_INFO_TYPE_PREFIX = "stldoc_info_type_";//col_name
 	private final String INVOICE_DATE = "Invoice Date";
 	private String _stldoc_info_invoice_date = "Invoice Date";//< ConstRep; default
@@ -527,7 +526,6 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			Table tblSettleData = getSettleDataTable(eventTable);
 			tblSettleData.makeTableUnique();
 			setMetalValueDate(eventTable, tblSettleData);
-			setJDECorrectionDate(eventTable, tblSettleData);
 			setTranInfoFormLoco(eventTable, tblSettleData);
 			tblSettleData.makeTableUnique();
 			addFinalPrice(eventTable, tblSettleData);
@@ -2190,38 +2188,6 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 				tblSettleData.select(eventData, "event_info_type_"+infoId+"(Metal_Value_Date)", "event_num EQ $EventNum");
 			else
 				setMetalValueDate(tblSettleData);
-		}
-	}
-	
-	private void setJDECorrectionDate(Table tblSettleData) throws OException
-	{
-		int queryId = Query.tableQueryInsert(tblSettleData, "EventNum");
-		String queryTbl = Query.getResultTableForId(queryId);
-		String sql
-			= "select event_num,value"
-			+ " from ab_tran_event_info atei"
-			+ " join "+queryTbl+" q on atei.event_num=q.query_result and q.unique_id="+queryId
-			+ " join tran_event_info_types teit on atei.type_id=teit.type_id and teit.type_name='JDE Correction Date'"
-			;
-		Table tbl = Table.tableNew("event info");
-		try
-		{
-			DBaseTable.execISql(tbl, sql);
-			if (tbl.getNumRows() > 0)
-				tblSettleData.select(tbl, "value(JDE_Correction_Date)", "event_num EQ $EventNum");
-		}
-		finally { tbl.destroy(); Query.clear(queryId); }
-	}
-
-	private void setJDECorrectionDate(Table eventData, Table tblSettleData) throws OException
-	{
-		int infoId = getEventInfoTypeId("JDE Correction Date");
-		if (infoId > 0)
-		{
-			if (eventData.getColNum("event_info_type_"+infoId) > 0)
-				tblSettleData.select(eventData, "event_info_type_"+infoId+"(JDE_Correction_Date)", "event_num EQ $EventNum");
-			else
-				setJDECorrectionDate(tblSettleData);
 		}
 	}
 
