@@ -10,6 +10,7 @@
  * 0.2  added Settle Tax Data table; revised getPhysCashProfile
  * 0.3  reviewed Metal retrieval; warn only on invalid FX Rates
  * 0.4  memory leaks, remove console prints & formatting changes
+ * 0.5 Rohit Tomar	- PBI 0408 | Fix for not to update event info while preview the document 
  */
 
 package com.openlink.sc.bo.docproc;
@@ -32,6 +33,7 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables = true;
 	protected static boolean _formatDoubles = false;
+	protected boolean _isPreview = false;
 	protected static int _doublePrec = -1;
 	protected static String _vatCashflowType    = "VAT";
 	protected static String _vatLegTranInfo     = "VAT-Leg dummy";
@@ -152,6 +154,11 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 			try {
 				Table argt = context.getArgumentsTable();
 				retrieveSettingsFromConstRep();
+				
+				int previewFlag = argt.getInt("PreviewFlag", 1);
+				
+				if(previewFlag == 1)
+					_isPreview = true;
 
 				if (argt.getInt("GetItemList", 1) == 1) {
 					// if mode 1
@@ -2727,7 +2734,9 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 			where = "event_type EQ " + EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt();
 			tbl.select(tblEvent, what, where);
 			calculateProvAmount(tbl);
-			saveSavedSettleVolume(tbl);
+			
+			if(!_isPreview)
+				saveSavedSettleVolume(tbl);
 
 		//	what = "prov_perc (Prov_Perc), prov_price (Prov_Price), prov_amount (Prov_Amount)";
 			what = "prov_perc (Prov_Perc), prov_price (Prov_Price), prov_amount (Prov_Amount), prep_amount (Prep_Amount)";
@@ -3200,7 +3209,7 @@ public class OLI_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript {
 				}
 				
 
-				if (canBaseAmount||canBaseCcy||canFxRate) {
+				if ((canBaseAmount||canBaseCcy||canFxRate) && !_isPreview) {
 					double amount;
 					boolean doSave;
 					String /*strAmount, strFxRate,*/ str;
