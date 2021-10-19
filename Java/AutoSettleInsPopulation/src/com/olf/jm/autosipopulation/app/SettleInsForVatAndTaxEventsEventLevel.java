@@ -125,7 +125,7 @@ public class SettleInsForVatAndTaxEventsEventLevel extends
 		    				DealEvents events = tran.getDealEvents();
 		        			for (DealEvent event : events) {
 		        				Field eventTypeField = event.getField("Event Type");
-		        				if (eventTypeField.getValueAsInt() == 2 ) {//Open Event
+		        				if (eventTypeField.getValueAsInt() == 2 || eventTypeField.getValueAsInt() == 21 ) {//Open and Amended Open Event 
 		        					long eventNum = event.getId();
 		        					setEventInfoField(tranNum, eventNum);
 		        				}

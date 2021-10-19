@@ -377,7 +377,9 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 									deal.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt())));
 					deal.saveDealDocumentTable();
 					Logging.info("Calling checkModifiedSIConfirmRegen tranNum="+tranNum);
-					checkModifiedSIConfirmRegen(deal, tranNum);
+					if (isRegenerateConfirm(tranNum)) {
+						checkModifiedSI(deal, tranNum);
+					}
 			}
 		
 		}finally{
@@ -389,8 +391,36 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 			}
 		}
 	}
+	public static boolean isRegenerateConfirm(int tranNum) throws OException{
+		boolean status = false;
+		Table sqlResult = null;
+		String sql = 
+				"\nSELECT count(abes.ext_settle_id) row_count "
+			+	"\nFROM ab_tran_event abe, ab_tran_event_settle abes, ab_tran_event_info abei, tran_event_info_types tet "
+			+   "\nWHERE abes.event_num = abe.event_num"
+			+   "\nAND abei.event_num = abe.event_num"
+//			+   "\nAND abe.event_num = " + eventId
+			+   "\nAND tet.type_id = abei.type_id"
+			+   "\nAND tet.type_name = 'RegenerateConfirm'"
+			+   "\nAND abei.value = 'Yes'"
+			+   "\nAND abe.tran_num = " + tranNum;
+		Logging.info("Executing SQL(getSiId) query:" + sql);
+		try {
+			sqlResult = Table.tableNew();
+			int ret = DBaseTable.execISql(sqlResult, sql);
+			if (ret != OLF_RETURN_SUCCEED) {
+				throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL: " + sql));
+			}
+			status = (sqlResult.getInt("row_count", 1) >= 1); 
+		} finally {
+			if(Table.isTableValid(sqlResult) == 1){
+				TableUtilities.destroy(sqlResult);	
+			}
+		}
+			return status;
+	}
 	//Check modified SI and confirm Regen then set traninfo IsModSIReGenConfirm=1
-	private boolean checkModifiedSIConfirmRegen(Transaction deal, int tranNum) throws OException{
+	private boolean checkModifiedSI(Transaction deal, int tranNum) throws OException{
 		boolean status=false;
 		
 		Table sqlResult = null;
@@ -425,7 +455,7 @@ public class JM_OUT_DocOutput_wMail extends com.openlink.jm.bo.docoutput.BO_DocO
 		Table eventInfoTbl = null;
 		try{
 			sqlResult = Table.tableNew();
-			String sql = String.format("select event_num from ab_tran_event where tran_num=%d and event_type=2", tranNum);
+			String sql = String.format("select event_num from ab_tran_event where tran_num=%d and event_type in (2, 21) ", tranNum);// Open and Amended Open
 			int ret = DBaseTable.execISql(sqlResult, sql);
 			if (ret != OLF_RETURN_SUCCEED) {
 				throw new OException (DBUserTable.dbRetrieveErrorInfo(ret, "Error executing SQL: " + sql));
