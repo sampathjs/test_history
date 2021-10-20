@@ -127,6 +127,7 @@ public class SettleInsForVatAndTaxEventsEventLevel extends
 		        				Field eventTypeField = event.getField("Event Type");
 		        				if (eventTypeField.getValueAsInt() == 2 || eventTypeField.getValueAsInt() == 21 ) {//Open and Amended Open Event 
 		        					long eventNum = event.getId();
+		        					//Sets the event info field IsModSIReGenConfirm to 1 and saves it to DB.
 		        					setEventInfoField(tranNum, eventNum);
 		        				}
 		        			}	
@@ -155,7 +156,11 @@ public class SettleInsForVatAndTaxEventsEventLevel extends
 			e.printStackTrace();
 		}
     }
-    
+    /**
+	 * Checks if the Regenerate Confirm Event Info field is set to Yes, default value is No.
+	 * @param session
+	 * @param tranNum
+	 */      
     private boolean isRegenerateConfirm(Session session, int tranNum) {
     	try (Transaction tran = session.getTradingFactory().retrieveTransactionById(tranNum)) {
 	    	DealEvents events = tran.getDealEvents();

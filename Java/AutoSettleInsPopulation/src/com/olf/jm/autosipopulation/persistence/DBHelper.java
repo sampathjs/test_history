@@ -21,7 +21,8 @@ import com.olf.openjvs.enums.DELIVERY_TYPE_ENUM;
  *                                    and retrieveDispatchStatus
  * 2016-05-10	V1.4	jwaechter	- added new methods getSiId and retrieveTransOfTranGroup
  * 2016-06-07	V1.5	jwaechter	- modified method getSiId to work on external bunit if requested
- * 2021-09-27	V1.6	RodriR02	- JIRA-1874-Added functionality to save the SI when modified at event level
+ * 2021-02-26   V1.6    Prashanth   - EPI-1825   - Fix for missing SI for FX deals booked via SAP and re-factoring logs
+ * 2021-09-27	V1.7	RodriR02	- JIRA-1874-Added functionality to save the SI when modified at event level
  * 
  */
 /**
