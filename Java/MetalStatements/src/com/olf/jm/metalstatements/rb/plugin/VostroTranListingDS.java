@@ -1,5 +1,14 @@
 package com.olf.jm.metalstatements.rb.plugin;
 
+/* History
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | Rev | Date        | Change Id     | Author          | Description                                                                     |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | 001 | 			   |               | 		         | Initial version.                                                                |
+ * | 002 | 18-Oct-2021 |   EPI-1933    | Rohit Tomar     | Added Logic to pick 1st line always  of the deal comments                       |              
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ */
+
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
@@ -163,3 +172,4 @@ public class VostroTranListingDS extends MetalStatementsDataSource {
 	}
 
 }
+
