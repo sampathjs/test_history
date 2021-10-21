@@ -17,7 +17,7 @@ import com.olf.jm.logging.Logging;
  * 2016-10-18	V1.0	jwaechter	- Initial Version
  * 2016-10-19	V1.1	jwaechter	- Now executing only if deal tracking num is 
  *                                    not GT 0
- * 2021-09-10	V1.1	RodriR02	- Clearing tran should clear the JM FX Rate field on the deal                                   
+ * 2021-09-10	V1.2	RodriR02	- Clearing tran should clear the JM FX Rate field on the deal                                   
  */
 
 /**
