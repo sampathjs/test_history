@@ -1,5 +1,13 @@
 package com.jm.ops.trading;
 
+/* History
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | Rev | Date        | Change Id     | Author          | Description                                                                     |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | 001 | 18-Oct-2021 |   EPI-1918    | Rohit Tomar     | Initial version                       										   |              
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ */
+
 import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.logging.Logging;
 import com.olf.openrisk.io.IOFactory;
@@ -15,6 +23,9 @@ import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 
 /**
+ * OPS Service to blocks the currency deal booking in metal portfolio.
+ * The combination is configured in user Table 'USER_jm_currency_trade_checks' 
+ * 
  * @author TomarR01
  *
  */
@@ -25,8 +36,8 @@ public class CurrencyDealBlocker extends AbstractTradeProcessListener {
 	private static final String COUNTERPARTY = "counterparty";
 	private static final String INTERNAL_PORTFOLIO = "internal_portfolio";
 	private static final String INTERNAL_BUNIT = "internal_bunit";
-	private static final String OPSERVICE = "OpService";
-	private static final String CURRENCYDEALBLOCKER = "CurrencyDealBlocker";
+	private static final String CONTEXT = "OpService";
+	private static final String SUBCONTEXT = "CurrencyDealBlocker";
 
 	public PreProcessResult preProcess(final Context context, final EnumTranStatus targetStatus,
 			final PreProcessingInfo<EnumTranStatus>[] infoArray, final Table clientData) {
@@ -35,7 +46,7 @@ public class CurrencyDealBlocker extends AbstractTradeProcessListener {
 
 		try {
 
-			Logging.init(this.getClass(), OPSERVICE, CURRENCYDEALBLOCKER);
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 
 			preProcessResult = PreProcessResult.succeeded();
 			
@@ -74,9 +85,13 @@ public class CurrencyDealBlocker extends AbstractTradeProcessListener {
 		} catch (Exception e) {
 			Logging.error("Error, Reason : " + e.getMessage());
 		}
+		finally {
+			Logging.close();
+		}
 		
 		return preProcessResult;
 
 	}
 
 }
+
