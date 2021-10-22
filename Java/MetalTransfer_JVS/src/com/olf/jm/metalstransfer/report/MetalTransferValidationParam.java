@@ -21,6 +21,9 @@ import com.olf.openjvs.enums.ASK_TEXT_DATA_TYPES;
 import com.olf.openjvs.enums.COL_TYPE_ENUM;
 
 /**
+ * This is the param class for the metal transfer validation report
+ * Its gives the pop up to user for selection according to which the data is fetched from the database.
+ * 
  * @author TomarR01
  *
  */

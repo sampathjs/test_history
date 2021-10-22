@@ -23,6 +23,12 @@ import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
 import com.openlink.util.constrepository.ConstRepository;
 
 /**
+ * This is a helper class for the metal validation report.
+ * This report can be triggered for any region ad-hoc by BO users.
+ * This report contains the strategy deals along with its cash,VAT and transfer charges deal details.
+ * It also contains a comment column which indicates if we have any issue with the corresponding strategy
+ * 
+ * 
  * @author TomarR01
  *
  */
@@ -45,8 +51,8 @@ public class MetalTransferValidationHelper {
 	 public static final String ACTUAL_COUNT = "actual_cash_deal_count"; 
 	 public static final String VALIDATION_REPORT = "MetalTransferValidation_Report"; 
 	 public static final String EXCEPTION_REPORT = "MetalTransferException_Report"; 
-	 public static final String REPORTS = "Reports";  
-	 public static final String METAL_TRANSFER_VALIDATION = "MetalTransferValidation";
+	 public static final String CONTEXT = "Reports";  
+	 public static final String SUB_CONTEXT = "MetalTransferValidation";
 	 public static final String EMAILSERVICE = "emailServiceName";
 	 public static final String UKRECEIPIENT = "ukrecipients";
 	 public static final String HKRECEIPIENT = "hkrecipients";
@@ -438,7 +444,7 @@ public class MetalTransferValidationHelper {
 	public void sendReportOnMail(String filePath,String party){		
 		
 		try {		
-			ConstRepository constRepo =  new ConstRepository(REPORTS, METAL_TRANSFER_VALIDATION);		
+			ConstRepository constRepo =  new ConstRepository(CONTEXT, SUB_CONTEXT);		
 			
 			String recipients = "";
 			String emailService = constRepo.getStringValue(EMAILSERVICE);

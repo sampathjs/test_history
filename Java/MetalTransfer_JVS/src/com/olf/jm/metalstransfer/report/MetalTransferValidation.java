@@ -15,6 +15,18 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 
 /**
+ * This is the main script for metal transfer validation report
+ * It read the below data from @param script and uses the helper class to retrieve and format the report data
+ * 
+ * PARTY - Report to be triggered for which region (multiselect)
+ * DATE - The report to be triggered for Trade date or settle date (single select)
+ * START_DATE - the start range of the date (Trade date or settle date)
+ * END_DATE - the end range of the date (Trade date or settle date)
+ * STATUS - The status of strategy deals (multiselect)
+ * EMAIL_FLAG - Flag to send the report over mail or not
+ * 
+ * Parameters are configured in USER_CONS_REPOSITORY with context - 'Reports' and sub-context - 'MetalTransferValidation'
+ * 
  * @author TomarR01
  *
  */
@@ -28,7 +40,7 @@ public class MetalTransferValidation implements IScript {
 		Table tblExceptionData = null;
 		String filePath = null;
 
-		Logging.init(this.getClass(), MetalTransferValidationHelper.REPORTS, MetalTransferValidationHelper.METAL_TRANSFER_VALIDATION);
+		Logging.init(this.getClass(), MetalTransferValidationHelper.CONTEXT, MetalTransferValidationHelper.SUB_CONTEXT);
 
 		try {
 
@@ -97,6 +109,8 @@ public class MetalTransferValidation implements IScript {
 			if(Table.isValidTable(tblExceptionData) && tblExceptionData!= null ){
 				tblExceptionData.destroy();
 			}
+			
+			Logging.close();
 		}
 
 	}
