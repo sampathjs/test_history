@@ -20,7 +20,7 @@ public class CustomerRetriever {
     public List<String> retrieve() {
         final String customerCol = "customer";
         //language=TSQL
-        String sqlTemplate = "SELECT DISTINCT end_user_customer AS ${customerCol} FROM USER_jm_end_user";
+        String sqlTemplate = "SELECT DISTINCT end_user_customer AS ${customerCol} FROM USER_jm_end_user_view";
         Map<String, String> variables = new HashMap<>();
         variables.put("customerCol", customerCol);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
