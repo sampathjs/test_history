@@ -1,5 +1,13 @@
 package com.olf.jm.trading_units.app;
 
+/* History
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | Rev | Date        | Change Id     | Author          | Description                                                                     |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | 001 | 18-Oct-2021 |   EPI-1910    | Rohit Tomar     | Initial version                       										   |              
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ */
+
 import com.olf.jm.logging.Logging;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
@@ -10,6 +18,9 @@ import com.olf.openjvs.Util;
 import com.olf.openjvs.enums.TRANF_FIELD;
 
 /**
+ * This plugin blocks swap deals from being booked in case they have the 'Is Funding Trade' info field set to 'No'
+ * but they are actually time swap deals 
+ * 
  * @author TomarR01
  *
  */
@@ -75,3 +86,4 @@ public class TradingSwapsFundingCheck implements IScript {
 		}
 	}
 }
+
