@@ -10,6 +10,8 @@ import com.matthey.pmm.jde.corrections.LedgerEntry;
 import com.matthey.pmm.jde.corrections.Region;
 import com.matthey.pmm.jde.corrections.SalesLedgerEntry;
 import com.olf.embedded.application.Context;
+import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.staticdata.StaticDataFactory;
@@ -54,7 +56,7 @@ public class BoundaryTableProcessor {
         this.staticDataFactory = context.getStaticDataFactory();
         this.ioFactory = context.getIOFactory();
         this.startDate = getStartDate();
-        this.startDateOtherRegions = getStartDateOtherRegions();
+        this.startDateOtherRegions = getCurrentTradingDate(); //getStartDateOtherRegions();
     }
     
     public static void updateGLRow(GeneralLedgerEntry entry, TableRow row) {
@@ -81,6 +83,7 @@ public class BoundaryTableProcessor {
     
     public Set<Integer> retrieveAmendedTrans(Region region) {
         //language=TSQL
+    	 
         String sqlTemplate = "SELECT DISTINCT bt.tran_num\n" +
                              "    FROM user_jm_bt_out_gl bt\n" +
                              "             JOIN ab_tran t\n" +
@@ -107,6 +110,7 @@ public class BoundaryTableProcessor {
         int cancelledDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
         int newDoc = staticDataFactory.getId(EnumReferenceTable.StldocDocumentStatus, "New Document");	
 		LocalDate startLastUpdateDate = startDateOtherRegions;
+		logger.info("startLastUpdateDate:--> " + System.lineSeparator() + startLastUpdateDate);
         Map<String, Object> variables = new HashMap<>();
         variables.put("amendedTran", amendedTran);
         variables.put("cancelledTran", cancelledTran);
@@ -225,6 +229,7 @@ public class BoundaryTableProcessor {
             return result.getRows().stream().map(row -> {
                 String payload = row.getClob("payload");
                 LocalDate valueDate = getValueDate(payload);
+                LocalDate valueDate1 = getValueDate(payload);
                 Region region = Region.of(row.getString("region"));
                 return ImmutableSalesLedgerEntry.builder()
                         .extractionId(row.getInt("extraction_id"))
@@ -308,8 +313,28 @@ public class BoundaryTableProcessor {
 				}
 			}
 		}
-		
-		// TODO Auto-generated method stub
+		 
 		return null;
 	}
+ 
+	 public boolean getJDECorrectionFlagValue(int tranNum) {
+			
+			Table tbl;
+			String tmpJDECorrectionVal = null; 
+				String sql
+						= "select ati.value"
+						+ " from ab_tran_info ati"
+						+ " JOIN tran_info_types tit on ( tit.type_id = ati.type_id and tit.type_name='JDE Correction Flag')"
+						+ " JOIN ab_tran  ab on (ab.tran_num = ati.tran_num  and ab.tran_num ="+tranNum+")"; 
+				tbl = ioFactory.runSQL(sql); // context.getIOFactory().runSQL(sql);
+				if(tbl.getRowCount()>0){
+				tmpJDECorrectionVal =  tbl.getValueAsString("value", 0); //tbl.getString("value", 0);
+				}
+				if(tmpJDECorrectionVal != null)
+					return tmpJDECorrectionVal.equalsIgnoreCase("Yes")  ;
+				else 
+					return false;  
+		}    
+
 }
+
