@@ -46,7 +46,8 @@ export class BalanceFormComponent {
 	readonly columns = [
 		"customer",
 		"currentBalance",
-		"shipmentVolume",
+		// "shipmentVolume",
+    "inUse",
 		"shipmentWindow",
 		"basisOfAssumption",
 		"excessMetal",

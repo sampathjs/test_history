@@ -15,7 +15,9 @@ public interface Balance {
     
     Double currentBalance();
     
-    Double shipmentVolume();
+    // Double shipmentVolume();
+
+    Double inUse();
     
     @Nullable
     Integer shipmentWindow();

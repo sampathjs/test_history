@@ -62,7 +62,7 @@ public class ForecastUpdater {
         return ImmutableBalance.builder()
                 .customer(row.getString("customer"))
                 .currentBalance(row.getDouble("current_balance"))
-                .shipmentVolume(row.getDouble("shipment_volume"))
+                .inUse(row.getDouble("in_use"))
                 .shipmentWindow(row.getInt("shipment_window"))
                 .basisOfAssumption(row.getString("basis_of_assumption"))
                 .build();
@@ -98,7 +98,8 @@ public class ForecastUpdater {
                 row.getCell("deliverable").setDouble(forecast.deliverable());
                 row.getCell("customer").setString(balance.customer());
                 row.getCell("current_balance").setDouble(balance.currentBalance());
-                row.getCell("shipment_volume").setDouble(Optional.ofNullable(balance.shipmentVolume()).orElse(Double.valueOf(0)));
+                // row.getCell("shipment_volume").setDouble(Optional.ofNullable(balance.shipmentVolume()).orElse(Double.valueOf(0)));
+                row.getCell("in_use").setDouble(Optional.ofNullable(balance.inUse()).orElse(Double.valueOf(0)));
                 row.getCell("shipment_window").setInt(Optional.ofNullable(balance.shipmentWindow()).orElse(0));
                 row.getCell("basis_of_assumption").setString(balance.basisOfAssumption());
                 

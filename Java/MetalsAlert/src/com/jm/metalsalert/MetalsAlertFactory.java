@@ -47,6 +47,10 @@ public class MetalsAlertFactory extends AbstractGenericScript {
 					MetalsSpotRateAlert msrb = new MetalsSpotRateAlert();
 					msrb.MonitorAndRaiseAlerts(context, taskParams, reportDate, MetalsAlertConst.CONST_alertRate, MetalsAlertConst.CONST_unitLeaseRate);
 					break;
+				case	"Total_Liquidity_Alert":
+					CustomerReminderAlert cra = new CustomerReminderAlert();
+					cra.MonitorAndRaiseAlerts(context, taskParams, reportDate, MetalsAlertConst.CONST_alertCustomer, MetalsAlertConst.CONST_unitLeaseRate);
+					break;
 				}
 			} 
 		} catch (Exception e) {

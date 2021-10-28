@@ -56,7 +56,7 @@
 					</td>
 					<td mat-footer-cell *matFooterCellDef>{{selectedMetalTab.totalCurrentBalance()}}</td>
 				</ng-container>
-				<ng-container matColumnDef="shipmentVolume">
+				<!-- <ng-container matColumnDef="shipmentVolume">
 					<th mat-header-cell *matHeaderCellDef>Shipment Volume</th>
 					<td mat-cell *matCellDef="let balance; index as idx">
 						<mat-form-field>
@@ -72,6 +72,23 @@
 						</mat-form-field>
 					</td>
 					<td mat-footer-cell *matFooterCellDef>{{selectedMetalTab.totalShipmentVolume()}}</td>
+				</ng-container> -->
+				<ng-container matColumnDef="inUse">
+					<th mat-header-cell *matHeaderCellDef>In Use</th>
+					<td mat-cell *matCellDef="let balance; index as idx">
+						<mat-form-field>
+							<label>
+								<input
+									[(ngModel)]="balance.inUse"
+									type="number"
+									matInput
+									required
+									[name]="metal + '-inUse-' + idx"
+								/>
+							</label>
+						</mat-form-field>
+					</td>
+					<td mat-footer-cell *matFooterCellDef>{{selectedMetalTab.totalInUse()}}</td>
 				</ng-container>
 				<ng-container matColumnDef="shipmentWindow">
 					<th mat-header-cell *matHeaderCellDef>Shipment Window</th>

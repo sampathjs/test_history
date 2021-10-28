@@ -15,8 +15,12 @@ export class MetalTab {
 		return this.calculateTotal((balance) => balance.currentBalance);
 	}
 
-	totalShipmentVolume(): number | undefined {
-		return this.calculateTotal((balance) => balance.shipmentVolume);
+	// totalShipmentVolume(): number | undefined {
+	// 	return this.calculateTotal((balance) => balance.shipmentVolume);
+	// }
+
+  totalInUse(): number | undefined {
+		return this.calculateTotal((balance) => balance.inUse);
 	}
 
 	totalExcessMetal(): number | undefined {

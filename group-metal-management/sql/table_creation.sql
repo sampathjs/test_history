@@ -31,7 +31,8 @@ CREATE TABLE dbo.USER_gmm_forecast
     deliverable         FLOAT,
     customer            VARCHAR(255),
     current_balance     FLOAT,
-    shipment_volume     FLOAT,
+    -- shipment_volume     FLOAT,
+    in_use              FLOAT,
     shipment_window     INT,
     basis_of_assumption VARCHAR(255),
     create_time         VARCHAR(255)

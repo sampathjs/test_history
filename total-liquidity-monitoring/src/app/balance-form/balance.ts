@@ -2,13 +2,15 @@ export class Balance {
 	constructor(
 		public customer = "",
 		public currentBalance = 0,
-		public shipmentVolume = 0,
+		// public shipmentVolume = 0,
+    public inUse = 0,
 		public shipmentWindow?: number,
 		public basisOfAssumption?: string
 	) {}
 
 	excessMetal(): number {
-		return this.currentBalance - this.shipmentVolume;
+		// return this.currentBalance - this.shipmentVolume;
+    return this.currentBalance - this.inUse;
 	}
 
 	validate(validCustomers: string[], validBasisOfAssumptions: string[]): string | undefined {
