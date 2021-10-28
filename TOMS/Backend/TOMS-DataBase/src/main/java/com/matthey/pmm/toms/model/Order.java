@@ -105,11 +105,6 @@ public abstract class Order {
 	private Reference termCurrency;
 	
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="physical_delivery_required_reference_id", nullable = false)
-	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.YES_NO)
-	private Reference physicalDeliveryRequired;
-
-	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="order_status_id", nullable = false)
 	private OrderStatus orderStatus;
 
@@ -128,6 +123,19 @@ public abstract class Order {
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="updated_by", nullable = false)
 	private User updatedByUser;
+	
+	@Column(name = "reference")
+	private String reference;
+		
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="metal_form_reference_id", nullable = true)
+	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.METAL_FORM})
+	private Reference metalForm;
+
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="metal_location_reference_id", nullable = true)
+	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.METAL_LOCATION})
+	private Reference metalLocation;
 	
 	@ManyToMany(cascade = CascadeType.ALL)
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -160,7 +168,8 @@ public abstract class Order {
 			final Party internalLe, final Party externalLe, final Reference intPortfolio,
 			final Reference extPortfolio, final Reference buySell, final Reference baseCurrency,
 			final Double baseQuantity, final Reference baseQuantityUnit, 
-			final Reference termCurrency, final Reference physicalDeliveryRequired,
+			final Reference termCurrency, 
+			final String reference, final Reference metalForm, final Reference metalLocation,
 			final OrderStatus orderStatus, final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final List<OrderComment> orderComments,
@@ -176,7 +185,9 @@ public abstract class Order {
 		this.baseQuantity = baseQuantity;
 		this.baseQuantityUnit = baseQuantityUnit;
 		this.termCurrency = termCurrency;
-		this.physicalDeliveryRequired = physicalDeliveryRequired;
+		this.reference = reference;
+		this.metalForm = metalForm;
+		this.metalLocation = metalLocation;
 		this.orderStatus = orderStatus;
 		this.createdAt = createdAt;
 		this.createdByUser = createdByUser;
@@ -291,14 +302,6 @@ public abstract class Order {
 		this.termCurrency = termCurrency;
 	}
 
-	public Reference getPhysicalDeliveryRequired() {
-		return physicalDeliveryRequired;
-	}
-
-	public void setPhysicalDeliveryRequired(Reference physicalDeliveryRequired) {
-		this.physicalDeliveryRequired = physicalDeliveryRequired;
-	}
-
 	public OrderStatus getOrderStatus() {
 		return orderStatus;
 	}
@@ -361,8 +364,32 @@ public abstract class Order {
 
 	public void setCreditChecks(List<CreditCheck> creditChecks) {
 		this.creditChecks = creditChecks;
-	}	
+	}
 	
+	public String getReference() {
+		return reference;
+	}
+
+	public void setReference(String reference) {
+		this.reference = reference;
+	}
+
+	public Reference getMetalForm() {
+		return metalForm;
+	}
+
+	public void setMetalForm(Reference metalForm) {
+		this.metalForm = metalForm;
+	}
+
+	public Reference getMetalLocation() {
+		return metalLocation;
+	}
+
+	public void setMetalLocation(Reference metalLocation) {
+		this.metalLocation = metalLocation;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -393,6 +420,7 @@ public abstract class Order {
 		return "Order [orderId=" + orderId + ", version=" + version + ", internalBu=" + internalBu + ", externalBu=" + externalBu
 				+ ", internalLe=" + internalLe + ", externalLe=" + externalLe + ", intPortfolio=" + intPortfolio
 				+ ", buySell=" + buySell + ", baseCurrency=" + baseCurrency + ", baseQuantity=" + baseQuantity
+				+ ", reference=" + reference + ", metalForm=" + metalForm + ", metalLocation=" + metalLocation
 				+ ", baseQuantityUnit=" + baseQuantityUnit + ", termCurrency=" + termCurrency + ", orderStatus="
 				+ orderStatus + "]";
 	}

@@ -109,7 +109,6 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.baseQuantity(entity.getBaseQuantity())
 				.idBaseQuantityUnit(entity.getBaseQuantityUnit().getId())
 				.idTermCurrency(entity.getTermCurrency().getId())
-				.idYesNoPhysicalDeliveryRequired(entity.getPhysicalDeliveryRequired().getId())
 				.idOrderStatus(entity.getOrderStatus().getId())
 				.creditChecksIds(entity.getCreditChecks().stream().map( x -> x.getId()).collect(Collectors.toList()))
 				.createdAt(formatDateTime(entity.getCreatedAt()))
@@ -149,7 +148,8 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		Reference baseCurrency = loadRef (to, to.idBaseCurrency());
 		Reference baseQuantityUnit = to.idBaseQuantityUnit() != null?loadRef (to, to.idBaseQuantityUnit()):null;
 		Reference termCurrency = to.idTermCurrency() != null?loadRef (to, to.idTermCurrency()):null;
-		Reference yesNoPhysicalDeliveryRequired = to.idYesNoPhysicalDeliveryRequired() != null?loadRef (to, to.idYesNoPhysicalDeliveryRequired()):null;
+		Reference metalForm = to.idMetalForm() != null?loadRef (to, to.idMetalForm()):null;
+		Reference metalLocation = to.idMetalLocation() != null?loadRef (to, to.idMetalLocation()):null;
 		OrderStatus orderStatus = to.idOrderStatus() != null?loadOrderStatus (to, to.idOrderStatus()):null;
 		User createdByUser = loadUser(to, to.idCreatedByUser());
 		User updatedByUser = loadUser(to, to.idUpdatedByUser());
@@ -200,7 +200,6 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 			existingEntity.get().setBaseQuantity(to.baseQuantity());
 			existingEntity.get().setBaseQuantityUnit(baseQuantityUnit);
 			existingEntity.get().setTermCurrency(termCurrency);
-			existingEntity.get().setPhysicalDeliveryRequired(yesNoPhysicalDeliveryRequired);
 			existingEntity.get().setOrderStatus(orderStatus);
 			existingEntity.get().setCreatedAt(createdAt);
 			existingEntity.get().setCreatedByUser(createdByUser);
@@ -224,7 +223,8 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 			return existingEntity.get();
 		}
 		LimitOrder newEntity = new LimitOrder(1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
-				baseQuantityUnit, termCurrency, yesNoPhysicalDeliveryRequired, orderStatus, createdAt, createdByUser, lastUpdate,
+				baseQuantityUnit, termCurrency, to.reference(), metalForm, metalLocation, 
+				orderStatus, createdAt, createdByUser, lastUpdate,
 				updatedByUser, orderComments, fills, creditChecks, settleDate, expirationStatus, to.price(), priceType, to.spotPrice(), 
 				stopTriggerType, currencyCrossMetal, yesNoPartFillable, to.executionLikelihood());
 		if (to.version() != 0) {

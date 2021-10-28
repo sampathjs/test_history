@@ -14,7 +14,7 @@ public enum TestReferenceOrder {
 			DefaultReference.PORTFOLIO_UK_PLATINUM, null,
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
-			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
+			DefaultReference.CCY_GBP, "TEST_ORDER_1A", DefaultReference.METAL_FORM_INGOT, DefaultReference.METAL_LOCATION_ROYSTON,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8),
 			TestIndex.INDEX_PX_XPT_GBP, TestIndex.INDEX_FX_EUR_CHF, 
@@ -25,7 +25,7 @@ public enum TestReferenceOrder {
 			DefaultReference.PORTFOLIO_UK_PLATINUM, null,
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
-			DefaultReference.CCY_GBP, DefaultReference.YES_NO_YES,
+			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_NONE, DefaultReference.METAL_LOCATION_NONE,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-12-23 12:00:00", TestUser.ANDREW_BAYNES,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8),
 			TestIndex.INDEX_PX_XPT_GBP, TestIndex.INDEX_FX_EUR_CHF, 
@@ -35,7 +35,7 @@ public enum TestReferenceOrder {
 	TEST_ORDER_2(100004, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
-			DefaultReference.CCY_EUR, DefaultReference.YES_NO_NO,
+			DefaultReference.CCY_EUR, "TEST_ORDER_2", null, null,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_2, TestCreditCheck.TEST_CREDIT_CHECK_6), TestIndex.INDEX_PX_XAG_USD, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
@@ -44,7 +44,7 @@ public enum TestReferenceOrder {
 	TEST_ORDER_3(100005, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
-			DefaultReference.CCY_EUR, DefaultReference.YES_NO_NO,
+			DefaultReference.CCY_EUR, "TEST_ORDER_3", DefaultReference.METAL_FORM_GRAIN, DefaultReference.METAL_LOCATION_BRANDENBERGER,
 			DefaultOrderStatus.REFERENCE_ORDER_FILLED, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_7), TestIndex.INDEX_PX_XAG_USD, TestIndex.INDEX_FX_EUR_CHF, 
 			"2000-02-15 16:00:00", "2000-04-15 16:00:00", DefaultReference.AVERAGING_RULES_SAMPLE1,
@@ -58,7 +58,8 @@ public enum TestReferenceOrder {
 			DefaultReference intPfolio, DefaultReference extPfolio,
 			DefaultReference buySell,
 			DefaultReference baseCurrency, Double baseQuantity, DefaultReference baseQuantityUnit, 
-			DefaultReference termCurrency, DefaultReference yesNoPhysicalDeliveryRequired,
+			DefaultReference termCurrency, String reference, DefaultReference metalForm, 
+			DefaultReference metalLocation,			
 			DefaultOrderStatus orderStatus, TestUser createdBy, String createdAt,
 			String lastUpdate, TestUser updatedByUser,  
 			List<TestCreditCheck> creditChecks,
@@ -83,7 +84,9 @@ public enum TestReferenceOrder {
 				.baseQuantity(baseQuantity)
 				.idBaseQuantityUnit(baseQuantityUnit != null?baseQuantityUnit.getEntity().id():null)
 				.idTermCurrency(termCurrency.getEntity().id())
-				.idYesNoPhysicalDeliveryRequired(yesNoPhysicalDeliveryRequired.getEntity().id())
+				.reference(reference)
+				.idMetalForm(metalForm != null?metalForm.getEntity().id():null)
+				.idMetalLocation(metalLocation != null?metalLocation.getEntity().id():null)
 				.idOrderStatus(orderStatus.getEntity().id())
 				.createdAt(createdAt)
 				.idCreatedByUser(createdBy.getEntity().id())

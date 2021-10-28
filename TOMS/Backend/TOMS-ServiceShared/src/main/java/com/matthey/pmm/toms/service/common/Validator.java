@@ -615,12 +615,16 @@ public class Validator {
     	
     	verifyDefaultReference (order.idTermCurrency(),
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY),
-				clazz, method , argument + ".idCurrency", false);
+				clazz, method , argument + ".idTermCurrency", false);
 
-    	verifyDefaultReference (order.idYesNoPhysicalDeliveryRequired(),
-				Arrays.asList(DefaultReferenceType.YES_NO),
-				clazz, method , argument + ".idYesNoPhysicalDeliveryRequired", false);
+    	verifyDefaultReference (order.idMetalForm(),
+				Arrays.asList(DefaultReferenceType.METAL_FORM),
+				clazz, method , argument + ".idMetalForm", false);
 
+    	verifyDefaultReference (order.idMetalLocation(),
+				Arrays.asList(DefaultReferenceType.METAL_LOCATION),
+				clazz, method , argument + ".idMetalLocation", false);
+    	
     	if (!DefaultOrderStatus.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idOrderStatus()) ) {
     		throw new UnknownEntityException (clazz, method, argument + ".idOrderStatus" , "Order Status", "" + order.idOrderStatus());
     	}

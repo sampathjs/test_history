@@ -20,52 +20,59 @@ public abstract class OrderTo {
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType");
-
+					"createdAt", "idCreatedByUser", "idPriceType",
+					"reference", "idMetalForm", "idMetalLocation");
+	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_FILLED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType");
+					"createdAt", "idCreatedByUser", "idPriceType",
+					"reference", "idMetalForm", "idMetalLocation");
 
 	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType");
+					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType",
+					"reference", "idMetalForm", "idMetalLocation");
 
 	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED_TO_CANCELLED_EXPIRED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType");
+					"createdAt", "idCreatedByUser", "idPriceType",
+					"reference", "idMetalForm", "idMetalLocation");
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_PULLED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType");
+					"createdAt", "idCreatedByUser", "idPriceType",
+					"reference", "idMetalForm", "idMetalLocation");
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_REJECTED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType");
+					"createdAt", "idCreatedByUser", "idPriceType",
+					"reference", "idMetalForm", "idMetalLocation");
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_MATURED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType");
+					"createdAt", "idCreatedByUser", "idPriceType",
+					"reference", "idMetalForm", "idMetalLocation");
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_EXPIRED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType");
-
+					"createdAt", "idCreatedByUser", "idPriceType",
+					"reference", "idMetalForm", "idMetalLocation");
 	
 	/**
 	 * TOMS maintained ID 
@@ -113,10 +120,19 @@ public abstract class OrderTo {
 
     @Auxiliary
     public abstract Long idTermCurrency();
-   
-    @Auxiliary
-    public abstract Long idYesNoPhysicalDeliveryRequired();
 
+    @Auxiliary
+    @Nullable
+    public abstract String reference();    
+    
+    @Auxiliary
+    @Nullable
+    public abstract Long idMetalForm();
+    
+    @Auxiliary
+    @Nullable
+    public abstract Long idMetalLocation();
+   
     @Auxiliary
     public abstract Long idOrderStatus();
         

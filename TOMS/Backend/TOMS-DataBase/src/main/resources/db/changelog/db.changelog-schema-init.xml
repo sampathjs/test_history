@@ -552,13 +552,19 @@
        <column name="base_quantity_unit_reference_id" type="int">
          <constraints nullable="true"/>
        </column>
+       <column name="order_status_id" type="int">
+         <constraints nullable="true"/>
+       </column>       
        <column name="term_currency_reference_id" type="int">
          <constraints nullable="true"/>
        </column>
-       <column name="physical_delivery_required_reference_id" type="int">
+       <column name="reference" type="varchar(1000)">
          <constraints nullable="true"/>
        </column>
-       <column name="order_status_id" type="int">
+       <column name="metal_form_reference_id" type="int">
+         <constraints nullable="true"/>
+       </column>
+       <column name="metal_location_reference_id" type="int">
          <constraints nullable="true"/>
        </column>
        <column name="created_at" type="timestamp">
@@ -674,17 +680,27 @@
         referencedColumnNames="reference_id"  
         referencedTableName="reference"
         validate="true"/>
-        
+
     <addForeignKeyConstraint
-   	    baseColumnNames="physical_delivery_required_reference_id"  
+   	    baseColumnNames="metal_form_reference_id"  
         baseTableName="abstract_order"  
-        constraintName="fk_order_physical_delivery_required_reference_id"          
+        constraintName="fk_metal_form_reference_id"          
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
         referencedColumnNames="reference_id"  
         referencedTableName="reference"
-        validate="true"/>            
+        validate="true"/>
 
+    <addForeignKeyConstraint
+   	    baseColumnNames="metal_location_reference_id"  
+        baseTableName="abstract_order"  
+        constraintName="fk_metal_location_reference_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+        
     <addForeignKeyConstraint
    	    baseColumnNames="order_status_id"  
         baseTableName="abstract_order"  

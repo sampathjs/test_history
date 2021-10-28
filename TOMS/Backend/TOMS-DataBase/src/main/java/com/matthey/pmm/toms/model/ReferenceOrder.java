@@ -53,24 +53,34 @@ public class ReferenceOrder extends Order {
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="metal_reference_index_id", nullable = false)
-	private IndexEntity metalReferenceIndex;
+	private IndexEntity metalReferenceIndex; // remove index entities
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="currency_reference_index_id", nullable = false)
-	private IndexEntity currencyReferenceIndex;
+	private IndexEntity currencyReferenceIndex; // remove index entities
 	
 	@Column(name = "fixing_start_date", nullable = false)
 	@Temporal(TemporalType.DATE)
-	private Date fixingStartDate;
+	private Date fixingStartDate;  // move to leg
 
 	@Column(name = "fixing_end_date", nullable = false)
 	@Temporal(TemporalType.DATE)
-	private Date fixingEndDate;
+	private Date fixingEndDate;  // move to leg
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="averaging_rule_reference_id", nullable = false)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.AVERAGING_RULE)
-	private Reference averagingRule;
+	private Reference averagingRule;  // no longer needed, change to contract type having values averaging / fixing
+	
+	// missing fields:   
+	// - Reference Source (leg)
+	// - Settle Currency (leg)
+	// - Payment offset (String value, pick list, e.g. 1d. 2d) (leg) 
+	// - FX Index Ref Source (leg)
+	// - Notional, floating point number (leg) 
+	// - Metal Price Spread floating point number 
+	// - FX Rate Spread floating point number
+	// - Contango Backwardation floating point number  
 		
 	/**
 	 * For JPA purposes only. Do not use.
@@ -82,7 +92,8 @@ public class ReferenceOrder extends Order {
 			final Party internalLe, final Party externalLe, final Reference intPortfolio,
 			final Reference extPortfolio, final Reference buySell, final Reference baseCurrency,
 			final Double baseQuantity, final Reference baseQuantityUnit, 
-			final Reference termCurrency, final Reference physicalDeliveryRequired,
+			final Reference termCurrency,
+			final String reference, final Reference metalForm, final Reference metalLocation,			
 			final OrderStatus orderStatus, final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final List<OrderComment> orderComments,
@@ -92,7 +103,7 @@ public class ReferenceOrder extends Order {
 			final Reference averagingRule) {
 		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
-				termCurrency, physicalDeliveryRequired, orderStatus, createdAt,
+				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
 				createdByUser, lastUpdate, updatedByUser, orderComments, 
 				fills, creditChecks);
 		this.metalReferenceIndex = metalReferenceIndex;
@@ -152,7 +163,7 @@ public class ReferenceOrder extends Order {
 				+ ", getIntPortfolio()=" + getIntPortfolio() + ", getExtPortfolio()=" + getExtPortfolio()
 				+ ", getBuySell()=" + getBuySell() + ", getBaseCurrency()=" + getBaseCurrency() + ", getBaseQuantity()="
 				+ getBaseQuantity() + ", getBaseQuantityUnit()=" + getBaseQuantityUnit() + ", getTermCurrency()="
-				+ getTermCurrency() + ", getPhysicalDeliveryRequired()=" + getPhysicalDeliveryRequired()
+				+ getTermCurrency()
 				+ ", getOrderStatus()=" + getOrderStatus() + ", getCreatedAt()=" + getCreatedAt()
 				+ ", getCreatedByUser()=" + getCreatedByUser() + ", getLastUpdate()=" + getLastUpdate()
 				+ ", getUpdatedByUser()=" + getUpdatedByUser() + ", getOrderComments()=" + getOrderComments()

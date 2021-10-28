@@ -30,6 +30,8 @@ public enum DefaultReferenceType {
 	CREDIT_CHECK_OUTCOME (19, "Credit Check Outcome"),
 	PORTFOLIO (20, "Internal Portfolio"),
 	DELETION_FLAG (21, "Deletion Flag"),	
+	METAL_FORM (22, "Form"),
+	METAL_LOCATION (23, "Location"),
 	;
 	
 	private final ReferenceTypeTo refType;

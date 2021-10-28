@@ -251,10 +251,6 @@ public class SharedMockLogic {
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY),
 				MockOrderController.class, method , argument + ".idCurrency", false);
 
-    	TomsService.verifyDefaultReference (order.idYesNoPhysicalDeliveryRequired(),
-				Arrays.asList(DefaultReferenceType.YES_NO),
-				MockOrderController.class, method , argument + ".idYesNoPhysicalDeliveryRequired", false);
-
     	if (!DefaultOrderStatus.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idOrderStatus()) ) {
     		throw new UnknownEntityException (clazz, method, argument + ".idOrderStatus" , "Order Status", "" + order.idOrderStatus());
     	}

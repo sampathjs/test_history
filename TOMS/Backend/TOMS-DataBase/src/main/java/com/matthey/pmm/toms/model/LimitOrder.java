@@ -54,14 +54,16 @@ public class LimitOrder extends Order{
 	@Column(name = "settle_date")
 	@Temporal(TemporalType.DATE)
 	private Date settleDate;
+	
+	// Add Start Date (fixed one with concrete date and symbolic one pick list)
  
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="expiration_status_reference_id", nullable = true)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.EXPIRATION_STATUS)
-	private Reference expirationStatusReference;
+	private Reference expirationStatusReference; // remove, part of the order status
 	
 	@Column(name="price", nullable = true)
-	private Double price;
+	private Double price; // rename to limit price
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="price_type_reference_id", nullable = true)
@@ -74,12 +76,12 @@ public class LimitOrder extends Order{
 	private Reference yesNoPartFillable;
 	
 	@Column(name="spot_price", nullable = true)
-	private Double spotPrice;
+	private Double spotPrice; // remove 
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="stop_trigger_type_reference_id", nullable = true)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.STOP_TRIGGER_TYPE)
-	private Reference stopTriggerType;
+	private Reference stopTriggerType; 
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="currency_cross_metal_reference_id", nullable = true)
@@ -89,6 +91,9 @@ public class LimitOrder extends Order{
 	@Column(name="execution_likelihood", nullable = true)
 	private Double executionLikelihood;
 		
+	// Add Validation Type, pick list ("Good Til Cancelled", "Expiry Date")
+	// Add expiry date, optional
+	
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
@@ -99,7 +104,8 @@ public class LimitOrder extends Order{
 			final Party internalLe, final Party externalLe, final Reference intPortfolio,
 			final Reference extPortfolio, final Reference buySell, final Reference baseCurrency,
 			final Double baseQuantity, final Reference baseQuantityUnit, 
-			final Reference termCurrency, final Reference physicalDeliveryRequired,
+			final Reference termCurrency, 
+			final String reference, final Reference metalForm, final Reference metalLocation,			
 			final OrderStatus orderStatus, final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final List<OrderComment> orderComments,
@@ -111,7 +117,7 @@ public class LimitOrder extends Order{
 			final Double executionLikelihood) {
 		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
-				termCurrency, physicalDeliveryRequired, orderStatus, createdAt,
+				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
 				createdByUser, lastUpdate, updatedByUser, orderComments, 
 				fills, creditChecks);
 		this.settleDate = settleDate;
@@ -209,7 +215,7 @@ public class LimitOrder extends Order{
 				+ ", getIntPortfolio()=" + getIntPortfolio() + ", getExtPortfolio()=" + getExtPortfolio()
 				+ ", getBuySell()=" + getBuySell() + ", getBaseCurrency()=" + getBaseCurrency() + ", getBaseQuantity()="
 				+ getBaseQuantity() + ", getBaseQuantityUnit()=" + getBaseQuantityUnit() + ", getTermCurrency()="
-				+ getTermCurrency() + ", getPhysicalDeliveryRequired()=" + getPhysicalDeliveryRequired()
+				+ getTermCurrency()
 				+ ", getOrderStatus()=" + getOrderStatus() + ", getCreatedAt()=" + getCreatedAt()
 				+ ", getCreatedByUser()=" + getCreatedByUser() + ", getLastUpdate()=" + getLastUpdate()
 				+ ", getUpdatedByUser()=" + getUpdatedByUser() + "]";

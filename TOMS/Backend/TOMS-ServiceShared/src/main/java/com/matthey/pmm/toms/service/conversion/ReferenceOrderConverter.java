@@ -117,7 +117,6 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.baseQuantity(entity.getBaseQuantity())
 				.idBaseQuantityUnit(entity.getBaseQuantityUnit().getId())
 				.idTermCurrency(entity.getTermCurrency().getId())
-				.idYesNoPhysicalDeliveryRequired(entity.getPhysicalDeliveryRequired().getId())
 				.idOrderStatus(entity.getOrderStatus().getId())
 				.creditChecksIds(entity.getCreditChecks().stream().map( x -> x.getId()).collect(Collectors.toList()))
 				.createdAt(formatDateTime(entity.getCreatedAt()))
@@ -137,9 +136,6 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 	
 	@Override
 	public ReferenceOrder toManagedEntity (ReferenceOrderTo to) {	
-		System.out.println("\n\n");
-		System.out.println(to);
-		System.out.println("\n\n");
 		// Order
 		Date createdAt = parseDateTime(to, to.createdAt());
 		Date lastUpdate = parseDateTime (to, to.lastUpdate());
@@ -153,7 +149,8 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 		Reference baseCurrency = loadRef (to, to.idBaseCurrency());
 		Reference baseQuantityUnit = to.idBaseQuantityUnit() != null?loadRef (to, to.idBaseQuantityUnit()):null;
 		Reference termCurrency = to.idTermCurrency() != null?loadRef (to, to.idTermCurrency()):null;
-		Reference yesNoPhysicalDeliveryRequired = to.idYesNoPhysicalDeliveryRequired() != null?loadRef (to, to.idYesNoPhysicalDeliveryRequired()):null;
+		Reference metalForm = to.idMetalForm() != null?loadRef (to, to.idMetalForm()):null;
+		Reference metalLocation = to.idMetalLocation() != null?loadRef (to, to.idMetalLocation()):null;
 		OrderStatus orderStatus = to.idOrderStatus() != null?loadOrderStatus (to, to.idOrderStatus()):null;
 		User createdByUser = loadUser(to, to.idCreatedByUser());
 		User updatedByUser = loadUser(to, to.idUpdatedByUser());
@@ -203,7 +200,6 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 			existingEntity.get().setBaseQuantity(to.baseQuantity());
 			existingEntity.get().setBaseQuantityUnit(baseQuantityUnit);
 			existingEntity.get().setTermCurrency(termCurrency);
-			existingEntity.get().setPhysicalDeliveryRequired(yesNoPhysicalDeliveryRequired);
 			existingEntity.get().setOrderStatus(orderStatus);
 			existingEntity.get().setCreatedAt(createdAt);
 			existingEntity.get().setCreatedByUser(createdByUser);
@@ -222,7 +218,8 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 			return existingEntity.get();
 		}
 		ReferenceOrder newEntity = new ReferenceOrder(1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
-				baseQuantityUnit, termCurrency, yesNoPhysicalDeliveryRequired, orderStatus, createdAt, createdByUser, lastUpdate,
+				baseQuantityUnit, termCurrency, to.reference(), metalForm, metalLocation, 
+				orderStatus, createdAt, createdByUser, lastUpdate,
 				updatedByUser, orderComments, fills, creditChecks, 
 				metalReferenceIndex, currencyReferenceIndex, fixingStartDate, fixingEndDate, averagingRule);
 		if (to.version() != 0) {
