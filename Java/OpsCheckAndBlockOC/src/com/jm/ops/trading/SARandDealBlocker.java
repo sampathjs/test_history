@@ -15,14 +15,14 @@ import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
 
 /**
- * @author TomarR01
+ * @author RodriR01
  *
  */
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class SARandDealBlocker extends AbstractTradeProcessListener {
 	
-	private static final String OPSERVICE = "OpService";
-	private static final String SARANDDEALBLOCKER = "SARandDealBlocker";
+	private static final String CONTEXT = "OpService";
+	private static final String SUBCONTEXT = "SARandDealBlocker";
 
 	public PreProcessResult preProcess(final Context context, final EnumTranStatus targetStatus,
 			final PreProcessingInfo<EnumTranStatus>[] infoArray, final Table clientData) {
@@ -31,7 +31,7 @@ public class SARandDealBlocker extends AbstractTradeProcessListener {
 
 		try {
 
-			Logging.init(this.getClass(), OPSERVICE, SARANDDEALBLOCKER);
+			Logging.init(this.getClass(), CONTEXT, SUBCONTEXT);
 			preProcessResult = PreProcessResult.succeeded();
 			StaticDataFactory sdf = context.getStaticDataFactory();
 			IOFactory iof = context.getIOFactory();
@@ -52,6 +52,8 @@ public class SARandDealBlocker extends AbstractTradeProcessListener {
 			Logging.info("Checks Completed");
 		} catch (Exception e) {
 			Logging.error("Error, Reason : " + e.getMessage());
+		} finally {
+			Logging.close();
 		}
 		
 		return preProcessResult;
