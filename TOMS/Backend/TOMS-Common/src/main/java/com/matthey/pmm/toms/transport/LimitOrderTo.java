@@ -26,44 +26,44 @@ public abstract class LimitOrderTo extends OrderTo {
 	 * Remember to update the lists if the attribute names are refactored, attributes are getting added or removed.
 	 */
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_FILLED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "price", "idYesNoPartFillable", "spotPrice",
+			  "settleDate", "idExpirationStatus", "limitPrice", "idYesNoPartFillable",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "price", "idYesNoPartFillable", "spotPrice",
+			  "settleDate", "idExpirationStatus", "limitPrice", "idYesNoPartFillable",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "price", "idYesNoPartFillable", "spotPrice",
+			  "settleDate", "idExpirationStatus", "limitPrice", "idYesNoPartFillable",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_EXPIRED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "price", "idYesNoPartFillable", "spotPrice",
+			  "settleDate", "idExpirationStatus", "limitPrice", "idYesNoPartFillable",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	
 	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED_TO_CANCELLED_EXPIRED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "price", "idYesNoPartFillable", "spotPrice",
+			  "settleDate", "idExpirationStatus", "limitPrice", "idYesNoPartFillable",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_PULLED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "price", "idYesNoPartFillable", "spotPrice",
+			  "settleDate", "idExpirationStatus", "limitPrice", "idYesNoPartFillable",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_REJECTED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "price", "idYesNoPartFillable", "spotPrice",
+			  "settleDate", "idExpirationStatus", "limitPrice", "idYesNoPartFillable",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_MATURED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "price", "idYesNoPartFillable", "spotPrice",
+			  "settleDate", "idExpirationStatus", "limitPrice", "idYesNoPartFillable",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
@@ -71,28 +71,42 @@ public abstract class LimitOrderTo extends OrderTo {
 	@Auxiliary
     @Nullable
     public abstract String settleDate();
+
+	@Auxiliary
+    @Nullable
+	public abstract String startDateConcrete();
+
+	@Auxiliary
+    @Nullable
+	public abstract Long idStartDateSymbolic();
+	
+    @Auxiliary
+    public abstract double limitPrice();
+
+    @Auxiliary
+    @Nullable
+    public abstract Long idPriceType();
+
+    @Auxiliary
+    @Nullable
+    public abstract Long idYesNoPartFillable();
+
+    @Auxiliary
+    @Nullable
+    public abstract Long idStopTriggerType();
+
+    @Auxiliary
+    @Nullable
+    public abstract Long idCurrencyCrossMetal();
+
+    @Auxiliary
+    @Nullable
+    public abstract Long idValidationType();
+
+    @Auxiliary
+    @Nullable
+    public abstract String expiryDate();
     
-    @Auxiliary
-    public abstract long idExpirationStatus();
-    
-    @Auxiliary
-    public abstract double price();
-
-    @Auxiliary
-    public abstract long idPriceType();
-
-    @Auxiliary
-    public abstract long idYesNoPartFillable();
-
-    @Auxiliary
-    public abstract double spotPrice();
-
-    @Auxiliary
-    public abstract long idStopTriggerType();
-
-    @Auxiliary
-    public abstract long idCurrencyCrossMetal();
-
     @Auxiliary
     @Nullable
     public abstract Double executionLikelihood();

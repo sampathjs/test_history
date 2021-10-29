@@ -56,14 +56,17 @@ public class LimitOrder extends Order{
 	private Date settleDate;
 	
 	// Add Start Date (fixed one with concrete date and symbolic one pick list)
- 
+	@Column(name = "start_date_concrete")
+	@Temporal(TemporalType.DATE)
+	private Date startDateConcrete;
+
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="expiration_status_reference_id", nullable = true)
-	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.EXPIRATION_STATUS)
-	private Reference expirationStatusReference; // remove, part of the order status
-	
-	@Column(name="price", nullable = true)
-	private Double price; // rename to limit price
+	@JoinColumn(name="start_date_symbolic_reference_id", nullable = true)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.SYMBOLIC_DATE)
+	private Reference startDateSymbolic; 	
+		
+	@Column(name="limit_price", nullable = true)
+	private Double limitPrice;
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="price_type_reference_id", nullable = true)
@@ -74,9 +77,6 @@ public class LimitOrder extends Order{
 	@JoinColumn(name="part_fillable_reference_id", nullable = true)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.YES_NO)
 	private Reference yesNoPartFillable;
-	
-	@Column(name="spot_price", nullable = true)
-	private Double spotPrice; // remove 
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="stop_trigger_type_reference_id", nullable = true)
@@ -90,7 +90,17 @@ public class LimitOrder extends Order{
 		
 	@Column(name="execution_likelihood", nullable = true)
 	private Double executionLikelihood;
-		
+
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="validation_type_reference_id", nullable = false)
+	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.VALIDATION_TYPE})
+	private Reference validationType;
+
+	@Column(name = "expiry_date", nullable=true)
+	@Temporal(TemporalType.DATE)
+	private Date expiryDate;
+	
+	
 	// Add Validation Type, pick list ("Good Til Cancelled", "Expiry Date")
 	// Add expiry date, optional
 	
@@ -110,25 +120,27 @@ public class LimitOrder extends Order{
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks, // << order fields
-			final Date settleDate, final Reference expirationStatusReference,
-			final Double price, final Reference priceType, final Double spotPrice,
+			final Date settleDate, final Date startDateConcrete, final Reference startDateSymbolic,
+			final Double limitPrice, final Reference priceType,
 			final Reference stopTriggerType, final Reference currencyCrossMetal,
-			final Reference yesNoPartFillable,
-			final Double executionLikelihood) {
+			final Reference yesNoPartFillable, final Reference validationType,
+			final Date expiryDate, final Double executionLikelihood) {
 		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
 				createdByUser, lastUpdate, updatedByUser, orderComments, 
 				fills, creditChecks);
 		this.settleDate = settleDate;
-		this.expirationStatusReference = expirationStatusReference;
-		this.price = price;
+		this.startDateConcrete = startDateConcrete;
+		this.startDateSymbolic = startDateSymbolic;
+		this.limitPrice = limitPrice;
 		this.priceType = priceType;
-		this.spotPrice = spotPrice;
 		this.stopTriggerType = stopTriggerType;
 		this.currencyCrossMetal = currencyCrossMetal;
 		this.executionLikelihood = executionLikelihood;
 		this.yesNoPartFillable = yesNoPartFillable;
+		this.validationType = validationType;
+		this.expiryDate = expiryDate;
 	}
 
 	public Date getSettleDate() {
@@ -139,20 +151,12 @@ public class LimitOrder extends Order{
 		this.settleDate = settleDate;
 	}
 
-	public Reference getExpirationStatusReference() {
-		return expirationStatusReference;
+	public Double getLimitPrice() {
+		return limitPrice;
 	}
 
-	public void setExpirationStatusReference(Reference expirationStatusReference) {
-		this.expirationStatusReference = expirationStatusReference;
-	}
-
-	public Double getPrice() {
-		return price;
-	}
-
-	public void setPrice(Double price) {
-		this.price = price;
+	public void setLimitPrice(Double limitPrice) {
+		this.limitPrice = limitPrice;
 	}
 
 	public Reference getPriceType() {
@@ -169,14 +173,6 @@ public class LimitOrder extends Order{
 
 	public void setYesNoPartFillable(Reference yesNoPartFillable) {
 		this.yesNoPartFillable = yesNoPartFillable;
-	}
-
-	public Double getSpotPrice() {
-		return spotPrice;
-	}
-
-	public void setSpotPrice(Double spotPrice) {
-		this.spotPrice = spotPrice;
 	}
 
 	public Reference getStopTriggerType() {
@@ -203,19 +199,53 @@ public class LimitOrder extends Order{
 		this.executionLikelihood = executionLikelihood;
 	}
 
+	public Date getStartDateConcrete() {
+		return startDateConcrete;
+	}
+
+	public void setStartDateConcrete(Date startDateConcrete) {
+		this.startDateConcrete = startDateConcrete;
+	}
+
+	public Reference getStartDateSymbolic() {
+		return startDateSymbolic;
+	}
+
+	public void setStartDateSymbolic(Reference startDateSymbolic) {
+		this.startDateSymbolic = startDateSymbolic;
+	}
+
+	public Reference getValidationType() {
+		return validationType;
+	}
+
+	public void setValidationType(Reference validationType) {
+		this.validationType = validationType;
+	}
+
+	public Date getExpiryDate() {
+		return expiryDate;
+	}
+
+	public void setExpiryDate(Date expiryDate) {
+		this.expiryDate = expiryDate;
+	}
+
 	@Override
 	public String toString() {
 		return "LimitOrder [orderId=" + getOrderId() + ", version=" + getVersion() + ", settleDate=" + settleDate
-				+ ", expirationStatusReference=" + expirationStatusReference + ", price=" + price + ", priceType="
-				+ priceType + ", yesNoPartFillable=" + yesNoPartFillable + ", spotPrice=" + spotPrice
+				+ ", expiryDate=" + expiryDate + ", startDateConcrete=" + startDateConcrete
+				+ ", startDateSymbolic=" + startDateSymbolic
+				+ ", limitPrice=" + limitPrice + ", priceType=" + priceType 
+				+ ", yesNoPartFillable=" + yesNoPartFillable
+				+ ", validationType=" + validationType
 				+ ", stopTriggerType=" + stopTriggerType + ", currencyCrossMetal=" + currencyCrossMetal
-				+ ", executionLikelihood=" + executionLikelihood + ", getId()=" + getOrderId() + ", getVersion()="
-				+ getVersion() + ", getInternalBu()=" + getInternalBu() + ", getExternalBu()=" + getExternalBu()
+				+ ", executionLikelihood=" + executionLikelihood + ", getInternalBu()=" + getInternalBu() + ", getExternalBu()=" + getExternalBu()
 				+ ", getInternalLe()=" + getInternalLe() + ", getExternalLe()=" + getExternalLe()
 				+ ", getIntPortfolio()=" + getIntPortfolio() + ", getExtPortfolio()=" + getExtPortfolio()
 				+ ", getBuySell()=" + getBuySell() + ", getBaseCurrency()=" + getBaseCurrency() + ", getBaseQuantity()="
 				+ getBaseQuantity() + ", getBaseQuantityUnit()=" + getBaseQuantityUnit() + ", getTermCurrency()="
-				+ getTermCurrency()
+				+ getTermCurrency() 
 				+ ", getOrderStatus()=" + getOrderStatus() + ", getCreatedAt()=" + getCreatedAt()
 				+ ", getCreatedByUser()=" + getCreatedByUser() + ", getLastUpdate()=" + getLastUpdate()
 				+ ", getUpdatedByUser()=" + getUpdatedByUser() + "]";

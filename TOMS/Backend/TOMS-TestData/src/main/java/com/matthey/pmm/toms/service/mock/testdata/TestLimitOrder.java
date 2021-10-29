@@ -17,9 +17,9 @@ public enum TestLimitOrder {
 			DefaultReference.CCY_GBP, "TEST_ORDER_1A", DefaultReference.METAL_FORM_INGOT, DefaultReference.METAL_LOCATION_ROYSTON,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			DefaultReference.PRICE_TYPE_SPOT, null,
-			"2000-01-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 1200.00d,
+			"2000-01-15 16:00:00", "2001-04-28", DefaultReference.SYMBOLIC_DATE_1D, 1200.00d,
 			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
-			DefaultReference.METAL_XPT, 1.0d, null,
+			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, "2010-01-31", 1.0d, null,
 			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
 	TEST_ORDER_1B(100000, 2, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_BUY,
@@ -27,9 +27,9 @@ public enum TestLimitOrder {
 			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_NONE, DefaultReference.METAL_LOCATION_NONE,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-03-02 08:00:00", TestUser.ANDREW_BAYNES,
 			DefaultReference.PRICE_TYPE_SPOT, null,
-			"2000-01-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 1200.00d,
+			"2000-01-15 16:00:00", "2001-04-28", null, 1200.00d,
 			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
-			DefaultReference.METAL_XPT, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_1, TestFill.TEST_LIMIT_ORDER_FILL_2),
+			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, null, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_1, TestFill.TEST_LIMIT_ORDER_FILL_2),
 			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
 	TEST_ORDER_2(100001, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_SELL,
@@ -37,9 +37,9 @@ public enum TestLimitOrder {
 			DefaultReference.CCY_EUR,"TEST_ORDER_2", null, null,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			DefaultReference.PRICE_TYPE_FORWARD, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1), 
-			"2000-02-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 400.00d,
+			"2000-02-15 16:00:00", null, DefaultReference.SYMBOLIC_DATE_1D, 400.00d,
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
-			DefaultReference.METAL_XRU, 1.0d, Arrays.asList(), Arrays.asList()
+			DefaultReference.METAL_XRU, null, "2010-01-31", 1.0d, Arrays.asList(), Arrays.asList()
 			),
 	TEST_ORDER_3(100002, 1, TestParty.JM_PMM_US_BU, TestParty.JM_PMM_UK_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, DefaultReference.PORTFOLIO_UK_RUTHENIUM, DefaultReference.BUY_SELL_SELL,
@@ -47,9 +47,9 @@ public enum TestLimitOrder {
 			DefaultReference.CCY_EUR,  "TEST_ORDER_3", DefaultReference.METAL_FORM_GRAIN, DefaultReference.METAL_LOCATION_BRANDENBERGER,
 			DefaultOrderStatus.LIMIT_ORDER_FILLED, TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.ARINDAM_RAY,
 			DefaultReference.PRICE_TYPE_SPOT_PLUS, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_4, TestCreditCheck.TEST_CREDIT_CHECK_5), 
-			"2000-02-15 16:00:00", DefaultExpirationStatus.LIMIT_ORDER_ACTIVE, 400.00d,
+			"2000-02-15 16:00:00", null, null, 400.00d,
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
-			DefaultReference.METAL_XRU, 1.0d, null, null
+			DefaultReference.METAL_XRU, null, null, 1.0d, null, null
 			),
 	;
 	
@@ -64,9 +64,9 @@ public enum TestLimitOrder {
 			DefaultOrderStatus orderStatus, TestUser createdBy, String createdAt,
 			String lastUpdate, TestUser updatedByUser, DefaultReference priceType, 
 			List<TestCreditCheck> creditChecks, // << order fields
-			String settleDate, DefaultExpirationStatus expirationStatus, double price, 
+			String settleDate, String startDateConcrete, DefaultReference startDateSymbolic, double limitPrice, 
 			DefaultReference yesNoPartFillable, double spotPrice, DefaultReference stopTriggerType,
-			DefaultReference currencyCrossMetal, Double executionLikelihood, 
+			DefaultReference currencyCrossMetal, DefaultReference validationType, String expiryDate, Double executionLikelihood, 
 			List<TestFill> fills, List<TestOrderComment> comments) { // << limit order fields
 		// order type has to be limit order always
 		limitOrder = ImmutableLimitOrderTo.builder()
@@ -93,12 +93,14 @@ public enum TestLimitOrder {
 				.idUpdatedByUser(updatedByUser.getEntity().id()) // << order fields
 				.idPriceType(priceType.getEntity().id())
 				.settleDate(settleDate)
-				.idExpirationStatus(expirationStatus.getEntity().id())
-				.price(price)
+				.startDateConcrete(startDateConcrete)
+				.idStartDateSymbolic(startDateSymbolic != null?startDateSymbolic.getEntity().id():null)
+				.limitPrice(limitPrice)
 				.idYesNoPartFillable(yesNoPartFillable.getEntity().id())
-				.spotPrice(spotPrice)
 				.idStopTriggerType(stopTriggerType.getEntity().id())
 				.idCurrencyCrossMetal(currencyCrossMetal.getEntity().id())
+				.expiryDate(expiryDate)
+				.idValidationType(validationType != null?validationType.getEntity().id():null)
 				.executionLikelihood(executionLikelihood)
 				.fillIds(fills!=null?fills.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.creditChecksIds(creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)

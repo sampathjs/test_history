@@ -56,7 +56,6 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 	@Autowired
 	private LimitOrderRepository entityRepo;
 	
-	
 	@Override
 	public UserRepository userRepo() {
 		return userRepo;
@@ -119,11 +118,13 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				// Limit Order
 				.settleDate(formatDate(entity.getSettleDate()))
-				.idExpirationStatus(entity.getExpirationStatusReference().getId())
-				.price(entity.getPrice())
+				.idStartDateSymbolic(entity.getStartDateSymbolic() != null?entity.getStartDateSymbolic().getId():null)
+				.startDateConcrete(formatDate(entity.getStartDateConcrete()))
+				.idValidationType(entity.getValidationType() != null?entity.getValidationType().getId():null)
+				.expiryDate(formatDate(entity.getExpiryDate()))
+				.limitPrice(entity.getLimitPrice())
 				.idPriceType(entity.getPriceType().getId())
 				.idYesNoPartFillable(entity.getYesNoPartFillable().getId())
-				.spotPrice(entity.getSpotPrice())
 				.idStopTriggerType(entity.getStopTriggerType().getId())
 				.idCurrencyCrossMetal(entity.getCurrencyCrossMetal().getId())
 				.executionLikelihood(entity.getExecutionLikelihood())
@@ -174,11 +175,15 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		
 		// Limit Order
 		Date settleDate = to.settleDate() != null?parseDate (to, to.settleDate()):null;
-		Reference expirationStatus = loadRef (to, to.idExpirationStatus());
-		Reference priceType = loadRef (to, to.idPriceType());
-		Reference yesNoPartFillable = loadRef (to, to.idYesNoPartFillable());
-		Reference stopTriggerType = loadRef (to, to.idStopTriggerType());
-		Reference currencyCrossMetal = loadRef (to, to.idCurrencyCrossMetal());
+		Date startDateConcrete = to.startDateConcrete() != null?parseDate (to, to.startDateConcrete()):null;
+		Date expiryDate = to.expiryDate() != null?parseDate (to, to.expiryDate()):null;
+		
+		Reference priceType = to.idPriceType() != null?loadRef (to, to.idPriceType()):null;
+		Reference yesNoPartFillable = to.idYesNoPartFillable() != null?loadRef (to, to.idYesNoPartFillable()):null;
+		Reference stopTriggerType = to.idStopTriggerType() != null?loadRef (to, to.idStopTriggerType()):null;
+		Reference currencyCrossMetal = to.idCurrencyCrossMetal() != null?loadRef (to, to.idCurrencyCrossMetal()):null;
+		Reference startDateSymbolic = to.idStartDateSymbolic() != null?loadRef (to, to.idStartDateSymbolic()):null;
+		Reference validationType = to.idValidationType() != null?loadRef (to, to.idValidationType()):null;
 		
 		Optional<LimitOrder> existingEntity = entityRepo.findById(new OrderVersionId(to.id(), to.version()));
 		Optional<LimitOrder> entityNextVersion = entityRepo.findById(new OrderVersionId(to.id(), to.version()+1));
@@ -211,13 +216,15 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 			existingEntity.get().getCreditChecks().addAll(creditChecks);
 			// limit order
 			existingEntity.get().setSettleDate(settleDate);
-			existingEntity.get().setExpirationStatusReference(expirationStatus);
-			existingEntity.get().setPrice(to.price());
+			existingEntity.get().setStartDateConcrete(startDateConcrete);
+			existingEntity.get().setStartDateSymbolic(startDateSymbolic);			
+			existingEntity.get().setLimitPrice(to.limitPrice());
 			existingEntity.get().setPriceType(priceType);
 			existingEntity.get().setYesNoPartFillable(yesNoPartFillable);
-			existingEntity.get().setSpotPrice(to.spotPrice());
 			existingEntity.get().setStopTriggerType(stopTriggerType);
 			existingEntity.get().setCurrencyCrossMetal(currencyCrossMetal);
+			existingEntity.get().setValidationType(validationType);			
+			existingEntity.get().setExpiryDate(expiryDate);
 			existingEntity.get().setExecutionLikelihood(to.executionLikelihood());
 			
 			return existingEntity.get();
@@ -225,8 +232,10 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		LimitOrder newEntity = new LimitOrder(1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
 				baseQuantityUnit, termCurrency, to.reference(), metalForm, metalLocation, 
 				orderStatus, createdAt, createdByUser, lastUpdate,
-				updatedByUser, orderComments, fills, creditChecks, settleDate, expirationStatus, to.price(), priceType, to.spotPrice(), 
-				stopTriggerType, currencyCrossMetal, yesNoPartFillable, to.executionLikelihood());
+				updatedByUser, orderComments, fills, creditChecks, 
+				settleDate, startDateConcrete, startDateSymbolic, to.limitPrice(), priceType,
+				stopTriggerType, currencyCrossMetal, yesNoPartFillable, 
+				validationType, expiryDate, to.executionLikelihood());
 		if (to.version() != 0) {
 			newEntity.setVersion(to.version());
 		}

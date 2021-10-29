@@ -840,10 +840,13 @@
        <column name="settle_date" type="timestamp">
          <constraints nullable="true"/>
        </column>             
-       <column name="expiration_status_reference_id" type="int">
+       <column name="start_date_concrete" type="timestamp">
          <constraints nullable="true"/>
        </column>
-       <column name="price" type="double">
+       <column name="start_date_symbolic_reference_id" type="int">
+         <constraints nullable="true"/>
+       </column>       
+       <column name="limit_price" type="double">
          <constraints nullable="true"/>
        </column>     
        <column name="part_fillable_reference_id" type="int">
@@ -852,15 +855,18 @@
        <column name="price_type_reference_id" type="int">
          <constraints nullable="true"/>
        </column>
-       <column name="spot_price" type="double">
-         <constraints nullable="true"/>
-       </column>       
        <column name="stop_trigger_type_reference_id" type="int">
          <constraints nullable="true"/>
        </column>      
        <column name="currency_cross_metal_reference_id" type="int">
          <constraints nullable="true"/>
        </column>      
+       <column name="validation_type_reference_id" type="int">
+         <constraints nullable="true"/>
+       </column>
+       <column name="expiry_date" type="timestamp">
+         <constraints nullable="true"/>
+       </column>              
        <column name="execution_likelihood" type="double">
          <constraints nullable="true"/>
        </column>                  
@@ -875,17 +881,7 @@
         referencedColumnNames="order_id, version"  
         referencedTableName="abstract_order"
         validate="true"/>  
-        
-    <addForeignKeyConstraint
-   	    baseColumnNames="expiration_status_reference_id"  
-        baseTableName="limit_order"  
-        constraintName="fk_limit_order_expiration_status_reference_id"
-        onDelete="NO ACTION"
-        onUpdate="NO ACTION"
-        referencedColumnNames="reference_id"  
-        referencedTableName="reference"
-        validate="true"/>
-        
+                
     <addForeignKeyConstraint
    	    baseColumnNames="part_fillable_reference_id"  
         baseTableName="limit_order"  
@@ -895,6 +891,27 @@
         referencedColumnNames="reference_id"  
         referencedTableName="reference"
         validate="true"/>     
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="validation_type_reference_id"  
+        baseTableName="limit_order"  
+        constraintName="fk_limit_order_validation_type_reference_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="start_date_symbolic_reference_id"  
+        baseTableName="limit_order"  
+        constraintName="fk_limit_order_start_date_symblic_reference_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+
          
     <addForeignKeyConstraint
    	    baseColumnNames="stop_trigger_type_reference_id"  

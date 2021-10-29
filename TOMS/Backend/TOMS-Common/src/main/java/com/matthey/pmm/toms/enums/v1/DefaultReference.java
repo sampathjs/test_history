@@ -189,6 +189,12 @@ public enum DefaultReference {
 	METAL_LOCATION_BRINKS (DefaultReferenceType.METAL_LOCATION , 181, "Brinks", 0),
 	METAL_LOCATION_CNT (DefaultReferenceType.METAL_LOCATION , 182, "CNT", 18),
 	METAL_LOCATION_UMICORE_GERMANY (DefaultReferenceType.METAL_LOCATION , 183, "Umicore Germany", 19),	
+	VALIDATION_TYPE_GOOD_TIL_CANCELLED (DefaultReferenceType.VALIDATION_TYPE , 184, "Good Til Cancelled"),	
+	VALIDATION_TYPE_EXPIRY_DATE (DefaultReferenceType.VALIDATION_TYPE , 185, "Expiry Date"),
+	SYMBOLIC_DATE_1D (DefaultReferenceType.SYMBOLIC_DATE , 186, "1d"),
+	SYMBOLIC_DATE_2D (DefaultReferenceType.SYMBOLIC_DATE , 187, "2d"),
+	SYMBOLIC_DATE_EOM (DefaultReferenceType.SYMBOLIC_DATE , 188, "eom"),
+	SYMBOLIC_DATE_SOM (DefaultReferenceType.SYMBOLIC_DATE , 189, "som"),
 	;
 	
 	private final ReferenceTo ref;

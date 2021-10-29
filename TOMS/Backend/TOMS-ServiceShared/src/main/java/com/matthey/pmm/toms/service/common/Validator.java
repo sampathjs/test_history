@@ -463,14 +463,25 @@ public class Validator {
 		} catch (ParseException pe) {
 			throw new IllegalDateFormatException (clazz, method, argument + ".settleDate", TomsService.DATE_FORMAT, order.settleDate());
 		}
-    	if (!DefaultExpirationStatus.asList().stream().map(x -> x.id()).collect(Collectors.toList()).contains( order.idExpirationStatus()) ) {
-    		throw new UnknownEntityException (clazz, method, argument + ".idExpirationStatus" , "Expiration Status", "" + order.idExpirationStatus());
-    	}
 		
-    	if (order.price() <= 0) {
-    		throw new IllegalValueException(clazz, method, argument + ".price", " > 0", "" + order.price());
+    	if (order.startDateConcrete() != null) {
+    		try {
+    			Date parsedTime = sdfDate.parse (order.startDateConcrete());
+    		} catch (ParseException pe) {
+    			throw new IllegalDateFormatException (clazz, method, argument + ".startDateConcrete", TomsService.DATE_FORMAT, order.startDateConcrete());
+    		}    		
     	}
-    	
+    	if (order.expiryDate() != null) {
+    		try {
+    			Date parsedTime = sdfDate.parse (order.expiryDate());
+    		} catch (ParseException pe) {
+    			throw new IllegalDateFormatException (clazz, method, argument + ".expiryDate", TomsService.DATE_FORMAT, order.expiryDate());
+    		}    		
+    	}
+				
+    	if (order.limitPrice() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".limitPrice", " > 0", "" + order.limitPrice());
+    	}    	
     	
     	verifyDefaultReference (order.idPriceType(),
 				Arrays.asList(DefaultReferenceType.PRICE_TYPE),
@@ -481,9 +492,7 @@ public class Validator {
 				Arrays.asList(DefaultReferenceType.YES_NO),
 				clazz, method , argument + ".idYesNoPartFillable", false);
 
-    	if (order.spotPrice() <= 0) {
-    		throw new IllegalValueException(clazz, method, argument + ".spotPrice", " > 0", "" + order.spotPrice());
-    	}
+
     	
     	verifyDefaultReference (order.idStopTriggerType(),
 				Arrays.asList(DefaultReferenceType.STOP_TRIGGER_TYPE),
@@ -492,13 +501,20 @@ public class Validator {
     	verifyDefaultReference (order.idCurrencyCrossMetal(),
 				Arrays.asList(DefaultReferenceType.CCY_METAL),
 				clazz, method , argument + ".idCurrencyCrossMetal", false);
+    	
+    	verifyDefaultReference (order.idMetalForm(),
+				Arrays.asList(DefaultReferenceType.METAL_FORM),
+				clazz, method , argument + ".idMetalForm", true);
 
+    	verifyDefaultReference (order.idMetalLocation(),
+				Arrays.asList(DefaultReferenceType.METAL_LOCATION),
+				clazz, method , argument + ".idMetalLocation", true);
+    	
     	if (order.executionLikelihood() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".executionLikelihood", " > 0", "" + order.executionLikelihood());
     	}
     	
-    	if (!isNew) {
-    		
+    	if (!isNew) {    		
         	// verify status change
     		List<ProcessTransition> availableTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(DefaultReference.LIMIT_ORDER_TRANSITION.getEntity().id(),
     				oldLimitOrder.idOrderStatus());

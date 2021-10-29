@@ -32,6 +32,8 @@ public enum DefaultReferenceType {
 	DELETION_FLAG (21, "Deletion Flag"),	
 	METAL_FORM (22, "Form"),
 	METAL_LOCATION (23, "Location"),
+	VALIDATION_TYPE (24, "Validation Type"),
+	SYMBOLIC_DATE (25, "Symbolic Date"),
 	;
 	
 	private final ReferenceTypeTo refType;
