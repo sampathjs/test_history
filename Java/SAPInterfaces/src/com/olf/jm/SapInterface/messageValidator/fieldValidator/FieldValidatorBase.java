@@ -19,12 +19,13 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 	
 	/** The context the script is running in. */
 	protected Context context = null;
-		
+	private static final String CONTEXT =  "SAP";
+	private static final String SUB_CONTEXT =  "FieldValidatorBase";	
 	/**
 	 * Instantiates a new field validator base.
 	 */
 	public FieldValidatorBase() {
-		Logging.init(getClass(), "FieldValidatorBase", "FieldValidatorBase");
+		Logging.init(getClass(), CONTEXT, SUB_CONTEXT);
 	}
 	
 	/**
@@ -34,7 +35,7 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 	 */
 	public FieldValidatorBase(final Context currentContext) {
 		context = currentContext;
-		Logging.init(getClass(), "FieldValidatorBase", "FieldValidatorBase");
+		Logging.init(getClass(), CONTEXT, SUB_CONTEXT);
 	}	
 	
 	/* (non-Javadoc)
@@ -180,3 +181,4 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 	}
 
 }
+
