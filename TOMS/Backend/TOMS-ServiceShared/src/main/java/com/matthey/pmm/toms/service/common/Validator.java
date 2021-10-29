@@ -14,9 +14,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.matthey.pmm.toms.enums.v1.DefaultExpirationStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
-import com.matthey.pmm.toms.enums.v1.DefaultProcessTransition;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.CreditCheck;
@@ -56,13 +54,9 @@ import com.matthey.pmm.toms.transport.CreditCheckTo;
 import com.matthey.pmm.toms.transport.FillTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
 import com.matthey.pmm.toms.transport.OrderCommentTo;
-import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.OrderTo;
-import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
-import com.matthey.pmm.toms.transport.UserTo;
 
 @Service
 public class Validator {

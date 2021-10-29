@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.matthey.pmm.toms.transport.ExpirationStatusTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.ReferenceTypeTo;
@@ -39,12 +38,4 @@ public interface TomsStaticDataService {
 	public Set<OrderStatusTo> getOrderStatus (
 			@ApiParam(value = "Order Status ID, 0 or null for all", example = "7", required = false) @RequestParam(required=false) Long orderStatusId,
 			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "13", required = false) @RequestParam(required=false) Long orderTypeNameId);
-    
-    @Cacheable({"ExpirationStatus"})
-    @ApiOperation("Retrieval of Expiration Status (dependent on order type)")
-	@GetMapping("/expirationStatus")
-	public Set<ExpirationStatusTo> getExpirationStatus (
-			@ApiParam(value = "Expiration Status ID, 0 or null for all", example = "17", required = false) @RequestParam(required=false) Long expirationStatusId,
-			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "13", required = false) @RequestParam(required=false) Long orderTypeNameId);
-
 }

@@ -18,11 +18,9 @@ import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.service.TomsStaticDataService;
 import com.matthey.pmm.toms.service.common.Validator;
-import com.matthey.pmm.toms.service.conversion.ExpirationStatusConverter;
 import com.matthey.pmm.toms.service.conversion.OrderStatusConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceTypeConverter;
-import com.matthey.pmm.toms.transport.ExpirationStatusTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.ReferenceTypeTo;
@@ -55,10 +53,7 @@ public abstract class StaticDataControllerImpl implements TomsStaticDataService 
 	
 	@Autowired
 	protected OrderStatusConverter orderStatusConverter;
-	
-	@Autowired
-	protected ExpirationStatusConverter expirationStatusConverter;
-	
+		
 	
 	@Override
 	public Set<ReferenceTypeTo> getAllReferenceTypes () {
@@ -104,32 +99,4 @@ public abstract class StaticDataControllerImpl implements TomsStaticDataService 
 			}
 		}
 	}
-	    
-    @ApiOperation("Retrieval of Expiration Status (dependent on order type)")
-	public Set<ExpirationStatusTo> getExpirationStatus (
-			@ApiParam(value = "Expiration Status Name ID, 0 or null for all", example = "17", required = false) @RequestParam(required=false) Long expirationStatusId,
-			@ApiParam(value = "Order Type Name ID, 0 or null for all", example = "13", required = false) @RequestParam(required=false) Long orderTypeNameId) {
-		Optional<Reference> expirationStatusName = validator.verifyDefaultReference(expirationStatusId, 
-				Arrays.asList(DefaultReferenceType.EXPIRATION_STATUS),  this.getClass(), "getExpirationStatus", "expirationStatusId",  expirationStatusId == null || expirationStatusId == 0);
-		Optional<Reference> orderTypeName = validator.verifyDefaultReference(orderTypeNameId, 
-				Arrays.asList(DefaultReferenceType.ORDER_TYPE_NAME),  this.getClass(), "getExpirationStatus", "orderTypeNameId", orderTypeNameId == null || orderTypeNameId == 0);
-		
-    	if (expirationStatusName.isPresent()) {
-			if (orderTypeName.isPresent()) {
-				return expirationStatusRepo.findByExpirationStatusNameAndOrderType(expirationStatusName.get(), orderTypeName.get()).stream()
-						.map(x -> expirationStatusConverter.toTo(x)).collect(Collectors.toSet());
-			} else {
-				return expirationStatusRepo.findByExpirationStatusName(expirationStatusName.get()).stream()
-						.map(x -> expirationStatusConverter.toTo(x)).collect(Collectors.toSet());
-			}
-		} else {
-			if (orderTypeName.isPresent()) {
-				return expirationStatusRepo.findByOrderType(orderTypeName.get()).stream()
-						.map(x -> expirationStatusConverter.toTo(x)).collect(Collectors.toSet());
-			} else {
-				return StreamSupport.stream (expirationStatusRepo.findAll().spliterator(), false)
-						.map(x -> expirationStatusConverter.toTo(x)).collect(Collectors.toSet());
-			}
-		}
-    }
 }

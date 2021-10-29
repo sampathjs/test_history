@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.enums.v1.DefaultExpirationStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;

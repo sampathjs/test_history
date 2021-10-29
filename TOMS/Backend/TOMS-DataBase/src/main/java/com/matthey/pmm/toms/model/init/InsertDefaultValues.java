@@ -1,19 +1,15 @@
 package com.matthey.pmm.toms.model.init;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.matthey.pmm.toms.enums.v1.DefaultAttributeCalculation;
-import com.matthey.pmm.toms.enums.v1.DefaultExpirationStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultProcessTransition;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
-import com.matthey.pmm.toms.transport.ExpirationStatusTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
@@ -103,10 +99,6 @@ public class InsertDefaultValues implements CustomSqlChange {
 		String insertTemplate = 
 				"INSERT INTO expiration_status (expiration_status_id, name_reference_id, order_type_reference_id) VALUES (%s, %s, %s)";
 		
-		for (ExpirationStatusTo es : DefaultExpirationStatus.asList()) {
-			results.add(new RawSqlStatement(String.format(insertTemplate, 
-					es.id(), es.idExpirationStatusName(), es.idOrderTypeName())));
-		}
 		return results;
 	}
 
