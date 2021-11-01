@@ -1,5 +1,6 @@
 package com.jm.ops.trading;
 
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -318,7 +319,6 @@ public class CheckDates extends AbstractTradeProcessListener {
 	private boolean checkMetalSwapDates(Transaction tranPtr, StringBuilder sb) throws OException {
 		boolean blnReturn = true;
 		
-		
 		if(tranPtr.getField(EnumTransactionFieldId.InstrumentType).getValueAsString().equalsIgnoreCase("METAL-SWAP")){
 			// check payment dates across all floating legs are the same
 			
@@ -342,29 +342,41 @@ public class CheckDates extends AbstractTradeProcessListener {
 					floatSidePymtDates.add(dtPymtDate);
 					matDate = currProfile.getValueAsDate(EnumProfileFieldId.EndDate);
 					matDates.add(matDate);
-//					if(com.olf.openjvs.OCalendar.getMonth(dtPymtDate) ){
-//						strErrMsg = "All floating payment dates for the Swap deal must be the same.";
+					
+//					if(!fmt.format(matDate).equals(fmt.format(matDates.get(0))) ){
+//						String strErrMsg = "All floating maturity dates for the Swap deal must be the same.";
 //						sb.append(strErrMsg);
 //						Logging.info(strErrMsg);
 //						blnReturn = false;
-//						break;
+//						return blnReturn;
 //					}
 				} else if (currLeg.getField(EnumLegFieldId.FixFloat).getValueAsString().equalsIgnoreCase("Fixed")){
 					fixedSidePymtDate = currProfile.getValueAsDate(EnumProfileFieldId.PaymentDate);
 				}
 			}//for
-			return isTanakaDeal(tranPtr, sb)? isPymtDateValidForTanakaDeal(matDates, fixedSidePymtDate, floatSidePymtDates, sb) : isPymtDateValid(fixedSidePymtDate, floatSidePymtDates, sb);
+			return isTanakaDeal(tranPtr, sb)? isPymtDateValidForTanakaDeal(matDates, fixedSidePymtDate, floatSidePymtDates, sb) : isPymtDateValid(matDates, fixedSidePymtDate, floatSidePymtDates, sb);
 		}
 		
 		return blnReturn;
 	
 	}
-	private boolean isPymtDateValid(Date fixedSidePymtDate, List<Date> floatSidePymtDates, StringBuilder sb){
+	private boolean isPymtDateValid(List<Date>  matDates, Date fixedSidePymtDate, List<Date> floatSidePymtDates, StringBuilder sb){
 		boolean blnReturn = true;
+		SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
+
 		Collections.sort(floatSidePymtDates);
 		for (Date floatSidePymtDate: floatSidePymtDates){
 			if(floatSidePymtDate.before(fixedSidePymtDate)){
 				String strErrMsg = "All floating payment dates for the Swap deal must be the same or greater than the fixed side payment date";
+				sb.append(strErrMsg);
+				Logging.info(strErrMsg);
+				blnReturn = false;
+				break;
+			}
+		}
+		for (Date matDate: matDates){	
+			if(!fmt.format(matDate).equals(fmt.format(matDates.get(0))) ){
+				String strErrMsg = "All floating maturity dates for the Swap deal must be the same.";
 				sb.append(strErrMsg);
 				Logging.info(strErrMsg);
 				blnReturn = false;
