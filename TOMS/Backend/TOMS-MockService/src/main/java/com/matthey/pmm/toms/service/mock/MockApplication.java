@@ -16,6 +16,7 @@ import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.OrderCommentConverter;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
+import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
 import com.matthey.pmm.toms.service.mock.testdata.TestCreditCheck;
 import com.matthey.pmm.toms.service.mock.testdata.TestFill;
@@ -24,6 +25,7 @@ import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestOrderComment;
 import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
+import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrderLeg;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 
 import springfox.documentation.builders.PathSelectors;
@@ -56,7 +58,8 @@ public class MockApplication {
     public CommandLineRunner loadLimitOrder (ReferenceOrderConverter referenceOrderConverter,
     		LimitOrderConverter limitOrderConverter, FillConverter fillConverter,
     		CreditCheckConverter creditCheckConverter, OrderCommentConverter orderCommentConverter,
-    		IndexConverter indexConverter, UserConverter userConverter, PartyConverter partyConverter) {
+    		IndexConverter indexConverter, UserConverter userConverter, PartyConverter partyConverter,
+    		ReferenceOrderLegConverter referenceOrderLegConverter) {
 
       return (args) -> {
     	  TestParty.asList() // legal entities first (LEs are not assigned to another LE)
@@ -91,6 +94,10 @@ public class MockApplication {
     	  TestLimitOrder.asList() 
     	  	.stream()
     	  	.forEach(x -> limitOrderConverter.toManagedEntity(x));
+ 
+    	  TestReferenceOrderLeg.asList()
+    	  	.stream()
+    	  	.forEach(x -> referenceOrderLegConverter.toManagedEntity(x));
     	  
     	  TestReferenceOrder.asList() 
   	  		.stream()

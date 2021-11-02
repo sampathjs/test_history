@@ -27,34 +27,36 @@ public abstract class ReferenceOrderTo extends OrderTo {
 	 * Remember to update the lists if the attribute names are refactored, attributes are getting added or removed.
 	 */
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED = Arrays.asList(
-			"idMetalReferenceIndex", "idCurrencyReferenceIndex", "fixingStartDate", "fixingEndDate", 
-			"idAveragingRule"
+			"metalPriceSpread", "fxRateSpread", "contangoBackwardation", "idContractType", 
+			"legIds"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED = Arrays.asList(
-			"idMetalReferenceIndex", "idCurrencyReferenceIndex", "fixingStartDate", "fixingEndDate", 
-			"idAveragingRule"
+			"metalPriceSpread", "fxRateSpread", "contangoBackwardation", "idContractType", 
+			"legIds"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_FILLED = Arrays.asList(
-			"idMetalReferenceIndex", "idCurrencyReferenceIndex", "fixingStartDate", "fixingEndDate", 
-			"idAveragingRule"
+			"metalPriceSpread", "fxRateSpread", "contangoBackwardation", "idContractType", 
+			"legIds"
 			);
 	
-    @Auxiliary
-    public abstract long idMetalReferenceIndex();
+	@Auxiliary
+	@Nullable
+	public abstract Double metalPriceSpread();
+	
+	@Auxiliary
+	@Nullable
+	public abstract Double fxRateSpread();
 
+	@Auxiliary
+	@Nullable
+	public abstract Double contangoBackwardation();
+	
+	@Auxiliary
+	public abstract Long idContractType();
+	
     @Auxiliary
-    public abstract long idCurrencyReferenceIndex();
-
-    @Auxiliary
-    public abstract String fixingStartDate();
-    
-    @Auxiliary
-    public abstract String fixingEndDate();
-
-    @Auxiliary
-    @JsonIgnore
     @Nullable
-    public abstract Long idAveragingRule();
+    public abstract List<Long> legIds();
 }

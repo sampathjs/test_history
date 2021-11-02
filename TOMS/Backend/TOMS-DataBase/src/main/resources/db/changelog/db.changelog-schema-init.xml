@@ -514,6 +514,7 @@
         referencedTableName="user"
         validate="true"/>
         
+        
     <!-- Order -->
    	<createTable tableName="abstract_order">
        <column name="order_id" type="int">
@@ -940,22 +941,19 @@
        </column>
        <column name="version" type="int">
          <constraints nullable="false"/>
-       </column>       
-       <column name="metal_reference_index_id" type="int">
+       </column>
+       <column name="fx_rate_spread" type="double">
+         <constraints nullable="true"/>
+       </column>
+       <column name="metal_price_spread" type="double">
+         <constraints nullable="true"/>
+       </column>
+       <column name="contango_backwardation" type="double">
+         <constraints nullable="true"/>
+       </column>
+       <column name="contract_type_reference_id" type="int">
          <constraints nullable="false"/>
        </column>
-       <column name="currency_reference_index_id" type="int">
-         <constraints nullable="false"/>
-       </column>
-       <column name="fixing_start_date" type="timestamp">
-         <constraints nullable="false"/>
-       </column>       
-       <column name="fixing_end_date" type="timestamp">
-         <constraints nullable="false"/>
-       </column>      
-       <column name="averaging_rule_reference_id" type="int">
-         <constraints nullable="false"/>
-       </column>      
     </createTable>   
     
     <addForeignKeyConstraint
@@ -967,36 +965,118 @@
         referencedColumnNames="order_id, version"  
         referencedTableName="abstract_order"
         validate="true"/>
-     
+             
     <addForeignKeyConstraint
-   	    baseColumnNames="metal_reference_index_id"  
+   	    baseColumnNames="contract_type_reference_id"  
         baseTableName="reference_order"  
-        constraintName="fk_reference_order_metal_index_id"
+        constraintName="fk_reference_order_contract_type_id"
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
-        referencedColumnNames="index_id"  
-        referencedTableName="index"
-        validate="true"/>
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>        
         
+    <!-- Reference Order Legs -->
+    <createTable tableName="reference_order_leg">
+       <column name="leg_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="fixing_start_date" type="timestamp">
+         <constraints nullable="true"/>
+       </column>             
+       <column name="fixing_end_date" type="timestamp">
+         <constraints nullable="true"/>
+       </column>             
+       <column name="payment_offset_reference_id" type="int">
+         <constraints nullable="true"/>
+       </column>
+       <column name="notional" type="double">
+         <constraints nullable="true"/>
+       </column>
+       <column name="settle_currency_reference_id" type="int">
+         <constraints nullable="true"/>
+       </column>
+       <column name="ref_source_reference_id" type="int">
+         <constraints nullable="true"/>
+       </column>
+       <column name="fx_index_ref_source_reference_id" type="int">
+         <constraints nullable="true"/>
+       </column>
+    </createTable>
+                 
     <addForeignKeyConstraint
-   	    baseColumnNames="currency_reference_index_id"  
-        baseTableName="reference_order"  
-        constraintName="fk_reference_order_index_id"
-        onDelete="NO ACTION"
-        onUpdate="NO ACTION"
-        referencedColumnNames="index_id"  
-        referencedTableName="index"
-        validate="true"/>
-        
-    <addForeignKeyConstraint
-   	    baseColumnNames="averaging_rule_reference_id"  
-        baseTableName="reference_order"  
-        constraintName="fk_reference_order_averaging_rule_id"
+   	    baseColumnNames="payment_offset_reference_id"  
+        baseTableName="reference_order_leg"  
+        constraintName="fk_reference_order_payment_offset_reference_id"
         onDelete="NO ACTION"
         onUpdate="NO ACTION"
         referencedColumnNames="reference_id"  
         referencedTableName="reference"
         validate="true"/>
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="settle_currency_reference_id"  
+        baseTableName="reference_order_leg"  
+        constraintName="fk_reference_order_settle_currency_reference_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="ref_source_reference_id"  
+        baseTableName="reference_order_leg"  
+        constraintName="fk_reference_order_ref_source_reference_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="fx_index_ref_source_reference_id"  
+        baseTableName="reference_order_leg"  
+        constraintName="fk_reference_order_fx_index_ref_source_reference_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+        
+   	<createSequence sequenceName="leg_id_seq" incrementBy="1" startValue="1000000" />
+        
+    <createTable tableName="reference_order_leg_map">
+       <column name="order_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="version" type="int">
+         <constraints nullable="false"/>
+       </column>
+       <column name="leg_id" type="int">
+         <constraints nullable="false"/>
+       </column>
+    </createTable>           
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="order_id, version"  
+        baseTableName="reference_order_leg_map"  
+        constraintName="fk_reference_order_leg_map_order_id_order_version"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="order_id, version"  
+        referencedTableName="reference_order"
+        validate="true"/>
+             
+    <addForeignKeyConstraint
+   	    baseColumnNames="leg_id"  
+        baseTableName="reference_order_leg_map"  
+        constraintName="fk_reference_order_leg_map_leg_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="leg_id"  
+        referencedTableName="reference_order_leg"
+        validate="true"/>    
         
     <!-- Cache Invalidates -->
     <createTable tableName="cache_invalidate">

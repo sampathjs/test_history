@@ -27,6 +27,7 @@ import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.ProcessTransition;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceOrder;
+import com.matthey.pmm.toms.model.ReferenceOrderLeg;
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.FillRepository;
@@ -35,6 +36,7 @@ import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ProcessTransitionRepository;
+import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
@@ -76,6 +78,10 @@ public class Validator {
 
 	@Autowired
 	ReferenceOrderRepository referenceOrderRepo;
+
+	@Autowired
+	ReferenceOrderLegRepository referenceOrderLegRepo;
+
 	
 	@Autowired
 	ProcessTransitionRepository processTransitionRepo;
@@ -211,6 +217,15 @@ public class Validator {
 			throw new IllegalIdException(clazz, method, parameter, "(unknown)", Long.toString(referenceOrderId));
 		}
 		return referenceOrder;
+	}
+	
+	public Optional<ReferenceOrderLeg> verifyReferenceOrderLegId(long referenceOrderLegId,
+			Class clazz, String method, String parameter, boolean isOptional) {
+		Optional<ReferenceOrderLeg> referenceOrderLeg = referenceOrderLegRepo.findById(referenceOrderLegId);
+		if (!referenceOrderLeg.isPresent() && !isOptional) {
+			throw new IllegalIdException(clazz, method, parameter, "(unknown)", Long.toString(referenceOrderLegId));
+		}
+		return referenceOrderLeg;
 	}
 	
 	public Optional<OrderComment> verifyOrderCommentId(long orderCommentId, Class clazz,
@@ -535,32 +550,29 @@ public class Validator {
 	public void validateReferenceOrderFields (Class clazz, String method, String argument, ReferenceOrderTo order, boolean isNew, OrderTo oldReferenceOrder) {
 		validateOrderFields (clazz, method, argument, order, isNew, oldReferenceOrder);
 	    
-		Optional<IndexEntity> metalReferenceIndex = indexRepo.findById(order.idMetalReferenceIndex());
-    	if (metalReferenceIndex.isEmpty()) {
-    		throw new UnknownEntityException (clazz, method, argument + ".idMetalReferenceIndex", "Index (metal)", "" + order.idMetalReferenceIndex());
-    	}
-    	
-		Optional<IndexEntity> currencyReferenceIndex = indexRepo.findById(order.idCurrencyReferenceIndex());
-    	if (currencyReferenceIndex.isEmpty()) {
-    		throw new UnknownEntityException (clazz, method, argument + ".idCurrencyReferenceIndex", "Index (pure currency)", "" + order.idCurrencyReferenceIndex());
+    	verifyDefaultReference (order.idContractType(),
+				Arrays.asList(DefaultReferenceType.CONTRACT_TYPE),
+				clazz, method , argument + ".idContractType", false);
+
+    	if (order.metalPriceSpread()  != null && order.metalPriceSpread() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".metalPriceSpread", " > 0", "" + order.metalPriceSpread());
     	}
 
-		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
-		try {
-			Date parsedTime = sdfDateTime.parse (order.fixingStartDate());
-		} catch (ParseException pe) {
-			throw new IllegalDateFormatException (clazz, method, argument + ".fixingStartDate", TomsService.DATE_TIME_FORMAT, order.lastUpdate());
-		}
+    	if (order.contangoBackwardation()  != null && order.contangoBackwardation() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".contangoBackwardation", " > 0", "" + order.contangoBackwardation());
+    	}
 
-		try {
-			Date parsedTime = sdfDateTime.parse (order.fixingEndDate());
-		} catch (ParseException pe) {
-			throw new IllegalDateFormatException (clazz, method, argument + ".fixingEndDate", TomsService.DATE_TIME_FORMAT, order.lastUpdate());
-		}
+    	if (order.fxRateSpread() != null && order.fxRateSpread() <= 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".fxRateSpread", " > 0", "" + order.fxRateSpread());
+    	}
 
-    	verifyDefaultReference (order.idAveragingRule(),
-				Arrays.asList(DefaultReferenceType.AVERAGING_RULE),
-				clazz, method , argument + ".idAveragingRule", false);
+
+    	// legs
+    	if (order.legIds() != null) {
+    		for (Long legId : order.legIds()) {
+    			verifyReferenceOrderLegId (legId, clazz, method, argument, false);
+    		}
+    	}
     	
     	if (!isNew) {
         	// verify status change

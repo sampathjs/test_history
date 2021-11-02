@@ -34,6 +34,8 @@ public enum DefaultReferenceType {
 	METAL_LOCATION (23, "Location"),
 	VALIDATION_TYPE (24, "Validation Type"),
 	SYMBOLIC_DATE (25, "Symbolic Date"),
+	REF_SOURCE (26, "Ref Source"),
+	CONTRACT_TYPE (27, "Contract Type"),
 	;
 	
 	private final ReferenceTypeTo refType;

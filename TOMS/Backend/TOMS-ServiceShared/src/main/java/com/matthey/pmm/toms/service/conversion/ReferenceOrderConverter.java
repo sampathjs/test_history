@@ -18,6 +18,7 @@ import com.matthey.pmm.toms.model.OrderVersionId;
 import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceOrder;
+import com.matthey.pmm.toms.model.ReferenceOrderLeg;
 import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.CreditCheckRepository;
 import com.matthey.pmm.toms.repository.FillRepository;
@@ -25,6 +26,7 @@ import com.matthey.pmm.toms.repository.IndexRepository;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
 import com.matthey.pmm.toms.repository.OrderStatusRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
+import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.UserRepository;
@@ -58,7 +60,10 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 	private ReferenceOrderRepository entityRepo;
 	
 	@Autowired
-	private IndexRepository indexRepo;	
+	private IndexRepository indexRepo;
+	
+	@Autowired
+	private ReferenceOrderLegRepository referenceOrderLegRepo;
 	
 	@Override
 	public UserRepository userRepo() {
@@ -101,6 +106,11 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 	}
 	
 	@Override
+	public ReferenceOrderLegRepository referenceOrderLegRepo() {
+		return referenceOrderLegRepo;
+	}
+	
+	@Override
 	public ReferenceOrderTo toTo (ReferenceOrder entity) {
 		return ImmutableReferenceOrderTo.builder()
 				// Order
@@ -126,11 +136,11 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				// Reference Order
-				.idMetalReferenceIndex(entity.getMetalReferenceIndex().getId())
-				.idCurrencyReferenceIndex (entity.getCurrencyReferenceIndex().getId())
-				.fixingStartDate (formatDate(entity.getFixingStartDate()))
-				.fixingEndDate (formatDate(entity.getFixingEndDate()))
-				.idAveragingRule (entity.getAveragingRule().getId())
+				.contangoBackwardation(entity.getContangoBackwardation())
+				.idContractType (entity.getContractType() != null?entity.getContractType().getId():null)
+				.fxRateSpread(entity.getFxRateSpread())
+				.metalPriceSpread(entity.getMetalPriceSpread())
+				.legIds(entity.getLegs().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.build();
 	}
 	
@@ -174,16 +184,19 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 		}
 		
 		// ReferenceOrder
-		Date fixingStartDate = to.fixingStartDate() != null?parseDate (to, to.fixingStartDate()):null;
-		Date fixingEndDate = to.fixingEndDate() != null?parseDate (to, to.fixingEndDate()):null;
-		IndexEntity metalReferenceIndex = loadIndex(to, to.idMetalReferenceIndex());
-		IndexEntity currencyReferenceIndex = loadIndex(to, to.idCurrencyReferenceIndex());
-		Reference averagingRule = loadRef (to, to.idAveragingRule());
-		
 		Optional<ReferenceOrder> existingEntity = entityRepo.findById(new OrderVersionId(to.id(), to.version()));
 		Optional<ReferenceOrder> entityNextVersion = entityRepo.findById(new OrderVersionId(to.id(), to.version()+1));
 		if (entityNextVersion.isPresent()) {
 			throw new RuntimeException ("The provided reference order " + to.toString() + " having version " + to.version() + " is outdated and needs to be refreshed");
+		}		
+		
+		Reference contractType = loadRef (to, to.idContractType());
+		
+		List<ReferenceOrderLeg> legs = new ArrayList<>(to.legIds() != null?to.legIds().size():1);
+		if (to.legIds() != null) {
+			for (Long legId : to.legIds()) {
+				legs.add(loadReferenceOrderLeg(to, legId));
+			}
 		}
 		
 		if (existingEntity.isPresent()) {
@@ -210,18 +223,19 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 			existingEntity.get().getFills().addAll(fills);
 			existingEntity.get().getCreditChecks().addAll(creditChecks);
 			// limit order
-			existingEntity.get().setFixingStartDate(fixingStartDate);
-			existingEntity.get().setFixingStartDate(fixingEndDate);
-			existingEntity.get().setMetalReferenceIndex(metalReferenceIndex);
-			existingEntity.get().setCurrencyReferenceIndex(currencyReferenceIndex);
-			existingEntity.get().setAveragingRule(averagingRule);
+			existingEntity.get().setContangoBackwardation(to.contangoBackwardation());
+			existingEntity.get().setContractType(contractType);
+			existingEntity.get().setFxRateSpread(to.fxRateSpread());
+			existingEntity.get().getLegs().addAll(legs);
+			existingEntity.get().setMetalPriceSpread(to.metalPriceSpread());
+			
 			return existingEntity.get();
 		}
 		ReferenceOrder newEntity = new ReferenceOrder(1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
 				baseQuantityUnit, termCurrency, to.reference(), metalForm, metalLocation, 
 				orderStatus, createdAt, createdByUser, lastUpdate,
 				updatedByUser, orderComments, fills, creditChecks, 
-				metalReferenceIndex, currencyReferenceIndex, fixingStartDate, fixingEndDate, averagingRule);
+				contractType, to.metalPriceSpread(), to.fxRateSpread(), to.contangoBackwardation(), legs);
 		if (to.version() != 0) {
 			newEntity.setVersion(to.version());
 		}

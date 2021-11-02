@@ -173,22 +173,26 @@
   	</createIndex>
 
 	<!--  Limit Order -->
-   	<createIndex indexName="i_limit_order_order_id" tableName="limit_order" unique="false">
+   	<createIndex indexName="i_limit_order_order_id" tableName="limit_order" unique="true">
     	<column name="order_id"/>
-    	<column name="version"/>    	
+    	<column name="version"/>
   	</createIndex>
 
 	<!--  Reference Order -->
    	<createIndex indexName="i_reference_order_order_id" tableName="reference_order" unique="true">
     	<column name="order_id"/>
-    	<column name="version"/>    	
+    	<column name="version"/>
+  	</createIndex>
+
+	<!-- Reference Order Legs -->
+   	<createIndex indexName="i_reference_order_leg_leg_id" tableName="reference_order_leg" unique="true">
+    	<column name="leg_id"/>
   	</createIndex>
   	
   	<!-- Cache Invalidate -->
    	<createIndex indexName="i_cache_invalidate_id" tableName="cache_invalidate" unique="true">
     	<column name="cache_invalidate_id"/>
   	</createIndex>
-  	
   </changeSet> 
     
 </databaseChangeLog>

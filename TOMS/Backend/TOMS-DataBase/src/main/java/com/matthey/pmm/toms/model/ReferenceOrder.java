@@ -1,19 +1,26 @@
 package com.matthey.pmm.toms.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.PrimaryKeyJoinColumns;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 
@@ -52,35 +59,29 @@ public class ReferenceOrder extends Order {
 	}
 	
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="metal_reference_index_id", nullable = false)
-	private IndexEntity metalReferenceIndex; // remove index entities
-	
-	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="currency_reference_index_id", nullable = false)
-	private IndexEntity currencyReferenceIndex; // remove index entities
-	
-	@Column(name = "fixing_start_date", nullable = false)
-	@Temporal(TemporalType.DATE)
-	private Date fixingStartDate;  // move to leg
-
-	@Column(name = "fixing_end_date", nullable = false)
-	@Temporal(TemporalType.DATE)
-	private Date fixingEndDate;  // move to leg
-	
-	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="averaging_rule_reference_id", nullable = false)
+	@JoinColumn(name="contract_type_reference_id", nullable = false)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.AVERAGING_RULE)
-	private Reference averagingRule;  // no longer needed, change to contract type having values averaging / fixing
+	private Reference contractType; 		
 	
-	// missing fields:   
-	// - Reference Source (leg)
-	// - Settle Currency (leg)
-	// - Payment offset (String value, pick list, e.g. 1d. 2d) (leg) 
-	// - FX Index Ref Source (leg)
-	// - Notional, floating point number (leg) 
-	// - Metal Price Spread floating point number 
-	// - FX Rate Spread floating point number
-	// - Contango Backwardation floating point number  
+	// new columns below:
+	@Column(name="metal_price_spread", nullable=true)
+	private Double metalPriceSpread;
+
+	@Column(name="fx_rate_spread", nullable=true)
+	private Double fxRateSpread;
+
+	@Column(name="contango_backwardation", nullable=true)
+	private Double contangoBackwardation;
+	
+	@ManyToMany(cascade = CascadeType.ALL)
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@JoinTable(name = "reference_order_leg_map",
+            joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
+	        inverseJoinColumns=@JoinColumn(name = "leg_id"))
+	private List<ReferenceOrderLeg> legs;
+	
+	// new columns end
+	// TODO: DB schema init scripts 
 		
 	/**
 	 * For JPA purposes only. Do not use.
@@ -98,66 +99,66 @@ public class ReferenceOrder extends Order {
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks, // << order fields
-			final IndexEntity metalReferenceIndex, final IndexEntity currencyReferenceIndex, 
-			final Date fixingStartDate, final Date fixingEndDate,
-			final Reference averagingRule) {
+			final Reference contractType, 
+			final Double metalPriceSpread,  final Double fxRateSpread, final Double contangoBackwardation, 
+			final List<ReferenceOrderLeg> legs) {
 		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
 				createdByUser, lastUpdate, updatedByUser, orderComments, 
 				fills, creditChecks);
-		this.metalReferenceIndex = metalReferenceIndex;
-		this.currencyReferenceIndex = currencyReferenceIndex;
-		this.fixingStartDate = fixingStartDate;
-		this.fixingEndDate = fixingEndDate;
-		this.averagingRule = averagingRule;
+		this.contractType = contractType;
+		this.metalPriceSpread = metalPriceSpread;
+		this.fxRateSpread = fxRateSpread;
+		this.contangoBackwardation = contangoBackwardation;
+		this.legs = new ArrayList<>(legs);
 	}
 
-	public IndexEntity getMetalReferenceIndex() {
-		return metalReferenceIndex;
+	public Reference getContractType() {
+		return contractType;
 	}
 
-	public void setMetalReferenceIndex(IndexEntity metalReferenceIndex) {
-		this.metalReferenceIndex = metalReferenceIndex;
+	public void setContractType(Reference contractType) {
+		this.contractType = contractType;
 	}
 
-	public IndexEntity getCurrencyReferenceIndex() {
-		return currencyReferenceIndex;
+	public Double getMetalPriceSpread() {
+		return metalPriceSpread;
 	}
 
-	public void setCurrencyReferenceIndex(IndexEntity currencyReferenceIndex) {
-		this.currencyReferenceIndex = currencyReferenceIndex;
+	public void setMetalPriceSpread(Double metalPriceSpread) {
+		this.metalPriceSpread = metalPriceSpread;
 	}
 
-	public Date getFixingStartDate() {
-		return fixingStartDate;
+	public Double getFxRateSpread() {
+		return fxRateSpread;
 	}
 
-	public void setFixingStartDate(Date fixingStartDate) {
-		this.fixingStartDate = fixingStartDate;
+	public void setFxRateSpread(Double fxRateSpread) {
+		this.fxRateSpread = fxRateSpread;
 	}
 
-	public Date getFixingEndDate() {
-		return fixingEndDate;
+	public Double getContangoBackwardation() {
+		return contangoBackwardation;
 	}
 
-	public void setFixingEndDate(Date fixingEndDate) {
-		this.fixingEndDate = fixingEndDate;
+	public void setContangoBackwardation(Double contangoBackwardation) {
+		this.contangoBackwardation = contangoBackwardation;
 	}
 
-	public Reference getAveragingRule() {
-		return averagingRule;
+	public List<ReferenceOrderLeg> getLegs() {
+		return legs;
 	}
 
-	public void setAveragingRule(Reference averagingRule) {
-		this.averagingRule = averagingRule;
+	public void setLegs(List<ReferenceOrderLeg> legs) {
+		this.legs = legs;
 	}
 
 	@Override
 	public String toString() {
-		return "ReferenceOrder [metalReferenceIndex=" + metalReferenceIndex + ", currencyReferenceIndex="
-				+ currencyReferenceIndex + ", fixingStartDate=" + fixingStartDate + ", fixingEndDate=" + fixingEndDate
-				+ ", averagingRule=" + averagingRule + ", getOrderId()=" + getOrderId() + ", getVersion()="
+		return "ReferenceOrder [contractType=" + contractType + ", legs="
+				+ legs + ", metalPriceSpread=" + metalPriceSpread + ", fxRateSpread=" + fxRateSpread
+				+ ", contangoBackwardation=" + contangoBackwardation + ", getOrderId()=" + getOrderId() + ", getVersion()="
 				+ getVersion() + ", getInternalBu()=" + getInternalBu() + ", getExternalBu()=" + getExternalBu()
 				+ ", getInternalLe()=" + getInternalLe() + ", getExternalLe()=" + getExternalLe()
 				+ ", getIntPortfolio()=" + getIntPortfolio() + ", getExtPortfolio()=" + getExtPortfolio()
@@ -170,5 +171,5 @@ public class ReferenceOrder extends Order {
 				+ ", getFills()=" + getFills() + ", getCreditChecks()=" + getCreditChecks() + "]";
 	}
 	
-	//  inherit hashCode and equals and to String from Order base class
+	//  inherit hashCode and equals from Order base class
 }

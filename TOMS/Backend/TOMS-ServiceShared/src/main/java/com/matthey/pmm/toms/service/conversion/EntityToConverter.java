@@ -15,6 +15,7 @@ import com.matthey.pmm.toms.model.OrderComment;
 import com.matthey.pmm.toms.model.OrderStatus;
 import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
+import com.matthey.pmm.toms.model.ReferenceOrderLeg;
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.CreditCheckRepository;
@@ -23,6 +24,7 @@ import com.matthey.pmm.toms.repository.IndexRepository;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
 import com.matthey.pmm.toms.repository.OrderStatusRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
+import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.repository.UserRepository;
@@ -124,6 +126,15 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @return
 	 */
 	public IndexRepository indexRepo() {
+		return null;
+	}
+	
+	/**
+	 * Overwrite this method in case you want to use the {@link #loadIndex(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public ReferenceOrderLegRepository referenceOrderLegRepo() {
 		return null;
 	}
 	
@@ -331,5 +342,23 @@ public abstract class EntityToConverter <Entity, TO> {
 			throw new RuntimeException (msg);
 		}
 		return index.get();
+	}
+	
+	/**
+ 	 * Implement the {@link #referenceOrderLegRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param indexId
+	 * @return
+	 */
+	protected ReferenceOrderLeg loadReferenceOrderLeg(TO to, long legId) {
+		Optional<ReferenceOrderLeg> leg = referenceOrderLegRepo().findById(legId);
+		if (!leg.isPresent()) {
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
+					+ " can't find the Reference Order Leg having ID #" + legId + "."
+					+ " Please ensure all instances of member variables are present before conversion.";			
+			logger.error(msg);
+			throw new RuntimeException (msg);
+		}
+		return leg.get();
 	}
 }
