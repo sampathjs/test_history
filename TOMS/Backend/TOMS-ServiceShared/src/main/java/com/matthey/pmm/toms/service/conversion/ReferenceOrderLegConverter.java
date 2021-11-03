@@ -31,7 +31,7 @@ public class ReferenceOrderLegConverter extends EntityToConverter<ReferenceOrder
 		return ImmutableReferenceOrderLegTo.builder()
 				.id(entity.getId())
 				.idFxIndexRefSource(entity.getFxIndexRefSource() != null?entity.getFxIndexRefSource().getId():null)
-				.idPaymentOffset(entity.getRefSource() != null?entity.getRefSource().getId():null)
+				.idPaymentOffset(entity.getPaymentOffset() != null?entity.getPaymentOffset().getId():null)
 				.idRefSource(entity.getRefSource() != null?entity.getRefSource().getId():null)
 				.idSettleCurrency(entity.getSettleCurrency() != null?entity.getSettleCurrency().getId():null)
 				.fixingEndDate(entity.getFixingEndDate() != null?formatDate(entity.getFixingEndDate()):null)

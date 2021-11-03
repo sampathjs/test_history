@@ -156,6 +156,9 @@ public enum DefaultProcessTransition {
 			DefaultReference.CREDIT_CHECK_RUN_STATUS_OPEN, DefaultReference.CREDIT_CHECK_RUN_STATUS_COMPLETED, Arrays.asList()),
 	CREDIT_CHECK_RUN_STATUS_OPEN_TO_FAILED(202, DefaultReference.CREDIT_CHECK_RUN_STATUS_TRANSITION,
 			DefaultReference.CREDIT_CHECK_RUN_STATUS_OPEN, DefaultReference.CREDIT_CHECK_RUN_STATUS_FAILED,  Arrays.asList()),
+	
+	REFERENCE_ORDER_LEG_PENDING_TO_PENDING(300, DefaultReference.REFERENCE_ORDER_LEG_TRANSITION, 
+			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultOrderStatus.REFERENCE_ORDER_PENDING, Arrays.asList()),
 	;
 	
 	private final ProcessTransitionTo processStatus;

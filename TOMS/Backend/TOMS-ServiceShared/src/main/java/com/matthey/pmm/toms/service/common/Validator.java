@@ -58,6 +58,7 @@ import com.matthey.pmm.toms.transport.LimitOrderTo;
 import com.matthey.pmm.toms.transport.OrderCommentTo;
 import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
+import com.matthey.pmm.toms.transport.ReferenceOrderLegTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 @Service
@@ -217,6 +218,13 @@ public class Validator {
 			throw new IllegalIdException(clazz, method, parameter, "(unknown)", Long.toString(referenceOrderId));
 		}
 		return referenceOrder;
+	}
+	
+	public void verifyReferenceOrderVersion(ReferenceOrder referenceOrder, int providedVersion, 
+			Class clazz, String method, String parameter) {
+		if (referenceOrder.getVersion() != providedVersion) {
+			throw new IllegalVersionException(clazz, method, parameter, " latest version = " + referenceOrder.getVersion(), "" + providedVersion);
+		}
 	}
 	
 	public Optional<ReferenceOrderLeg> verifyReferenceOrderLegId(long referenceOrderLegId,
@@ -527,6 +535,7 @@ public class Validator {
         	// verify status change
     		List<ProcessTransition> availableTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(DefaultReference.LIMIT_ORDER_TRANSITION.getEntity().id(),
     				oldLimitOrder.idOrderStatus());
+			availableTransitions.removeIf( x -> x.getToStatusId() != order.idOrderStatus());
 
     		if (availableTransitions.size() == 0) {	
     			List<ProcessTransition> possibleTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(
@@ -578,6 +587,7 @@ public class Validator {
         	// verify status change
     		List<ProcessTransition> availableTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(DefaultReference.REFERENCE_ORDER_TRANSITION.getEntity().id(), 
     				oldReferenceOrder.idOrderStatus());
+			availableTransitions.removeIf( x -> x.getToStatusId() != order.idOrderStatus());
 
     		if (availableTransitions.size() == 0) {	
     			List<ProcessTransition> possibleTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(
@@ -709,6 +719,64 @@ public class Validator {
     				"Not matching allowed external parties for provided updatedBy " + updatedBy.get().getId() + " :" + updatedBy.get().getTradeableParties(), "" + order.idExternalBu());
     	}
    	}
+	
+	public void validateReferenceOrderLegFields (Class clazz, String method, String argument, ReferenceOrder referenceOrder, 
+			ReferenceOrderLegTo leg, boolean isNew, ReferenceOrderLeg oldLeg) {
+		leg.id();
+	
+    	verifyDefaultReference (leg.idSettleCurrency(),
+				Arrays.asList(DefaultReferenceType.CCY_CURRENCY, DefaultReferenceType.CCY_METAL),
+				clazz, method , argument + ".idSettleCurrency", true);
+
+    	verifyDefaultReference (leg.idRefSource(),
+				Arrays.asList(DefaultReferenceType.REF_SOURCE),
+				clazz, method , argument + ".idRefSource", true);
+
+    	verifyDefaultReference (leg.idPaymentOffset(),
+				Arrays.asList(DefaultReferenceType.SYMBOLIC_DATE),
+				clazz, method , argument + ".idPaymentOffset", true);
+
+    	verifyDefaultReference (leg.idFxIndexRefSource(),
+				Arrays.asList(DefaultReferenceType.REF_SOURCE),
+				clazz, method , argument + ".idFxIndexRefSource", true);
+    	
+		SimpleDateFormat sdfDate = new SimpleDateFormat (TomsService.DATE_FORMAT);
+    	
+		try {
+			Date parsedTime = sdfDate.parse (leg.fixingEndDate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".fixingEndDate", TomsService.DATE_FORMAT, leg.fixingEndDate());
+		}
+		
+		try {
+			Date parsedTime = sdfDate.parse (leg.fixingStartDate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".fixingStartDate", TomsService.DATE_FORMAT, leg.fixingStartDate());
+		}
+    	
+    	if (!isNew) {
+        	// verify status change
+    		List<ProcessTransition> availableTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(DefaultReference.REFERENCE_ORDER_LEG_TRANSITION.getEntity().id(), 
+    				referenceOrder.getOrderStatus().getId());
+			availableTransitions.removeIf( x -> x.getToStatusId() != referenceOrder.getOrderStatus().getId());
+			
+    		if (availableTransitions.size() == 0) {	
+    			List<ProcessTransition> possibleTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(
+        				DefaultReference.REFERENCE_ORDER_TRANSITION.getEntity().id(), referenceOrder.getOrderStatus().getId());
+    			
+    			Reference statusName = referenceOrder.getOrderStatus().getOrderStatusName();
+    			    			    			
+        		List<String> possibleTransitionsText = possibleTransitions.stream()
+        				.map(x -> x.getFromStatusId() + " -> " + 
+        						x.getToStatusId())
+        				.collect(Collectors.toList());
+    			throw new IllegalStateChangeException (clazz, method,
+    					argument, statusName.getValue(), statusName.getValue(), possibleTransitionsText.toString());
+    		} else {
+    			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(availableTransitions.get(0)), oldLeg, leg);
+    		}
+    	}
+	}
 
 	public void verifyOrderCommentBelongsToOrder(OrderComment orderComment, Order order,
 			Class clazz, String methodName, String argumentNameManager, String argumentNameManaged) {

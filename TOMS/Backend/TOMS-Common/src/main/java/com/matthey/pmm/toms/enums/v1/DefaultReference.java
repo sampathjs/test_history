@@ -231,6 +231,7 @@ public enum DefaultReference {
 	REF_SOURCE_JMLO_BFIX_1500 (DefaultReferenceType.REF_SOURCE, 223, "JMLO BFIX 1500", 20035),
 	CONTRACT_TYPE_AVERAGE (DefaultReferenceType.CONTRACT_TYPE , 224, "Average"),
 	CONTRACT_TYPE_FIXING (DefaultReferenceType.CONTRACT_TYPE , 225, "Fixing"),
+	REFERENCE_ORDER_LEG_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 226, "Transition for Reference Orders Legs"),
 	;
 	
 	private final ReferenceTo ref;
