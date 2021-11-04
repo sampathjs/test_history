@@ -51,6 +51,7 @@ import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
 import com.matthey.pmm.toms.service.exception.IllegalValueException;
 import com.matthey.pmm.toms.service.exception.IllegalVersionException;
 import com.matthey.pmm.toms.service.exception.InvalidBelongsToException;
+import com.matthey.pmm.toms.service.exception.MissingLegException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
 import com.matthey.pmm.toms.transport.FillTo;
@@ -576,12 +577,16 @@ public class Validator {
     	}
 
 
+    	
+    	
     	// legs
-    	if (order.legIds() != null) {
-    		for (Long legId : order.legIds()) {
-    			verifyReferenceOrderLegId (legId, clazz, method, argument, false);
-    		}
+    	if (order.legIds() == null || order.legIds().size() == 0) {
+    		throw new MissingLegException(clazz, argument + ".legIds", 0, 1);
     	}
+    	
+    	for (Long legId : order.legIds()) {
+   			verifyReferenceOrderLegId (legId, clazz, method, argument, false);
+   		}
     	
     	if (!isNew) {
         	// verify status change
