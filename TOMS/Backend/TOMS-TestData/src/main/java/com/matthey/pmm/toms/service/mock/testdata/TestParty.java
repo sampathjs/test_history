@@ -71,6 +71,38 @@ public enum TestParty {
 				                                                || x.typeId() == DefaultReference.PARTY_TYPE_EXTERNAL_LE.getEntity().id()).collect(Collectors.toList());
 	}
 	
+	public static List<PartyTo> asListInternalLe () {
+		return Arrays.asList(TestParty.values())
+				.stream().map(TestParty::getEntity).filter(x -> x.typeId() == DefaultReference.PARTY_TYPE_INTERNAL_LE.getEntity().id()).collect(Collectors.toList());
+	}
+	
+	public static List<PartyTo> asListExternalLe () {
+		return Arrays.asList(TestParty.values())
+				.stream().map(TestParty::getEntity).filter(x -> x.typeId() == DefaultReference.PARTY_TYPE_EXTERNAL_LE.getEntity().id()).collect(Collectors.toList());
+	}
+	
+	public static List<PartyTo> asListInternalBu () {
+		return Arrays.asList(TestParty.values())
+				.stream().map(TestParty::getEntity).filter(x -> x.typeId() == DefaultReference.PARTY_TYPE_INTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList());
+	}
+	
+	public static List<PartyTo> asListExternalBu () {
+		return Arrays.asList(TestParty.values())
+				.stream().map(TestParty::getEntity).filter(x -> x.typeId() == DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList());
+	}
+	
+	public static List<PartyTo> asListLe () {
+		return Arrays.asList(TestParty.values())
+				.stream().map(TestParty::getEntity).filter(x -> x.typeId() == DefaultReference.PARTY_TYPE_EXTERNAL_LE.getEntity().id() 
+				                                                || x.typeId() == DefaultReference.PARTY_TYPE_INTERNAL_LE.getEntity().id()).collect(Collectors.toList());
+	}
+	
+	public static List<PartyTo> asListBu () {
+		return Arrays.asList(TestParty.values())
+				.stream().map(TestParty::getEntity).filter(x -> x.typeId() == DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT.getEntity().id() 
+				                                                || x.typeId() == DefaultReference.PARTY_TYPE_INTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList());
+	}
+	
 	public static Optional<PartyTo> findById(long refId) {
 		List<PartyTo> filtered = asList().stream().filter(x -> x.id() == refId).collect(Collectors.toList());
 		if (filtered.size() == 0) {

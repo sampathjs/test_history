@@ -574,10 +574,7 @@ public class Validator {
 
     	if (order.fxRateSpread() != null && order.fxRateSpread() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".fxRateSpread", " > 0", "" + order.fxRateSpread());
-    	}
-
-
-    	
+    	}    	
     	
     	// legs
     	if (order.legIds() == null || order.legIds().size() == 0) {

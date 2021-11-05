@@ -109,7 +109,7 @@ public class LimitOrder extends Order{
 	 */
 	protected LimitOrder() {
 	}
-
+	
 	public LimitOrder(final int version, final Party internalBu, final Party externalBu, 
 			final Party internalLe, final Party externalLe, final Reference intPortfolio,
 			final Reference extPortfolio, final Reference buySell, final Reference baseCurrency,
@@ -141,6 +141,21 @@ public class LimitOrder extends Order{
 		this.yesNoPartFillable = yesNoPartFillable;
 		this.validationType = validationType;
 		this.expiryDate = expiryDate;
+	}
+	
+	public LimitOrder(LimitOrder toClone) {
+		super(toClone);
+		this.settleDate = toClone.settleDate;
+		this.startDateConcrete = toClone.startDateConcrete;
+		this.startDateSymbolic = toClone.startDateSymbolic;
+		this.limitPrice = toClone.limitPrice;
+		this.priceType = toClone.priceType;
+		this.stopTriggerType = toClone.stopTriggerType;
+		this.currencyCrossMetal = toClone.currencyCrossMetal;
+		this.executionLikelihood = toClone.executionLikelihood;
+		this.yesNoPartFillable = toClone.yesNoPartFillable;
+		this.validationType = toClone.validationType;
+		this.expiryDate = toClone.expiryDate;
 	}
 
 	public Date getSettleDate() {

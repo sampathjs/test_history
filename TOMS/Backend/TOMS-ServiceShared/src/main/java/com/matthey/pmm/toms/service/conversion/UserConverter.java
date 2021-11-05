@@ -97,8 +97,14 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 			entity.get().setFirstName(to.firstName());
 			entity.get().setLastName(to.lastName());
 			entity.get().setRole(role);
-			entity.get().setTradeableParties(tradeableParties);
-			entity.get().setTradeablePortfolios(tradeablePortfolios);
+			if (    !entity.get().getTradeableParties().containsAll(tradeableParties) | 
+					!tradeableParties.containsAll(entity.get().getTradeableParties())) {
+				entity.get().setTradeableParties(tradeableParties);				
+			}
+			if (    !entity.get().getTradeablePortfolios().containsAll(tradeablePortfolios) | 
+					!tradeablePortfolios.containsAll(entity.get().getTradeablePortfolios())) {
+				entity.get().setTradeablePortfolios(tradeablePortfolios);				
+			}
 			return entity.get();
 		}
 		User newEntity = new User (to.email(), to.firstName(), to.lastName(), role, to.active(), tradeableParties, tradeablePortfolios);

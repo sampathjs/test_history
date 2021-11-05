@@ -101,7 +101,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.idExternalBu(entity.getExternalBu() != null?entity.getExternalBu().getId():null)
 				.idInternalLe(entity.getInternalLe() != null?entity.getInternalLe().getId():null)
 				.idExternalLe(entity.getExternalLe() != null?entity.getExternalLe().getId():null)
-				.idIntPortfolio(entity.getIntPortfolio().getId())
+				.idIntPortfolio(entity.getIntPortfolio() != null?entity.getIntPortfolio().getId():null)
 				.idExtPortfolio(entity.getExtPortfolio() != null?entity.getExtPortfolio().getId():null)
 				.idBuySell(entity.getBuySell().getId())
 				.idBaseCurrency(entity.getBaseCurrency().getId())
@@ -123,10 +123,10 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.idValidationType(entity.getValidationType() != null?entity.getValidationType().getId():null)
 				.expiryDate(formatDate(entity.getExpiryDate()))
 				.limitPrice(entity.getLimitPrice())
-				.idPriceType(entity.getPriceType().getId())
-				.idYesNoPartFillable(entity.getYesNoPartFillable().getId())
-				.idStopTriggerType(entity.getStopTriggerType().getId())
-				.idCurrencyCrossMetal(entity.getCurrencyCrossMetal().getId())
+				.idPriceType(entity.getPriceType() != null?entity.getPriceType().getId():null)
+				.idYesNoPartFillable(entity.getYesNoPartFillable() != null?entity.getYesNoPartFillable().getId():null)
+				.idStopTriggerType(entity.getStopTriggerType() != null?entity.getStopTriggerType().getId():null)
+				.idCurrencyCrossMetal(entity.getCurrencyCrossMetal() != null?entity.getCurrencyCrossMetal().getId():null)
 				.executionLikelihood(entity.getExecutionLikelihood())
 				.build();
 	}
@@ -210,10 +210,18 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 			existingEntity.get().setCreatedByUser(createdByUser);
 			existingEntity.get().setLastUpdate(lastUpdate);
 			existingEntity.get().setUpdatedByUser(updatedByUser);
-			existingEntity.get().setUpdatedByUser(updatedByUser);
-			existingEntity.get().getOrderComments().addAll(orderComments);
-			existingEntity.get().getFills().addAll(fills);
-			existingEntity.get().getCreditChecks().addAll(creditChecks);
+			if (    !existingEntity.get().getOrderComments().containsAll(orderComments) | 
+					!orderComments.containsAll(existingEntity.get().getOrderComments())) {
+				existingEntity.get().setOrderComments(orderComments);
+			}
+			if (    !existingEntity.get().getFills().containsAll(fills) | 
+					!fills.containsAll(existingEntity.get().getFills())) {
+				existingEntity.get().setFills(fills);				
+			}
+			if (    !existingEntity.get().getCreditChecks().containsAll(creditChecks) | 
+					!creditChecks.containsAll(existingEntity.get().getCreditChecks())) {
+				existingEntity.get().setCreditChecks(creditChecks);				
+			}
 			// limit order
 			existingEntity.get().setSettleDate(settleDate);
 			existingEntity.get().setStartDateConcrete(startDateConcrete);

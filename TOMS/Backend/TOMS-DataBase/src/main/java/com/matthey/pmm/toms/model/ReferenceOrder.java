@@ -113,6 +113,15 @@ public class ReferenceOrder extends Order {
 		this.contangoBackwardation = contangoBackwardation;
 		this.legs = new ArrayList<>(legs);
 	}
+	
+	public ReferenceOrder(final ReferenceOrder toClone) {
+		super(toClone);
+		this.contractType = toClone.contractType;
+		this.metalPriceSpread = toClone.metalPriceSpread;
+		this.fxRateSpread = toClone.fxRateSpread;
+		this.contangoBackwardation = toClone.contangoBackwardation;
+		this.legs = new ArrayList<>(toClone.legs);
+	}
 
 	public Reference getContractType() {
 		return contractType;

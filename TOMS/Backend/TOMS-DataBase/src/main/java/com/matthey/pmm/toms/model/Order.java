@@ -197,6 +197,33 @@ public abstract class Order {
 		this.fills = new ArrayList<>(fills);
 		this.creditChecks = new ArrayList<>(creditChecks);
 	}	
+	
+	public Order(Order toClone) {
+		this.orderId = toClone.orderId;
+		this.version = toClone.version;
+		this.internalBu = toClone.internalBu;
+		this.externalBu = toClone.externalBu;
+		this.internalLe = toClone.internalLe;
+		this.externalLe = toClone.externalLe;		
+		this.intPortfolio = toClone.intPortfolio;
+		this.extPortfolio = toClone.extPortfolio;
+		this.buySell = toClone.buySell;
+		this.baseCurrency = toClone.baseCurrency;
+		this.baseQuantity = toClone.baseQuantity;
+		this.baseQuantityUnit = toClone.baseQuantityUnit;
+		this.termCurrency = toClone.termCurrency;
+		this.reference = toClone.reference;
+		this.metalForm = toClone.metalForm;
+		this.metalLocation = toClone.metalLocation;
+		this.orderStatus = toClone.orderStatus;
+		this.createdAt = toClone.createdAt;
+		this.createdByUser = toClone.createdByUser;
+		this.lastUpdate = toClone.lastUpdate;
+		this.updatedByUser = toClone.updatedByUser;
+		this.orderComments = new ArrayList<>(toClone.orderComments);
+		this.fills = new ArrayList<>(toClone.fills);
+		this.creditChecks = new ArrayList<>(toClone.creditChecks);
+	}	
 
 	public long getOrderId() {
 		return orderId;

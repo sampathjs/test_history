@@ -120,7 +120,7 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.idExternalBu(entity.getExternalBu() != null?entity.getExternalBu().getId():null)
 				.idInternalLe(entity.getInternalLe() != null?entity.getInternalLe().getId():null)
 				.idExternalLe(entity.getExternalLe() != null?entity.getExternalLe().getId():null)
-				.idIntPortfolio(entity.getIntPortfolio().getId())
+				.idIntPortfolio(entity.getIntPortfolio() != null?entity.getIntPortfolio().getId():null)
 				.idExtPortfolio(entity.getExtPortfolio() != null?entity.getExtPortfolio().getId():null)
 				.idBuySell(entity.getBuySell().getId())
 				.idBaseCurrency(entity.getBaseCurrency().getId())
@@ -218,15 +218,26 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 			existingEntity.get().setCreatedByUser(createdByUser);
 			existingEntity.get().setLastUpdate(lastUpdate);
 			existingEntity.get().setUpdatedByUser(updatedByUser);
-			existingEntity.get().setUpdatedByUser(updatedByUser);
-			existingEntity.get().getOrderComments().addAll(orderComments);
-			existingEntity.get().getFills().addAll(fills);
-			existingEntity.get().getCreditChecks().addAll(creditChecks);
-			// limit order
+			if (    !existingEntity.get().getOrderComments().containsAll(orderComments) | 
+					!orderComments.containsAll(existingEntity.get().getOrderComments())) {
+				existingEntity.get().setOrderComments(orderComments);
+			}
+			if (    !existingEntity.get().getFills().containsAll(fills) | 
+					!fills.containsAll(existingEntity.get().getFills())) {
+				existingEntity.get().setFills(fills);				
+			}
+			if (    !existingEntity.get().getCreditChecks().containsAll(creditChecks) | 
+					!creditChecks.containsAll(existingEntity.get().getCreditChecks())) {
+				existingEntity.get().setCreditChecks(creditChecks);				
+			}
+			// reference Order
 			existingEntity.get().setContangoBackwardation(to.contangoBackwardation());
 			existingEntity.get().setContractType(contractType);
 			existingEntity.get().setFxRateSpread(to.fxRateSpread());
-			existingEntity.get().getLegs().addAll(legs);
+			if (    !existingEntity.get().getLegs().containsAll(legs) | 
+					!legs.containsAll(existingEntity.get().getLegs())) {
+				existingEntity.get().setLegs(legs);
+			}
 			existingEntity.get().setMetalPriceSpread(to.metalPriceSpread());
 			
 			return existingEntity.get();

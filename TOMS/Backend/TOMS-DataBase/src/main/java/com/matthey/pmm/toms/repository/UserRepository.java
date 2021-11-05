@@ -2,14 +2,14 @@ package com.matthey.pmm.toms.repository;
 
 import java.util.Set;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.User;
 
 @Repository
-public interface UserRepository extends CrudRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
   Set<User> findByEmail(String email);
 
   Set<User> findByEmailAndRole(String name, Reference role);
