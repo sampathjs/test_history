@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
@@ -20,7 +18,6 @@ import com.matthey.pmm.toms.model.Fill;
 import com.matthey.pmm.toms.model.LimitOrder;
 import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.OrderComment;
-import com.matthey.pmm.toms.model.OrderVersionId;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.ReferenceOrderLeg;
