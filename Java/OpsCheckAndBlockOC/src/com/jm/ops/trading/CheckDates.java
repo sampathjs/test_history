@@ -1,8 +1,6 @@
 package com.jm.ops.trading;
 
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -342,14 +340,6 @@ public class CheckDates extends AbstractTradeProcessListener {
 					floatSidePymtDates.add(dtPymtDate);
 					matDate = currProfile.getValueAsDate(EnumProfileFieldId.EndDate);
 					matDates.add(matDate);
-					
-//					if(!fmt.format(matDate).equals(fmt.format(matDates.get(0))) ){
-//						String strErrMsg = "All floating maturity dates for the Swap deal must be the same.";
-//						sb.append(strErrMsg);
-//						Logging.info(strErrMsg);
-//						blnReturn = false;
-//						return blnReturn;
-//					}
 				} else if (currLeg.getField(EnumLegFieldId.FixFloat).getValueAsString().equalsIgnoreCase("Fixed")){
 					fixedSidePymtDate = currProfile.getValueAsDate(EnumProfileFieldId.PaymentDate);
 				}
@@ -403,7 +393,6 @@ public class CheckDates extends AbstractTradeProcessListener {
 		boolean blnReturn = true;
 
 		Collections.sort(floatSidePymtDates);
-		int index=0;
 		for (Date floatSidePymtDate: floatSidePymtDates){
 			
 			if(getWorkingDaysBetweenTwoDates(fixedSidePymtDate, floatSidePymtDate) < 7 ){
@@ -412,22 +401,10 @@ public class CheckDates extends AbstractTradeProcessListener {
 				Logging.info(strErrMsg);
 				blnReturn = false;
 				break;
-
-			} else if ( getMonthsBetweenDates( matDates.get(index), fixedSidePymtDate ) < 6 
-						|| getMonthsBetweenDates( matDates.get(index), floatSidePymtDate ) < 6 ) {
-				String strErrMsg = "All payment dates for the Tanaka Swap deals must be 7 months ahead of the maturity date";
-				sb.append(strErrMsg);
-				Logging.info(strErrMsg);
-				blnReturn = false;
-				break;
-			}
-			index++;
+			} 
 		}
 
 		return blnReturn;
-	}
-	private static long getMonthsBetweenDates(Date startDate, Date endDate) {
-		return ChronoUnit.MONTHS.between( startDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate() , endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
 	}
 	private static int getWorkingDaysBetweenTwoDates(Date startDate, Date endDate) {
 	    Calendar startCal = Calendar.getInstance();
