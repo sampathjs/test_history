@@ -309,8 +309,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 				try {
 					dailyPrice   = getHistoricalPrices(lastProjectionIndexInt, context);
 				} catch (OException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Logging.error("Error : "+e.getMessage()); 
 				}
 			 	physicalDispathValue = physicalDispathValue + 	dailyPrice*	dailyVolume;
 						 
@@ -327,8 +326,7 @@ public class ValidateCollateralBalance extends AbstractTradeProcessListener {
 				}
 				
 			} catch (OException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Logging.error("Error : "+e.getMessage()); 
 			}
 			return retval;
 		
