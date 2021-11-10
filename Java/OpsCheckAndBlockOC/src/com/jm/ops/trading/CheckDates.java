@@ -357,7 +357,7 @@ public class CheckDates extends AbstractTradeProcessListener {
 		Collections.sort(floatSidePymtDates);
 		for (Date floatSidePymtDate: floatSidePymtDates){
 			if(floatSidePymtDate.before(fixedSidePymtDate)){
-				String strErrMsg = "All floating payment dates for the Swap deal must be the same or greater than the fixed side payment date. ";
+				String strErrMsg = "All floating payment dates for the Swap deal must be the same or greater than the fixed side payment date.\n";
 				sb.append(strErrMsg);
 				Logging.info(strErrMsg);
 				blnReturn = false;
@@ -366,7 +366,7 @@ public class CheckDates extends AbstractTradeProcessListener {
 		}
 		for (Date floatSidePymtDate: floatSidePymtDates){
 			if(!fmt.format(floatSidePymtDate).equals(fmt.format(floatSidePymtDates.get(0))) ){
-				String strErrMsg = "All floating payment dates for the Swap deal must be the same. ";
+				String strErrMsg = "All floating payment dates for the Swap deal must be the same.\n";
 				sb.append(strErrMsg);
 				Logging.info(strErrMsg);
 				blnReturn = false;
@@ -375,15 +375,15 @@ public class CheckDates extends AbstractTradeProcessListener {
 		}
 		for (Date matDate: matDates){	
 			if(!fmt.format(matDate).equals(fmt.format(matDates.get(0))) ){
-				String strErrMsg = "All floating maturity dates for the Swap deal must be the same. ";
+				String strErrMsg = "All floating maturity dates for the Swap deal must be the same.\n";
 				sb.append(strErrMsg);
 				Logging.info(strErrMsg);
 				blnReturn = false;
 				break;
 			}
 		}
-		if (isTanakaDeal && blnReturn) {
-			blnReturn = isPymtDateValidForTanakaDeal(matDates, fixedSidePymtDate, floatSidePymtDates, sb);
+		if (isTanakaDeal) {
+			blnReturn = isPymtDateValidForTanakaDeal(matDates, fixedSidePymtDate, floatSidePymtDates, sb) && blnReturn;
 		}
 		return blnReturn;
 	}
@@ -408,7 +408,7 @@ public class CheckDates extends AbstractTradeProcessListener {
 		for (Date floatSidePymtDate: floatSidePymtDates){
 			
 			if(getWorkingDaysBetweenTwoDates(fixedSidePymtDate, floatSidePymtDate) < 7 ){
-				String strErrMsg = "All floating payment dates for the Tanaka Swap deals must have atleast 7 business days difference from the fixed side payment date. ";
+				String strErrMsg = "All floating payment dates for the Tanaka Swap deals must have atleast 7 business days difference from the fixed side payment date.\n";
 				sb.append(strErrMsg);
 				Logging.info(strErrMsg);
 				blnReturn = false;
