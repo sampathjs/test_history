@@ -9,7 +9,7 @@ import com.openlink.util.misc.TableUtilities;
  * History: 
  * OPS Trading plugin to be used to set the "Loco" and "Loco Offset" tran info fields to "Royston" in case of pass through deals.
  * @author jwaechter 
- * * 2015-09-21	V1.0	jwaechter	- Initial Version 
+ * 2015-09-21	V1.0	jwaechter	- Initial Version 
  * 2021-10-26	V1.1     BhardG01	- WO0000000007327_Location Pass through deals failed
  *
  */
