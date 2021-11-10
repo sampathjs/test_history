@@ -387,7 +387,7 @@ public class CheckDates extends AbstractTradeProcessListener {
 		}
 		return blnReturn;
 	}
-	private boolean isTanakaDeal(Transaction tranPtr, StringBuilder sb){
+	private boolean isTanakaDeal(Transaction tranPtr, StringBuilder sb) {
 		boolean blnReturn = false;
 		try {
 			int cptLE = tranPtr.getField(EnumTransactionFieldId.ExternalLegalEntity).getValueAsInt();
