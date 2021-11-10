@@ -16,6 +16,8 @@ import com.openlink.util.misc.TableUtilities;
  * OPS Trading plugin to be used to set the "Loco" and "Loco Offset" tran info fields to "Royston" in case of pass through deals.
  * @author jwaechter
  * @version 1.0
+ * 2021-10-26	V1.1     BhardG01	- WO0000000007327_Location Pass through deals failed
+ *
  */
 public class TraderLocationAssignment implements IScript
 {
@@ -46,7 +48,7 @@ public class TraderLocationAssignment implements IScript
 
 	private void process() throws OException {
 		for (int i = OpService.retrieveNumTrans(); i >= 1;i--) {
-			Transaction origTran = OpService.retrieveOriginalTran(i);
+			Transaction origTran = OpService.retrieveOriginalTran(i); 
 //			Transaction tran = OpService.retrieveTran(i);
 			String offsetTranType = origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.toInt());
 			if (offsetTranType == null) {
@@ -66,9 +68,37 @@ public class TraderLocationAssignment implements IScript
 							"or Loco and Form are not set in PTE deal", 0);
 				}
 			}				
+			else if (isPassthroughDeal(origTran) ) {
+				
+				
+				String form = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Form");
+				String loco = origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Loco");
+				origLoco = loco;
+				origForm = form;
+				if (origLoco != null && origForm != null && !origLoco.equals("") && !origForm.equals("") ) {
+					updatePtiPto(origTran, origLoco, origForm);
+				} else {
+					OpService.serviceFail("Could not retrieve Loco and Form from PTE deal " +
+							"or Loco and Form are not set in PTE deal", 0);
+				}
+			}				
 		}
 	}
 
+
+	private boolean isPassthroughDeal(Transaction origTran) throws OException {
+		String offsetTranType = origTran.getField(TRANF_FIELD.TRANF_OFFSET_TRAN_TYPE.toInt());
+	 
+		String passthroughBU =origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "PassThrough Unit") ;
+		String passthroughLegal =origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "PassThrough Legal") ;
+		String passthroughPF =origTran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "PassThrough pfolio") ; 
+		if (offsetTranType.equalsIgnoreCase("No Offset") && passthroughBU != null && passthroughPF != null  && passthroughLegal != null &&  !passthroughBU.equals("") && !passthroughPF.equals("")
+				 && !passthroughLegal.equals("") ){
+			return true;
+		}
+		 
+		return false;
+	}
 
 	private void updatePtiPto(Transaction origTran, String loco, String form) throws OException {
 		String sql = generateLocoRetrievalSqlForLoco(loco, form);
