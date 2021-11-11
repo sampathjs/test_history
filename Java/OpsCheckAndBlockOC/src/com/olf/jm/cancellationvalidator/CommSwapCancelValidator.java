@@ -1,6 +1,9 @@
 package com.olf.jm.cancellationvalidator;
 
+import java.text.SimpleDateFormat;
+
 import com.olf.embedded.application.Context;
+import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetFieldId;
@@ -35,29 +38,20 @@ public class CommSwapCancelValidator extends AbstractValidator {
 		boolean cancellationAllowed = false;
 		int maxResetDate = 0;
 		try {
-			int dealTradeDate = getDealTradeDate();
+			maxResetDate = getMaxResetDate();
 			int currentTradingDate = getCurrentTradingDate();
-			
-				// If trade has maturity date in same month then Allow
-				// cancellation
-				// till month end
-				// else allow cancellation till last reset date.
-				if (isSameMonth(currentTradingDate, dealTradeDate)) {
+
+			if (monthDiff(maxResetDate, currentTradingDate) <= 0) {
+				cancellationAllowed = true;
+				Logging.info("last reset date of the deal is in current Month. Deal can be cancelled");
+			} else {
+				// Allow cancellation till last reset date
+				Logging.info("Trade Month on the deal is in past, check if the last reset date has passed");
+				if (maxResetDate >= currentTradingDate) {
 					cancellationAllowed = true;
-					Logging.info("Trade Month on the deal is same as current Month. Deal can be cancelled");
-
-				} else {
-					// Allow cancellation till last reset date
-					Logging.info("Trade Month on the deal is in past, check if the last reset date has passed");
-					maxResetDate = getMaxResetDate();
-					if (maxResetDate >= currentTradingDate) {
-						cancellationAllowed = true;
-						Logging.info("Last Reset Date for this deal is in future. This can be cancelled");
-					}
-
+					Logging.info("Last Reset Date for this deal is in future. This can be cancelled");
 				}
-
-		
+			}
 			if (!cancellationAllowed) {
 
 				Logging.info("Cancellation criteria is not satisfied. This deal can't be cancelled ");
@@ -69,6 +63,20 @@ public class CommSwapCancelValidator extends AbstractValidator {
 
 		return cancellationAllowed;
 
+	}
+
+	private int getMinResetDate() {
+		int minResetDate = Integer.MAX_VALUE;
+		Legs legs = tran.getLegs();
+		for (Leg leg : legs) {
+			if (leg.getValueAsInt(EnumLegFieldId.FixFloat) == (com.olf.openrisk.trading.EnumFixedFloat.FloatRate.getValue())) {
+				int resetDate = leg.getReset(0).getValueAsInt(EnumResetFieldId.Date);
+				if (resetDate < minResetDate) {
+					minResetDate = resetDate;
+				}
+			}
+		}		
+		return minResetDate;
 	}
 
 	private int getMaxResetDate() {

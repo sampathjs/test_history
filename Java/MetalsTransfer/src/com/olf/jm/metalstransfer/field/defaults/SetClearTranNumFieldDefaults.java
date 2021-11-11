@@ -29,7 +29,8 @@ import com.olf.openrisk.trading.Transaction;
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | Rev | Date        | Change Id     | Author          | Description                                                                     |
  * -----------------------------------------------------------------------------------------------------------------------------------------
- * | 001 | 07-Sep-2016 |               | S. Curran       | Initial version                                                                 |
+ * | 001 | 07-Sep-2016 |               | S. Curran       | Initial version   
+ * | 002 | 14-Sep-2020 |               | GuptaN02		 | Set default value to No for tran info Assignment Approved                                                               |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 public class SetClearTranNumFieldDefaults extends SetInitialFieldDefaults{
@@ -90,6 +91,10 @@ public class SetClearTranNumFieldDefaults extends SetInitialFieldDefaults{
 				if (field.isApplicable()) {
 					field.setValue("No");
 				}
+				field = tran.getField("Assignment Approved");
+				if (field.isApplicable()) {
+					field.setValue("No");
+				}
 
 			}
 			// clear the statement date
@@ -127,4 +132,5 @@ public class SetClearTranNumFieldDefaults extends SetInitialFieldDefaults{
 			}
     	}
     }
+    
 }

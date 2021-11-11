@@ -43,9 +43,10 @@ public abstract class AbstractValidator {
 	protected int getDealTradeDate() throws OException {
 		int jdTradeDate;
 		try {
-			String tradeDate = tran.getField(EnumTransactionFieldId.TradeDate).getValueAsString();
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");  
+			String tradeDate = formatter.format(tran.getField(EnumTransactionFieldId.TradeDate).getValueAsDate());
 			Logging.info("Trade Date for deal number " + tran.getDealTrackingId() + " is " + tradeDate);
-			jdTradeDate = OCalendar.parseString(tradeDate);
+			jdTradeDate = OCalendar.convertYYYYMMDDToJd(tradeDate);
 		} catch (OException exp) {
 			Logging.error("There was an error retrieving Trade date form Transaction for deal " + tran.getDealTrackingId() + "\n" + exp.getMessage());
 			throw new OException(exp.getMessage());
@@ -56,10 +57,10 @@ public abstract class AbstractValidator {
 	protected int getCurrentTradingDate() throws OException {
 		int jdCurrentTradingDate;
 		try {
-			SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");  
-		    String today = formatter.format(context.getTradingDate());  
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+		    String today = formatter.format(context.getTradingDate());
 			Logging.info("Current Trading Date " + today);
-			jdCurrentTradingDate = OCalendar.parseString(today);
+			jdCurrentTradingDate = OCalendar.convertYYYYMMDDToJd(today);
 		} catch (OException exp) {
 			Logging.error("There was an error retrieving Today's trading date while processing  " + tran.getDealTrackingId() + "\n" + exp.getMessage());
 			throw new OException(exp.getMessage());
@@ -101,6 +102,14 @@ public abstract class AbstractValidator {
 
 	}
 
+	protected int monthDiff(int startDate, int endDate) throws OException {
+		Logging.info ("Calculating month diff for start date = " + startDate 
+				+ " , end date" + endDate);
+		int yearDiff = OCalendar.getYear(endDate) - OCalendar.getYear(startDate);
+		int monthDiff = OCalendar.getMonth(endDate) - OCalendar.getMonth(startDate);
+		return Math.abs(yearDiff) * 12 + Math.abs(monthDiff);
+	}
+	
 	protected boolean isSameMonth(int firstDate, int secondDate) throws OException {
 		boolean flag = false;
 

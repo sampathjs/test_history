@@ -51,6 +51,14 @@ import com.olf.jm.logging.Logging;
  * 
  */
 
+/*
+ * History:
+ *              V1.0                        - Initil cersion
+ * 2021-01-05   V1.2	GanapP02  EPI-1546  - PBI000000000293 - Set default end user wne From account changes for 
+ *                                            Metal/Cash Transfer deals
+ * 
+ */
+
 @ScriptCategory({ EnumScriptCategory.OpsSvcTranfield })
 public class CustomerDefaulting extends AbstractFieldListener {
 

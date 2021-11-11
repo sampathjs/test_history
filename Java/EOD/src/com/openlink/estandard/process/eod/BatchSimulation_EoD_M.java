@@ -159,7 +159,10 @@ public class BatchSimulation_EoD_M implements IScript {
 		
 		try {
 			tblBatchSimList = getInitializedBatchSimList();
-	        tblSimResultWarnings = Sim.runBatchSim(tblBatchSimList, _run_close, _currency, _market_price);
+	        if (splitOnGrid())
+				tblSimResultWarnings = Sim.runBatchSim(tblBatchSimList, _run_close, _currency, _market_price, Services.serviceGetServiceId("Reval"));
+			else
+				tblSimResultWarnings = Sim.runBatchSim(tblBatchSimList, _run_close, _currency, _market_price);
 	        
 		} catch (OException e) {
 			String message = "Error executing batch sims " + e.getMessage();
@@ -182,6 +185,18 @@ public class BatchSimulation_EoD_M implements IScript {
 		}
 		
 		return tblSimResultWarnings;
+	}
+    
+    private boolean splitOnGrid() throws OException {
+		
+		ConstRepository constRepository = new ConstRepository("EOD", "Batch");
+		String runOnReval = constRepository.getStringValue("Split On Grid");
+		
+		if(runOnReval.equalsIgnoreCase("Yes")){
+			return true;
+		}
+		
+		return false;
 	}
 
 	private Table getFilledtblExceptions() throws OException, Exception {

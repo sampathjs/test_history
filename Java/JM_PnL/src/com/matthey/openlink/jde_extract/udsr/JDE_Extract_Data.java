@@ -239,7 +239,7 @@ public class JDE_Extract_Data implements IScript
 		swapData.setTableTitle("Swap Data");
 
 		// Retrieve unique deal rows
-		swapData.select(swapResult, "DISTINCT, deal_num, fixings_complete, from_currency, to_currency, delivery_date, uom", "deal_num GE 0");
+		swapData.select(swapResult, "DISTINCT, deal_num, tran_num, fixings_complete, from_currency, to_currency, delivery_date, uom", "deal_num GE 0");
 		swapData.group("deal_num");
 		swapData.distinctRows();
 
@@ -363,6 +363,7 @@ public class JDE_Extract_Data implements IScript
 	protected void setOutputFormat(Table workData) throws OException
 	{		
 		workData.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
+		workData.addCol("tran_num", COL_TYPE_ENUM.COL_INT);
 		workData.addCol("fixings_complete", COL_TYPE_ENUM.COL_STRING);
 
 		workData.addCol("from_currency", COL_TYPE_ENUM.COL_INT);

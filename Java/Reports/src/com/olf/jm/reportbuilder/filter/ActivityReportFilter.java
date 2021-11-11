@@ -14,6 +14,7 @@ import com.olf.openjvs.enums.TRANF_FIELD;
  * | Rev | Date        | Change Id     | Author          | Description                                                                     |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | 001 | 19-Nov-2020 |               | FernaI01        | Script to hide and show rows per region (CN or non-CN)                          |
+ * | 002 | 22-Dec-2020 |               | KrishM02        | Script to correct currecny on FX curreny trades                                 |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 
@@ -111,31 +112,6 @@ public class ActivityReportFilter implements IScript {
 			tblFXDeals.select(tblArgt, strWhat, strWhere );
 
 			tblFXDeals.makeTableUnique();
-			
-			for(int i=1;i<=tblFXDeals.getNumRows();i++){
-				
-				int intTranNum = tblFXDeals.getInt("tran_num", i);
-				Transaction tranPtr = Transaction.retrieve(intTranNum);
-				
-				double dblStlAmtCN = tblFXDeals.getDouble("settlement_amount_cn",i);				
-				double dblDealtAmt = tranPtr.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT);
-				
-				String strBaseCcy = tranPtr.getField(TRANF_FIELD.TRANF_BASE_CURRENCY);
-				String strBoughtCcy = tranPtr.getField(TRANF_FIELD.TRANF_BOUGHT_CURRENCY);
-						
-				if(dblStlAmtCN == dblDealtAmt){
-					
-					tblFXDeals.setInt("currency",i,Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, strBaseCcy));
-					tblFXDeals.setInt("currency1",i,Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, strBoughtCcy));
-				}else{
-					
-					tblFXDeals.setInt("currency",i,Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, strBoughtCcy));
-					tblFXDeals.setInt("currency1",i,Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, strBaseCcy));
-					
-				}
-				
-			}
-			
 			for(int i=tblArgt.getNumRows();i>0;i--){
 				
 				int intToolset = tblArgt.getInt("toolset", i);
