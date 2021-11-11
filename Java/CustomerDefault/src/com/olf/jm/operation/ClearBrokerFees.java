@@ -8,17 +8,7 @@ import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
 
-/**
- * 
- * When clear Tran Num is pressed, clear Broker fee fields.
- * 
- * Revision History:
- * Version  Updated By    Date         Ticket#    Description
- * -----------------------------------------------------------------------------------
- * 	01      Prashanth     23-Jul-2021  EPI-1712   Initial version
- * 	02      Gaurav        11-Nov-2021  EPI-1532   Passthrough Changes
- * 
- */
+
 
 @ScriptCategory({ EnumScriptCategory.FieldNotification })
 public class ClearBrokerFees extends AbstractTransactionListener {
