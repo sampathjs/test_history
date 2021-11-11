@@ -72,7 +72,7 @@ public class OrderTestDataGenerator {
 
 	private static final double MAX_REFERENCE_ORDER_LEG_NOTIONAL = 100;
 
-	private static int FILL_TRADE_ID_COUNTER=1000000;
+	private static int FILL_TRADE_ID_COUNTER=10000000;
 
 	
 	@Autowired
@@ -186,12 +186,12 @@ public class OrderTestDataGenerator {
 	}
 
 	private List<CreditCheck> createCreditCheckList() {
-		int creditCheckCount = (int)Math.random()*(MAX_CREDIT_CHECK_COUNT+1);
+		int creditCheckCount = (int)(Math.random()*(MAX_CREDIT_CHECK_COUNT+1));
 		List<CreditCheck> newCreditChecks = new ArrayList<>(creditCheckCount);
 		for (int i=0; i < creditCheckCount; i++) {
 			CreditCheck newCreditCheck = new CreditCheck(null, null, null, null, null, null);
 			newCreditCheck.setCreditCheckOutcome(selectReferenceValue(DefaultReferenceType.CREDIT_CHECK_OUTCOME, true));
-			newCreditCheck.setCreditCheckRunStatus(selectReferenceValue(DefaultReferenceType.CREDIT_CHECK_RUN_STATUS, true));
+			newCreditCheck.setCreditCheckRunStatus(selectReferenceValue(DefaultReferenceType.CREDIT_CHECK_RUN_STATUS, false));
 			newCreditCheck.setCreditLimit(randomDoubleOrNull(MAX_CREDIT_LIMIT));
 			newCreditCheck.setCurrentUtilization(randomDoubleOrNull(MAX_CREDIT_LIMIT));
 			newCreditCheck.setParty(partyConverter.toManagedEntity(selectOneOf(TestParty.asListBu(), false)));
@@ -203,7 +203,7 @@ public class OrderTestDataGenerator {
 	}
 	
 	private List<Fill> createFillList() {
-		int fillCount = (int)Math.random()*(MAX_FILL_COUNT+1);
+		int fillCount = (int)(Math.random()*(MAX_FILL_COUNT+1));
 		List<Fill> newFills = new ArrayList<>(fillCount);
 		for (int i=0; i < fillCount; i++) {
 			Fill newFill = new Fill(null, null, 0l, null, null, null);
@@ -212,7 +212,7 @@ public class OrderTestDataGenerator {
 			newFill.setLastUpdateDateTime(randomDate(false));
 			newFill.setTradeId(FILL_TRADE_ID_COUNTER++);
 			newFill.setTrader(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
-			newFill.setUpdatedBy(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), true)));
+			newFill.setUpdatedBy(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
 			newFill = fillRepo.save(newFill);
 			newFills.add(newFill);
 		}
@@ -220,16 +220,16 @@ public class OrderTestDataGenerator {
 	}
 	
 	private List<OrderComment> createOrderCommentList() {
-		int orderCommentCount = (int)Math.random()*(MAX_ORDER_COMMENT_COUNT+1);
+		int orderCommentCount = (int)(Math.random()*(MAX_ORDER_COMMENT_COUNT+1));
 		List<OrderComment> newOrderComments = new ArrayList<>(orderCommentCount);
 		for (int i=0; i < orderCommentCount; i++) {
 			OrderComment newOrderComment = new OrderComment(null, null,  null,  null,  null,  null);
 			newOrderComment.setCommentText(selectOneOf(Arrays.asList("Example Comment", "Another Example Comment", "More comments", "Even more comments"), false));
 			newOrderComment.setCreatedAt(randomDate(false));
-			newOrderComment.setCreatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), true)));
+			newOrderComment.setCreatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
 			newOrderComment.setDeletionFlag(selectReferenceValue(DefaultReferenceType.DELETION_FLAG, false));
 			newOrderComment.setLastUpdate(randomDate(false));
-			newOrderComment.setUpdatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), true)));
+			newOrderComment.setUpdatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
 			newOrderComment = orderCommentRepo.save(newOrderComment);
 			newOrderComments.add(newOrderComment);
 		}
@@ -237,7 +237,7 @@ public class OrderTestDataGenerator {
 	}
 	
 	private List<ReferenceOrderLeg> createLegList() {
-		int legCount = MIN_LEG_COUNT+(int)Math.random()*(MAX_LEG_COUNT+1);
+		int legCount = MIN_LEG_COUNT+(int)(Math.random()*(MAX_LEG_COUNT+1));
 		List<ReferenceOrderLeg> newLegs = new ArrayList<>(legCount);
 		for (int i=0; i < legCount; i++) {
 			ReferenceOrderLeg newLeg = new ReferenceOrderLeg(null, null, null, null, null, null, null);
