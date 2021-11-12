@@ -2,13 +2,14 @@ package com.openlink.jm.bo.docoutput;
 
 import java.util.ArrayList;
 
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.EmailMessage;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.olf.jm.logging.Logging;
-import com.openlink.util.mail.Mail;
+import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
 import com.openlink.util.misc.TableUtilities;
 
 /*
@@ -85,31 +86,25 @@ class DocOutput_wMail extends DocOutput
 			recipientsArr = new String[list.size()];
 			for (int i = list.size(); --i >= 0;)
 				recipientsArr[i] = list.get(i);
-
-			Mail mail = new Mail(mailParams.smtpServer);
-			/*
-			mail.send(mailParams.recipients, 
-					  mailParams.subject, 
-					  mailParams.message, 
-					  mailParams.sender, 
-					  output.documentExportPath);
-			 */
 			
-			while (retryTimeoutCount<retryCount) {
+			EmailMessage mymessage = EmailMessage.create();
+			
+			while (retryTimeoutCount < retryCount) {
 				try {
-					mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
+					mymessage.addBodyText(message, EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML);
+					mymessage.addAttachments(output.documentExportPath, 0, null);
+					mymessage.addSubject(subject);
+					mymessage.addRecipients(recipients);
+					mymessage.sendAs(sender, "MAIL");
 					success = true;
 					break;
-				}
-				
-				catch (OException ex) {
+				} catch (OException ex) {
 					retryTimeoutCount++;
 					mailErrorMessage = ex.getMessage();
 					Thread.sleep(1000);
 				}
-				
 			}
-			
+						
 			if (!success)
 			{
 				//The attempts to connect to the smtp server failed.
@@ -120,8 +115,6 @@ class DocOutput_wMail extends DocOutput
 				throw new OException (erroMessage);
 				
 			}
-			
-			//mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
 		}
 		catch (Throwable t)
 		{
