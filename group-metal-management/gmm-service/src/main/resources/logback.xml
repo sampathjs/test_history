@@ -10,7 +10,7 @@
     <appender name="File" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${GMM_LOG_DIR}/metal-rentals-service.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
-            <fileNamePattern>${GMM_LOG_DIR}/metal-rentals-service.%i.log.zip</fileNamePattern>
+            <fileNamePattern>${GMM_LOG_DIR}/GMM-services.%i.log.zip</fileNamePattern>
             <minIndex>1</minIndex>
             <maxIndex>20</maxIndex>
         </rollingPolicy>
