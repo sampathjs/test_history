@@ -99,22 +99,13 @@ public class ClearBrokerFees extends AbstractTransactionListener {
 	 	} 
 	}
 
+	
 	/**
 	 * Initialise the class loggers.
 	 *
 	 * @throws Exception the exception
 	 */	private void init() throws Exception {
-		constRep = new ConstRepository(CONTEXT, SUBCONTEXT);
-
-		String logLevel = "Error";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = null;
-
 		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
 			Logging.init(this.getClass(), constRep.getContext(), constRep.getSubcontext());
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
