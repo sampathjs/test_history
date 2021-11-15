@@ -155,7 +155,7 @@ public class OrderTestDataGenerator {
 			ReferenceOrder referenceOrder = new ReferenceOrder ((ReferenceOrder)order);
 			referenceOrder.setOrderComments(createOrderCommentList());
 			referenceOrder.setVersion(referenceOrder.getVersion()+1);
-			referenceOrder = referenceOrderRepo.saveAndFlush(referenceOrder);
+			referenceOrder = referenceOrderRepo.save(referenceOrder);
 			return referenceOrder;
 		}		
 	}

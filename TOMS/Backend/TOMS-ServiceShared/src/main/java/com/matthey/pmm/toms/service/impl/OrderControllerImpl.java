@@ -1,8 +1,6 @@
 package com.matthey.pmm.toms.service.impl;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +11,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,11 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
-import com.matthey.pmm.toms.enums.v1.DefaultReference;
-import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.LimitOrder;
-import com.matthey.pmm.toms.model.Party;
-import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.ReferenceOrderLeg;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
@@ -46,8 +42,11 @@ import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderLegTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 public abstract class OrderControllerImpl implements TomsOrderService {
@@ -116,7 +115,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "Min Execution Likelihood, all orders returned have a at least the provided base quantity , Null = no restrictions", example = "0.00", required = false) @RequestParam(required=false) Double minExecutionLikelihood,
 			@ApiParam(value = "Max Execution Likelihood, all orders returned have a at max the provided base quantity , Null = no restrictions", example = "1.00", required = false) @RequestParam(required=false) Double maxExecutionLikelihood,
     		@ApiParam(value = "Min limit price, Null = no restrictions", example = "500.00", required = false) @RequestParam(required=false) Double minLimitPrice,
-    		@ApiParam(value = "Max limit price, Null = no restrictions", example = "1250.00", required = false) @RequestParam(required=false) Double maxLimitPrice) {
+    		@ApiParam(value = "Max limit price, Null = no restrictions", example = "1250.00", required = false) @RequestParam(required=false) Double maxLimitPrice,
+    		@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable) {
 	    // Validation of the input parameters required or not?
 //		Optional<Party> intBu = validator.verifyParty(internalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), getClass(), "getLimitOrders", "internalBuId", true);
 //		Optional<Party> extBu = validator.verifyParty(externalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT), getClass(), "getLimitOrders", "externalBuId", true);
@@ -140,8 +140,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				// all above: order fields, all below: limit order fields
 				minSettle, maxSettle, minStartConcrete, maxStartConcrete, noEmptyList(idStartDateSymbolic), noEmptyList(idPriceType), noEmptyList(idYesNoPartFillable), 
 				noEmptyList(idStopTriggerType), noEmptyList(idCurrencyCrossMetal),
-				noEmptyList(idValidationType), minExpiry, maxExpiry, minExecutionLikelihood, maxExecutionLikelihood, minLimitPrice, maxLimitPrice
-				);
+				noEmptyList(idValidationType), minExpiry, maxExpiry, minExecutionLikelihood, maxExecutionLikelihood, minLimitPrice, maxLimitPrice,
+				pageable);
 		return matchingOrders.stream()
 				.map(x -> limitOrderConverter.toTo(x))
 				.collect(Collectors.toSet());
@@ -176,20 +176,87 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	
 	@Override
     @ApiOperation("Retrieval of Reference Order Data")
+    @Cacheable({"ReferenceOrder"})
+    @ApiImplicitParams ({
+        @ApiImplicitParam(name = "page", dataType = "integer", paramType = "query",
+                value = "Results page you want to retrieve (0..N)"),
+        @ApiImplicitParam(name = "size", dataType = "integer", paramType = "query",
+                value = "Number of records per page."),
+        @ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query",
+                value = "Sorting criteria in the format: property(,asc|desc). " +
+                        "Default sort order is ascending. " +
+                        "Multiple sort criteria are supported.")
+    })	
 	public Set<OrderTo> getReferenceOrders (
-			@ApiParam(value = "The internal party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20006", required = false) @RequestParam(required=false) Long internalBuId,
-			@ApiParam(value = "The external party IDs the Reference orders are supposed to be retrieved for. Null or 0 = all orders", example = "20022", required = false) @RequestParam(required=false) Long externalBuId,
-			@ApiParam(value = "Min Creation Date, all orders returned have been created after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
-			@ApiParam(value = "Max Creation Date, all orders returned have been created before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC)", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
-			@ApiParam(value = "Buy/Sell ID, Null or 0 = all orders", example = "15", required = false) @RequestParam(required=false) Long buySellId,
-			@ApiParam(value = "Version ID, -1 = all limit orders", example = "1", required = false) @RequestParam(required=false) Integer versionId) {
-		Optional<Party> intBu = validator.verifyParty(internalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), getClass(), "getReferenceOrders", "internalBuId", true);
-		Optional<Party> extBu = validator.verifyParty(externalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT), getClass(), "getReferenceOrders", "externalBuId", true);
+			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
+			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
+			@ApiParam(value = "List of the internal BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20006", example = "20006", required = false) @RequestParam(required=false) List<Long> idInternalBu,
+			@ApiParam(value = "List of the external BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20022", example = "20022", required = false) @RequestParam(required=false) List<Long> idExternalBu,
+			@ApiParam(value = "List of internal LE IDs the orders are supposed to be retrieved for. Null =  all orders, example 20004", example = "20004", required = false) @RequestParam(required=false) List<Long> idInternalLe,
+			@ApiParam(value = "List of the external LE IDs the orders are supposed to be retrieved for. Null = all orders, example 20023", example = "20023", required = false) @RequestParam(required=false) List<Long> idExternalLe,
+			@ApiParam(value = "List of the internal portfolio IDs the orders are supposed to be retrieved for. Null = all orders, example 118, 119", example = "118, 119", required = false) @RequestParam(required=false) List<Long> idInternalPfolio,
+			@ApiParam(value = "List of the external portfolio IDs the orders are supposed to be retrieved for. Null = all orders, example 119", example = "119", required = false) @RequestParam(required=false) List<Long> idExternalPfolio,
+			@ApiParam(value = "List of Buy/Sell IDs, Null all orders, example 15", example = "15", required = false) @RequestParam(required=false) List<Long> idBuySell,
+			@ApiParam(value = "List of Base Currency IDs, Null all orders, example 34,35,36", example = "34, 35, 36", required = false) @RequestParam(required=false) List<Long> idBaseCurrency,
+			@ApiParam(value = "Min Base Quantity, all orders returned have a at least the provided base quantity , Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double minBaseQuantity,
+			@ApiParam(value = "Max Base Quantity, all orders returned have a at max the provided base quantity , Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double maxBaseQuantity,
+			@ApiParam(value = "List of Base Quantity Unit IDs, null = all orders, example 28, 29", example = "28, 29", required = false) @RequestParam(required=false) List<Long> idBaseQuantityUnit,
+			@ApiParam(value = "List of Term Currency IDs, null = all orders, example 42, 43", example = "42, 43", required = false) @RequestParam(required=false) List<Long> idTermCurrency,
+			@ApiParam(value = "Reference has to contain this value, null = all orders", example = "gold", required = false) @RequestParam(required=false) String reference,
+			@ApiParam(value = "List of Metal Form IDs, null = all orders, example 164, 165", example = "164, 165", required = false) @RequestParam(required=false) List<Long> idMetalForm,
+			@ApiParam(value = "List of Metal Location IDs, null = all orders, example 168, 169", example = "168, 169", required = false) @RequestParam(required=false) List<Long> idMetalLocation,
+			@ApiParam(value = "List of Order Status IDs, null = all orders, example 1, 2, 3", example = "1, 2, 3", required = false) @RequestParam(required=false) List<Long> idOrderStatus,
+			@ApiParam(value = "Min Creation Date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
+			@ApiParam(value = "Max Creation Date, all orders returned have been created on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
+			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
+			@ApiParam(value = "Max last update date, all orders returned have been updated on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLastUpdateDate,
+			// all above: order fields, all below: reference order fields
+			@ApiParam(value = "Min metal price spread, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double minMetalPriceSpread,
+			@ApiParam(value = "Max metal price spread, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double maxMetalPriceSpread,
+			@ApiParam(value = "Min FX price spread, Null = no restrictions", example = "1.1", required = false) @RequestParam(required=false) Double minFxRateSpread,
+			@ApiParam(value = "Max FX price spread, Null = no restrictions", example = "1.2", required = false) @RequestParam(required=false) Double maxFxRateSpread,
+			@ApiParam(value = "Min Contango Backwardation, Null = no restrictions", example = "1.1", required = false) @RequestParam(required=false) Double minContangoBackwardation,
+			@ApiParam(value = "Max Contango Backwardation, Null = no restrictions", example = "1.2", required = false) @RequestParam(required=false) Double maxContangoBackwardation,
+			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,
+			@ApiParam(value = "List of reference order leg ids, null = no restrictions", example = "", required = false) @RequestParam(required=false) List<Long> idLeg,
+			@ApiParam(value = "Min leg notional, Null = no restrictions", example = "1.00", required = false) @RequestParam(required=false) Double minLegNotonal,
+			@ApiParam(value = "Max leg notional, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double maxLegNotional,
+			@ApiParam(value = "Min leg fixing start date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLegFixingStartDate,
+			@ApiParam(value = "Max leg fixing start date, all orders returned have been created on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLegFixingStartDate,
+			@ApiParam(value = "Min leg fixing end date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLegFixingEndDate,
+			@ApiParam(value = "Max leg fixing end date, all orders returned have been created on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLegFixingEndDate,
+			@ApiParam(value = "List of leg payment offsets (symbolic date), null = no restriction, example 186, 187 ", example = "186, 187", required = false) @RequestParam(required=false) List<Long> idLegPaymentOffset,
+			@ApiParam(value = "List of leg settlement currencies, null = no restriction, example 34,35,36,42,43", example = "34,35,36,42,43", required = false) @RequestParam(required=false) List<Long> idLegSettleCurrency,
+			@ApiParam(value = "List of leg ref sources, null = no restriction, example 190, 191, 192, 193", example = "190, 191, 192, 193", required = false) @RequestParam(required=false) List<Long> idLegRefSource,
+			@ApiParam(value = "List of leg index ref sources, null = no restriction, example 190, 191, 192, 193", example = "190, 191, 192, 193", required = false) @RequestParam(required=false) List<Long> idLegFxIndexRefSource ,
+			@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable) {
+		// validation of input required or not?
+//		Optional<Party> intBu = validator.verifyParty(internalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), getClass(), "getReferenceOrders", "internalBuId", true);
+//		Optional<Party> extBu = validator.verifyParty(externalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT), getClass(), "getReferenceOrders", "externalBuId", true);
+//		Optional<Reference> buySell = validator.verifyDefaultReference(buySellId, Arrays.asList(DefaultReferenceType.BUY_SELL), getClass(), "getReferenceOrders", "buySellId", true); 
+
 		Date minCreatedAt = validator.verifyDateTime (minCreatedAtDate, getClass(), "getReferenceOrders", "minCreatedAtDate");
 		Date maxCreatedAt = validator.verifyDateTime (maxCreatedAtDate, getClass(), "getReferenceOrders", "maxCreatedAtDate");
-		Optional<Reference> buySell = validator.verifyDefaultReference(buySellId, Arrays.asList(DefaultReferenceType.BUY_SELL), getClass(), "getReferenceOrders", "buySellId", true); 
+		Date minLastUpdate = validator.verifyDateTime (minLastUpdateDate, getClass(), "getReferenceOrders", "minLastUpdateDate");
+		Date maxLastUpdate = validator.verifyDateTime (maxLastUpdateDate, getClass(), "getReferenceOrders", "maxLastUpdateDate");
+		Date minLegFixingStart = validator.verifyDateTime (maxLastUpdateDate, getClass(), "getReferenceOrders", "minLegFixingStartDate");
+		Date maxLegFixingStart = validator.verifyDateTime (maxLastUpdateDate, getClass(), "getReferenceOrders", "maxLegFixingStartDate");
+		Date minLegFixingEnd = validator.verifyDateTime (maxLastUpdateDate, getClass(), "getReferenceOrders", "minLegFixingEndDate");
+		Date maxLegFixingEnd = validator.verifyDateTime (maxLastUpdateDate, getClass(), "getReferenceOrders", "maxLegFixingEndDate");
 		
-		List<ReferenceOrder> matchingOrders = referenceOrderRepo.findByOrderIdAndOptionalParameters(intBu.orElse(null), extBu.orElse(null), buySell.orElse(null), minCreatedAt, maxCreatedAt, versionId);
+		Page<ReferenceOrder> matchingOrders = referenceOrderRepo.findByOrderIdAndOptionalParameters(noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
+				noEmptyList(idExternalBu), noEmptyList(idInternalLe), noEmptyList(idExternalLe),
+				noEmptyList(idInternalPfolio), noEmptyList(idExternalPfolio), noEmptyList(idBuySell), 
+				noEmptyList(idBaseCurrency), minBaseQuantity, maxBaseQuantity, noEmptyList(idBaseQuantityUnit), noEmptyList(idTermCurrency), reference,
+				noEmptyList(idMetalForm), noEmptyList(idMetalLocation), noEmptyList(idOrderStatus), minCreatedAt, maxCreatedAt, minLastUpdate, maxLastUpdate,
+				// all above: order fields, all below: reference order fields
+				minMetalPriceSpread, maxMetalPriceSpread, minFxRateSpread, maxFxRateSpread, minContangoBackwardation, maxContangoBackwardation,
+				noEmptyList(idContractType), noEmptyList(idLeg), minLegNotonal, maxLegNotional, minLegFixingStart, 
+				maxLegFixingStart, minLegFixingEnd, maxLegFixingEnd, 
+				noEmptyList(idLegPaymentOffset), noEmptyList(idLegSettleCurrency), noEmptyList(idLegRefSource), noEmptyList(idLegFxIndexRefSource),
+				pageable
+				);
+				
 		return matchingOrders.stream()
 				.map(x -> referenceOrderConverter.toTo(x))
 				.collect(Collectors.toSet());

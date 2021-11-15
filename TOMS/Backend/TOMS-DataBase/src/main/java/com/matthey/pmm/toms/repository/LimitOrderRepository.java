@@ -4,8 +4,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +16,7 @@ import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
 
 @Repository
-public interface LimitOrderRepository extends JpaRepository<LimitOrder, OrderVersionId> {
+public interface LimitOrderRepository extends PagingAndSortingRepository<LimitOrder, OrderVersionId> {
    List<LimitOrder> findByOrderId(long orderId); 
    
    @Query("SELECT lo FROM LimitOrder lo WHERE lo.orderId = :orderId AND lo.version = (SELECT MAX(lo2.version) FROM LimitOrder lo2 WHERE lo2.orderId = :orderId)") 
@@ -94,6 +95,7 @@ public interface LimitOrderRepository extends JpaRepository<LimitOrder, OrderVer
 		   @Param("minExecutionLikelihood") Double minExecutionLikelihood,
 		   @Param("maxExecutionLikelihood") Double maxExecutionLikelihood,
 		   @Param("minLimitPrice") Double minLimitPrice,
-		   @Param("maxLimitPrice") Double maxLimitPrice  
+		   @Param("maxLimitPrice") Double maxLimitPrice,
+		   Pageable pageable
 		   );
 }
