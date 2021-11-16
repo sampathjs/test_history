@@ -22,7 +22,8 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 @Entity
 @Table(name = "index", 
     indexes = { @Index(name = "i_index_id", columnList = "index_id", unique = true),
-    		@Index(name = "i_index_name", columnList = "reference_index_name_id", unique = true) })
+    		@Index(name = "i_index_name", columnList = "reference_index_name_id", unique = true),
+    		@Index(name = "i_index_sort_column", columnList = "sort_column", unique = false)})
 public class IndexEntity {	
 	@Id
 	@Column(name = "index_id", updatable = false, nullable = false)
@@ -41,6 +42,9 @@ public class IndexEntity {
 	@JoinColumn(name="reference_currency_two_id")
 	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.CCY_CURRENCY, DefaultReferenceType.CCY_METAL })
 	private Reference currencyTwoName;
+	
+	@Column(name = "sort_column", nullable = true)
+	private Long sortColumn;
 		
 	/**
 	 * For JPA purposes only. Do not use.
@@ -49,11 +53,12 @@ public class IndexEntity {
 	}
 
 	public IndexEntity(final Long id, final Reference indexName, 
-			final Reference currencyOneName, final Reference currencyTwoName) {
+			final Reference currencyOneName, final Reference currencyTwoName, Long sortColumn) {
 		this.id = id;
 		this.indexName = indexName;
 		this.currencyOneName = currencyOneName;
 		this.currencyTwoName = currencyTwoName;
+		this.sortColumn = sortColumn;
 	}
 
 	public Long getId() {
@@ -86,6 +91,14 @@ public class IndexEntity {
 
 	public void setCurrencyTwoName(Reference currencyTwoName) {
 		this.currencyTwoName = currencyTwoName;
+	}
+
+	public Long getSortColumn() {
+		return sortColumn;
+	}
+
+	public void setSortColumn(Long sortColumn) {
+		this.sortColumn = sortColumn;
 	}
 
 	@Override

@@ -30,7 +30,7 @@ public class ReferenceTypeConverter extends EntityToConverter<ReferenceType, Ref
 	 * @return
 	 */
 	public ReferenceType toEntity (ReferenceTypeTo to) {		
-		ReferenceType entity = new ReferenceType (to.name());
+		ReferenceType entity = new ReferenceType (to.name(), to.sortColumn());
 		entity.setId(to.id());
 		return entity;
 	}
@@ -57,9 +57,10 @@ public class ReferenceTypeConverter extends EntityToConverter<ReferenceType, Ref
 		Optional<ReferenceType> entity = refTypeRepo.findById(to.id());
 		if (entity.isPresent()) {
 			entity.get().setName(to.name());
+			entity.get().setSortColumn(to.sortColumn());
 			return entity.get();
 		}
-		ReferenceType newEntity = new ReferenceType (to.name());
+		ReferenceType newEntity = new ReferenceType (to.name(), to.sortColumn());
 		newEntity = refTypeRepo.save(newEntity);
 		return newEntity;
 	}

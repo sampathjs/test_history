@@ -26,7 +26,7 @@ public class ReferenceTypeRepoTest extends AbstractRepositoryTestBase<ReferenceT
 	@Override
 	protected Supplier<List<ReferenceType>> listProvider() {
 		return () -> {
-			return Arrays.asList(new ReferenceType("UnitTest"));
+			return Arrays.asList(new ReferenceType("UnitTest", 1000l));
 		};
 	}
 

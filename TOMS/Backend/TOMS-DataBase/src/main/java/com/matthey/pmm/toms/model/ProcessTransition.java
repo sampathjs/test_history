@@ -27,7 +27,8 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name = "process_transition", 
     indexes = { @Index(name = "i_process_transition_id", columnList = "process_transition_id", unique = true),
-        @Index(name = "i_process_transition_category", columnList = "reference_category_id", unique = false) },
+        @Index(name = "i_process_transition_category", columnList = "reference_category_id", unique = false),
+        @Index(name = "i_process_transition_sort_column", columnList = "sort_column", unique = false)},
     		uniqueConstraints = { @UniqueConstraint(columnNames = { "reference_category_id", "from_status_id", "to_status_id" }) })
 public class ProcessTransition {
 	@Id
@@ -53,17 +54,21 @@ public class ProcessTransition {
     @Column(name = "unchangeable_attribute")
 	private List<String> unchangeableAttributes;
 	
+	@Column(name = "sort_column", nullable = true)
+	private Long sortColumn;
+	
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
 	protected ProcessTransition() {
 	}
 
-	public ProcessTransition(Reference referenceCategory, long fromStatusId, long toStatusId, List<String> unchangeableAttributes) {
+	public ProcessTransition(Reference referenceCategory, long fromStatusId, long toStatusId, Long sortColumn, List<String> unchangeableAttributes) {
 		this.referenceCategory = referenceCategory;
 		this.fromStatusId = fromStatusId;
 		this.toStatusId = toStatusId;
 		this.unchangeableAttributes = new ArrayList<>(unchangeableAttributes);
+		this.sortColumn = sortColumn;
 	}
 
 	public Long getId() {
@@ -104,6 +109,14 @@ public class ProcessTransition {
 
 	public void setUnchangeableAttributes(List<String> unchangeableAttributes) {
 		this.unchangeableAttributes = unchangeableAttributes;
+	}
+
+	public Long getSortColumn() {
+		return sortColumn;
+	}
+
+	public void setSortColumn(Long sortColumn) {
+		this.sortColumn = sortColumn;
 	}
 
 	@Override

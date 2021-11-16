@@ -40,7 +40,7 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 				.collect(Collectors.toList())
 				.get(0);
 		ReferenceType type = new ReferenceTypeConverter().toEntity(typeTo);
-		Reference entity = new Reference (type, to.name(), to.displayName(), to.endurId());
+		Reference entity = new Reference (type, to.name(), to.displayName(), to.endurId(), to.sortColumn());
 		return entity;
 	}
 	
@@ -52,6 +52,7 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 				.endurId(entity.getEndurId())
 				.displayName(entity.getDisplayName())
 				.idType(entity.getType().getId())
+				.sortColumn(entity.getSortColumn())
 				.build();
 	}
 	
@@ -64,9 +65,10 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 			entity.get().setEndurId(to.endurId());
 			entity.get().setType(type);
 			entity.get().setValue(to.name());
+			entity.get().setSortColumn(to.sortColumn());
 			return entity.get();
 		}
-		Reference newEntity = new Reference (type, to.name(), to.displayName(), to.endurId());
+		Reference newEntity = new Reference (type, to.name(), to.displayName(), to.endurId(), to.sortColumn());
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;
 	}

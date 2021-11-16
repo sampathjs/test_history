@@ -41,6 +41,7 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 				.idLegalEntity(entity.getLegalEntity() != null?entity.getLegalEntity().getId():null)
 				.name(entity.getName())
 				.typeId(entity.getType().getId())
+				.sortColumn(entity.getSortColumn())
 				.build();
 	}
 	
@@ -56,8 +57,9 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 			party.setLegalEntity(legalEntity.isPresent()?legalEntity.get():null);
 			party.setType(type);
 			party.setName(to.name());
+			party.setSortColumn(to.sortColumn());
 		} else {
-			party = new Party(to.name(), type, legalEntity.orElse(null));
+			party = new Party(to.name(), type, legalEntity.orElse(null), to.sortColumn());
 			party.setId(to.id());
 			party = partyRepo.save(party);
 		}

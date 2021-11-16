@@ -36,4 +36,7 @@ public abstract class PartyTo {
     @Auxiliary
     @Nullable
     public abstract Long idLegalEntity();
+    
+    @Auxiliary
+    public abstract long sortColumn();
 }

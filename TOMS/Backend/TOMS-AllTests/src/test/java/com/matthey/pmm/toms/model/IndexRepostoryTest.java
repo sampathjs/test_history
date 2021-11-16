@@ -43,13 +43,13 @@ public class IndexRepostoryTest extends AbstractRepositoryTestBase<IndexEntity, 
 		return () -> { // in prod ID is managed by Endur
 			final List<IndexEntity> indices = Arrays.asList(new IndexEntity(1000l, referenceCon.toManagedEntity(DefaultReference.INDEX_NAME_PX_XPT_GBP.getEntity()), 
 					referenceCon.toManagedEntity(DefaultReference.METAL_XPT.getEntity()), 
-					referenceCon.toManagedEntity(DefaultReference.CCY_GBP.getEntity())),
+					referenceCon.toManagedEntity(DefaultReference.CCY_GBP.getEntity()), 1000l),
 					new IndexEntity(1001l, referenceCon.toManagedEntity(DefaultReference.INDEX_NAME_FX_EUR_GBP.getEntity()), 
 							referenceCon.toManagedEntity(DefaultReference.CCY_EUR.getEntity()), 
-							referenceCon.toManagedEntity(DefaultReference.CCY_GBP.getEntity())),
+							referenceCon.toManagedEntity(DefaultReference.CCY_GBP.getEntity()), 2000l),
 					new IndexEntity(1002l, referenceCon.toManagedEntity(DefaultReference.INDEX_NAME_PX_XAU_USD.getEntity()), 
 							referenceCon.toManagedEntity(DefaultReference.METAL_XAU.getEntity()), 
-							referenceCon.toManagedEntity(DefaultReference.CCY_USD.getEntity()))				
+							referenceCon.toManagedEntity(DefaultReference.CCY_USD.getEntity()), 3000l)				
 					);
 			return indices;
 		};

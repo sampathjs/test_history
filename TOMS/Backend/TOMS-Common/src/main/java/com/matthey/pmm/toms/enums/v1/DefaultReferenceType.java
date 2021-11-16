@@ -9,41 +9,42 @@ import com.matthey.pmm.toms.transport.ImmutableReferenceTypeTo;
 import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum DefaultReferenceType {
-	PARTY_TYPE(1, "Party Type"),
-	ORDER_TYPE_NAME(2, "Order Type"),
-	USER_ROLE(3, "User Role ID"),
-	ORDER_STATUS_NAME(4, "Order Status"),
-	BUY_SELL (5, "Buy/Sell"),
-	EXPIRATION_STATUS (6, "Expiration Status"),
-	CACHE_TYPE (7, "Cache Type"),
-	QUANTITY_UNIT (8, "Quantity Unit"),
-	CCY_METAL(9, "Metal"),
-	CCY_CURRENCY(10, "Currency"),
-	INDEX_NAME(11, "Index Name"),
-	YES_NO (12, "Yes/No"),
-	PAYMENT_PERIOD (13, "Payment Period"),
-	CREDIT_CHECK_RUN_STATUS (14, "Credit Check Run Status"),
-	PRICE_TYPE (15, "Price Type"),
-	AVERAGING_RULE (16, "Averaging Rule"),
-	STOP_TRIGGER_TYPE (17, "Stop Trigger Type"),
-	PROCESS_TRANSITION_TYPE (18, "Process Transition Type"),
-	CREDIT_CHECK_OUTCOME (19, "Credit Check Outcome"),
-	PORTFOLIO (20, "Internal Portfolio"),
-	DELETION_FLAG (21, "Deletion Flag"),	
-	METAL_FORM (22, "Form"),
-	METAL_LOCATION (23, "Location"),
-	VALIDATION_TYPE (24, "Validation Type"),
-	SYMBOLIC_DATE (25, "Symbolic Date"),
-	REF_SOURCE (26, "Ref Source"),
-	CONTRACT_TYPE (27, "Contract Type"),
+	PARTY_TYPE(1, "Party Type", 100l),
+	ORDER_TYPE_NAME(2, "Order Type", 200l),
+	USER_ROLE(3, "User Role ID", 300l),
+	ORDER_STATUS_NAME(4, "Order Status", 400l),
+	BUY_SELL (5, "Buy/Sell", 500l),
+	EXPIRATION_STATUS (6, "Expiration Status", 600l),
+	CACHE_TYPE (7, "Cache Type", 700l),
+	QUANTITY_UNIT (8, "Quantity Unit", 800l),
+	CCY_METAL(9, "Metal", 900l),
+	CCY_CURRENCY(10, "Currency", 1000l),
+	INDEX_NAME(11, "Index Name", 1100l),
+	YES_NO (12, "Yes/No", 1200l),
+	PAYMENT_PERIOD (13, "Payment Period", 1300l),
+	CREDIT_CHECK_RUN_STATUS (14, "Credit Check Run Status", 1400l),
+	PRICE_TYPE (15, "Price Type", 1500l),
+	AVERAGING_RULE (16, "Averaging Rule", 1600l),
+	STOP_TRIGGER_TYPE (17, "Stop Trigger Type", 1700l),
+	PROCESS_TRANSITION_TYPE (18, "Process Transition Type", 1800l),
+	CREDIT_CHECK_OUTCOME (19, "Credit Check Outcome", 1900l),
+	PORTFOLIO (20, "Internal Portfolio", 2000l),
+	DELETION_FLAG (21, "Deletion Flag", 2100l),	
+	METAL_FORM (22, "Form", 2200l),
+	METAL_LOCATION (23, "Location", 2300l),
+	VALIDATION_TYPE (24, "Validation Type", 2400l),
+	SYMBOLIC_DATE (25, "Symbolic Date", 2500l),
+	REF_SOURCE (26, "Ref Source", 2600l),
+	CONTRACT_TYPE (27, "Contract Type", 2700l),
 	;
 	
 	private final ReferenceTypeTo refType;
 	
-	private DefaultReferenceType (long id, String name) {
+	private DefaultReferenceType (long id, String name, Long sortColumn) {
 		refType = ImmutableReferenceTypeTo.builder()
 			.id(id)
 			.name(name)
+			.sortColumn(sortColumn)
 			.build();
 	}
 	

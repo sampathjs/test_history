@@ -21,7 +21,8 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "reference_type", 
     indexes = { @Index(name = "i_reference_type_id", columnList = "reference_type_id", unique = true),
-        @Index(name = "i_reference_type_name", columnList = "name", unique = true) })
+        @Index(name = "i_reference_type_name", columnList = "name", unique = true),
+    	@Index(name = "i_reference_type_sort_column", columnList = "sort_column", unique = false)})
 public class ReferenceType {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reference_type_id_seq")
@@ -32,6 +33,9 @@ public class ReferenceType {
 
 	@Column(name = "name", nullable = false)
 	private String name;
+	
+	@Column(name = "sort_column", nullable = true)
+	private Long sortColumn;
  	
 	/**
 	 * For JPA purposes only. Do not use.
@@ -39,8 +43,9 @@ public class ReferenceType {
 	protected ReferenceType() {
 	}
 
-	public ReferenceType(final String name) {
+	public ReferenceType(final String name, Long sortColumn) {
 		this.name = name;
+		this.sortColumn = sortColumn;
 	}
 
 	public Long getId() {
@@ -57,6 +62,14 @@ public class ReferenceType {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Long getSortColumn() {
+		return sortColumn;
+	}
+
+	public void setSortColumn(Long sortColumn) {
+		this.sortColumn = sortColumn;
 	}
 
 	@Override

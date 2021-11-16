@@ -25,7 +25,8 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 @Entity
 @Table(name = "expiration_status", 
     indexes = { @Index(name = "i_expiration_status_id", columnList = "expiration_status_id", unique = true),
-        @Index(name = "i_expiration_status_name_reference", columnList = "name_reference_id", unique = false) },
+        @Index(name = "i_expiration_status_name_reference", columnList = "name_reference_id", unique = false),
+        @Index(name = "i_expiration_status_sort_column", columnList = "sort_column", unique = false)},
 	uniqueConstraints = { @UniqueConstraint(columnNames = { "name_reference_id", "order_type_reference_id" }) })
 public class ExpirationStatus {
 	@Id
@@ -43,8 +44,11 @@ public class ExpirationStatus {
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="order_type_reference_id")
 	@ReferenceTypeDesignator(referenceTypes=DefaultReferenceType.ORDER_TYPE_NAME)
-	private Reference orderType;	
-	
+	private Reference orderType;
+
+	@Column(name = "sort_column", nullable = true)
+	private Long sortColumn;
+
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
@@ -78,6 +82,14 @@ public class ExpirationStatus {
 
 	public void setOrderType(Reference orderType) {
 		this.orderType = orderType;
+	}
+
+	public Long getSortColumn() {
+		return sortColumn;
+	}
+
+	public void setSortColumn(Long sortColumn) {
+		this.sortColumn = sortColumn;
 	}
 
 	@Override

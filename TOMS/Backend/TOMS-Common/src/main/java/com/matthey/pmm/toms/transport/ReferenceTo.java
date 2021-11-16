@@ -38,4 +38,8 @@ public abstract class ReferenceTo {
     @Nullable
     @JsonIgnore
     public abstract Long endurId();
+    
+    @Auxiliary
+    @Nullable
+    public abstract Long sortColumn();
 }

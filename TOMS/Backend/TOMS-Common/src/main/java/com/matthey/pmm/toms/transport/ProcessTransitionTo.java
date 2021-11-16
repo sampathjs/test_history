@@ -33,4 +33,8 @@ public abstract class ProcessTransitionTo {
     @Auxiliary
     @Nullable
     public abstract List<String> unchangeableAttributes();
+    
+    @Auxiliary
+    @Nullable
+    public abstract Long sortColumn();
 }

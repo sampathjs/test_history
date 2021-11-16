@@ -32,7 +32,7 @@ public class ReferenceRepoTest extends AbstractRepositoryTestBase<Reference, Lon
 	@Override
 	protected Supplier<List<Reference>> listProvider() {
 		return () -> {
-			return Arrays.asList(new Reference(refTypeConverter.toManagedEntity(DefaultReferenceType.BUY_SELL.getEntity()), "value", "display name", -1));
+			return Arrays.asList(new Reference(refTypeConverter.toManagedEntity(DefaultReferenceType.BUY_SELL.getEntity()), "value", "display name", -1, 1000l));
 		};
 	}
 

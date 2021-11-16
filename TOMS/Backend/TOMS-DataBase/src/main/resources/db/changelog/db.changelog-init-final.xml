@@ -17,6 +17,10 @@
       <column name="name"/>
     </createIndex>
 
+	<createIndex indexName="i_reference_type_sort_column" tableName="reference_type" unique="false">
+      <column name="sort_column"/>
+    </createIndex>
+
 	<!--  reference  -->
 	<createIndex indexName="i_reference_id" tableName="reference" unique="true">
       <column name="reference_id"/>
@@ -26,6 +30,10 @@
       <column name="reference_type_id"/>
       <column name="value"/>
     </createIndex>
+    
+  	<createIndex indexName="i_reference_sort_column" tableName="reference" unique="false">
+      <column name="sort_column"/>
+    </createIndex>    
     
     <addUniqueConstraint  
             tableName="reference"
@@ -61,12 +69,16 @@
   	<createIndex indexName="i_expiration_status_name_reference" tableName="expiration_status" unique="false">
       <column name="name_reference_id"/>
     </createIndex>
+    
+  	<createIndex indexName="i_expiration_status_sort_column" tableName="expiration_status" unique="false">
+      <column name="sort_column"/>
+    </createIndex>
 
     <addUniqueConstraint  
             tableName="expiration_status"
             columnNames="name_reference_id,order_type_reference_id"  
             constraintName="unique_constraint_expiration_status"
-            validate="true"/>
+            validate="true"/>            
     
     <!-- Order Status  -->
   	<createIndex indexName="i_order_status_id" tableName="order_status" unique="true">
@@ -75,6 +87,10 @@
 
   	<createIndex indexName="i_order_status_name_reference" tableName="order_status" unique="false">
       <column name="name_reference_id"/>
+    </createIndex>
+    
+  	<createIndex indexName="i_order_status_sort_column" tableName="order_status" unique="false">
+      <column name="sort_column"/>
     </createIndex>
 
     <addUniqueConstraint  
@@ -96,6 +112,10 @@
       <column name="process_transition_id"/>
     </createIndex>
     
+   	<createIndex indexName="i_process_transition_sort_column" tableName="process_transition" unique="false">
+      <column name="sort_column"/>
+    </createIndex>
+    
     <addUniqueConstraint  
          tableName="process_transition"
          columnNames="reference_category_id,from_status_id,to_status_id"  
@@ -110,6 +130,10 @@
     <createIndex indexName="i_party_type" tableName="party" unique="false">
       <column name="reference_party_type_id"/>
     </createIndex>  
+    
+  	<createIndex indexName="i_party_sort_column" tableName="party" unique="false">
+      <column name="sort_column"/>
+    </createIndex>
 
     <addUniqueConstraint  
          tableName="party"
@@ -138,6 +162,10 @@
   	<createIndex indexName="i_index_name" tableName="index" unique="true">
     	<column name="reference_index_name_id"/>
   	</createIndex>
+  	
+  	<createIndex indexName="i_index_sort_column" tableName="index" unique="false">
+      <column name="sort_column"/>
+    </createIndex>
   	
   	<!--  Order Comment -->
   	<createIndex indexName="i_order_comment_id" tableName="order_comment" unique="true">

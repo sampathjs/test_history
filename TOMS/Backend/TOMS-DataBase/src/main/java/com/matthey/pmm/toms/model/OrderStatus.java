@@ -25,7 +25,8 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 @Entity
 @Table(name = "order_status", 
     indexes = { @Index(name = "i_order_status_id", columnList = "order_status_id", unique = true),
-        @Index(name = "i_order_status_name_reference", columnList = "name_reference_id", unique = false) },
+        @Index(name = "i_order_status_name_reference", columnList = "name_reference_id", unique = false),
+        @Index(name = "i_order_status_sort_column", columnList = "sort_column", unique = false)},
 	uniqueConstraints = { @UniqueConstraint(columnNames = { "name_reference_id", "order_type_reference_id" }) })
 public class OrderStatus {
 	@Id
@@ -45,15 +46,19 @@ public class OrderStatus {
 	@ReferenceTypeDesignator(referenceTypes=DefaultReferenceType.ORDER_TYPE_NAME)
 	private Reference orderType;	
 	
+	@Column(name = "sort_column", nullable = true)
+	private Long sortColumn;
+	
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
 	protected OrderStatus() {
 	}
 
-	public OrderStatus(final Reference orderStatusName, final Reference orderType) {
+	public OrderStatus(final Reference orderStatusName, final Reference orderType, Long sortColumn) {
 		this.orderStatusName = orderStatusName;
 		this.orderType = orderType;
+		this.sortColumn = sortColumn;
 	}
 
 	public Long getId() {
@@ -78,6 +83,14 @@ public class OrderStatus {
 
 	public void setOrderType(Reference orderType) {
 		this.orderType = orderType;
+	}
+
+	public Long getSortColumn() {
+		return sortColumn;
+	}
+
+	public void setSortColumn(Long sortColumn) {
+		this.sortColumn = sortColumn;
 	}
 
 	@Override

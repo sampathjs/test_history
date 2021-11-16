@@ -41,21 +41,23 @@ public class OrderStatusConverter extends EntityToConverter<OrderStatus, OrderSt
 				.id(entity.getId())
 				.idOrderStatusName(entity.getOrderStatusName().getId())
 				.idOrderTypeName(entity.getOrderType().getId())
+				.sortColumn(entity.getSortColumn())
 				.build();
 	}
 
 	@Override
 	public OrderStatus toManagedEntity(OrderStatusTo to) {
-		Reference OrderStatus = loadRef(to, to.idOrderStatusName());
+		Reference orderStatus = loadRef(to, to.idOrderStatusName());
 		Reference orderTypeName = loadRef(to, to.idOrderTypeName());
 		
 		Optional<OrderStatus> existingEntity = entityRepo.findById(to.id());
 		if (existingEntity.isPresent()) {
-			existingEntity.get().setOrderStatusName(OrderStatus);
+			existingEntity.get().setOrderStatusName(orderStatus);
 			existingEntity.get().setOrderType(orderTypeName);
+			existingEntity.get().setSortColumn(to.sortColumn());
 			return existingEntity.get();
 		}
-		OrderStatus newEntity = new OrderStatus(OrderStatus, orderTypeName);
+		OrderStatus newEntity = new OrderStatus(orderStatus, orderTypeName, to.sortColumn());
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;
 	}

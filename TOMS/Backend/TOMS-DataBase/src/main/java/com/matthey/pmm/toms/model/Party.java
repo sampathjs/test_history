@@ -24,8 +24,9 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 @Entity
 @Table(name = "party", 
     indexes = { @Index(name = "i_party_id", columnList = "party_id", unique = true),
-        @Index(name = "i_party_type", columnList = "reference_party_type_id", unique = false) },
-    		uniqueConstraints = { @UniqueConstraint(columnNames = { "reference_party_type_id", "name" }) })
+        @Index(name = "i_party_type", columnList = "reference_party_type_id", unique = false),
+        @Index(name = "i_party_sort_column", columnList = "sort_column", unique = false)},
+    		uniqueConstraints = { @UniqueConstraint(columnNames = { "reference_party_type_id", "name"}) })
 public class Party {	
 	@Id
 	@Column(name = "party_id", updatable = false, nullable = false)
@@ -43,16 +44,20 @@ public class Party {
 	@JoinColumn(name="legal_entity_id", nullable = true)
 	private Party legalEntity;
 	
+	@Column(name = "sort_column", nullable = true)
+	private Long sortColumn;
+	
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
 	protected Party() {
 	}
 
-	public Party(final String name, final Reference type, Party legalEntity) {
+	public Party(final String name, final Reference type, Party legalEntity, Long sortColumn) {
 		this.name = name;
 		this.type = type;
 		this.legalEntity = legalEntity;
+		this.sortColumn = sortColumn;
 	}
 
 	public Long getId() {
@@ -85,6 +90,14 @@ public class Party {
 
 	public void setLegalEntity(Party legalEntity) {
 		this.legalEntity = legalEntity;
+	}
+
+	public Long getSortColumn() {
+		return sortColumn;
+	}
+
+	public void setSortColumn(Long sortColumn) {
+		this.sortColumn = sortColumn;
 	}
 
 	@Override

@@ -25,7 +25,8 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name = "reference", 
     indexes = { @Index(name = "i_reference_id", columnList = "reference_id", unique = true),
-        @Index(name = "i_reference_type_value", columnList = "reference_type_id,value", unique = true) },
+        @Index(name = "i_reference_type_value", columnList = "reference_type_id,value", unique = true),
+        @Index(name = "i_reference_sort_column", columnList = "sort_column",  unique=false)},
     		uniqueConstraints = { @UniqueConstraint(columnNames = { "reference_type_id", "value" }) })
 public class Reference {
 	@Id
@@ -48,6 +49,9 @@ public class Reference {
 	@Column(name = "endur_id")
 	private Long endurId;
 	
+	@Column(name = "sort_column", nullable = true)
+	private Long sortColumn;
+	
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
@@ -55,11 +59,12 @@ public class Reference {
 	}
 
 	public Reference(final ReferenceType type, final String value, final String displayName, 
-			long endurId) {
+			long endurId, Long sortColumn) {
 		this.value = value;
 		this.type = type;
 		this.displayName = displayName;
 		this.endurId = endurId;
+		this.sortColumn = sortColumn;
 	}
 
 	public Long getId() {
@@ -100,6 +105,14 @@ public class Reference {
 
 	public void setEndurId(Long endurId) {
 		this.endurId = endurId;
+	}
+	
+	public Long getSortColumn() {
+		return sortColumn;
+	}
+
+	public void setSortColumn(Long sortColumn) {
+		this.sortColumn = sortColumn;
 	}
 
 	@Override

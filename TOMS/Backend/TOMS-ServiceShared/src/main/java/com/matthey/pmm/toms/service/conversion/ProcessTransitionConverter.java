@@ -44,6 +44,7 @@ public class ProcessTransitionConverter extends EntityToConverter<ProcessTransit
 				.referenceCategoryId(entity.getReferenceCategory().getId())
 				.id(entity.getId())
 				.fromStatusId(entity.getFromStatusId())
+				.sortColumn(entity.getSortColumn())
 				.build();
 	}
 
@@ -56,9 +57,10 @@ public class ProcessTransitionConverter extends EntityToConverter<ProcessTransit
 			existingEntity.get().setToStatusId(to.toStatusId());
 			existingEntity.get().setReferenceCategory(referenceCategory);
 			existingEntity.get().setFromStatusId(to.fromStatusId());
+			existingEntity.get().setSortColumn(to.sortColumn());
 			return existingEntity.get();
 		} 
-		ProcessTransition newEntity = new ProcessTransition(referenceCategory, to.fromStatusId(), to.toStatusId(), 
+		ProcessTransition newEntity = new ProcessTransition(referenceCategory, to.fromStatusId(), to.toStatusId(), to.sortColumn(),
 				new ArrayList<>(to.unchangeableAttributes()));
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;

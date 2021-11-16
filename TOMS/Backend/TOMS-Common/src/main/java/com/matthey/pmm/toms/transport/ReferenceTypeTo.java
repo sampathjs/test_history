@@ -24,4 +24,8 @@ public abstract class ReferenceTypeTo {
     @Nullable
     @Auxiliary
     public abstract String name();
+    
+    @Auxiliary
+    @Nullable
+    public abstract Long sortColumn();
 }

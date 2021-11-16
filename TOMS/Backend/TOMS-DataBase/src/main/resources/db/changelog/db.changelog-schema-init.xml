@@ -15,12 +15,14 @@
          <column name="name" type="varchar(64)">
            <constraints nullable="false"/>
          </column>
+         <column name="sort_column" type="int">
+         	<constraints nullable="true"/>
+         </column>
      </createTable>  
      
 	<createSequence sequenceName="reference_type_id_seq" incrementBy="1" startValue="10000" />
      
     <!--  Reference -->
-  
     <createTable tableName="reference">
          <column name="reference_id" type="int">
            <constraints primaryKey="true"/>
@@ -34,6 +36,9 @@
         	 <constraints nullable="false"/>
          </column>
          <column name="endur_id" type="int">
+         </column>
+         <column name="sort_column" type="int">
+         	<constraints nullable="true"/>
          </column>
      </createTable>
      
@@ -94,6 +99,9 @@
        <column name="order_type_reference_id" type="int">
          <constraints nullable="false"/>
        </column>
+       <column name="sort_column" type="int">
+       	 <constraints nullable="true"/>
+       </column>       
     </createTable>
     
 	<createSequence sequenceName="expiration_status_id_seq" incrementBy="1" startValue="10000" />
@@ -129,6 +137,9 @@
        <column name="order_type_reference_id" type="int">
          <constraints nullable="false"/>
        </column>
+       <column name="sort_column" type="int">
+         <constraints nullable="true"/>
+       </column>       
     </createTable>
     
 	<createSequence sequenceName="order_status_id_seq" incrementBy="1" startValue="10000" />
@@ -167,6 +178,9 @@
        <column name="to_status_id" type="int">
          <constraints nullable="false"/>
        </column>       
+       <column name="sort_column" type="int">
+         <constraints nullable="true"/>
+       </column>       
     </createTable>
     
     <createSequence sequenceName="process_transition_id_seq" incrementBy="1" startValue="10000" />
@@ -202,6 +216,9 @@
          <constraints nullable="false"/>
        </column>
        <column name="legal_entity_id" type="int">
+         <constraints nullable="true"/>
+       </column>
+       <column name="sort_column" type="int">
          <constraints nullable="true"/>
        </column>
     </createTable>
@@ -320,6 +337,9 @@
        <column name="reference_currency_two_id" type="int">
          <constraints nullable="false"/>
        </column>
+       <column name="sort_column" type="int">
+         <constraints nullable="true"/>
+       </column>
     </createTable>
     
     <addForeignKeyConstraint
@@ -374,7 +394,7 @@
        </column>      
        <column name="deletion_flag_reference_id" type="int">
          <constraints nullable="false"/>
-       </column>      
+       </column>
     </createTable>
     
     <createSequence sequenceName="order_comment_id_seq" incrementBy="1" startValue="1000000" /> 
