@@ -23,7 +23,8 @@ import com.openlink.util.misc.TableUtilities;
 * 2021-06-07	V1.4	jwaechter		- Now offering the option to load email body context from
 * 										  Endur DB file system.
 * 2021-07-01	V1.5	jwaechter       - Hiding links for next doc status 3 Fixed and Sent
-* 2021-09-08	V1.6	ganapP02        - instead on hiding the link, removing the whole tag from the email template.
+* 2021-09-08	V1.6	ganapP02        - EPI-1718 - instead on hiding the link, removing the whole tag from the email template.
+* 2021-11-16	V1.7	SalviK01        - EPI-1939 - Change message type to HTML.
 **/
 
 class DocOutput_wMail extends DocOutput
@@ -75,11 +76,14 @@ class DocOutput_wMail extends DocOutput
 			int rowDisplayStyle = argt.getTable("process_data", 1).getTable("user_data", 1).findString("col_name", "jmActionUrlDisplayStyle", SEARCH_ENUM.FIRST_IN_GROUP);
 			String displayStyle = rowDisplayStyle <= 0 ? "" : argt.getTable("process_data", 1).getTable("user_data", 1).getString("col_data", rowDisplayStyle);
 			int nextStatusId = argt.getTable(PROCESS_DATA, 1).getInt("next_doc_status", 1);
-
+			int docType = argt.getTable(PROCESS_DATA, 1).getInt("doc_type", 1);
+			
+			String intBU = token.getUserData(argt.getTable("process_data", 1).getTable("user_data", 1), "olfIntBUShortName");
 			// doc status 19 = 3 Fixed and Sent
-			if (isCancellationDoc () || rowDisplayStyle < 1 || nextStatusId == 19 || "None".equalsIgnoreCase(displayStyle)) {
+			if (docType == 2 && (isCancellationDoc () || nextStatusId == 19 || rowDisplayStyle < 1
+					|| (("JM PMM UK".equals(intBU) || "JM PMM US".equals(intBU)) && "None".equalsIgnoreCase(displayStyle)))){
 				message = message.replace("%jmActionUrlDisplayStyle%", "None");
-				message = message.replace(message.substring(message.indexOf("<p style"), message.lastIndexOf("</p>")+5), "");
+				message = message.replace(message.substring(message.indexOf("<p style"), message.lastIndexOf("</p>")+5), "");					
 			}
 			recipients = token.replaceTokens(recipients, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Recipients");
 			subject    = token.replaceTokens(subject, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Subject");
@@ -97,7 +101,7 @@ class DocOutput_wMail extends DocOutput
 			if (sender.contains("%"))
 				sender = tryRetrieveSettingFromConstRepo("[EnhanceVars]", sender, true);
 
-			String intBU = token.getUserData(argt.getTable("process_data", 1).getTable("user_data", 1), "olfIntBUShortName");
+//			String intBU = token.getUserData(argt.getTable("process_data", 1).getTable("user_data", 1), "olfIntBUShortName");
 			if ("JM PMM US".equals(intBU)) {
 				String doNotReplyText = tryRetrieveSettingFromConstRepo("Do_Not_Reply_Email_Message_Text_US", "", false);
 				message = (message.indexOf("<DoNotReplyText>") > -1) ? message.replace("<DoNotReplyText>", doNotReplyText) : message;
@@ -116,10 +120,11 @@ class DocOutput_wMail extends DocOutput
 			// ensure backward compatibility to avoid touching the recipients lists.
 			// The , syntax is also enforced in class JM_OUT_DocOutput_wMail.
 			recipients = recipients.replaceAll(",", ";");
-			EMAIL_MESSAGE_TYPE messageType = (message.contains("<HTML>"))?
-					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML:
-					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT
-				;
+//			EMAIL_MESSAGE_TYPE messageType = (message.contains("<HTML>"))?
+//					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML:
+//					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT
+//				;
+			EMAIL_MESSAGE_TYPE messageType = EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML;
 			
 			EmailMessage emailMessage = EmailMessage.create();
 			emailMessage.addBodyText(message, messageType);
