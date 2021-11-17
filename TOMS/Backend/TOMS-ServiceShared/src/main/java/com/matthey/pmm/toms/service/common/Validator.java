@@ -8,10 +8,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
@@ -47,6 +51,7 @@ import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
 import com.matthey.pmm.toms.service.exception.IllegalIdException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
+import com.matthey.pmm.toms.service.exception.IllegalSortColumnException;
 import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
 import com.matthey.pmm.toms.service.exception.IllegalValueException;
 import com.matthey.pmm.toms.service.exception.IllegalVersionException;
@@ -317,6 +322,25 @@ public class Validator {
     		}
     	}
 	}
+	
+	
+	public static Pageable verifySorts (Pageable pageable, Class clazz, String method, String argument, Map<String, String> columnMap) {
+		
+		for (org.springframework.data.domain.Sort.Order sortOrder : pageable.getSort() ) {
+			if (!columnMap.containsKey(sortOrder.getProperty())) {
+				throw new IllegalSortColumnException(clazz, method, argument, sortOrder.getProperty(), columnMap.keySet().toString());
+			}
+		}
+		
+		Sort mappedSort = 		
+				Sort.by(pageable.getSort().stream()
+				  .map( x -> new Sort.Order(x.getDirection(), columnMap.get(x.getProperty())) )
+				  .collect(Collectors.toList()));
+
+		PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), mappedSort);
+		return pageRequest;
+	}
+
 	
 	
 	private <T> void verifyUnchangedStates (Class clazz, String method, String argument, ProcessTransitionTo transition, T oldEntity, T newEntity) {
@@ -806,5 +830,4 @@ public class Validator {
 			throw new IllegalDateFormatException (clazz, methodName, argument + ".runDateTime", TomsService.DATE_TIME_FORMAT, dateTime);
 		}
 	}
-
 }

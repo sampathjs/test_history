@@ -2,7 +2,10 @@ package com.matthey.pmm.toms.service.impl;
 
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -10,9 +13,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +42,7 @@ import com.matthey.pmm.toms.service.common.Validator;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
+import com.matthey.pmm.toms.service.exception.IllegalSortColumnException;
 import com.matthey.pmm.toms.service.exception.IllegalStateException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
@@ -49,6 +57,7 @@ import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
+@PropertySource("classpath:mapping/Order.properties")
 public abstract class OrderControllerImpl implements TomsOrderService {
 	@Autowired
 	protected Validator validator;
@@ -70,10 +79,16 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 
 	@Autowired
 	protected ReferenceOrderLegConverter referenceOrderLegConverter;	
+		
+	@Value("#{${search.mapping.abstractOrder}}")  
+	private Map<String,String> abstractOrderSearchMap;
 	
-	public static final AtomicLong ID_COUNTER_ORDER = new AtomicLong(20000);
-	public static final List<OrderTo> CUSTOM_ORDERS = new CopyOnWriteArrayList<>();
-	
+	@Value("#{${search.mapping.limitOrder}}")  
+	private Map<String,String> limitOrderSearchMap;
+
+	@Value("#{${search.mapping.referenceOrder}}")  
+	private Map<String,String> referenceOrderSearchMap;
+		
 	@Override
     @ApiOperation("Retrieval of Limit Order Data")
 	public Set<OrderTo> getLimitOrders (
@@ -120,7 +135,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	    // Validation of the input parameters required or not?
 //		Optional<Party> intBu = validator.verifyParty(internalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), getClass(), "getLimitOrders", "internalBuId", true);
 //		Optional<Party> extBu = validator.verifyParty(externalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT), getClass(), "getLimitOrders", "externalBuId", true);
-//		Optional<Reference> buySell = validator.verifyDefaultReference(buySellId, Arrays.asList(DefaultReferenceType.BUY_SELL), getClass(), "getLimitOrders", "buySellId", true); 
+//		Optional<Reference> buySell = validator.verifyDefaultReference(buySellId, Arrays.asList(DefaultReferenceType.BUY_SELL), getClass(), "getLimitOrders", "buySellId", true);
 		Date minCreatedAt = validator.verifyDateTime (minCreatedAtDate, getClass(), "getLimitOrders", "minCreatedAtDate");
 		Date maxCreatedAt = validator.verifyDateTime (maxCreatedAtDate, getClass(), "getLimitOrders", "maxCreatedAtDate");
 		Date minLastUpdate = validator.verifyDateTime (minLastUpdateDate, getClass(), "getLimitOrders", "minLastUpdateDate");
@@ -132,6 +147,12 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		Date minExpiry = validator.verifyDateTime (minExpiryDate, getClass(), "getLimitOrders", "minExpiryDate");
 		Date maxExpiry = validator.verifyDateTime (maxExpiryDate, getClass(), "getLimitOrders", "maxExpiryDate");
 		
+		Map<String,String> allMappings = new HashMap<String, String> ();
+		allMappings.putAll(abstractOrderSearchMap);
+		allMappings.putAll(limitOrderSearchMap);
+				
+		Pageable mappedPageable = Validator.verifySorts(pageable, getClass(), "getLimitOrders", "sort", allMappings);
+		
 		List<LimitOrder> matchingOrders = limitOrderRepo.findByOrderIdAndOptionalParameters(noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
 				noEmptyList(idExternalBu), noEmptyList(idInternalLe), noEmptyList(idExternalLe),
 				noEmptyList(idInternalPfolio), noEmptyList(idExternalPfolio), noEmptyList(idBuySell), 
@@ -141,7 +162,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				minSettle, maxSettle, minStartConcrete, maxStartConcrete, noEmptyList(idStartDateSymbolic), noEmptyList(idPriceType), noEmptyList(idYesNoPartFillable), 
 				noEmptyList(idStopTriggerType), noEmptyList(idCurrencyCrossMetal),
 				noEmptyList(idValidationType), minExpiry, maxExpiry, minExecutionLikelihood, maxExecutionLikelihood, minLimitPrice, maxLimitPrice,
-				pageable);
+				mappedPageable);
 		return matchingOrders.stream()
 				.map(x -> limitOrderConverter.toTo(x))
 				.collect(Collectors.toSet());
@@ -244,6 +265,12 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		Date minLegFixingEnd = validator.verifyDateTime (maxLastUpdateDate, getClass(), "getReferenceOrders", "minLegFixingEndDate");
 		Date maxLegFixingEnd = validator.verifyDateTime (maxLastUpdateDate, getClass(), "getReferenceOrders", "maxLegFixingEndDate");
 		
+		Map<String,String> allMappings = new HashMap<String, String> ();
+		allMappings.putAll(abstractOrderSearchMap);
+		allMappings.putAll(referenceOrderSearchMap);	
+		
+		Pageable mappedPageable = Validator.verifySorts(pageable,  getClass(), "getReferenceOrders", "sort", allMappings);
+		
 		Page<ReferenceOrder> matchingOrders = referenceOrderRepo.findByOrderIdAndOptionalParameters(noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
 				noEmptyList(idExternalBu), noEmptyList(idInternalLe), noEmptyList(idExternalLe),
 				noEmptyList(idInternalPfolio), noEmptyList(idExternalPfolio), noEmptyList(idBuySell), 
@@ -254,7 +281,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				noEmptyList(idContractType), noEmptyList(idLeg), minLegNotonal, maxLegNotional, minLegFixingStart, 
 				maxLegFixingStart, minLegFixingEnd, maxLegFixingEnd, 
 				noEmptyList(idLegPaymentOffset), noEmptyList(idLegSettleCurrency), noEmptyList(idLegRefSource), noEmptyList(idLegFxIndexRefSource),
-				pageable
+				mappedPageable
 				);
 				
 		return matchingOrders.stream()
