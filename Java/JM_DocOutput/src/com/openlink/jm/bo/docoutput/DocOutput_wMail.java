@@ -80,10 +80,12 @@ class DocOutput_wMail extends DocOutput
 			
 			String intBU = token.getUserData(argt.getTable("process_data", 1).getTable("user_data", 1), "olfIntBUShortName");
 			// doc status 19 = 3 Fixed and Sent
-			if (docType == 2 && (isCancellationDoc () || nextStatusId == 19 || rowDisplayStyle < 1
-					|| (("JM PMM UK".equals(intBU) || "JM PMM US".equals(intBU)) && "None".equalsIgnoreCase(displayStyle)))){
+			if (docType == 2 && (isCancellationDoc() || nextStatusId == 19 || rowDisplayStyle < 1
+							|| (("JM PMM UK".equals(intBU) || "JM PMM US".equals(intBU)) && "None".equalsIgnoreCase(displayStyle)))) {
 				message = message.replace("%jmActionUrlDisplayStyle%", "None");
-				message = message.replace(message.substring(message.indexOf("<p style"), message.lastIndexOf("</p>")+5), "");					
+				if(message.indexOf("<p style") >0 ){
+					message = message.replace(message.substring(message.indexOf("<p style"), message.lastIndexOf("</p>") + 5), "");	
+				}
 			}
 			recipients = token.replaceTokens(recipients, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Recipients");
 			subject    = token.replaceTokens(subject, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Subject");
