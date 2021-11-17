@@ -21,8 +21,7 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
    @Query("SELECT o FROM ReferenceOrder o WHERE o.orderId = :orderId AND o.version = (SELECT MAX(ro2.version) FROM ReferenceOrder ro2 WHERE ro2.orderId = :orderId)") 
    Optional<ReferenceOrder> findLatestByOrderId(@Param("orderId")long orderId);
       
-   @Query("SELECT DISTINCT o FROM ReferenceOrder o \n"
-		   + "  LEFT JOIN o.legs legs\n"
+   @Query("SELECT o FROM ReferenceOrder o \n"
    		   + "WHERE \n"
 		   + "     (COALESCE(:orderIds) IS NULL OR o.orderId IN (:orderIds))\n"
 		   + " AND ((COALESCE(:versionIds) IS NULL AND (o.version = (SELECT MAX(ro2.version) FROM ReferenceOrder ro2 WHERE ro2.orderId = o.orderId))) OR o.version IN (:versionIds))\n"
@@ -53,17 +52,19 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
 		   + " AND (:minContangoBackwardation IS NULL OR o.contangoBackwardation >= :minContangoBackwardation)\n" 
 		   + " AND (:maxContangoBackwardation IS NULL OR o.contangoBackwardation <= :maxContangoBackwardation)\n"
 		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"
-		   + " AND (COALESCE(:legIds) IS NULL OR legs.id IN (:legIds))"
-		   + " AND (:minLegNotional IS NULL OR legs.notional >= :minLegNotional)\n" 
-		   + " AND (:maxLegNotional IS NULL OR legs.notional >= :maxLegNotional)\n" 
-		   + " AND (:minLegFixingStartDate IS NULL OR legs.fixingStartDate >= :minLegFixingStartDate)\n" 
-		   + " AND (:maxLegFixingStartDate IS NULL OR legs.fixingStartDate >= :maxLegFixingStartDate)\n" 
-		   + " AND (:minLegFixingEndDate IS NULL OR legs.fixingStartDate >= :minLegFixingEndDate)\n" 
-		   + " AND (:maxLegFixingEndDate IS NULL OR legs.fixingEndDate >= :maxLegFixingEndDate)\n" 
-		   + " AND (COALESCE(:idLegPaymentOffset) IS NULL OR legs.paymentOffset.id IN (:idLegPaymentOffset))"
-		   + " AND (COALESCE(:idLegSettlementCurrencies) IS NULL OR legs.settleCurrency.id IN (:idLegSettlementCurrencies))"
-		   + " AND (COALESCE(:idRefSources) IS NULL OR legs.refSource.id IN (:idRefSources))"
-		   + " AND (COALESCE(:idLegFxIndexRefSource) IS NULL OR legs.fxIndexRefSource.id IN (:idLegFxIndexRefSource))"
+		   + " AND ( (SELECT COUNT (l) FROM o.legs l\n" // start legs part
+		   + "    WHERE (    (COALESCE(:legIds) IS NULL OR l.id IN (:legIds))\n"
+		   + " 			 AND (:minLegNotional IS NULL OR l.notional >= :minLegNotional)\n" 
+		   + " 			 AND (:maxLegNotional IS NULL OR l.notional >= :maxLegNotional)\n" 
+		   + " 			 AND (:minLegFixingStartDate IS NULL OR l.fixingStartDate >= :minLegFixingStartDate)\n" 
+		   + " 			 AND (:maxLegFixingStartDate IS NULL OR l.fixingStartDate >= :maxLegFixingStartDate)\n" 
+		   + " 			 AND (:minLegFixingEndDate IS NULL OR l.fixingStartDate >= :minLegFixingEndDate)\n" 
+		   + " 			 AND (:maxLegFixingEndDate IS NULL OR l.fixingEndDate >= :maxLegFixingEndDate)\n" 
+		   + " 			 AND (COALESCE(:idLegPaymentOffset) IS NULL OR l.paymentOffset.id IN (:idLegPaymentOffset))\n"
+		   + " 			 AND (COALESCE(:idLegSettlementCurrencies) IS NULL OR l.settleCurrency.id IN (:idLegSettlementCurrencies))\n"
+		   + " 			 AND (COALESCE(:idRefSources) IS NULL OR l.refSource.id IN (:idRefSources))\n"
+		   + " 			 AND (COALESCE(:idLegFxIndexRefSource) IS NULL OR l.fxIndexRefSource.id IN (:idLegFxIndexRefSource))\n"
+		   + ")) > 0 )" // end legs part
 		   )
    Page<ReferenceOrder> findByOrderIdAndOptionalParameters (@Param("orderIds") List<Long> orderIds, 
 		   @Param("versionIds") List<Integer> versionIds, @Param("idInternalBu") List<Long> idInternalBu,  

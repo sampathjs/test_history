@@ -45,7 +45,7 @@ public interface TomsOrderService {
                         "Default sort order is ascending. " +
                         "Multiple sort criteria are supported.")
     })
-	public Set<OrderTo> getLimitOrders (
+	public List<OrderTo> getLimitOrders (
 			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
 			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
 			@ApiParam(value = "List of the internal BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20006", example = "20006", required = false) @RequestParam(required=false) List<Long> idInternalBu,
@@ -109,7 +109,7 @@ public interface TomsOrderService {
                         "Default sort order is ascending. " +
                         "Multiple sort criteria are supported.")
     })
-	public Set<OrderTo> getReferenceOrders (
+	public List<OrderTo> getReferenceOrders (
 			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
 			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
 			@ApiParam(value = "List of the internal BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20006", example = "20006", required = false) @RequestParam(required=false) List<Long> idInternalBu,

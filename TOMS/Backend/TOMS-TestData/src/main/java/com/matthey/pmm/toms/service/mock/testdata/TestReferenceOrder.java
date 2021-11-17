@@ -45,7 +45,7 @@ public enum TestReferenceOrder {
 			// reference order fields
 			DefaultReference.CONTRACT_TYPE_FIXING, 100d, 
 			null, 45d, 
-			Arrays.asList(),
+			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_9),
 			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1), Arrays.asList(TestOrderComment.TEST_COMMENT_6)
 			),		
 	TEST_ORDER_3(100005, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
@@ -59,7 +59,7 @@ public enum TestReferenceOrder {
 			30d, null, 
 			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_3, TestReferenceOrderLeg.TEST_LEG_4, 
 					TestReferenceOrderLeg.TEST_LEG_5, TestReferenceOrderLeg.TEST_LEG_6,
-					TestReferenceOrderLeg.TEST_LEG_7, TestReferenceOrderLeg.TEST_LEG_8, TestReferenceOrderLeg.TEST_LEG_9),
+					TestReferenceOrderLeg.TEST_LEG_7, TestReferenceOrderLeg.TEST_LEG_8),
 			null, null
 			),
 	;
