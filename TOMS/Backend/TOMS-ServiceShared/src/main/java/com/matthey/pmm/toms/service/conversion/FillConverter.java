@@ -54,6 +54,9 @@ public class FillConverter extends EntityToConverter<Fill, FillTo>{
 			return existingEntity.get();
 		}
 		Fill newEntity =  new Fill(to.fillQuantity(), to.fillPrice(), to.idTrade(), trader, updatedBy, parseDateTime(to, to.lastUpdateDateTime()));
+		if (to.id() >= 1) {
+			newEntity.setId(to.id());
+		}
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;
 	}

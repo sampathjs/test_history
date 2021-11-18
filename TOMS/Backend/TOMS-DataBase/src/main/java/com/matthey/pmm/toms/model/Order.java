@@ -137,21 +137,21 @@ public abstract class Order {
 	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.METAL_LOCATION})
 	private Reference metalLocation;
 	
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "order_comment_map",
 	            joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
 	            inverseJoinColumns=@JoinColumn(name = "order_comment_id"))
 	private List<OrderComment> orderComments;
 	
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@JoinTable(name = "order_fills_map",
+	@JoinTable(name = "order_fills_map", 
             joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
 	            inverseJoinColumns=@JoinColumn(name = "fill_id"))
 	private List<Fill> fills;
 	
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "order_credit_check_map",
             joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },

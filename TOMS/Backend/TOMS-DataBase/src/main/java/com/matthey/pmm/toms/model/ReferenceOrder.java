@@ -73,7 +73,7 @@ public class ReferenceOrder extends Order {
 	@Column(name="contango_backwardation", nullable=true)
 	private Double contangoBackwardation;
 	
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "reference_order_leg_map",
             joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
