@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -21,6 +23,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(as = ImmutableReferenceOrderTo.class)
 @JsonDeserialize(as = ImmutableReferenceOrderTo.class)
 @JsonRootName (value = "referenceOrder")
+@JsonTypeName(value = "referenceOrder")
+@JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME)
 public abstract class ReferenceOrderTo extends OrderTo {  
 	/*
 	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.

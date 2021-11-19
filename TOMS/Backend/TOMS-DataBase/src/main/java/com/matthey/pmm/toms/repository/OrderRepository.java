@@ -11,20 +11,21 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.matthey.pmm.toms.model.LimitOrder;
+import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.OrderVersionId;
 
 @Repository
-public interface LimitOrderRepository extends PagingAndSortingRepository<LimitOrder, OrderVersionId> {
-   List<LimitOrder> findByOrderId(long orderId); 
+public interface OrderRepository extends PagingAndSortingRepository<Order, OrderVersionId> {
+   List<Order> findByOrderId(long orderId); 
    
-   @Query("SELECT o FROM LimitOrder o WHERE o.orderId = :orderId AND o.version = (SELECT MAX(lo2.version) FROM LimitOrder lo2 WHERE lo2.orderId = :orderId)") 
-   Optional<LimitOrder> findLatestByOrderId(@Param("orderId") Long orderId);
+   @Query("SELECT o FROM Order o WHERE o.orderId = :orderId AND o.version = (SELECT MAX(lo2.version) FROM LimitOrder lo2 WHERE lo2.orderId = :orderId)") 
+   Optional<Order> findLatestByOrderId(@Param("orderId") Long orderId);
    
 
-   @Query("SELECT o FROM LimitOrder o\n"
+   @Query("SELECT o FROM Order o\n"
    		   + "WHERE \n"
 		   + "     (COALESCE(:orderIds) IS NULL OR o.orderId IN (:orderIds))\n"
-		   + " AND ((COALESCE(:versionIds) IS NULL AND (o.version = (SELECT MAX(lo2.version) FROM LimitOrder lo2 WHERE lo2.orderId = o.orderId))) OR o.version IN (:versionIds))\n"
+		   + " AND ((COALESCE(:versionIds) IS NULL AND (o.version = (SELECT MAX(o2.version) FROM Order o2 WHERE o2.orderId = o.orderId))) OR o.version IN (:versionIds))\n"
    		   + " AND (COALESCE(:idInternalBu) IS NULL OR o.internalBu.id IN (:idInternalBu))\n"  
 		   + " AND (COALESCE(:idExternalBu) IS NULL OR o.externalBu.id IN (:idExternalBu))\n"
    		   + " AND (COALESCE(:idExternalLe) IS NULL OR o.internalLe.id IN (:idInternalLe))\n"  
@@ -44,25 +45,8 @@ public interface LimitOrderRepository extends PagingAndSortingRepository<LimitOr
 		   + " AND (:maxCreatedAt IS NULL OR o.createdAt <= :maxCreatedAt)\n"
 		   + " AND (:minLastUpdate IS NULL OR o.lastUpdate >= :minLastUpdate)\n" 
 		   + " AND (:maxLastUpdate IS NULL OR o.lastUpdate <= :maxLastUpdate)\n"
-		   // all above: order fields, all below: limit order fields
-		   + " AND (:minSettle IS NULL OR o.settleDate >= :minSettle)\n" 
-		   + " AND (:maxSettle IS NULL OR o.settleDate <= :maxSettle)\n"
-		   + " AND (:minStartConcrete IS NULL OR o.startDateConcrete >= :minStartConcrete)\n" 
-		   + " AND (:maxStartConcrete IS NULL OR o.startDateConcrete <= :maxStartConcrete)\n"
-		   + " AND (COALESCE(:idStartDateSymbolic) IS NULL OR o.startDateSymbolic.id IN (:idStartDateSymbolic))\n"
-		   + " AND (COALESCE(:idPriceType) IS NULL OR o.priceType.id IN (:idPriceType))\n"
-		   + " AND (COALESCE(:idYesNoPartFillable) IS NULL OR o.yesNoPartFillable.id IN (:idYesNoPartFillable))\n"
-		   + " AND (COALESCE(:idStopTriggerType) IS NULL OR o.stopTriggerType.id IN (:idStopTriggerType))\n"
-		   + " AND (COALESCE(:idCurrencyCrossMetal) IS NULL OR o.currencyCrossMetal.id IN (:idCurrencyCrossMetal))\n" 
-		   + " AND (COALESCE(:idValidationType) IS NULL OR o.validationType.id IN (:idValidationType))\n"
-		   + " AND (:minExpiry IS NULL OR o.expiryDate >= :minExpiry)\n" 
-		   + " AND (:maxExpiry IS NULL OR o.expiryDate <= :maxExpiry)\n"
-		   + " AND (:minExecutionLikelihood IS NULL OR o.executionLikelihood >= :minExecutionLikelihood)\n" 
-		   + " AND (:maxExecutionLikelihood IS NULL OR o.executionLikelihood <= :maxExecutionLikelihood)\n"
-		   + " AND (:minLimitPrice IS NULL OR o.limitPrice >= :minLimitPrice)\n" 
-		   + " AND (:maxLimitPrice IS NULL OR o.limitPrice <= :maxLimitPrice)\n" 
 		   )
-   List<LimitOrder> findByOrderIdAndOptionalParameters(@Param("orderIds") List<Long> orderIds, 
+   List<Order> findByOrderIdAndOptionalParameters(@Param("orderIds") List<Long> orderIds, 
 		   @Param("versionIds") List<Integer> versionIds, @Param("idInternalBu") List<Long> idInternalBu,  
 		   @Param("idExternalBu") List<Long> idExternalBu,  @Param("idInternalLe") List<Long> idInternalLe,  
 		   @Param("idExternalLe") List<Long> idExternalLe,  @Param("idInternalPfolio") List<Long> idInternalPfolio, 
@@ -74,17 +58,6 @@ public interface LimitOrderRepository extends PagingAndSortingRepository<LimitOr
 		   @Param("idOrderStatus") List<Long> idOrderStatus,  @Param("minCreatedAt") Date minCreatedAt, 
 		   @Param("maxCreatedAt") Date maxCreatedAt,  @Param("minLastUpdate") Date minLastUpdate, 
 		   @Param("maxLastUpdate") Date maxLastUpdate,
-		   // all above: order fields, all below: limit order fields
-		   @Param("minSettle") Date minSettle, @Param("maxSettle") Date maxSettle,  
-		   @Param("minStartConcrete") Date minStartConcrete, @Param("maxStartConcrete") Date maxStartConcrete,  
-		   @Param("idStartDateSymbolic") List<Long> idStartDateSymbolic, @Param("idPriceType") List<Long> idPriceType, 
-		   @Param("idYesNoPartFillable") List<Long> idYesNoPartFillable, @Param("idStopTriggerType")  List<Long> idStopTriggerType,  
-		   @Param("idCurrencyCrossMetal") List<Long> idCurrencyCrossMetal, @Param("idValidationType") List<Long> idValidationType,  
-		   @Param("minExpiry") Date minExpiry, @Param("maxExpiry") Date maxExpiry, 
-		   @Param("minExecutionLikelihood") Double minExecutionLikelihood,
-		   @Param("maxExecutionLikelihood") Double maxExecutionLikelihood,
-		   @Param("minLimitPrice") Double minLimitPrice,
-		   @Param("maxLimitPrice") Double maxLimitPrice,
 		   Pageable pageable
 		   );
 }

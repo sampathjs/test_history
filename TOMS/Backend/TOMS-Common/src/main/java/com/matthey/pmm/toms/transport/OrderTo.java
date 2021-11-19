@@ -6,11 +6,19 @@ import java.util.List;
 import org.immutables.value.Value.Auxiliary;
 import org.jetbrains.annotations.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 /**
  * Abstract base class for Limit Orders and Reference Orders
  * @author jwaechter
  * @version 1.0
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
+@JsonSubTypes({
+  @JsonSubTypes.Type(value=LimitOrderTo.class, name = "LimitOrder"),
+  @JsonSubTypes.Type(value=ReferenceOrderTo.class, name = "ReferenceOrder")
+})
 public abstract class OrderTo {
 	/*
 	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.

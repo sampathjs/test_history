@@ -31,9 +31,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.model.LimitOrder;
+import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.ReferenceOrderLeg;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
+import com.matthey.pmm.toms.repository.OrderRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.service.TomsOrderService;
@@ -73,6 +75,9 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	
 	@Autowired
 	protected LimitOrderConverter limitOrderConverter;
+
+	@Autowired
+	protected OrderRepository orderRepo;
 	
 	@Autowired
 	protected ReferenceOrderConverter referenceOrderConverter;	
@@ -88,6 +93,55 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 
 	@Value("#{${search.mapping.referenceOrder}}")  
 	private Map<String,String> referenceOrderSearchMap;
+	
+	
+	// all order types
+    @Override
+    @ApiOperation("Retrieval of All Order Types")
+	public List<OrderTo> getOrders (
+			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
+			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
+			@ApiParam(value = "List of the internal BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20006", example = "20006", required = false) @RequestParam(required=false) List<Long> idInternalBu,
+			@ApiParam(value = "List of the external BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20022", example = "20022", required = false) @RequestParam(required=false) List<Long> idExternalBu,
+			@ApiParam(value = "List of internal LE IDs the orders are supposed to be retrieved for. Null =  all orders, example 20004", example = "20004", required = false) @RequestParam(required=false) List<Long> idInternalLe,
+			@ApiParam(value = "List of the external LE IDs the orders are supposed to be retrieved for. Null = all orders, example 20023", example = "20023", required = false) @RequestParam(required=false) List<Long> idExternalLe,
+			@ApiParam(value = "List of the internal portfolio IDs the orders are supposed to be retrieved for. Null = all orders, example 118, 119", example = "118, 119", required = false) @RequestParam(required=false) List<Long> idInternalPfolio,
+			@ApiParam(value = "List of the external portfolio IDs the orders are supposed to be retrieved for. Null = all orders, example 119", example = "119", required = false) @RequestParam(required=false) List<Long> idExternalPfolio,
+			@ApiParam(value = "List of Buy/Sell IDs, Null all orders, example 15", example = "15", required = false) @RequestParam(required=false) List<Long> idBuySell,
+			@ApiParam(value = "List of Base Currency IDs, Null all orders, example 34,35,36", example = "34, 35, 36", required = false) @RequestParam(required=false) List<Long> idBaseCurrency,
+			@ApiParam(value = "Min Base Quantity, all orders returned have a at least the provided base quantity , Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double minBaseQuantity,
+			@ApiParam(value = "Max Base Quantity, all orders returned have a at max the provided base quantity , Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double maxBaseQuantity,
+			@ApiParam(value = "List of Base Quantity Unit IDs, null = all orders, example 28, 29", example = "28, 29", required = false) @RequestParam(required=false) List<Long> idBaseQuantityUnit,
+			@ApiParam(value = "List of Term Currency IDs, null = all orders, example 42, 43", example = "42, 43", required = false) @RequestParam(required=false) List<Long> idTermCurrency,
+			@ApiParam(value = "Reference has to contain this value, null = all orders", example = "gold", required = false) @RequestParam(required=false) String reference,
+			@ApiParam(value = "List of Metal Form IDs, null = all orders, example 164, 165", example = "164, 165", required = false) @RequestParam(required=false) List<Long> idMetalForm,
+			@ApiParam(value = "List of Metal Location IDs, null = all orders, example 168, 169", example = "168, 169", required = false) @RequestParam(required=false) List<Long> idMetalLocation,
+			@ApiParam(value = "List of Order Status IDs, null = all orders, example 1, 2, 3", example = "1, 2, 3", required = false) @RequestParam(required=false) List<Long> idOrderStatus,
+			@ApiParam(value = "Min Creation Date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
+			@ApiParam(value = "Max Creation Date, all orders returned have been created on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
+			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
+			@ApiParam(value = "Max last update date, all orders returned have been updated on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLastUpdateDate,
+    		@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable) {
+		Date minCreatedAt = validator.verifyDateTime (minCreatedAtDate, getClass(), "getLimitOrders", "minCreatedAtDate");
+		Date maxCreatedAt = validator.verifyDateTime (maxCreatedAtDate, getClass(), "getLimitOrders", "maxCreatedAtDate");
+		Date minLastUpdate = validator.verifyDateTime (minLastUpdateDate, getClass(), "getLimitOrders", "minLastUpdateDate");
+		Date maxLastUpdate = validator.verifyDateTime (maxLastUpdateDate, getClass(), "getLimitOrders", "maxLastUpdateDate");
+
+		Map<String,String> allMappings = new HashMap<String, String> ();
+		allMappings.putAll(abstractOrderSearchMap);
+		
+		Pageable mappedPageable = Validator.verifySorts(pageable, getClass(), "getLimitOrders", "sort", allMappings);
+		
+		List<Order> matchingOrders = orderRepo.findByOrderIdAndOptionalParameters(noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
+				noEmptyList(idExternalBu), noEmptyList(idInternalLe), noEmptyList(idExternalLe),
+				noEmptyList(idInternalPfolio), noEmptyList(idExternalPfolio), noEmptyList(idBuySell), 
+				noEmptyList(idBaseCurrency), minBaseQuantity, maxBaseQuantity, noEmptyList(idBaseQuantityUnit), noEmptyList(idTermCurrency), reference,
+				noEmptyList(idMetalForm), noEmptyList(idMetalLocation), noEmptyList(idOrderStatus), minCreatedAt, maxCreatedAt, minLastUpdate, maxLastUpdate,
+				mappedPageable);
+		return matchingOrders.stream()
+				.map(x -> x instanceof LimitOrder?limitOrderConverter.toTo((LimitOrder)x):referenceOrderConverter.toTo((ReferenceOrder)x))
+				.collect(Collectors.toList());
+    }
 		
 	@Override
     @ApiOperation("Retrieval of Limit Order Data")
