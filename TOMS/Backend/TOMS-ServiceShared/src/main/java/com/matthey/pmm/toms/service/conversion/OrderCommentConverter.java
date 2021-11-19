@@ -39,6 +39,8 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 				.id(entity.getId())
 				.idCreatedByUser(entity.getCreatedByUser().getId())
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
+				.displayStringCreatedByUser(entity.getCreatedByUser() != null?entity.getCreatedByUser().getLastName():null)
+				.displayStringUpdatedByUser(entity.getUpdatedByUser() != null?entity.getUpdatedByUser().getLastName():null)
 				.build();
 	}
 	

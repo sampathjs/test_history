@@ -109,6 +109,7 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 	
 	@Override
 	protected Supplier<List<LimitOrder>> listProvider() {
+		// TODO: Add Limit Order with all optional fields being null
 		return () -> {
 			List<LimitOrder> list =  Arrays.asList(new LimitOrder (1,   // version
 										partyConverter.toManagedEntity(TestParty.JM_PMM_UK_BU.getEntity()),  // internal bu 
@@ -134,7 +135,7 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 										Arrays.asList(fillConverter.toManagedEntity(TestFill.TEST_LIMIT_ORDER_FILL_2.getEntity())),  // fills
 										Arrays.asList(creditCheckConverter.toManagedEntity(TestCreditCheck.TEST_CREDIT_CHECK_1.getEntity())), // credit checks
 										// << order fields
-										new Date(), // settle date  
+										new Date(), // settle date
 										new Date(),  // concrete start date
 										referenceConverter.toManagedEntity(DefaultReference.SYMBOLIC_DATE_1D.getEntity()), // start date symbolic
 										2000d,  // limit price

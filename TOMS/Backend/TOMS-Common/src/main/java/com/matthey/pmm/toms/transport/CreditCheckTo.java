@@ -24,6 +24,11 @@ public abstract class CreditCheckTo {
    
     @Auxiliary
     public abstract long idParty();
+
+    @Auxiliary
+    @Nullable
+    public abstract String displayStringParty();
+
     
     @Auxiliary
     @Nullable
@@ -39,8 +44,16 @@ public abstract class CreditCheckTo {
 
     @Auxiliary
     public abstract long idCreditCheckRunStatus();
+    
+    @Auxiliary
+    @Nullable
+    public abstract String displayStringCreditCheckRunStatus();
 
     @Auxiliary
     @Nullable
     public abstract Long idCreditCheckOutcome();
+    
+    @Auxiliary
+    @Nullable
+    public abstract String displayStringCreditCheckOutcome();    
 }

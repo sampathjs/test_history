@@ -2,6 +2,7 @@ package com.matthey.pmm.toms.transport;
 
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
+import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -37,6 +38,10 @@ public abstract class FillTo {
      */
     @Auxiliary
     public abstract long idTrader();
+    
+    @Auxiliary
+    @Nullable
+    public abstract String displayStringTrader();
 
     /**
      * User ID
@@ -44,6 +49,10 @@ public abstract class FillTo {
      */
     @Auxiliary
     public abstract long idUpdatedBy();
+
+    @Auxiliary
+    @Nullable
+    public abstract String displayStringUpdatedBy();    
     
     @Auxiliary
     public abstract String lastUpdateDateTime();

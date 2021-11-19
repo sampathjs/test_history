@@ -135,12 +135,26 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
 				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
+				.displayStringBaseCurrency(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)
+				.displayStringBaseQuantityUnit(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)
+				.displayStringBuySell(entity.getBuySell() != null?entity.getBuySell().getValue():null)
+				.displayStringExternalBu(entity.getExternalBu() != null?entity.getExternalBu().getName():null)
+				.displayStringExternalLe(entity.getExternalLe() != null?entity.getExternalLe().getName():null)
+				.displayStringExtPortfolio(entity.getExtPortfolio() != null?entity.getExtPortfolio().getValue():null)
+				.displayStringInternalBu(entity.getInternalBu() != null?entity.getInternalBu().getName():null)
+				.displayStringInternalLe(entity.getInternalLe() != null?entity.getInternalLe().getName():null)
+				.displayStringIntPortfolio(entity.getIntPortfolio() != null?entity.getIntPortfolio().getValue():null)
+				.displayStringMetalForm(entity.getMetalForm() != null?entity.getMetalForm().getValue():null)
+				.displayStringMetalLocation(entity.getMetalLocation() != null?entity.getMetalLocation().getValue():null)
+				.displayStringOrderStatus(entity.getOrderStatus() != null?entity.getOrderStatus().getOrderStatusName().getValue():null)
+				.displayStringTermCurrency(entity.getTermCurrency() !=  null?entity.getTermCurrency().getValue():null)				
 				// Reference Order
 				.contangoBackwardation(entity.getContangoBackwardation())
 				.idContractType (entity.getContractType() != null?entity.getContractType().getId():null)
 				.fxRateSpread(entity.getFxRateSpread())
 				.metalPriceSpread(entity.getMetalPriceSpread())
 				.legIds(entity.getLegs().stream().map(x -> x.getId()).collect(Collectors.toList()))
+				.displayStringContractType(entity.getContractType() != null?entity.getContractType().getValue():null)
 				.build();
 	}
 	

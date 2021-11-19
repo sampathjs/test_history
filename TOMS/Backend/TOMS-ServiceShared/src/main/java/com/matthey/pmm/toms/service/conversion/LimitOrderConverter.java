@@ -116,6 +116,19 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
 				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
+				.displayStringBaseCurrency(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)
+				.displayStringBaseQuantityUnit(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)
+				.displayStringBuySell(entity.getBuySell() != null?entity.getBuySell().getValue():null)
+				.displayStringExternalBu(entity.getExternalBu() != null?entity.getExternalBu().getName():null)
+				.displayStringExternalLe(entity.getExternalLe() != null?entity.getExternalLe().getName():null)
+				.displayStringExtPortfolio(entity.getExtPortfolio() != null?entity.getExtPortfolio().getValue():null)
+				.displayStringInternalBu(entity.getInternalBu() != null?entity.getInternalBu().getName():null)
+				.displayStringInternalLe(entity.getInternalLe() != null?entity.getInternalLe().getName():null)
+				.displayStringIntPortfolio(entity.getIntPortfolio() != null?entity.getIntPortfolio().getValue():null)
+				.displayStringMetalForm(entity.getMetalForm() != null?entity.getMetalForm().getValue():null)
+				.displayStringMetalLocation(entity.getMetalLocation() != null?entity.getMetalLocation().getValue():null)
+				.displayStringOrderStatus(entity.getOrderStatus() != null?entity.getOrderStatus().getOrderStatusName().getValue():null)
+				.displayStringTermCurrency(entity.getTermCurrency() !=  null?entity.getTermCurrency().getValue():null)
 				// Limit Order
 				.settleDate(formatDate(entity.getSettleDate()))
 				.idStartDateSymbolic(entity.getStartDateSymbolic() != null?entity.getStartDateSymbolic().getId():null)
@@ -128,6 +141,12 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.idStopTriggerType(entity.getStopTriggerType() != null?entity.getStopTriggerType().getId():null)
 				.idCurrencyCrossMetal(entity.getCurrencyCrossMetal() != null?entity.getCurrencyCrossMetal().getId():null)
 				.executionLikelihood(entity.getExecutionLikelihood())
+				.displayStringCurrencyCrossMetal(entity.getCurrencyCrossMetal() != null?entity.getCurrencyCrossMetal().getValue():null)
+				.displayStringPartFillable(entity.getYesNoPartFillable() != null?entity.getYesNoPartFillable().getValue():null)				
+				.displayStringPriceType(entity.getPriceType() != null?entity.getPriceType().getValue():null)
+				.displayStringStartDateSymbolic(entity.getStartDateSymbolic() != null?entity.getStartDateSymbolic().getValue():null)
+				.displayStringStopTriggerType(entity.getStopTriggerType() != null?entity.getStopTriggerType().getValue():null)
+				.displayStringValidationType(entity.getValidationType() != null?entity.getValidationType().getValue():null)
 				.build();
 	}
 	

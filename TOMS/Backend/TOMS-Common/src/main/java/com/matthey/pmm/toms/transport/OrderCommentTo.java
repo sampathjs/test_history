@@ -2,6 +2,7 @@ package com.matthey.pmm.toms.transport;
 
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
+import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -32,8 +33,16 @@ public abstract class OrderCommentTo {
     public abstract long idCreatedByUser();
     
     @Auxiliary
+    @Nullable
+    public abstract String displayStringCreatedByUser();
+    
+    @Auxiliary
     public abstract String lastUpdate();
 
     @Auxiliary
     public abstract long idUpdatedByUser();
+    
+    @Auxiliary
+    @Nullable
+    public abstract String displayStringUpdatedByUser();
 }

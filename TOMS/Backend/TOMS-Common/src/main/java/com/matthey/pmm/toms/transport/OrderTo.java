@@ -94,29 +94,61 @@ public abstract class OrderTo {
 
 	@Auxiliary
 	@Nullable
+	public abstract String displayStringInternalBu(); 
+    
+    @Auxiliary
+	@Nullable
     public abstract Long idExternalBu();
+
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringExternalBu(); 
 
     @Auxiliary
 	@Nullable
     public abstract Long idInternalLe();
+    
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringInternalLe(); 
 
 	@Auxiliary
 	@Nullable
     public abstract Long idExternalLe();
+
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringExternalLe();
 	
 	@Auxiliary
 	@Nullable
     public abstract Long idIntPortfolio();
+	
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringIntPortfolio();
 
 	@Auxiliary
 	@Nullable
     public abstract Long idExtPortfolio();
 
-    @Auxiliary
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringExtPortfolio();
+
+	@Auxiliary
     public abstract long idBuySell();
+	
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringBuySell();
     
     @Auxiliary
     public abstract long idBaseCurrency();
+    
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringBaseCurrency();
     
     @Nullable
     @Auxiliary
@@ -126,8 +158,17 @@ public abstract class OrderTo {
     @Nullable
     public abstract Long idBaseQuantityUnit();
 
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringBaseQuantityUnit();
+    
     @Auxiliary
     public abstract Long idTermCurrency();
+    
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringTermCurrency();
+
 
     @Auxiliary
     @Nullable
@@ -136,14 +177,27 @@ public abstract class OrderTo {
     @Auxiliary
     @Nullable
     public abstract Long idMetalForm();
+
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringMetalForm();
     
     @Auxiliary
     @Nullable
     public abstract Long idMetalLocation();
-   
+
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringMetalLocation();
+
+    
     @Auxiliary
     public abstract Long idOrderStatus();
-        
+
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringOrderStatus();
+    
     @Auxiliary
     @Nullable
     public abstract List<Long> creditChecksIds();

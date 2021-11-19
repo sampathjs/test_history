@@ -84,6 +84,10 @@ public abstract class LimitOrderTo extends OrderTo {
     @Nullable
 	public abstract Long idStartDateSymbolic();
 	
+	@Auxiliary
+    @Nullable
+	public abstract String displayStringStartDateSymbolic();	
+	
     @Auxiliary
     public abstract double limitPrice();
 
@@ -91,21 +95,42 @@ public abstract class LimitOrderTo extends OrderTo {
     @Nullable
     public abstract Long idPriceType();
 
+	@Auxiliary
+    @Nullable
+	public abstract String displayStringPriceType();
+    
     @Auxiliary
     @Nullable
     public abstract Long idYesNoPartFillable();
+    
+	@Auxiliary
+    @Nullable
+	public abstract String displayStringPartFillable();	
 
     @Auxiliary
     @Nullable
     public abstract Long idStopTriggerType();
+    
+	@Auxiliary
+    @Nullable
+	public abstract String displayStringStopTriggerType();
 
     @Auxiliary
     @Nullable
     public abstract Long idCurrencyCrossMetal();
+    
+	@Auxiliary
+    @Nullable
+	public abstract String displayStringCurrencyCrossMetal();
 
     @Auxiliary
     @Nullable
     public abstract Long idValidationType();
+    
+	@Auxiliary
+    @Nullable
+	public abstract String displayStringValidationType();	
+
 
     @Auxiliary
     @Nullable

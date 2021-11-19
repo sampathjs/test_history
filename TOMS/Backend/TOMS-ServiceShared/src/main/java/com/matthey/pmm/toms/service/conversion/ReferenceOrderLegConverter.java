@@ -37,6 +37,10 @@ public class ReferenceOrderLegConverter extends EntityToConverter<ReferenceOrder
 				.fixingEndDate(entity.getFixingEndDate() != null?formatDate(entity.getFixingEndDate()):null)
 				.fixingStartDate(entity.getFixingStartDate() != null?formatDate(entity.getFixingStartDate()):null)
 				.notional(entity.getNotional())
+				.displayStringFxIndexRefSource(entity.getFxIndexRefSource() != null?entity.getFxIndexRefSource().getValue():null)
+				.displayStringPaymentOffset(entity.getPaymentOffset() != null?entity.getPaymentOffset().getValue():null)
+				.displayStringRefSource(entity.getRefSource() != null?entity.getRefSource().getValue():null)
+				.displayStringSettleCurrency(entity.getSettleCurrency() != null?entity.getSettleCurrency().getValue():null)
 				.build();
 	}
 	

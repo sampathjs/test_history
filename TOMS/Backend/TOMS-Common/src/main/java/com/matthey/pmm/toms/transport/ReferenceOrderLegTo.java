@@ -39,15 +39,31 @@ public abstract class ReferenceOrderLegTo {
     @Auxiliary
 	public abstract Long idPaymentOffset();
     
+	@Auxiliary
+    @Nullable
+	public abstract String displayStringPaymentOffset();
+	
     @Nullable
     @Auxiliary
 	public abstract Long idSettleCurrency();
     
+	@Auxiliary
+    @Nullable
+	public abstract String displayStringSettleCurrency();
+    
     @Nullable
     @Auxiliary
 	public abstract Long idRefSource();
+
+    @Nullable
+	@Auxiliary
+	public abstract String displayStringRefSource();
     
     @Nullable
     @Auxiliary
 	public abstract Long idFxIndexRefSource();
+    
+    @Nullable
+	@Auxiliary
+	public abstract String displayStringFxIndexRefSource();    
 }

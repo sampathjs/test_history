@@ -169,18 +169,18 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
 			@ApiParam(value = "Max last update date, all orders returned have been updated on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLastUpdateDate,
 			// all above: order fields, all below: limit order fields
-			@ApiParam(value = "Min Settle Date, all orders returned have been settled on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minSettleDate,
-			@ApiParam(value = "Max Settle Date, all orders returned have been settled on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxSettleDate,
-			@ApiParam(value = "Min Start Date Concrete, all orders returned have a concrete start date  on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minStartDateConcrete,
-			@ApiParam(value = "Max Start Date Concrete, all orders returned have a concrete start date on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxStartDateConcrete,
+			@ApiParam(value = "Min Settle Date, all orders returned have been settled on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2000-10-31", required = false) @RequestParam(required=false) String minSettleDate,
+			@ApiParam(value = "Max Settle Date, all orders returned have been settled on or before that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2030-10-31", required = false) @RequestParam(required=false) String maxSettleDate,
+			@ApiParam(value = "Min Start Date Concrete, all orders returned have a concrete start date  on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2000-10-31", required = false) @RequestParam(required=false) String minStartDateConcrete,
+			@ApiParam(value = "Max Start Date Concrete, all orders returned have a concrete start date on or before that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2030-10-31", required = false) @RequestParam(required=false) String maxStartDateConcrete,
 			@ApiParam(value = "List of IDs of the symbolic start date, null = all orders, example 186, 187", example = "186, 187", required = false) @RequestParam(required=false) List<Long> idStartDateSymbolic,
 			@ApiParam(value = "List of IDs of the price type, null = all orders, example 105, 106", example = "105, 106", required = false) @RequestParam(required=false) List<Long> idPriceType,
 			@ApiParam(value = "List of IDs of the part fillable flag, null = all orders, example 97, 98", example = "97, 98", required = false) @RequestParam(required=false) List<Long> idYesNoPartFillable,
 			@ApiParam(value = "List of IDs of the stop trigger type, null = all orders, example 109, 110", example = "109, 110", required = false) @RequestParam(required=false) List<Long> idStopTriggerType,
 			@ApiParam(value = "List of IDs of the currency cross metal, null = all orders, example 34, 35, 36", example = "34, 35, 36", required = false) @RequestParam(required=false) List<Long> idCurrencyCrossMetal,
 			@ApiParam(value = "List of IDs of the validation type, null = all orders, example 184, 185", example = "184, 185", required = false) @RequestParam(required=false) List<Long> idValidationType,
-			@ApiParam(value = "Min Expiry Date, all orders returned have expired on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minExpiryDate,
-			@ApiParam(value = "Max Expiry Date, all orders returned have expired on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxExpiryDate,
+			@ApiParam(value = "Min Expiry Date, all orders returned have expired on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2000-10-31", required = false) @RequestParam(required=false) String minExpiryDate,
+			@ApiParam(value = "Max Expiry Date, all orders returned have expired on or before that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2030-10-31", required = false) @RequestParam(required=false) String maxExpiryDate,
 			@ApiParam(value = "Min Execution Likelihood, all orders returned have a at least the provided base quantity , Null = no restrictions", example = "0.00", required = false) @RequestParam(required=false) Double minExecutionLikelihood,
 			@ApiParam(value = "Max Execution Likelihood, all orders returned have a at max the provided base quantity , Null = no restrictions", example = "1.00", required = false) @RequestParam(required=false) Double maxExecutionLikelihood,
     		@ApiParam(value = "Min limit price, Null = no restrictions", example = "500.00", required = false) @RequestParam(required=false) Double minLimitPrice,
@@ -194,12 +194,12 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		Date maxCreatedAt = validator.verifyDateTime (maxCreatedAtDate, getClass(), "getLimitOrders", "maxCreatedAtDate");
 		Date minLastUpdate = validator.verifyDateTime (minLastUpdateDate, getClass(), "getLimitOrders", "minLastUpdateDate");
 		Date maxLastUpdate = validator.verifyDateTime (maxLastUpdateDate, getClass(), "getLimitOrders", "maxLastUpdateDate");
-		Date minSettle = validator.verifyDateTime (minSettleDate, getClass(), "getLimitOrders", "minSettleDate");
-		Date maxSettle = validator.verifyDateTime (maxSettleDate, getClass(), "getLimitOrders", "maxSettleDate");
-		Date minStartConcrete = validator.verifyDateTime (minStartDateConcrete, getClass(), "getLimitOrders", "minStartDateConcrete");
-		Date maxStartConcrete = validator.verifyDateTime (maxStartDateConcrete, getClass(), "getLimitOrders", "maxStartDateConcrete");
-		Date minExpiry = validator.verifyDateTime (minExpiryDate, getClass(), "getLimitOrders", "minExpiryDate");
-		Date maxExpiry = validator.verifyDateTime (maxExpiryDate, getClass(), "getLimitOrders", "maxExpiryDate");
+		Date minSettle = validator.verifyDate (minSettleDate, getClass(), "getLimitOrders", "minSettleDate");
+		Date maxSettle = validator.verifyDate (maxSettleDate, getClass(), "getLimitOrders", "maxSettleDate");
+		Date minStartConcrete = validator.verifyDate (minStartDateConcrete, getClass(), "getLimitOrders", "minStartDateConcrete");
+		Date maxStartConcrete = validator.verifyDate (maxStartDateConcrete, getClass(), "getLimitOrders", "maxStartDateConcrete");
+		Date minExpiry = validator.verifyDate (minExpiryDate, getClass(), "getLimitOrders", "minExpiryDate");
+		Date maxExpiry = validator.verifyDate (maxExpiryDate, getClass(), "getLimitOrders", "maxExpiryDate");
 		
 		Map<String,String> allMappings = new HashMap<String, String> ();
 		allMappings.putAll(abstractOrderSearchMap);

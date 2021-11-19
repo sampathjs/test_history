@@ -35,6 +35,8 @@ public class FillConverter extends EntityToConverter<Fill, FillTo>{
 				.id(entity.getId())
 				.fillQuantity(entity.getFillQuantity())
 				.fillPrice(entity.getFillPrice())
+				.displayStringTrader(entity.getTrader() != null?entity.getTrader().getLastName():null)
+				.displayStringUpdatedBy(entity.getUpdatedBy() != null?entity.getUpdatedBy().getLastName():null)
 				.build();
 	}
 	

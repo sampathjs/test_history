@@ -7,7 +7,6 @@ import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -59,6 +58,10 @@ public abstract class ReferenceOrderTo extends OrderTo {
 	
 	@Auxiliary
 	public abstract Long idContractType();
+	
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringContractType();	
 	
     @Auxiliary
     @Nullable

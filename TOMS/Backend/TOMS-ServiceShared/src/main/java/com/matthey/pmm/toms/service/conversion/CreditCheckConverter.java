@@ -55,6 +55,9 @@ public class CreditCheckConverter extends EntityToConverter<CreditCheck, CreditC
 				.id(entity.getId())
 				.currentUtilization(entity.getCurrentUtilization())
 				.creditLimit(entity.getCreditLimit())
+				.displayStringCreditCheckOutcome(entity.getCreditCheckOutcome() != null?entity.getCreditCheckOutcome().getValue():null)
+				.displayStringCreditCheckRunStatus(entity.getCreditCheckRunStatus() != null?entity.getCreditCheckRunStatus().getValue():null)
+				.displayStringParty(entity.getParty() != null?entity.getParty().getName():null)
 				.build();
 	}
 	

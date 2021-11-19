@@ -822,12 +822,25 @@ public class Validator {
 		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
 		try {
 			if (dateTime != null) {
-				Date parsedTime = sdfDateTime.parse (dateTime);
-				return parsedTime;
+				Date parsedDateTime = sdfDateTime.parse (dateTime);
+				return parsedDateTime;
 			}
 			return null;
 		} catch (ParseException pe) {
-			throw new IllegalDateFormatException (clazz, methodName, argument + ".runDateTime", TomsService.DATE_TIME_FORMAT, dateTime);
+			throw new IllegalDateFormatException (clazz, methodName, argument, TomsService.DATE_TIME_FORMAT, dateTime);
+		}
+	}
+	
+	public Date verifyDate (String date, Class clazz, String methodName, String argument) {
+		SimpleDateFormat sdfDate = new SimpleDateFormat (TomsService.DATE_FORMAT);
+		try {
+			if (date != null) {
+				Date parsedDate = sdfDate.parse (date);
+				return parsedDate;
+			}
+			return null;
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, methodName, argument, TomsService.DATE_TIME_FORMAT, date);
 		}
 	}
 }
