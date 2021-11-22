@@ -18,6 +18,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -137,6 +139,9 @@ public abstract class Order {
 	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.METAL_LOCATION})
 	private Reference metalLocation;
 	
+	@Column(name = "fill_percentage", nullable=false)
+	private double fillPercentage;	
+	
 	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "order_comment_map",
@@ -172,7 +177,7 @@ public abstract class Order {
 			final String reference, final Reference metalForm, final Reference metalLocation,
 			final OrderStatus orderStatus, final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
-			final User updatedByUser, final List<OrderComment> orderComments,
+			final User updatedByUser, final double fillPercentage, final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks) {
 		this.internalBu = internalBu;
 		this.externalBu = externalBu;
@@ -193,6 +198,7 @@ public abstract class Order {
 		this.createdByUser = createdByUser;
 		this.lastUpdate = lastUpdate;
 		this.updatedByUser = updatedByUser;
+		this.fillPercentage = fillPercentage;
 		this.orderComments = new ArrayList<>(orderComments);
 		this.fills = new ArrayList<>(fills);
 		this.creditChecks = new ArrayList<>(creditChecks);
@@ -224,6 +230,33 @@ public abstract class Order {
 		this.fills = new ArrayList<>(toClone.fills);
 		this.creditChecks = new ArrayList<>(toClone.creditChecks);
 	}	
+	
+    @PrePersist
+    public void onPrePersist() {
+    	updateFillPercentage();
+    }
+      
+    @PreUpdate
+    public void onPreUpdate() { 
+    	updateFillPercentage();    	
+    }
+    
+	private void updateFillPercentage() {
+		if (fills != null) {
+    		double fp = 0.0d;
+    		for (Fill f : fills) {
+    			fp += f.getFillQuantity();
+    		}
+    		if (baseQuantity != 0.0d) {
+				fp = fp / baseQuantity;    			
+    		} else {
+    			fp = 1.0;
+    		}
+    		fillPercentage = fp;
+    	} else {
+    		fillPercentage = baseQuantity == 0.0d ? 0.0d : 1.0d;
+    	}
+	}
 
 	public long getOrderId() {
 		return orderId;
@@ -375,6 +408,14 @@ public abstract class Order {
 
 	public void setOrderComments(List<OrderComment> orderComments) {
 		this.orderComments = orderComments;
+	}
+
+	public double getFillPercentage() {
+		return fillPercentage;
+	}
+
+	public void setFillPercentage(double fillPercentage) {
+		this.fillPercentage = fillPercentage;
 	}
 
 	public List<Fill> getFills() {

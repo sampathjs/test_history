@@ -95,7 +95,7 @@ public class ReferenceOrder extends Order {
 			final String reference, final Reference metalForm, final Reference metalLocation,			
 			final OrderStatus orderStatus, final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
-			final User updatedByUser, final List<OrderComment> orderComments,
+			final User updatedByUser, final double fillPercentage, final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks, // << order fields
 			final Reference contractType, 
 			final Double metalPriceSpread,  final Double fxRateSpread, final Double contangoBackwardation, 
@@ -103,7 +103,7 @@ public class ReferenceOrder extends Order {
 		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
-				createdByUser, lastUpdate, updatedByUser, orderComments, 
+				createdByUser, lastUpdate, updatedByUser, fillPercentage, orderComments, 
 				fills, creditChecks);
 		this.contractType = contractType;
 		this.metalPriceSpread = metalPriceSpread;

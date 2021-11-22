@@ -600,6 +600,9 @@
        <column name="updated_by" type="int">
          <constraints nullable="true"/>
        </column>
+       <column name="fill_percentage" type="double">
+          <constraints nullable="false"/>
+       </column>    
     </createTable>
     
     <addForeignKeyConstraint

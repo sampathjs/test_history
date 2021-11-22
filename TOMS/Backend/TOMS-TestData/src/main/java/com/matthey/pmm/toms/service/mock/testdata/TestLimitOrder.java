@@ -104,6 +104,7 @@ public enum TestLimitOrder {
 				.fillIds(fills!=null?fills.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.creditChecksIds(creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.orderCommentIds(comments!=null?comments.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
+				.fillPercentage(0.0d)
 				.build();
 	}
 

@@ -113,6 +113,7 @@ public enum TestReferenceOrder {
 				.fxRateSpread(fxRateSpread)
 				.metalPriceSpread(metalPriceSpread)
 				.addAllLegIds((legs!=null?legs.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null))
+				.fillPercentage(0.0d)				
 				.build();
 	}
 

@@ -1,9 +1,11 @@
 package com.matthey.pmm.toms.service.mock;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +44,7 @@ import com.matthey.pmm.toms.transport.ReferenceTo;
 public class OrderTestDataGenerator {
 	private static final int MAX_CREDIT_LIMIT = 100000;
 
-	private static final double MAX_BASE_QUANTITY = 100000d;
+	private static final double MAX_BASE_QUANTITY = 50000d;
 
 	private static final int MIN_YEAR_DATES = 2000;
 
@@ -50,7 +52,7 @@ public class OrderTestDataGenerator {
 
 	private static final int MAX_CREDIT_CHECK_COUNT = 5;
 
-	private static final int MAX_FILL_COUNT = 10;
+	private static final int MAX_FILL_COUNT = 6;
 
 	private static final double MAX_FILL_PRICE = 10000;
 
@@ -114,7 +116,7 @@ public class OrderTestDataGenerator {
 
 	public Order createTestReferenceOrder() {
 		ReferenceOrder newTestOrder = new ReferenceOrder(1, null, null, null, null, null, null, null, null, null, null, null, null, null,
-				null, null, null, null, null, null, Arrays.asList(), Arrays.asList(), Arrays.asList(), 
+				null, null, null, null, null, null, 0.0d, Arrays.asList(), Arrays.asList(), Arrays.asList(), 
 				null, null, null, null, Arrays.asList());
 		fillOrderFields(newTestOrder);
 		newTestOrder.setContangoBackwardation(randomDoubleOrNull(MAX_CONTANGO_BACKWARDATION));
@@ -127,7 +129,7 @@ public class OrderTestDataGenerator {
 
 	public Order createTestLimitOrder() {
 		LimitOrder newTestOrder = new LimitOrder(1, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-				null, null, null, null, null, Arrays.asList(), Arrays.asList(), Arrays.asList(), null, null, null, null, null, null, null, null, null, null, null);
+				null, null, null, null, null, 0.0d, Arrays.asList(), Arrays.asList(), Arrays.asList(), null, null, null, null, null, null, null, null, null, null, null);
 		fillOrderFields(newTestOrder);
 		newTestOrder.setCurrencyCrossMetal(selectReferenceValue(DefaultReferenceType.CCY_METAL, true));
 		newTestOrder.setExecutionLikelihood(Math.random()*MAX_EXECUTION_LIKELIYHOOD);
@@ -164,7 +166,6 @@ public class OrderTestDataGenerator {
 		newTestOrder.setBuySell(selectReferenceValue(DefaultReferenceType.BUY_SELL, false));
 		newTestOrder.setCreatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
 		newTestOrder.setBaseCurrency(selectReferenceValue(DefaultReferenceType.CCY_METAL, false));
-		newTestOrder.setBaseQuantity(Math.random()*MAX_BASE_QUANTITY);
 		newTestOrder.setBaseQuantityUnit(selectReferenceValue(DefaultReferenceType.QUANTITY_UNIT, false));
 		newTestOrder.setCreatedAt(randomDate(false));
 		newTestOrder.setCreditChecks(createCreditCheckList());
@@ -183,6 +184,10 @@ public class OrderTestDataGenerator {
 		newTestOrder.setReference(selectOneOf(Arrays.asList("Reference 1", "Example Reference", "Very long long long long long long long long long long long long long long long long long long long long long long reference"), true));
 		newTestOrder.setTermCurrency(selectReferenceValue(DefaultReferenceType.CCY_CURRENCY, false));
 		newTestOrder.setUpdatedByUser(selectUserForOrder(newTestOrder, false));
+		DoubleSummaryStatistics summary = newTestOrder.getFills().stream().map(x -> x.getFillQuantity()).collect(Collectors.summarizingDouble(Double::doubleValue));
+		if (summary.getSum()/newTestOrder.getBaseQuantity() > newTestOrder.getFillPercentage()) {
+			newTestOrder.setBaseQuantity(Math.random() >= 0.5d?summary.getSum() + MAX_BASE_QUANTITY:summary.getSum());			
+		}
 	}
 
 	private List<CreditCheck> createCreditCheckList() {

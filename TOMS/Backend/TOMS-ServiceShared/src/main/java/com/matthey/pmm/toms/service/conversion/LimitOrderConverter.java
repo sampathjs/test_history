@@ -114,6 +114,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.idCreatedByUser(entity.getCreatedByUser().getId())
 				.lastUpdate(formatDateTime(entity.getLastUpdate()))
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
+				.fillPercentage(entity.getFillPercentage())
 				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.displayStringBaseCurrency(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)
@@ -129,6 +130,8 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.displayStringMetalLocation(entity.getMetalLocation() != null?entity.getMetalLocation().getValue():null)
 				.displayStringOrderStatus(entity.getOrderStatus() != null?entity.getOrderStatus().getOrderStatusName().getValue():null)
 				.displayStringTermCurrency(entity.getTermCurrency() !=  null?entity.getTermCurrency().getValue():null)
+				.displayStringCreatedByUser(entity.getCreatedByUser() !=  null?entity.getCreatedByUser().getLastName():null)
+				.displayStringUpdatedByUser(entity.getUpdatedByUser() !=  null?entity.getUpdatedByUser().getLastName():null)
 				// Limit Order
 				.settleDate(formatDate(entity.getSettleDate()))
 				.idStartDateSymbolic(entity.getStartDateSymbolic() != null?entity.getStartDateSymbolic().getId():null)
@@ -259,7 +262,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		LimitOrder newEntity = new LimitOrder(1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
 				baseQuantityUnit, termCurrency, to.reference(), metalForm, metalLocation, 
 				orderStatus, createdAt, createdByUser, lastUpdate,
-				updatedByUser, orderComments, fills, creditChecks, 
+				updatedByUser, 0.0d, orderComments, fills, creditChecks, 
 				settleDate, startDateConcrete, startDateSymbolic, to.limitPrice(), priceType,
 				stopTriggerType, currencyCrossMetal, yesNoPartFillable, 
 				validationType, expiryDate, to.executionLikelihood());

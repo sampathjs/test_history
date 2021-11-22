@@ -201,12 +201,16 @@ public abstract class OrderTo {
     @Auxiliary
     @Nullable
     public abstract List<Long> creditChecksIds();
-
+    
     @Auxiliary
     public abstract String createdAt();
     
     @Auxiliary
     public abstract long idCreatedByUser();
+    
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringCreatedByUser();
     
     @Auxiliary
     public abstract String lastUpdate();
@@ -214,6 +218,13 @@ public abstract class OrderTo {
     @Auxiliary
     public abstract long idUpdatedByUser();
     
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringUpdatedByUser();    
+
+    @Auxiliary
+    public abstract double fillPercentage();
+	
     @Auxiliary
     @Nullable
     public abstract List<Long> orderCommentIds();

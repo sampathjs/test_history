@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
@@ -341,7 +342,14 @@ public class Validator {
 		return pageRequest;
 	}
 
-	
+
+	public static String verifySort (String toAttributeName, Long id, Sort.Direction direction, Class clazz, String method, String argument, Map<String, String> columnMap) {
+		if (!columnMap.containsKey(toAttributeName)) {
+			throw new IllegalSortColumnException(clazz, method, argument, toAttributeName, columnMap.keySet().toString());
+		}
+		
+		return columnMap.get(toAttributeName) + (direction == Direction.ASC?">=":"<=");
+	}
 	
 	private <T> void verifyUnchangedStates (Class clazz, String method, String argument, ProcessTransitionTo transition, T oldEntity, T newEntity) {
 		for (String methodName : transition.unchangeableAttributes()) {

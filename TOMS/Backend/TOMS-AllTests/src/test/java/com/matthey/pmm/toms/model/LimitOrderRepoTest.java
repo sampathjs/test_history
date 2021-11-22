@@ -111,6 +111,7 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 	protected Supplier<List<LimitOrder>> listProvider() {
 		// TODO: Add Limit Order with all optional fields being null
 		return () -> {
+			// 1st test case with all fields filled
 			List<LimitOrder> list =  Arrays.asList(new LimitOrder (1,   // version
 										partyConverter.toManagedEntity(TestParty.JM_PMM_UK_BU.getEntity()),  // internal bu 
 										partyConverter.toManagedEntity(TestParty.ANGLO_PLATINUM_BU.getEntity()), // external bu
@@ -131,6 +132,7 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 										userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),  // created by
 										new Date(), // last update
 										userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),  // updated by
+										0.0d, // fillPercentage, going to get updated automatically before persisting to database
 										Arrays.asList(orderCommentConverter.toManagedEntity(TestOrderComment.TEST_COMMENT_1.getEntity())), // order comments
 										Arrays.asList(fillConverter.toManagedEntity(TestFill.TEST_LIMIT_ORDER_FILL_2.getEntity())),  // fills
 										Arrays.asList(creditCheckConverter.toManagedEntity(TestCreditCheck.TEST_CREDIT_CHECK_1.getEntity())), // credit checks
@@ -146,8 +148,46 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 										referenceConverter.toManagedEntity(DefaultReference.VALIDATION_TYPE_GOOD_TIL_CANCELLED.getEntity()), // validation type
 										new Date(), // expiry date
 										1.0d) // execution likelihood
+					// 2nd test case with only mandatory fields being filled.
+					,new LimitOrder (1,   // version
+							partyConverter.toManagedEntity(TestParty.JM_PMM_UK_BU.getEntity()),  // internal bu 
+							partyConverter.toManagedEntity(TestParty.ANGLO_PLATINUM_BU.getEntity()), // external bu
+							partyConverter.toManagedEntity(TestParty.JM_PLC_LE.getEntity()),  // internal le
+							partyConverter.toManagedEntity(TestParty.ANGLO_PLATINUM_LE.getEntity()), // external le
+							referenceConverter.toManagedEntity(DefaultReference.PORTFOLIO_UK_GOLD.getEntity()), // internal portfolio
+							null,  // external portfolio
+							referenceConverter.toManagedEntity(DefaultReference.BUY_SELL_BUY.getEntity()), // buy / sell
+							referenceConverter.toManagedEntity(DefaultReference.METAL_XAU.getEntity()), // base currency
+							1000d, // base quantity
+							referenceConverter.toManagedEntity(DefaultReference.QUANTITY_TOZ.getEntity()),  // base quantity unit
+							referenceConverter.toManagedEntity(DefaultReference.CCY_GBP.getEntity()), // term currency 
+							"Reference", // reference 
+							null, // metal form
+							null, // metal location 
+							orderStatusConverter.toManagedEntity(DefaultOrderStatus.LIMIT_ORDER_PENDING.getEntity()),  // order status
+							new Date(),  // created at
+							userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),  // created by
+							new Date(), // last update
+							userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),  // updated by
+							0.0d, // fillPercentage, going to get updated automatically before persisting to database
+							Arrays.asList(orderCommentConverter.toManagedEntity(TestOrderComment.TEST_COMMENT_1.getEntity())), // order comments
+							Arrays.asList(fillConverter.toManagedEntity(TestFill.TEST_LIMIT_ORDER_FILL_2.getEntity())),  // fills
+							Arrays.asList(creditCheckConverter.toManagedEntity(TestCreditCheck.TEST_CREDIT_CHECK_1.getEntity())), // credit checks
+							// << order fields
+							null, // settle date
+							null,  // concrete start date
+							null, // start date symbolic
+							null,  // limit price
+							null, // price type
+							null,  // stop trigger type
+							null, // currency cross metal
+							null, // part fillable
+							referenceConverter.toManagedEntity(DefaultReference.VALIDATION_TYPE_GOOD_TIL_CANCELLED.getEntity()), // validation type
+							null, // expiry date
+							null) // execution likelihood
 					);
 			list.get(0).setOrderId(1000000l);
+			list.get(1).setOrderId(1000001l);
 			return list;
 		};
 	}

@@ -39,11 +39,15 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
 		   + " AND (:reference IS NULL OR o.reference LIKE CONCAT('%',:reference,'%'))\n"
 		   + " AND (COALESCE(:idMetalForm) IS NULL OR o.metalForm.id IN (:idMetalForm))\n"
 		   + " AND (COALESCE(:idMetalLocation) IS NULL OR o.metalLocation.id IN (:idMetalLocation))\n"
-		   + " AND (COALESCE(:idOrderStatus) IS NULL OR o.orderStatus.id IN (:idOrderStatus))\n"		   
+		   + " AND (COALESCE(:idOrderStatus) IS NULL OR o.orderStatus.id IN (:idOrderStatus))\n"
+		   + " AND (COALESCE(:idCreatedByUser) IS NULL OR o.createdByUser.id IN (:idCreatedByUser))\n"
 		   + " AND (:minCreatedAt IS NULL OR o.createdAt >= :minCreatedAt)\n" 
 		   + " AND (:maxCreatedAt IS NULL OR o.createdAt <= :maxCreatedAt)\n"
+		   + " AND (COALESCE(:idUpdatedByUser) IS NULL OR o.updatedByUser.id IN (:idUpdatedByUser))\n"
 		   + " AND (:minLastUpdate IS NULL OR o.lastUpdate >= :minLastUpdate)\n" 
 		   + " AND (:maxLastUpdate IS NULL OR o.lastUpdate <= :maxLastUpdate)\n"
+		   + " AND (:minFillPercentage IS NULL OR o.fillPercentage >= :minFillPercentage)\n" 
+		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"		   
 		   )
    List<Order> findByOrderIdAndOptionalParameters(@Param("orderIds") List<Long> orderIds, 
 		   @Param("versionIds") List<Integer> versionIds, @Param("idInternalBu") List<Long> idInternalBu,  
@@ -54,9 +58,26 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
 		   @Param("maxBaseQuantity") Double maxBaseQuantity, @Param("idBaseQuantityUnit") List<Long> idBaseQuantityUnit, 
 		   @Param("idTermCurrency") List<Long> idTermCurrency, @Param("reference") String reference, 
 		   @Param("idMetalForm") List<Long> idMetalForm, @Param("idMetalLocation") List<Long> idMetalLocation, 
-		   @Param("idOrderStatus") List<Long> idOrderStatus,  @Param("minCreatedAt") Date minCreatedAt, 
-		   @Param("maxCreatedAt") Date maxCreatedAt,  @Param("minLastUpdate") Date minLastUpdate, 
-		   @Param("maxLastUpdate") Date maxLastUpdate,
+		   @Param("idOrderStatus") List<Long> idOrderStatus, @Param("idCreatedByUser") List<Long> idCreatedByUser,		   
+		   @Param("minCreatedAt") Date minCreatedAt, @Param("maxCreatedAt") Date maxCreatedAt,  
+		   @Param("idUpdatedByUser") List<Long> idUpdatedByUser,
+		   @Param("minLastUpdate") Date minLastUpdate, @Param("maxLastUpdate") Date maxLastUpdate,
+		   @Param("minFillPercentage") Double minFillPercentage,
+		   @Param("maxFillPercentage") Double maxFillPercentage,				   
 		   Pageable pageable
+//		   String idInternalBuMin, String idInternalBuMax,
+//		   String idExternalBuMin, String idExternalBuMax,
+//		   String idInternalLeMin, String idInternalLeMax,
+//		   String idExternalLeMin, String idExternalLeMax,
+//		   String idIntPortfolioMin, String idIntPortfolioMax,
+//		   String idExtPortfolioMin, String idExtPortfolioMax,
+//		   String idBuySellMin, String idBuySellMax,
+//		   String idBaseCurrencyMin, String idBaseCurrencyMax,
+//		   String idBaseQuantityUnitMin, String idBaseQuantityUnitMax,
+//		   String idTermCurrencyMin, String idTermCurrencyMax,
+//		   String minReference, String maxReference,
+//		   String idMetalFormMin, String idMetalFormMax,
+//		   String idMetalLocationMin, String idMetalLocationMax,
+//		   String idOrderStatusMin, String idOrderStatusMax
 		   );
 }

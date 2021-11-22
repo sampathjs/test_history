@@ -51,12 +51,12 @@ public class LimitOrder extends Order{
 		super.setVersion(version);
 	}
 		
-	@Column(name = "settle_date")
+	@Column(name = "settle_date", nullable = true)
 	@Temporal(TemporalType.DATE)
 	private Date settleDate;
 	
 	// Add Start Date (fixed one with concrete date and symbolic one pick list)
-	@Column(name = "start_date_concrete")
+	@Column(name = "start_date_concrete", nullable=true)
 	@Temporal(TemporalType.DATE)
 	private Date startDateConcrete;
 
@@ -118,7 +118,7 @@ public class LimitOrder extends Order{
 			final String reference, final Reference metalForm, final Reference metalLocation,			
 			final OrderStatus orderStatus, final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
-			final User updatedByUser, final List<OrderComment> orderComments,
+			final User updatedByUser, final double fillPercentage, final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks, // << order fields
 			final Date settleDate, final Date startDateConcrete, final Reference startDateSymbolic,
 			final Double limitPrice, final Reference priceType,
@@ -128,7 +128,7 @@ public class LimitOrder extends Order{
 		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
-				createdByUser, lastUpdate, updatedByUser, orderComments, 
+				createdByUser, lastUpdate, updatedByUser, fillPercentage, orderComments, 
 				fills, creditChecks);
 		this.settleDate = settleDate;
 		this.startDateConcrete = startDateConcrete;

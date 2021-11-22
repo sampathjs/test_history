@@ -21,10 +21,10 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
    @Query("SELECT o FROM ReferenceOrder o WHERE o.orderId = :orderId AND o.version = (SELECT MAX(ro2.version) FROM ReferenceOrder ro2 WHERE ro2.orderId = :orderId)") 
    Optional<ReferenceOrder> findLatestByOrderId(@Param("orderId")long orderId);
       
-   @Query("SELECT o FROM ReferenceOrder o \n"
+   @Query("SELECT o FROM Order o\n"
    		   + "WHERE \n"
 		   + "     (COALESCE(:orderIds) IS NULL OR o.orderId IN (:orderIds))\n"
-		   + " AND ((COALESCE(:versionIds) IS NULL AND (o.version = (SELECT MAX(ro2.version) FROM ReferenceOrder ro2 WHERE ro2.orderId = o.orderId))) OR o.version IN (:versionIds))\n"
+		   + " AND ((COALESCE(:versionIds) IS NULL AND (o.version = (SELECT MAX(o2.version) FROM Order o2 WHERE o2.orderId = o.orderId))) OR o.version IN (:versionIds))\n"
    		   + " AND (COALESCE(:idInternalBu) IS NULL OR o.internalBu.id IN (:idInternalBu))\n"  
 		   + " AND (COALESCE(:idExternalBu) IS NULL OR o.externalBu.id IN (:idExternalBu))\n"
    		   + " AND (COALESCE(:idExternalLe) IS NULL OR o.internalLe.id IN (:idInternalLe))\n"  
@@ -39,11 +39,15 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
 		   + " AND (:reference IS NULL OR o.reference LIKE CONCAT('%',:reference,'%'))\n"
 		   + " AND (COALESCE(:idMetalForm) IS NULL OR o.metalForm.id IN (:idMetalForm))\n"
 		   + " AND (COALESCE(:idMetalLocation) IS NULL OR o.metalLocation.id IN (:idMetalLocation))\n"
-		   + " AND (COALESCE(:idOrderStatus) IS NULL OR o.orderStatus.id IN (:idOrderStatus))\n"		   
+		   + " AND (COALESCE(:idOrderStatus) IS NULL OR o.orderStatus.id IN (:idOrderStatus))\n"
+		   + " AND (COALESCE(:idCreatedByUser) IS NULL OR o.createdByUser.id IN (:idCreatedByUser))\n"
 		   + " AND (:minCreatedAt IS NULL OR o.createdAt >= :minCreatedAt)\n" 
 		   + " AND (:maxCreatedAt IS NULL OR o.createdAt <= :maxCreatedAt)\n"
+		   + " AND (COALESCE(:idUpdatedByUser) IS NULL OR o.updatedByUser.id IN (:idUpdatedByUser))\n"
 		   + " AND (:minLastUpdate IS NULL OR o.lastUpdate >= :minLastUpdate)\n" 
 		   + " AND (:maxLastUpdate IS NULL OR o.lastUpdate <= :maxLastUpdate)\n"
+		   + " AND (:minFillPercentage IS NULL OR o.fillPercentage >= :minFillPercentage)\n" 
+		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"		   
 		   // all above: order fields, all below: reference order fields
 		   + " AND (:minMetalPriceSpread IS NULL OR o.metalPriceSpread >= :minMetalPriceSpread)\n" 
 		   + " AND (:maxMetalPriceSpread IS NULL OR o.metalPriceSpread <= :maxMetalPriceSpread)\n"
@@ -75,9 +79,12 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
 		   @Param("maxBaseQuantity") Double maxBaseQuantity, @Param("idBaseQuantityUnit") List<Long> idBaseQuantityUnit, 
 		   @Param("idTermCurrency") List<Long> idTermCurrency, @Param("reference") String reference, 
 		   @Param("idMetalForm") List<Long> idMetalForm, @Param("idMetalLocation") List<Long> idMetalLocation, 
-		   @Param("idOrderStatus") List<Long> idOrderStatus,  @Param("minCreatedAt") Date minCreatedAt, 
-		   @Param("maxCreatedAt") Date maxCreatedAt,  @Param("minLastUpdate") Date minLastUpdate, 
-		   @Param("maxLastUpdate") Date maxLastUpdate,
+		   @Param("idOrderStatus") List<Long> idOrderStatus, @Param("idCreatedByUser") List<Long> idCreatedByUser,		   
+		   @Param("minCreatedAt") Date minCreatedAt, @Param("maxCreatedAt") Date maxCreatedAt,  
+		   @Param("idUpdatedByUser") List<Long> idUpdatedByUser,
+		   @Param("minLastUpdate") Date minLastUpdate, @Param("maxLastUpdate") Date maxLastUpdate,
+		   @Param("minFillPercentage") Double minFillPercentage,
+		   @Param("maxFillPercentage") Double maxFillPercentage,		   
 		   // all above: order fields, all below: reference order fields;
 		   @Param("minMetalPriceSpread") Double minMetalPriceSpread, 
 		   @Param("maxMetalPriceSpread") Double maxMetalPriceSpread,
