@@ -137,7 +137,7 @@ class DocOutput_wMail extends DocOutput
 			
 			while (retryTimeoutCount<retryCount) {
 				try {
-					emailMessage.send();
+					emailMessage.sendAs(sender);
 					success = true;
 					break;
 				}
