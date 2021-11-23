@@ -21,7 +21,7 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
    @Query("SELECT o FROM ReferenceOrder o WHERE o.orderId = :orderId AND o.version = (SELECT MAX(ro2.version) FROM ReferenceOrder ro2 WHERE ro2.orderId = :orderId)") 
    Optional<ReferenceOrder> findLatestByOrderId(@Param("orderId")long orderId);
       
-   @Query("SELECT o FROM Order o\n"
+   @Query("SELECT o FROM ReferenceOrder o\n"
    		   + "WHERE \n"
 		   + "     (COALESCE(:orderIds) IS NULL OR o.orderId IN (:orderIds))\n"
 		   + " AND ((COALESCE(:versionIds) IS NULL AND (o.version = (SELECT MAX(o2.version) FROM Order o2 WHERE o2.orderId = o.orderId))) OR o.version IN (:versionIds))\n"
@@ -47,8 +47,9 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
 		   + " AND (:minLastUpdate IS NULL OR o.lastUpdate >= :minLastUpdate)\n" 
 		   + " AND (:maxLastUpdate IS NULL OR o.lastUpdate <= :maxLastUpdate)\n"
 		   + " AND (:minFillPercentage IS NULL OR o.fillPercentage >= :minFillPercentage)\n" 
-		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"		   
+		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"
 		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"
+		   + " AND (COALESCE(:idTicker) IS NULL OR o.ticker.id IN (:idTicker))\n"
 		   // all above: order fields, all below: reference order fields
 		   + " AND (:minMetalPriceSpread IS NULL OR o.metalPriceSpread >= :minMetalPriceSpread)\n" 
 		   + " AND (:maxMetalPriceSpread IS NULL OR o.metalPriceSpread <= :maxMetalPriceSpread)\n"
@@ -86,6 +87,7 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
 		   @Param("minFillPercentage") Double minFillPercentage,
 		   @Param("maxFillPercentage") Double maxFillPercentage,
 		   @Param("idContractType") List<Long> idContractType,
+		   @Param("idTicker") List<Long> idTicker,
 		   // all above: order fields, all below: reference order fields;
 		   @Param("minMetalPriceSpread") Double minMetalPriceSpread, 
 		   @Param("maxMetalPriceSpread") Double maxMetalPriceSpread,

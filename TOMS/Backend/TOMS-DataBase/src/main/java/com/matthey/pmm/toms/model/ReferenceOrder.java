@@ -88,18 +88,18 @@ public class ReferenceOrder extends Order {
 			final Double baseQuantity, final Reference baseQuantityUnit, 
 			final Reference termCurrency,
 			final String reference, final Reference metalForm, final Reference metalLocation,			
-			final OrderStatus orderStatus, final Date createdAt, 
+			final OrderStatus orderStatus, final Reference contractType, final Reference ticker,
+			final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final double fillPercentage, final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks, 
-			final Reference contractType, 
 			// << order fields
 			final Double metalPriceSpread,  final Double fxRateSpread, final Double contangoBackwardation, 
 			final List<ReferenceOrderLeg> legs) {
 		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
-				createdByUser, lastUpdate, updatedByUser, fillPercentage, contractType, orderComments, 
+				createdByUser, lastUpdate, updatedByUser, fillPercentage, contractType, ticker, orderComments, 
 				fills, creditChecks);
 		this.metalPriceSpread = metalPriceSpread;
 		this.fxRateSpread = fxRateSpread;
@@ -156,7 +156,7 @@ public class ReferenceOrder extends Order {
 				+ ", getIntPortfolio()=" + getIntPortfolio() + ", getExtPortfolio()=" + getExtPortfolio()
 				+ ", getBuySell()=" + getBuySell() + ", getBaseCurrency()=" + getBaseCurrency() + ", getBaseQuantity()="
 				+ getBaseQuantity() + ", getBaseQuantityUnit()=" + getBaseQuantityUnit() + ", getTermCurrency()="
-				+ getTermCurrency() + ", getContractType()=" + getContractType()
+				+ getTermCurrency() + ", getContractType()=" + getContractType() + ", ticker=" + getTicker()
 				+ ", getOrderStatus()=" + getOrderStatus() + ", getCreatedAt()=" + getCreatedAt()
 				+ ", getCreatedByUser()=" + getCreatedByUser() + ", getLastUpdate()=" + getLastUpdate()
 				+ ", getUpdatedByUser()=" + getUpdatedByUser() + ", getOrderComments()=" + getOrderComments()

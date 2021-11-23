@@ -119,6 +119,7 @@ public class LimitOrder extends Order{
 			final OrderStatus orderStatus, final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final double fillPercentage, final Reference contractType, 
+			final Reference ticker,
 			final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks, // << order fields
 			final Date settleDate, final Date startDateConcrete, final Reference startDateSymbolic,
@@ -129,7 +130,7 @@ public class LimitOrder extends Order{
 		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
-				createdByUser, lastUpdate, updatedByUser, fillPercentage, contractType, orderComments, 
+				createdByUser, lastUpdate, updatedByUser, fillPercentage, contractType, ticker, orderComments, 
 				fills, creditChecks);
 		this.settleDate = settleDate;
 		this.startDateConcrete = startDateConcrete;
@@ -254,7 +255,7 @@ public class LimitOrder extends Order{
 				+ ", startDateSymbolic=" + startDateSymbolic
 				+ ", contractType=" + getContractType()
 				+ ", limitPrice=" + limitPrice + ", priceType=" + priceType 
-				+ ", yesNoPartFillable=" + yesNoPartFillable
+				+ ", yesNoPartFillable=" + yesNoPartFillable + ", ticket=" + getTicker()
 				+ ", validationType=" + validationType
 				+ ", stopTriggerType=" + stopTriggerType + ", currencyCrossMetal=" + currencyCrossMetal
 				+ ", executionLikelihood=" + executionLikelihood + ", getInternalBu()=" + getInternalBu() + ", getExternalBu()=" + getExternalBu()

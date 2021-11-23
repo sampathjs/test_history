@@ -134,8 +134,9 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.lastUpdate(formatDateTime(entity.getLastUpdate()))
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
 				.fillPercentage(entity.getFillPercentage())
-				.idContractType (entity.getContractType() != null?entity.getContractType().getId():null)				
-				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))
+				.idContractType (entity.getContractType() != null?entity.getContractType().getId():null)
+				.idTicker(entity.getTicker() != null?entity.getTicker().getId():null)
+				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))				
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.displayStringBaseCurrency(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)
 				.displayStringBaseQuantityUnit(entity.getBaseQuantityUnit() != null?entity.getBaseQuantityUnit().getValue():null)
@@ -152,6 +153,8 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.displayStringTermCurrency(entity.getTermCurrency() !=  null?entity.getTermCurrency().getValue():null)
 				.displayStringCreatedByUser(entity.getCreatedByUser() !=  null?entity.getCreatedByUser().getLastName():null)
 				.displayStringUpdatedByUser(entity.getUpdatedByUser() !=  null?entity.getUpdatedByUser().getLastName():null)
+				.displayStringContractType(entity.getContractType() !=  null?entity.getContractType().getValue():null)
+				.displayStringTicker(entity.getTicker().getValue() !=  null?entity.getTicker().getValue():null)
 				// Reference Order
 				.contangoBackwardation(entity.getContangoBackwardation())
 				.fxRateSpread(entity.getFxRateSpread())
@@ -179,13 +182,15 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 		Reference metalForm = to.idMetalForm() != null?loadRef (to, to.idMetalForm()):null;
 		Reference metalLocation = to.idMetalLocation() != null?loadRef (to, to.idMetalLocation()):null;
 		OrderStatus orderStatus = to.idOrderStatus() != null?loadOrderStatus (to, to.idOrderStatus()):null;
+		Reference contractType = loadRef (to, to.idContractType());
+		Reference ticker = to.idTicker() != null?loadRef (to, to.idTicker()):null;
 		User createdByUser = loadUser(to, to.idCreatedByUser());
 		User updatedByUser = loadUser(to, to.idUpdatedByUser());
 		List<CreditCheck> creditChecks = new ArrayList<>(to.creditChecksIds() != null?to.creditChecksIds().size():1);
 		if (to.creditChecksIds() != null) {
 			for (Long creditCheckId : to.creditChecksIds()) {
 				creditChecks.add(loadCreditCheck(to, creditCheckId));
-			}			
+			}
 		}
 		List<OrderComment> orderComments = new ArrayList<>(to.orderCommentIds() != null?to.orderCommentIds().size():1);
 		if (to.orderCommentIds() != null) {
@@ -207,7 +212,6 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 			throw new RuntimeException ("The provided reference order " + to.toString() + " having version " + to.version() + " is outdated and needs to be refreshed");
 		}		
 		
-		Reference contractType = loadRef (to, to.idContractType());
 		
 		List<ReferenceOrderLeg> legs = new ArrayList<>(to.legIds() != null?to.legIds().size():1);
 		if (to.legIds() != null) {
@@ -231,6 +235,8 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 			existingEntity.get().setBaseQuantityUnit(baseQuantityUnit);
 			existingEntity.get().setTermCurrency(termCurrency);
 			existingEntity.get().setOrderStatus(orderStatus);
+			existingEntity.get().setContractType(contractType);
+			existingEntity.get().setTicker(ticker);
 			existingEntity.get().setCreatedAt(createdAt);
 			existingEntity.get().setCreatedByUser(createdByUser);
 			existingEntity.get().setLastUpdate(lastUpdate);
@@ -249,7 +255,6 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 			}
 			// reference Order
 			existingEntity.get().setContangoBackwardation(to.contangoBackwardation());
-			existingEntity.get().setContractType(contractType);
 			existingEntity.get().setFxRateSpread(to.fxRateSpread());
 			if (    !existingEntity.get().getLegs().containsAll(legs) | 
 					!legs.containsAll(existingEntity.get().getLegs())) {
@@ -261,9 +266,9 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 		}
 		ReferenceOrder newEntity = new ReferenceOrder(1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
 				baseQuantityUnit, termCurrency, to.reference(), metalForm, metalLocation, 
-				orderStatus, createdAt, createdByUser, lastUpdate,
+				orderStatus, contractType, ticker, createdAt, createdByUser, lastUpdate,
 				updatedByUser, 0.0d, orderComments, fills, creditChecks, 
-				contractType, to.metalPriceSpread(), to.fxRateSpread(), to.contangoBackwardation(), legs);
+				to.metalPriceSpread(), to.fxRateSpread(), to.contangoBackwardation(), legs);
 		if (to.version() != 0) {
 			newEntity.setVersion(to.version());
 		}

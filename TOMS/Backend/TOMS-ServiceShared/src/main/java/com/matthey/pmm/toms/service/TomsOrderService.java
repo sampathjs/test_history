@@ -74,6 +74,7 @@ public interface TomsOrderService {
 			@ApiParam(value = "Min fill percentage, a real number between 0 and 1,  null for no restriction", example = "0.0", required = false) @RequestParam(required=false) Double minFillPercentage,
 			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,			
 			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,
+			@ApiParam(value = "List of ticker IDs, null = all orders, example 231, 271", example = "231, 271", required = false) @RequestParam(required=false) List<Long> idTicker,
     		@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable,
 			@ApiParam(value = "Min Order Version included", example = "1", required = false) @RequestParam(required=false) List<Long> minVersionId,
 			@ApiParam(value = "Max Order Version included", example = "2", required = false) @RequestParam(required=false) List<Long> maxVersionId,
@@ -108,7 +109,9 @@ public interface TomsOrderService {
 			@ApiParam(value = "Min order status ID included. Note the order is following the alphabetical order of the name, example 1", required = false) @RequestParam(required=false) Long idOrderStatusMin,
 			@ApiParam(value = "Max order status ID included. Note the order is following the alphabetical order of the name, exmaple 3", required = false) @RequestParam(required=false) Long idOrderStatusMax,
 			@ApiParam(value = "Min contract type ID included. Note the order is following the alphabetical order of the name, example 224, 225, 227, 228", required = false) @RequestParam(required=false) Long idContractTypeMin,
-			@ApiParam(value = "Max contract type ID included. Note the order is following the alphabetical order of the name, exmaple 224, 225, 227, 228", required = false) @RequestParam(required=false) Long idContractTypeMax
+			@ApiParam(value = "Max contract type ID included. Note the order is following the alphabetical order of the name, exmaple 224, 225, 227, 228", required = false) @RequestParam(required=false) Long idContractTypeMax,
+			@ApiParam(value = "Min ticker ID included. Note the order is following the alphabetical order of the name, example 231", required = false) @RequestParam(required=false) Long idTickerMin,
+			@ApiParam(value = "Max ticker ID included. Note the order is following the alphabetical order of the name, exmaple 271", required = false) @RequestParam(required=false) Long idTickerMax			
 			);
 	
 	// limit order
@@ -152,7 +155,8 @@ public interface TomsOrderService {
 			@ApiParam(value = "Max last update date, all orders returned have been updated on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLastUpdateDate,
 			@ApiParam(value = "Min fill percentage, a real number between 0 and 1,  null for no restriction", example = "0.0", required = false) @RequestParam(required=false) Double minFillPercentage,
 			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,	
-			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,			
+			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,		
+			@ApiParam(value = "List of ticker IDs, null = all orders, example 231, 271", example = "231, 271", required = false) @RequestParam(required=false) List<Long> idTicker,			
 			// all above: order fields, all below: limit order fields
 			@ApiParam(value = "Min Settle Date, all orders returned have been settled on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2000-10-31", required = false) @RequestParam(required=false) String minSettleDate,
 			@ApiParam(value = "Max Settle Date, all orders returned have been settled on or before that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2030-10-31", required = false) @RequestParam(required=false) String maxSettleDate,
@@ -222,6 +226,7 @@ public interface TomsOrderService {
 			@ApiParam(value = "Min fill percentage, a real number between 0 and 1,  null for no restriction", example = "0.0", required = false) @RequestParam(required=false) Double minFillPercentage,
 			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,			
 			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,
+			@ApiParam(value = "List of ticker IDs, null = all orders, example 231, 271", example = "231, 271", required = false) @RequestParam(required=false) List<Long> idTicker,
 			// all above: order fields, all below: reference order fields
 			@ApiParam(value = "Min metal price spread, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double minMetalPriceSpread,
 			@ApiParam(value = "Max metal price spread, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double maxMetalPriceSpread,

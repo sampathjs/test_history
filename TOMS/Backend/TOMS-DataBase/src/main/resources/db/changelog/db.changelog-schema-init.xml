@@ -619,6 +619,9 @@
        <column name="contract_type_reference_id" type="int">
          <constraints nullable="false"/>
        </column>
+       <column name="ticker_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
     </createTable>
     
     <addForeignKeyConstraint
@@ -770,7 +773,7 @@
         referencedColumnNames="user_id"  
         referencedTableName="user"
         validate="true"/>     
-        
+
     <addForeignKeyConstraint
    	    baseColumnNames="contract_type_reference_id"  
         baseTableName="abstract_order"  
@@ -780,7 +783,17 @@
         referencedColumnNames="reference_id"  
         referencedTableName="reference"
         validate="true"/>
-        
+
+    <addForeignKeyConstraint
+   	    baseColumnNames="ticker_reference_id"  
+        baseTableName="abstract_order"  
+        constraintName="fk_order_ticker_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
+
    	 <createSequence sequenceName="order_id_seq" incrementBy="1" startValue="1000000" />         
    	
    	<createTable tableName="order_comment_map">

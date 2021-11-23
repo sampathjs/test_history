@@ -20,6 +20,8 @@ import com.matthey.pmm.toms.model.Fill;
 import com.matthey.pmm.toms.model.LimitOrder;
 import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.OrderComment;
+import com.matthey.pmm.toms.model.OrderStatus;
+import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.ReferenceOrderLeg;
@@ -115,9 +117,13 @@ public class OrderTestDataGenerator {
 	protected ReferenceOrderLegRepository referenceOrderLegRepository;
 
 	public Order createTestReferenceOrder() {
-		ReferenceOrder newTestOrder = new ReferenceOrder(1, null, null, null, null, null, null, null, null, null, null, null, null, null,
-				null, null, null, null, null, null, 0.0d, Arrays.asList(), Arrays.asList(), Arrays.asList(), 
-				null, null, null, null, Arrays.asList());
+		ReferenceOrder newTestOrder = new ReferenceOrder(1, null, null, 
+				null, null, null, null, null, null,
+				0.0d, null, null, "reference", null, null,			
+				null, null, null, null, null, null,
+				null, 0.0d, Arrays.asList(), Arrays.asList(), Arrays.asList(), 
+				// << order fields
+				0.0d,  0.0d, 0.0d,  Arrays.asList());
 		fillOrderFields(newTestOrder);
 		newTestOrder.setContangoBackwardation(randomDoubleOrNull(MAX_CONTANGO_BACKWARDATION));
 		newTestOrder.setFxRateSpread(randomDoubleOrNull(MAX_FX_RATE_SPREAD));
@@ -129,7 +135,7 @@ public class OrderTestDataGenerator {
 
 	public Order createTestLimitOrder() {
 		LimitOrder newTestOrder = new LimitOrder(1, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-				null, null, null, null, null, 0.0d, null, Arrays.asList(), Arrays.asList(), Arrays.asList(), null, null, null, null, null, null, null, null, null, null, null);
+				null, null, null, null, null, 0.0d, null, null, Arrays.asList(), Arrays.asList(), Arrays.asList(), null, null, null, null, null, null, null, null, null, null, null);
 		fillOrderFields(newTestOrder);
 		newTestOrder.setCurrencyCrossMetal(selectReferenceValue(DefaultReferenceType.CCY_METAL, true));
 		newTestOrder.setExecutionLikelihood(Math.random()*MAX_EXECUTION_LIKELIYHOOD);
@@ -166,6 +172,7 @@ public class OrderTestDataGenerator {
 	private void fillOrderFields(Order newTestOrder) {
 		newTestOrder.setBuySell(selectReferenceValue(DefaultReferenceType.BUY_SELL, false));
 		newTestOrder.setCreatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
+		newTestOrder.setBaseQuantity(Math.random() * MAX_BASE_QUANTITY);
 		newTestOrder.setBaseCurrency(selectReferenceValue(DefaultReferenceType.CCY_METAL, false));
 		newTestOrder.setBaseQuantityUnit(selectReferenceValue(DefaultReferenceType.QUANTITY_UNIT, false));
 		newTestOrder.setCreatedAt(randomDate(false));
@@ -185,6 +192,7 @@ public class OrderTestDataGenerator {
 		newTestOrder.setReference(selectOneOf(Arrays.asList("Reference 1", "Example Reference", "Very long long long long long long long long long long long long long long long long long long long long long long reference"), true));
 		newTestOrder.setTermCurrency(selectReferenceValue(DefaultReferenceType.CCY_CURRENCY, false));
 		newTestOrder.setUpdatedByUser(selectUserForOrder(newTestOrder, false));
+		newTestOrder.setTicker(selectReferenceValue(DefaultReferenceType.TICKER, false));
 		DoubleSummaryStatistics summary = newTestOrder.getFills().stream().map(x -> x.getFillQuantity()).collect(Collectors.summarizingDouble(Double::doubleValue));
 		if (summary.getSum()/newTestOrder.getBaseQuantity() > newTestOrder.getFillPercentage()) {
 			newTestOrder.setBaseQuantity(Math.random() >= 0.5d?summary.getSum() + MAX_BASE_QUANTITY:summary.getSum());			

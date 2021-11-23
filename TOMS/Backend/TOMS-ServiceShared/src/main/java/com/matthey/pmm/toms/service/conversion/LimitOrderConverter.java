@@ -116,6 +116,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
 				.fillPercentage(entity.getFillPercentage())
 				.idContractType(entity.getContractType().getId())
+				.idTicker(entity.getTicker().getId() != null?entity.getTicker().getId():null)
 				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.displayStringBaseCurrency(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)
@@ -133,6 +134,8 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.displayStringTermCurrency(entity.getTermCurrency() !=  null?entity.getTermCurrency().getValue():null)
 				.displayStringCreatedByUser(entity.getCreatedByUser() !=  null?entity.getCreatedByUser().getLastName():null)
 				.displayStringUpdatedByUser(entity.getUpdatedByUser() !=  null?entity.getUpdatedByUser().getLastName():null)
+				.displayStringContractType(entity.getContractType() !=  null?entity.getContractType().getValue():null)
+				.displayStringTicker(entity.getTicker().getValue() !=  null?entity.getTicker().getValue():null)
 				// Limit Order
 				.settleDate(formatDate(entity.getSettleDate()))
 				.idStartDateSymbolic(entity.getStartDateSymbolic() != null?entity.getStartDateSymbolic().getId():null)
@@ -156,9 +159,9 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 	
 	@Override
 	public LimitOrder toManagedEntity (LimitOrderTo to) {	
-		System.out.println("\n\n");
+		System.out.println("\n********************\n");
 		System.out.println(to);
-		System.out.println("\n\n");
+		System.out.println("\n********************\n");
 		// Order
 		Date createdAt = parseDateTime(to, to.createdAt());
 		Date lastUpdate = parseDateTime (to, to.lastUpdate());
@@ -178,6 +181,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		User createdByUser = loadUser(to, to.idCreatedByUser());
 		User updatedByUser = loadUser(to, to.idUpdatedByUser());
 		Reference contractType = to.idContractType() != null?loadRef (to, to.idContractType()):null;
+		Reference ticker = to.idTicker() != null?loadRef (to, to.idTicker()):null;
 		
 		List<CreditCheck> creditChecks = new ArrayList<>(to.creditChecksIds() != null?to.creditChecksIds().size():1);
 		if (to.creditChecksIds() != null) {
@@ -235,6 +239,8 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 			existingEntity.get().setCreatedByUser(createdByUser);
 			existingEntity.get().setLastUpdate(lastUpdate);
 			existingEntity.get().setUpdatedByUser(updatedByUser);
+			existingEntity.get().setContractType(contractType);	
+			existingEntity.get().setTicker(ticker);
 			if (    !existingEntity.get().getOrderComments().containsAll(orderComments) | 
 					!orderComments.containsAll(existingEntity.get().getOrderComments())) {
 				existingEntity.get().setOrderComments(orderComments);
@@ -259,13 +265,12 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 			existingEntity.get().setValidationType(validationType);			
 			existingEntity.get().setExpiryDate(expiryDate);
 			existingEntity.get().setExecutionLikelihood(to.executionLikelihood());
-			existingEntity.get().setContractType(contractType);			
 			return existingEntity.get();
 		}
 		LimitOrder newEntity = new LimitOrder(1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
 				baseQuantityUnit, termCurrency, to.reference(), metalForm, metalLocation, 
 				orderStatus, createdAt, createdByUser, lastUpdate,
-				updatedByUser, 0.0d, contractType, orderComments, fills, creditChecks, 
+				updatedByUser, 0.0d, contractType, ticker, orderComments, fills, creditChecks, 
 				settleDate, startDateConcrete, startDateSymbolic, to.limitPrice(), priceType,
 				stopTriggerType, currencyCrossMetal, yesNoPartFillable, 
 				validationType, expiryDate, to.executionLikelihood());
@@ -276,9 +281,9 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 			newEntity.setOrderId(to.id());
 		}
 		
-		System.out.println("\n\n");
+		System.out.println("\n*****************************\n");
 		System.out.println (newEntity);
-		System.out.println("\n\n");
+		System.out.println("\n*****************************\n");
 		
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;

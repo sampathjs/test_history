@@ -14,7 +14,7 @@ public enum TestLimitOrder {
 			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, "TEST_ORDER_1A", DefaultReference.METAL_FORM_INGOT, DefaultReference.METAL_LOCATION_ROYSTON,
-			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE, 
+			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE, DefaultReference.TICKER_XPDEUR, 
 			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			DefaultReference.PRICE_TYPE_SPOT, null,
 			"2000-01-15 16:00:00", "2001-04-28", DefaultReference.SYMBOLIC_DATE_1D, 1200.00d,
@@ -25,7 +25,7 @@ public enum TestLimitOrder {
 			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_NONE, DefaultReference.METAL_LOCATION_NONE,
-			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE, 
+			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE, DefaultReference.TICKER_XRUCNY,
 			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-03-02 08:00:00", TestUser.ANDREW_BAYNES,
 			DefaultReference.PRICE_TYPE_SPOT, null,
 			"2000-01-15 16:00:00", "2001-04-28", null, 1200.00d,
@@ -36,7 +36,7 @@ public enum TestLimitOrder {
 			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR,"TEST_ORDER_2", null, null,
-			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_FIXED, 
+			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_FIXED, DefaultReference.TICKER_XPTGBP, 
 			TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			DefaultReference.PRICE_TYPE_FORWARD, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1), 
 			"2000-02-15 16:00:00", null, DefaultReference.SYMBOLIC_DATE_1D, 400.00d,
@@ -47,7 +47,7 @@ public enum TestLimitOrder {
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, DefaultReference.PORTFOLIO_UK_RUTHENIUM, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR,  "TEST_ORDER_3", DefaultReference.METAL_FORM_GRAIN, DefaultReference.METAL_LOCATION_BRANDENBERGER,
-			DefaultOrderStatus.LIMIT_ORDER_FILLED, DefaultReference.CONTRACT_TYPE_LIMIT_FIXED,
+			DefaultOrderStatus.LIMIT_ORDER_FILLED, DefaultReference.CONTRACT_TYPE_LIMIT_FIXED, DefaultReference.TICKER_XAUUSD,
 			TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.ARINDAM_RAY,
 			DefaultReference.PRICE_TYPE_SPOT_PLUS, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_4, TestCreditCheck.TEST_CREDIT_CHECK_5), 
 			"2000-02-15 16:00:00", null, null, 400.00d,
@@ -65,6 +65,7 @@ public enum TestLimitOrder {
 			DefaultReference termCurrency, String reference, DefaultReference metalForm, 
 			DefaultReference metalLocation,
 			DefaultOrderStatus orderStatus, DefaultReference contractType,  
+			DefaultReference ticker,
 			TestUser createdBy, String createdAt,
 			String lastUpdate, TestUser updatedByUser, DefaultReference priceType, 
 			List<TestCreditCheck> creditChecks, // << order fields
@@ -111,6 +112,7 @@ public enum TestLimitOrder {
 				.orderCommentIds(comments!=null?comments.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.fillPercentage(0.0d)
 				.idContractType(contractType.getEntity().id())
+				.idTicker(ticker.getEntity().id())
 				.build();
 	}
 

@@ -16,6 +16,7 @@ public enum TestReferenceOrder {
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, "TEST_ORDER_1A", DefaultReference.METAL_FORM_INGOT, DefaultReference.METAL_LOCATION_ROYSTON,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_REFERENCE_AVERAGE,
+			DefaultReference.TICKER_XAUUSD,
 			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8),
 			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1), Arrays.asList(TestOrderComment.TEST_COMMENT_4, TestOrderComment.TEST_COMMENT_5),
@@ -30,6 +31,7 @@ public enum TestReferenceOrder {
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_NONE, DefaultReference.METAL_LOCATION_NONE,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_REFERENCE_AVERAGE,
+			DefaultReference.TICKER_XAUUSD,
 			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-12-23 12:00:00", TestUser.ANDREW_BAYNES,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8), null, null,
 			// reference order fields
@@ -41,7 +43,7 @@ public enum TestReferenceOrder {
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, "TEST_ORDER_2", null, null,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, 
-			DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
+			DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING, DefaultReference.TICKER_XAGCNY,
 			TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_2, TestCreditCheck.TEST_CREDIT_CHECK_6),  
 			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1), Arrays.asList(TestOrderComment.TEST_COMMENT_6),
@@ -54,6 +56,7 @@ public enum TestReferenceOrder {
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, "TEST_ORDER_3", DefaultReference.METAL_FORM_GRAIN, DefaultReference.METAL_LOCATION_BRANDENBERGER,
 			DefaultOrderStatus.REFERENCE_ORDER_FILLED, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
+			DefaultReference.TICKER_XPDUSD,
 			TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_7), null, null,
 			 100d, 
@@ -73,7 +76,7 @@ public enum TestReferenceOrder {
 			DefaultReference baseCurrency, Double baseQuantity, DefaultReference baseQuantityUnit, 
 			DefaultReference termCurrency, String reference, DefaultReference metalForm, 
 			DefaultReference metalLocation,			
-			DefaultOrderStatus orderStatus, DefaultReference contractType, 
+			DefaultOrderStatus orderStatus, DefaultReference contractType, DefaultReference ticker, 
 			TestUser createdBy, String createdAt,
 			String lastUpdate, TestUser updatedByUser,  
 			List<TestCreditCheck> creditChecks,
@@ -107,6 +110,7 @@ public enum TestReferenceOrder {
 				.lastUpdate(lastUpdate)
 				.idUpdatedByUser(updatedByUser.getEntity().id()) 
 				.idContractType(contractType.getEntity().id())
+				.idTicker(ticker.getEntity().id())
 				.fillIds (fills!=null?fills.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.creditChecksIds((creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null))
 				.orderCommentIds((orderComments!=null?orderComments.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null))

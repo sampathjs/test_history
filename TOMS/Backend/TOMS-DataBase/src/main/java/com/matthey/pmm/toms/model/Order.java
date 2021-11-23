@@ -147,6 +147,11 @@ public abstract class Order {
 	@JoinColumn(name="contract_type_reference_id", nullable = false)
 	@ReferenceTypeDesignator(referenceTypes = {DefaultReferenceType.CONTRACT_TYPE_LIMIT_ORDER, DefaultReferenceType.CONTRACT_TYPE_REFERENCE_ORDER})
 	private Reference contractType;
+
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="ticker_reference_id", nullable = false)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.TICKER)
+	private Reference ticker;
 	
 	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -184,6 +189,7 @@ public abstract class Order {
 			final OrderStatus orderStatus, final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final double fillPercentage, final Reference contractType, 
+			final Reference ticker,
 			final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks) {
 		this.internalBu = internalBu;
@@ -207,6 +213,7 @@ public abstract class Order {
 		this.updatedByUser = updatedByUser;
 		this.fillPercentage = fillPercentage;
 		this.contractType = contractType;
+		this.ticker = ticker;
 		this.orderComments = new ArrayList<>(orderComments);
 		this.fills = new ArrayList<>(fills);
 		this.creditChecks = new ArrayList<>(creditChecks);
@@ -236,6 +243,7 @@ public abstract class Order {
 		this.updatedByUser = toClone.updatedByUser;
 		this.fillPercentage = toClone.fillPercentage;
 		this.contractType = toClone.contractType;
+		this.ticker = toClone.ticker;
 		this.orderComments = new ArrayList<>(toClone.orderComments);
 		this.fills = new ArrayList<>(toClone.fills);
 		this.creditChecks = new ArrayList<>(toClone.creditChecks);
@@ -476,6 +484,14 @@ public abstract class Order {
 		this.contractType = contractType;
 	}
 
+	public Reference getTicker() {
+		return ticker;
+	}
+
+	public void setTicker(Reference ticker) {
+		this.ticker = ticker;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -508,7 +524,9 @@ public abstract class Order {
 				+ ", buySell=" + buySell + ", baseCurrency=" + baseCurrency + ", baseQuantity=" + baseQuantity
 				+ ", reference=" + reference + ", metalForm=" + metalForm + ", metalLocation=" + metalLocation
 				+ ", baseQuantityUnit=" + baseQuantityUnit + ", termCurrency=" + termCurrency + ", orderStatus="
-				+ ", fillPercentage=" + fillPercentage + ", contractType=" + contractType
-				+ orderStatus + "]";
+				+ orderStatus
+				+ ", fillPercentage=" + fillPercentage + ", contractType=" + contractType 
+				+ ", ticket=" + ticker
+				+ "]";
 	}
 }

@@ -38,6 +38,7 @@ public enum DefaultReferenceType {
 	CONTRACT_TYPE_REFERENCE_ORDER (27, "Contract Type Reference Order", 2700l),
 	CONTRACT_TYPE_LIMIT_ORDER (28, "Contract Type Limit Order", 2800l),
 	ORDER_TYPE_CATEGORY (29, "Order Type Category", 2900l),
+	TICKER (30, "Ticker", 3000l),
 	
 	;
 	

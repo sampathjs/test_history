@@ -226,7 +226,19 @@ public abstract class OrderTo {
     public abstract double fillPercentage();
     
 	@Auxiliary
+	@Nullable
+	public abstract String displayStringTicker();     
+
+	@Auxiliary
+	@Nullable
+	public abstract Long idTicker(); 
+
+	@Auxiliary
 	public abstract Long idContractType();
+
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringContractType();
 	
     @Auxiliary
     @Nullable

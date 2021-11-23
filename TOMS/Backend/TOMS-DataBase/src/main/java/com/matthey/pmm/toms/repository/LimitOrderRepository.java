@@ -21,7 +21,7 @@ public interface LimitOrderRepository extends PagingAndSortingRepository<LimitOr
    Optional<LimitOrder> findLatestByOrderId(@Param("orderId") Long orderId);
    
 
-   @Query("SELECT o FROM Order o\n"
+   @Query("SELECT o FROM LimitOrder o\n"
    		   + "WHERE \n"
 		   + "     (COALESCE(:orderIds) IS NULL OR o.orderId IN (:orderIds))\n"
 		   + " AND ((COALESCE(:versionIds) IS NULL AND (o.version = (SELECT MAX(o2.version) FROM Order o2 WHERE o2.orderId = o.orderId))) OR o.version IN (:versionIds))\n"
@@ -48,7 +48,8 @@ public interface LimitOrderRepository extends PagingAndSortingRepository<LimitOr
 		   + " AND (:maxLastUpdate IS NULL OR o.lastUpdate <= :maxLastUpdate)\n"
 		   + " AND (:minFillPercentage IS NULL OR o.fillPercentage >= :minFillPercentage)\n" 
 		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"
-		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"		   
+		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"
+		   + " AND (COALESCE(:idTicker) IS NULL OR o.ticker.id IN (:idTicker))\n"
 		   // all above: order fields, all below: limit order fields
 		   + " AND (:minSettle IS NULL OR o.settleDate >= :minSettle)\n" 
 		   + " AND (:maxSettle IS NULL OR o.settleDate <= :maxSettle)\n"
@@ -82,7 +83,8 @@ public interface LimitOrderRepository extends PagingAndSortingRepository<LimitOr
 		   @Param("minLastUpdate") Date minLastUpdate, @Param("maxLastUpdate") Date maxLastUpdate,
 		   @Param("minFillPercentage") Double minFillPercentage,
 		   @Param("maxFillPercentage") Double maxFillPercentage,
-		   @Param("idContractType") List<Long> idContractType,		   
+		   @Param("idContractType") List<Long> idContractType,
+		   @Param("idTicker") List<Long> idTicker,
 		   // all above: order fields, all below: limit order fields
 		   @Param("minSettle") Date minSettle, @Param("maxSettle") Date maxSettle,  
 		   @Param("minStartConcrete") Date minStartConcrete, @Param("maxStartConcrete") Date maxStartConcrete,  

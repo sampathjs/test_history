@@ -707,6 +707,10 @@ public class Validator {
 				Arrays.asList(DefaultReferenceType.PORTFOLIO),
 				clazz, method , argument + ".idIntPortfolio", true);
     	
+    	verifyDefaultReference (order.idTicker(),
+				Arrays.asList(DefaultReferenceType.TICKER),
+				clazz, method , argument + ".idTicker", false);
+    	
 		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
 		try {
 			Date parsedTime = sdfDateTime.parse (order.createdAt());
