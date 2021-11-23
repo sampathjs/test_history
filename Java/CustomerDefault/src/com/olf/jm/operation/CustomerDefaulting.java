@@ -40,15 +40,12 @@ import com.openlink.util.constrepository.ConstRepository;
 import com.openlink.util.constrepository.ConstantNameException;
 import com.openlink.util.constrepository.ConstantTypeException;
 import com.olf.jm.logging.Logging;
-   
 
 /*
  * History:
  *              V1.0                        - Initil cersion
  * 2021-01-05   V1.2	GanapP02  EPI-1546  - PBI000000000293 - Set default end user wne From account changes for 
  *                                            Metal/Cash Transfer deals
- *
- * 2021-10-11   V1.3	BhardG01  EPI-1532  - WO0000000007327 _Location Pass through deals failed to Book in v14 as well as V17
  * 
  */
 
@@ -409,10 +406,6 @@ public class CustomerDefaulting extends AbstractFieldListener {
 					extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 				}
 			} else {
-				if (isPassThroughDeals(tran)){
-					extBU =  tran.getField("End User").getValueAsString(); // tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
-				}
-				else
 				extBU = tran.getValueAsString(EnumTransactionFieldId.ExternalBusinessUnit);
 			}
 
@@ -498,11 +491,6 @@ public class CustomerDefaulting extends AbstractFieldListener {
 
 	}
 
-
-	
-	private boolean isPassThroughDeals(Transaction tran){ 
-		return tran.getField("PassThrough dealid").isApplicable(); 
-	}
 
 	private HashMap<String, String> convertTableToMap(Table inputTable) {
 		int rowCount = inputTable.getRowCount();
