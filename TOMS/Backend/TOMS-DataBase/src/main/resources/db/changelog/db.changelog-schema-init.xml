@@ -137,6 +137,9 @@
        <column name="order_type_reference_id" type="int">
          <constraints nullable="false"/>
        </column>
+       <column name="order_type_category_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
        <column name="sort_column" type="int">
          <constraints nullable="true"/>
        </column>       
@@ -163,6 +166,16 @@
             referencedColumnNames="reference_id"  
             referencedTableName="reference"  
             validate="true"/>
+            
+    <addForeignKeyConstraint  
+    	    baseColumnNames="order_type_category_reference_id"  
+            baseTableName="order_status"  
+            constraintName="fk_order_status_category_order_type_ref_id"  
+            onDelete="NO ACTION"
+            onUpdate="NO ACTION"  
+            referencedColumnNames="reference_id"  
+            referencedTableName="reference"  
+            validate="true"/>            
             
     <!-- Process Transition -->
    	<createTable tableName="process_transition">
@@ -601,8 +614,11 @@
          <constraints nullable="true"/>
        </column>
        <column name="fill_percentage" type="double">
-          <constraints nullable="false"/>
+         <constraints nullable="false"/>
        </column>    
+       <column name="contract_type_reference_id" type="int">
+         <constraints nullable="false"/>
+       </column>
     </createTable>
     
     <addForeignKeyConstraint
@@ -754,6 +770,16 @@
         referencedColumnNames="user_id"  
         referencedTableName="user"
         validate="true"/>     
+        
+    <addForeignKeyConstraint
+   	    baseColumnNames="contract_type_reference_id"  
+        baseTableName="abstract_order"  
+        constraintName="fk_order_contract_type_id"
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
         
    	 <createSequence sequenceName="order_id_seq" incrementBy="1" startValue="1000000" />         
    	
@@ -974,9 +1000,7 @@
        <column name="contango_backwardation" type="double">
          <constraints nullable="true"/>
        </column>
-       <column name="contract_type_reference_id" type="int">
-         <constraints nullable="false"/>
-       </column>
+
     </createTable>   
     
     <addForeignKeyConstraint
@@ -989,16 +1013,6 @@
         referencedTableName="abstract_order"
         validate="true"/>
              
-    <addForeignKeyConstraint
-   	    baseColumnNames="contract_type_reference_id"  
-        baseTableName="reference_order"  
-        constraintName="fk_reference_order_contract_type_id"
-        onDelete="NO ACTION"
-        onUpdate="NO ACTION"
-        referencedColumnNames="reference_id"  
-        referencedTableName="reference"
-        validate="true"/>        
-        
     <!-- Reference Order Legs -->
     <createTable tableName="reference_order_leg">
        <column name="leg_id" type="int">

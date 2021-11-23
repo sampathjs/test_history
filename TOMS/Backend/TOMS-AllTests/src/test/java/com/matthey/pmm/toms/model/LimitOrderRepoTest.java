@@ -104,8 +104,7 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 	@After
 	public void forDebug () {
 		fillRepo.findAll();
-	}
-	
+	}	
 	
 	@Override
 	protected Supplier<List<LimitOrder>> listProvider() {
@@ -133,6 +132,7 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 										new Date(), // last update
 										userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),  // updated by
 										0.0d, // fillPercentage, going to get updated automatically before persisting to database
+										referenceConverter.toManagedEntity(DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE.getEntity()),
 										Arrays.asList(orderCommentConverter.toManagedEntity(TestOrderComment.TEST_COMMENT_1.getEntity())), // order comments
 										Arrays.asList(fillConverter.toManagedEntity(TestFill.TEST_LIMIT_ORDER_FILL_2.getEntity())),  // fills
 										Arrays.asList(creditCheckConverter.toManagedEntity(TestCreditCheck.TEST_CREDIT_CHECK_1.getEntity())), // credit checks
@@ -170,6 +170,7 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 							new Date(), // last update
 							userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),  // updated by
 							0.0d, // fillPercentage, going to get updated automatically before persisting to database
+							referenceConverter.toManagedEntity(DefaultReference.CONTRACT_TYPE_LIMIT_FIXED.getEntity()),
 							Arrays.asList(orderCommentConverter.toManagedEntity(TestOrderComment.TEST_COMMENT_1.getEntity())), // order comments
 							Arrays.asList(fillConverter.toManagedEntity(TestFill.TEST_LIMIT_ORDER_FILL_2.getEntity())),  // fills
 							Arrays.asList(creditCheckConverter.toManagedEntity(TestCreditCheck.TEST_CREDIT_CHECK_1.getEntity())), // credit checks

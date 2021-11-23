@@ -48,6 +48,7 @@ public interface LimitOrderRepository extends PagingAndSortingRepository<LimitOr
 		   + " AND (:maxLastUpdate IS NULL OR o.lastUpdate <= :maxLastUpdate)\n"
 		   + " AND (:minFillPercentage IS NULL OR o.fillPercentage >= :minFillPercentage)\n" 
 		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"
+		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"		   
 		   // all above: order fields, all below: limit order fields
 		   + " AND (:minSettle IS NULL OR o.settleDate >= :minSettle)\n" 
 		   + " AND (:maxSettle IS NULL OR o.settleDate <= :maxSettle)\n"
@@ -80,7 +81,8 @@ public interface LimitOrderRepository extends PagingAndSortingRepository<LimitOr
 		   @Param("idUpdatedByUser") List<Long> idUpdatedByUser,
 		   @Param("minLastUpdate") Date minLastUpdate, @Param("maxLastUpdate") Date maxLastUpdate,
 		   @Param("minFillPercentage") Double minFillPercentage,
-		   @Param("maxFillPercentage") Double maxFillPercentage,		   
+		   @Param("maxFillPercentage") Double maxFillPercentage,
+		   @Param("idContractType") List<Long> idContractType,		   
 		   // all above: order fields, all below: limit order fields
 		   @Param("minSettle") Date minSettle, @Param("maxSettle") Date maxSettle,  
 		   @Param("minStartConcrete") Date minStartConcrete, @Param("maxStartConcrete") Date maxStartConcrete,  

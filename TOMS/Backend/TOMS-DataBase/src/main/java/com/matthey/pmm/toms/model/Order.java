@@ -140,7 +140,13 @@ public abstract class Order {
 	private Reference metalLocation;
 	
 	@Column(name = "fill_percentage", nullable=false)
-	private double fillPercentage;	
+	private double fillPercentage;		
+	
+	
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="contract_type_reference_id", nullable = false)
+	@ReferenceTypeDesignator(referenceTypes = {DefaultReferenceType.CONTRACT_TYPE_LIMIT_ORDER, DefaultReferenceType.CONTRACT_TYPE_REFERENCE_ORDER})
+	private Reference contractType;
 	
 	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -177,7 +183,8 @@ public abstract class Order {
 			final String reference, final Reference metalForm, final Reference metalLocation,
 			final OrderStatus orderStatus, final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
-			final User updatedByUser, final double fillPercentage, final List<OrderComment> orderComments,
+			final User updatedByUser, final double fillPercentage, final Reference contractType, 
+			final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks) {
 		this.internalBu = internalBu;
 		this.externalBu = externalBu;
@@ -199,6 +206,7 @@ public abstract class Order {
 		this.lastUpdate = lastUpdate;
 		this.updatedByUser = updatedByUser;
 		this.fillPercentage = fillPercentage;
+		this.contractType = contractType;
 		this.orderComments = new ArrayList<>(orderComments);
 		this.fills = new ArrayList<>(fills);
 		this.creditChecks = new ArrayList<>(creditChecks);
@@ -226,6 +234,8 @@ public abstract class Order {
 		this.createdByUser = toClone.createdByUser;
 		this.lastUpdate = toClone.lastUpdate;
 		this.updatedByUser = toClone.updatedByUser;
+		this.fillPercentage = toClone.fillPercentage;
+		this.contractType = toClone.contractType;
 		this.orderComments = new ArrayList<>(toClone.orderComments);
 		this.fills = new ArrayList<>(toClone.fills);
 		this.creditChecks = new ArrayList<>(toClone.creditChecks);
@@ -458,6 +468,14 @@ public abstract class Order {
 		this.metalLocation = metalLocation;
 	}
 
+	public Reference getContractType() {
+		return contractType;
+	}
+
+	public void setContractType(Reference contractType) {
+		this.contractType = contractType;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -490,6 +508,7 @@ public abstract class Order {
 				+ ", buySell=" + buySell + ", baseCurrency=" + baseCurrency + ", baseQuantity=" + baseQuantity
 				+ ", reference=" + reference + ", metalForm=" + metalForm + ", metalLocation=" + metalLocation
 				+ ", baseQuantityUnit=" + baseQuantityUnit + ", termCurrency=" + termCurrency + ", orderStatus="
+				+ ", fillPercentage=" + fillPercentage + ", contractType=" + contractType
 				+ orderStatus + "]";
 	}
 }

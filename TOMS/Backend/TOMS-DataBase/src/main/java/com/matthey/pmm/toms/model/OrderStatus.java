@@ -45,6 +45,11 @@ public class OrderStatus {
 	@JoinColumn(name="order_type_reference_id")
 	@ReferenceTypeDesignator(referenceTypes=DefaultReferenceType.ORDER_TYPE_NAME)
 	private Reference orderType;	
+
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="order_type_category_reference_id")
+	@ReferenceTypeDesignator(referenceTypes=DefaultReferenceType.ORDER_TYPE_CATEGORY)
+	private Reference orderTypeCategory;
 	
 	@Column(name = "sort_column", nullable = true)
 	private Long sortColumn;
@@ -55,9 +60,10 @@ public class OrderStatus {
 	protected OrderStatus() {
 	}
 
-	public OrderStatus(final Reference orderStatusName, final Reference orderType, Long sortColumn) {
+	public OrderStatus(final Reference orderStatusName, final Reference orderType, final Reference orderTypeCategory, Long sortColumn) {
 		this.orderStatusName = orderStatusName;
 		this.orderType = orderType;
+		this.orderTypeCategory = orderTypeCategory;
 		this.sortColumn = sortColumn;
 	}
 
@@ -91,6 +97,16 @@ public class OrderStatus {
 
 	public void setSortColumn(Long sortColumn) {
 		this.sortColumn = sortColumn;
+	}
+	
+	
+
+	public Reference getOrderTypeCategory() {
+		return orderTypeCategory;
+	}
+
+	public void setOrderTypeCategory(Reference orderTypeCategory) {
+		this.orderTypeCategory = orderTypeCategory;
 	}
 
 	@Override
@@ -127,6 +143,6 @@ public class OrderStatus {
 	@Override
 	public String toString() {
 		return "OrderStatus [id=" + id + ", orderStatusName=" + orderStatusName + ", orderType="
-				+ orderType + "]";
+				+ orderType  + ", orderTypeCategory=" + orderTypeCategory + "]";
 	}
 }

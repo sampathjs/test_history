@@ -224,6 +224,9 @@ public abstract class OrderTo {
 
     @Auxiliary
     public abstract double fillPercentage();
+    
+	@Auxiliary
+	public abstract Long idContractType();
 	
     @Auxiliary
     @Nullable

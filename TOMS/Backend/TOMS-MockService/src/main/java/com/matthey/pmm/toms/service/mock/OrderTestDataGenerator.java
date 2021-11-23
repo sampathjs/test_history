@@ -120,16 +120,16 @@ public class OrderTestDataGenerator {
 				null, null, null, null, Arrays.asList());
 		fillOrderFields(newTestOrder);
 		newTestOrder.setContangoBackwardation(randomDoubleOrNull(MAX_CONTANGO_BACKWARDATION));
-		newTestOrder.setContractType(selectReferenceValue(DefaultReferenceType.CONTRACT_TYPE, false));
 		newTestOrder.setFxRateSpread(randomDoubleOrNull(MAX_FX_RATE_SPREAD));
 		newTestOrder.setLegs(createLegList());
+		newTestOrder.setContractType(selectReferenceValue(DefaultReferenceType.CONTRACT_TYPE_REFERENCE_ORDER, false));
 		newTestOrder = referenceOrderRepo.save(newTestOrder);
 		return newTestOrder;
 	}
 
 	public Order createTestLimitOrder() {
 		LimitOrder newTestOrder = new LimitOrder(1, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-				null, null, null, null, null, 0.0d, Arrays.asList(), Arrays.asList(), Arrays.asList(), null, null, null, null, null, null, null, null, null, null, null);
+				null, null, null, null, null, 0.0d, null, Arrays.asList(), Arrays.asList(), Arrays.asList(), null, null, null, null, null, null, null, null, null, null, null);
 		fillOrderFields(newTestOrder);
 		newTestOrder.setCurrencyCrossMetal(selectReferenceValue(DefaultReferenceType.CCY_METAL, true));
 		newTestOrder.setExecutionLikelihood(Math.random()*MAX_EXECUTION_LIKELIYHOOD);
@@ -142,6 +142,7 @@ public class OrderTestDataGenerator {
 		newTestOrder.setStopTriggerType(selectReferenceValue(DefaultReferenceType.STOP_TRIGGER_TYPE, true));
 		newTestOrder.setValidationType(selectReferenceValue(DefaultReferenceType.VALIDATION_TYPE, false));
 		newTestOrder.setYesNoPartFillable(selectReferenceValue(DefaultReferenceType.YES_NO, true));
+		newTestOrder.setContractType(selectReferenceValue(DefaultReferenceType.CONTRACT_TYPE_LIMIT_ORDER, false));
 		newTestOrder = limitOrderRepo.save(newTestOrder);
 		return newTestOrder;
 	}
@@ -260,6 +261,15 @@ public class OrderTestDataGenerator {
 
 	private Reference selectReferenceValue(DefaultReferenceType type, boolean optional) {
 		List<ReferenceTo> values = DefaultReference.findByTypeId(type.getEntity().id()).get();
+		ReferenceTo selected = selectOneOf(values, optional);
+		return selected != null?refConverter.toManagedEntity(selected):null;
+	}
+	
+	private Reference selectReferenceValue(List<DefaultReferenceType> types, boolean optional) {
+		List<ReferenceTo> values = new ArrayList<>();
+		for (DefaultReferenceType type : types) {
+			values.addAll(DefaultReference.findByTypeId(type.getEntity().id()).get());
+		}
 		ReferenceTo selected = selectOneOf(values, optional);
 		return selected != null?refConverter.toManagedEntity(selected):null;
 	}

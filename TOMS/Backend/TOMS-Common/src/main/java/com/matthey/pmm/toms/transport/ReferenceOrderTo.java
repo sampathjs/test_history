@@ -57,9 +57,6 @@ public abstract class ReferenceOrderTo extends OrderTo {
 	public abstract Double contangoBackwardation();
 	
 	@Auxiliary
-	public abstract Long idContractType();
-	
-	@Auxiliary
 	@Nullable
 	public abstract String displayStringContractType();	
 	

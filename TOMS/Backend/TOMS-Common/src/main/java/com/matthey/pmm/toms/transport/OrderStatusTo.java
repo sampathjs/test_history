@@ -26,6 +26,9 @@ public abstract class OrderStatusTo {
 
     @Auxiliary
     public abstract long idOrderTypeName();
+
+    @Auxiliary
+    public abstract long idOrderTypeCategory();
     
     @Auxiliary
     @Nullable

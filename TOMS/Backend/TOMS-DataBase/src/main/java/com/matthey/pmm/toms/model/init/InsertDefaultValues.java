@@ -65,13 +65,13 @@ public class InsertDefaultValues implements CustomSqlChange {
 	private List<SqlStatement> processTransitionInsert(Database database) {
 		List<SqlStatement> results = new ArrayList<> (DefaultProcessTransition.values().length*20);
 		String insertTemplateMain = 
-				"INSERT INTO process_transition (process_transition_id, reference_category_id, from_status_id, to_status_id) VALUES (%s, %s, %s, %s)";
+				"INSERT INTO process_transition (process_transition_id, reference_category_id, from_status_id, to_status_id, sort_column) VALUES (%s, %s, %s, %s, %s)";
 		String insertTemplateAttributeList = 
 				"INSERT INTO process_transition_attributes (process_transition_id, unchangeable_attribute) VALUES (%s, '%s')";
 		for (ProcessTransitionTo pt : DefaultProcessTransition.asList()) {
 			results.add(new RawSqlStatement(String.format(insertTemplateMain, 
 					pt.id(), pt.referenceCategoryId(), pt.fromStatusId(),
-					pt.toStatusId())));
+					pt.toStatusId(), pt.sortColumn() != null?pt.sortColumn():"NULL")));
 			if (pt.unchangeableAttributes() != null) {
 				for (String unchangeableAttribute : pt.unchangeableAttributes()) {
 					results.add(new RawSqlStatement(String.format(insertTemplateAttributeList, 
@@ -85,11 +85,12 @@ public class InsertDefaultValues implements CustomSqlChange {
 	private List<SqlStatement> orderStatusDataInsert(Database database) {
 		List<SqlStatement> results = new ArrayList<> (DefaultAttributeCalculation.values().length);
 		String insertTemplate = 
-				"INSERT INTO order_status (order_status_id, name_reference_id, order_type_reference_id) VALUES (%s, %s, %s)";
+				"INSERT INTO order_status (order_status_id, name_reference_id, order_type_reference_id, order_type_category_reference_id, sort_column) VALUES (%s, %s, %s, '%s', %s)";
 		
 		for (OrderStatusTo os : DefaultOrderStatus.asList()) {
 			results.add(new RawSqlStatement(String.format(insertTemplate, 
-					os.id(), os.idOrderStatusName(), os.idOrderTypeName())));
+					os.id(), os.idOrderStatusName(), os.idOrderTypeName(),
+					os.idOrderTypeCategory(), os.sortColumn() != null?os.sortColumn():"NULL")));
 		}
 		return results;
 	}
@@ -97,7 +98,7 @@ public class InsertDefaultValues implements CustomSqlChange {
 	private List<SqlStatement> expirationStatusDataInsert(Database database) {
 		List<SqlStatement> results = new ArrayList<> (DefaultAttributeCalculation.values().length);
 		String insertTemplate = 
-				"INSERT INTO expiration_status (expiration_status_id, name_reference_id, order_type_reference_id) VALUES (%s, %s, %s)";
+				"INSERT INTO expiration_status (expiration_status_id, name_reference_id) VALUES (%s, %s, %s)";
 		
 		return results;
 	}
@@ -125,11 +126,11 @@ public class InsertDefaultValues implements CustomSqlChange {
 	private List<SqlStatement> referenceDataInsert(Database database) {
 		List<SqlStatement> results = new ArrayList<> (DefaultReference.values().length);
 		String insertTemplate = 
-				"INSERT INTO reference (reference_id, value, display_name, reference_type_id, endur_id) VALUES (%s, '%s', %s, %s, %s)";
+				"INSERT INTO reference (reference_id, value, display_name, reference_type_id, endur_id, sort_column) VALUES (%s, '%s', %s, %s, %s, %s)";
 		for (ReferenceTo ref : DefaultReference.asList()) {
 			results.add(new RawSqlStatement(String.format(insertTemplate, 
 					ref.id(), ref.name(), ref.displayName()!=null?ref.displayName():"NULL",
-							ref.idType(), ref.endurId() != null?ref.endurId():"NULL")));
+							ref.idType(), ref.endurId() != null?ref.endurId():"NULL", ref.sortColumn() != null?ref.sortColumn():"NULL")));
 			List<ReferenceTo> duplicates = 
 					DefaultReference.asList()
 					   .stream()
@@ -147,7 +148,7 @@ public class InsertDefaultValues implements CustomSqlChange {
 		String insertTemplate = 
 				"INSERT INTO reference_type (reference_type_id, name) VALUES (%s, '%s')";
 		for (ReferenceTypeTo refType : DefaultReferenceType.asList()) {
-			results.add(new RawSqlStatement(String.format(insertTemplate, refType.id(), refType.name())));
+			results.add(new RawSqlStatement(String.format(insertTemplate, refType.id(), refType.name(), ""+ (refType.sortColumn() != null?refType.sortColumn():"NULL"))));
 		}
 		return results;
 	}

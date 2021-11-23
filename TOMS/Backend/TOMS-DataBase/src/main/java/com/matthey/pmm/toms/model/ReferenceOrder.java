@@ -55,12 +55,7 @@ public class ReferenceOrder extends Order {
 	public void setVersion (int version) {
 		super.setVersion(version);
 	}
-	
-	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="contract_type_reference_id", nullable = false)
-	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.AVERAGING_RULE)
-	private Reference contractType; 		
-	
+		
 	// new columns below:
 	@Column(name="metal_price_spread", nullable=true)
 	private Double metalPriceSpread;
@@ -96,16 +91,16 @@ public class ReferenceOrder extends Order {
 			final OrderStatus orderStatus, final Date createdAt, 
 			final User createdByUser, final Date lastUpdate,
 			final User updatedByUser, final double fillPercentage, final List<OrderComment> orderComments,
-			final List<Fill> fills, final List<CreditCheck> creditChecks, // << order fields
+			final List<Fill> fills, final List<CreditCheck> creditChecks, 
 			final Reference contractType, 
+			// << order fields
 			final Double metalPriceSpread,  final Double fxRateSpread, final Double contangoBackwardation, 
 			final List<ReferenceOrderLeg> legs) {
 		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
-				createdByUser, lastUpdate, updatedByUser, fillPercentage, orderComments, 
+				createdByUser, lastUpdate, updatedByUser, fillPercentage, contractType, orderComments, 
 				fills, creditChecks);
-		this.contractType = contractType;
 		this.metalPriceSpread = metalPriceSpread;
 		this.fxRateSpread = fxRateSpread;
 		this.contangoBackwardation = contangoBackwardation;
@@ -114,19 +109,10 @@ public class ReferenceOrder extends Order {
 	
 	public ReferenceOrder(final ReferenceOrder toClone) {
 		super(toClone);
-		this.contractType = toClone.contractType;
 		this.metalPriceSpread = toClone.metalPriceSpread;
 		this.fxRateSpread = toClone.fxRateSpread;
 		this.contangoBackwardation = toClone.contangoBackwardation;
 		this.legs = new ArrayList<>(toClone.legs);
-	}
-
-	public Reference getContractType() {
-		return contractType;
-	}
-
-	public void setContractType(Reference contractType) {
-		this.contractType = contractType;
 	}
 
 	public Double getMetalPriceSpread() {
@@ -163,15 +149,14 @@ public class ReferenceOrder extends Order {
 
 	@Override
 	public String toString() {
-		return "ReferenceOrder [contractType=" + contractType + ", legs="
+		return "ReferenceOrder [orderId=" + getOrderId() + " version()" + getVersion() + ", legs="
 				+ legs + ", metalPriceSpread=" + metalPriceSpread + ", fxRateSpread=" + fxRateSpread
-				+ ", contangoBackwardation=" + contangoBackwardation + ", getOrderId()=" + getOrderId() + ", getVersion()="
-				+ getVersion() + ", getInternalBu()=" + getInternalBu() + ", getExternalBu()=" + getExternalBu()
+				+ ", contangoBackwardation=" + contangoBackwardation + ", getInternalBu()=" + getInternalBu() + ", getExternalBu()=" + getExternalBu()
 				+ ", getInternalLe()=" + getInternalLe() + ", getExternalLe()=" + getExternalLe()
 				+ ", getIntPortfolio()=" + getIntPortfolio() + ", getExtPortfolio()=" + getExtPortfolio()
 				+ ", getBuySell()=" + getBuySell() + ", getBaseCurrency()=" + getBaseCurrency() + ", getBaseQuantity()="
 				+ getBaseQuantity() + ", getBaseQuantityUnit()=" + getBaseQuantityUnit() + ", getTermCurrency()="
-				+ getTermCurrency()
+				+ getTermCurrency() + ", getContractType()=" + getContractType()
 				+ ", getOrderStatus()=" + getOrderStatus() + ", getCreatedAt()=" + getCreatedAt()
 				+ ", getCreatedByUser()=" + getCreatedByUser() + ", getLastUpdate()=" + getLastUpdate()
 				+ ", getUpdatedByUser()=" + getUpdatedByUser() + ", getOrderComments()=" + getOrderComments()

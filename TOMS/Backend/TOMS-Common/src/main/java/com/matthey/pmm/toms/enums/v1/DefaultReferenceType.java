@@ -35,7 +35,10 @@ public enum DefaultReferenceType {
 	VALIDATION_TYPE (24, "Validation Type", 2400l),
 	SYMBOLIC_DATE (25, "Symbolic Date", 2500l),
 	REF_SOURCE (26, "Ref Source", 2600l),
-	CONTRACT_TYPE (27, "Contract Type", 2700l),
+	CONTRACT_TYPE_REFERENCE_ORDER (27, "Contract Type Reference Order", 2700l),
+	CONTRACT_TYPE_LIMIT_ORDER (28, "Contract Type Limit Order", 2800l),
+	ORDER_TYPE_CATEGORY (29, "Order Type Category", 2900l),
+	
 	;
 	
 	private final ReferenceTypeTo refType;

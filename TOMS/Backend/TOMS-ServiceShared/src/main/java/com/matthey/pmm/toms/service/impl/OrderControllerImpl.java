@@ -5,11 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,7 +39,6 @@ import com.matthey.pmm.toms.service.common.Validator;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
-import com.matthey.pmm.toms.service.exception.IllegalSortColumnException;
 import com.matthey.pmm.toms.service.exception.IllegalStateException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
@@ -124,7 +118,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
 			@ApiParam(value = "Max last update date, all orders returned have been updated on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLastUpdateDate,
 			@ApiParam(value = "Min fill percentage, a real number between 0 and 1,  null for no restriction", example = "0.0", required = false) @RequestParam(required=false) Double minFillPercentage,
-			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,			
+			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,
+			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,			
     		@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable,
 			@ApiParam(value = "Min Order Version included", example = "1", required = false) @RequestParam(required=false) List<Long> minVersionId,
 			@ApiParam(value = "Max Order Version included", example = "2", required = false) @RequestParam(required=false) List<Long> maxVersionId,
@@ -157,7 +152,9 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "Min metal form ID included. Note the order is following the alphabetical order of the name, example 168", required = false) @RequestParam(required=false) Long idMetalLocationMin,
 			@ApiParam(value = "Max metal form ID included. Note the order is following the alphabetical order of the name, exmaple 169", required = false) @RequestParam(required=false) Long idMetalLocationMax,
 			@ApiParam(value = "Min order status ID included. Note the order is following the alphabetical order of the name, example 1", required = false) @RequestParam(required=false) Long idOrderStatusMin,
-			@ApiParam(value = "Max order status ID included. Note the order is following the alphabetical order of the name, exmaple 3", required = false) @RequestParam(required=false) Long idOrderStatusMax
+			@ApiParam(value = "Max order status ID included. Note the order is following the alphabetical order of the name, exmaple 3", required = false) @RequestParam(required=false) Long idOrderStatusMax,
+			@ApiParam(value = "Min contract type ID included. Note the order is following the alphabetical order of the name, example 224, 225, 227, 228", required = false) @RequestParam(required=false) Long idContractTypeMin,
+			@ApiParam(value = "Max contract type ID included. Note the order is following the alphabetical order of the name, exmaple 224, 225, 227, 228", required = false) @RequestParam(required=false) Long idContractTypeMax
     		) {
 		Date minCreatedAt = validator.verifyDateTime (minCreatedAtDate, getClass(), "getLimitOrders", "minCreatedAtDate");
 		Date maxCreatedAt = validator.verifyDateTime (maxCreatedAtDate, getClass(), "getLimitOrders", "maxCreatedAtDate");
@@ -175,7 +172,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				noEmptyList(idBaseCurrency), minBaseQuantity, maxBaseQuantity, noEmptyList(idBaseQuantityUnit), noEmptyList(idTermCurrency), reference,
 				noEmptyList(idMetalForm), noEmptyList(idMetalLocation), noEmptyList(idOrderStatus), 
 				noEmptyList(idCreatedByUser), minCreatedAt, maxCreatedAt, noEmptyList (idUpdatedByUser), minLastUpdate, maxLastUpdate,
-				minFillPercentage, maxFillPercentage,
+				minFillPercentage, maxFillPercentage, noEmptyList(idContractType),
 				mappedPageable
 //				idInternalBuMin, idInternalBuMax,
 //				idExternalBuMin, idExternalBuMax,
@@ -225,7 +222,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
 			@ApiParam(value = "Max last update date, all orders returned have been updated on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLastUpdateDate,
 			@ApiParam(value = "Min fill percentage, a real number between 0 and 1,  null for no restriction", example = "0.0", required = false) @RequestParam(required=false) Double minFillPercentage,
-			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,			
+			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,
+			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,			
 			// all above: order fields, all below: limit order fields
 			@ApiParam(value = "Min Settle Date, all orders returned have been settled on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2000-10-31", required = false) @RequestParam(required=false) String minSettleDate,
 			@ApiParam(value = "Max Settle Date, all orders returned have been settled on or before that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2030-10-31", required = false) @RequestParam(required=false) String maxSettleDate,
@@ -271,7 +269,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				noEmptyList(idBaseCurrency), minBaseQuantity, maxBaseQuantity, noEmptyList(idBaseQuantityUnit), noEmptyList(idTermCurrency), reference,
 				noEmptyList(idMetalForm), noEmptyList(idMetalLocation), noEmptyList(idOrderStatus), 
 				noEmptyList(idCreatedByUser), minCreatedAt, maxCreatedAt, noEmptyList (idUpdatedByUser), minLastUpdate, maxLastUpdate,
-				minFillPercentage, maxFillPercentage,				
+				minFillPercentage, maxFillPercentage, noEmptyList(idContractType),			
 				// all above: order fields, all below: limit order fields
 				minSettle, maxSettle, minStartConcrete, maxStartConcrete, noEmptyList(idStartDateSymbolic), noEmptyList(idPriceType), noEmptyList(idYesNoPartFillable), 
 				noEmptyList(idStopTriggerType), noEmptyList(idCurrencyCrossMetal),
@@ -348,7 +346,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
 			@ApiParam(value = "Max last update date, all orders returned have been updated on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLastUpdateDate,
 			@ApiParam(value = "Min fill percentage, a real number between 0 and 1,  null for no restriction", example = "0.0", required = false) @RequestParam(required=false) Double minFillPercentage,
-			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,			
+			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,
+			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,
 			// all above: order fields, all below: reference order fields
 			@ApiParam(value = "Min metal price spread, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double minMetalPriceSpread,
 			@ApiParam(value = "Max metal price spread, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double maxMetalPriceSpread,
@@ -356,7 +355,6 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "Max FX price spread, Null = no restrictions", example = "1.2", required = false) @RequestParam(required=false) Double maxFxRateSpread,
 			@ApiParam(value = "Min Contango Backwardation, Null = no restrictions", example = "1.1", required = false) @RequestParam(required=false) Double minContangoBackwardation,
 			@ApiParam(value = "Max Contango Backwardation, Null = no restrictions", example = "1.2", required = false) @RequestParam(required=false) Double maxContangoBackwardation,
-			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,
 			@ApiParam(value = "List of reference order leg ids, null = no restrictions", example = "", required = false) @RequestParam(required=false) List<Long> idLeg,
 			@ApiParam(value = "Min leg notional, Null = no restrictions", example = "1.00", required = false) @RequestParam(required=false) Double minLegNotonal,
 			@ApiParam(value = "Max leg notional, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double maxLegNotional,
@@ -367,7 +365,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "List of leg payment offsets (symbolic date), null = no restriction, example 186, 187 ", example = "186, 187", required = false) @RequestParam(required=false) List<Long> idLegPaymentOffset,
 			@ApiParam(value = "List of leg settlement currencies, null = no restriction, example 34,35,36,42,43", example = "34,35,36,42,43", required = false) @RequestParam(required=false) List<Long> idLegSettleCurrency,
 			@ApiParam(value = "List of leg ref sources, null = no restriction, example 190, 191, 192, 193", example = "190, 191, 192, 193", required = false) @RequestParam(required=false) List<Long> idLegRefSource,
-			@ApiParam(value = "List of leg index ref sources, null = no restriction, example 190, 191, 192, 193", example = "190, 191, 192, 193", required = false) @RequestParam(required=false) List<Long> idLegFxIndexRefSource ,
+			@ApiParam(value = "List of leg index ref sources, null = no restriction, example 190, 191, 192, 193", example = "190, 191, 192, 193", required = false) @RequestParam(required=false) List<Long> idLegFxIndexRefSource,
 			@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable) {
 		// validation of input required or not?
 //		Optional<Party> intBu = validator.verifyParty(internalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), getClass(), "getReferenceOrders", "internalBuId", true);
@@ -395,10 +393,10 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				noEmptyList(idBaseCurrency), minBaseQuantity, maxBaseQuantity, noEmptyList(idBaseQuantityUnit), noEmptyList(idTermCurrency), reference,
 				noEmptyList(idMetalForm), noEmptyList(idMetalLocation), noEmptyList(idOrderStatus), 
 				noEmptyList(idCreatedByUser), minCreatedAt, maxCreatedAt, noEmptyList (idUpdatedByUser), minLastUpdate, maxLastUpdate,
+				minFillPercentage, maxFillPercentage, noEmptyList(idContractType),
 				// all above: order fields, all below: reference order fields
-				minMetalPriceSpread, maxMetalPriceSpread, minFxRateSpread, maxFxRateSpread, minContangoBackwardation, maxContangoBackwardation,
-				minFillPercentage, maxFillPercentage,				
-				noEmptyList(idContractType), noEmptyList(idLeg), minLegNotonal, maxLegNotional, minLegFixingStart, 
+				minMetalPriceSpread, maxMetalPriceSpread, minFxRateSpread, maxFxRateSpread, minContangoBackwardation, maxContangoBackwardation,		
+				noEmptyList(idLeg), minLegNotonal, maxLegNotional, minLegFixingStart, 
 				maxLegFixingStart, minLegFixingEnd, maxLegFixingEnd, 
 				noEmptyList(idLegPaymentOffset), noEmptyList(idLegSettleCurrency), noEmptyList(idLegRefSource), noEmptyList(idLegFxIndexRefSource),
 				mappedPageable

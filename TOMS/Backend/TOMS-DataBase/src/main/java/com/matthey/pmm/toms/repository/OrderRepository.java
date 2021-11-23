@@ -47,7 +47,8 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
 		   + " AND (:minLastUpdate IS NULL OR o.lastUpdate >= :minLastUpdate)\n" 
 		   + " AND (:maxLastUpdate IS NULL OR o.lastUpdate <= :maxLastUpdate)\n"
 		   + " AND (:minFillPercentage IS NULL OR o.fillPercentage >= :minFillPercentage)\n" 
-		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"		   
+		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"	
+		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"		   
 		   )
    List<Order> findByOrderIdAndOptionalParameters(@Param("orderIds") List<Long> orderIds, 
 		   @Param("versionIds") List<Integer> versionIds, @Param("idInternalBu") List<Long> idInternalBu,  
@@ -63,7 +64,8 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
 		   @Param("idUpdatedByUser") List<Long> idUpdatedByUser,
 		   @Param("minLastUpdate") Date minLastUpdate, @Param("maxLastUpdate") Date maxLastUpdate,
 		   @Param("minFillPercentage") Double minFillPercentage,
-		   @Param("maxFillPercentage") Double maxFillPercentage,				   
+		   @Param("maxFillPercentage") Double maxFillPercentage,
+		   @Param("idContractType") List<Long> idContractType,		   
 		   Pageable pageable
 //		   String idInternalBuMin, String idInternalBuMax,
 //		   String idExternalBuMin, String idExternalBuMax,

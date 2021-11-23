@@ -48,6 +48,7 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
 		   + " AND (:maxLastUpdate IS NULL OR o.lastUpdate <= :maxLastUpdate)\n"
 		   + " AND (:minFillPercentage IS NULL OR o.fillPercentage >= :minFillPercentage)\n" 
 		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"		   
+		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"
 		   // all above: order fields, all below: reference order fields
 		   + " AND (:minMetalPriceSpread IS NULL OR o.metalPriceSpread >= :minMetalPriceSpread)\n" 
 		   + " AND (:maxMetalPriceSpread IS NULL OR o.metalPriceSpread <= :maxMetalPriceSpread)\n"
@@ -55,7 +56,6 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
 		   + " AND (:maxFxPriceSpread IS NULL OR o.fxRateSpread <= :maxFxPriceSpread)\n"
 		   + " AND (:minContangoBackwardation IS NULL OR o.contangoBackwardation >= :minContangoBackwardation)\n" 
 		   + " AND (:maxContangoBackwardation IS NULL OR o.contangoBackwardation <= :maxContangoBackwardation)\n"
-		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"
 		   + " AND ( (SELECT COUNT (l) FROM o.legs l\n" // start legs part
 		   + "    WHERE (    (COALESCE(:legIds) IS NULL OR l.id IN (:legIds))\n"
 		   + " 			 AND (:minLegNotional IS NULL OR l.notional >= :minLegNotional)\n" 
@@ -84,7 +84,8 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
 		   @Param("idUpdatedByUser") List<Long> idUpdatedByUser,
 		   @Param("minLastUpdate") Date minLastUpdate, @Param("maxLastUpdate") Date maxLastUpdate,
 		   @Param("minFillPercentage") Double minFillPercentage,
-		   @Param("maxFillPercentage") Double maxFillPercentage,		   
+		   @Param("maxFillPercentage") Double maxFillPercentage,
+		   @Param("idContractType") List<Long> idContractType,
 		   // all above: order fields, all below: reference order fields;
 		   @Param("minMetalPriceSpread") Double minMetalPriceSpread, 
 		   @Param("maxMetalPriceSpread") Double maxMetalPriceSpread,
@@ -92,7 +93,6 @@ public interface ReferenceOrderRepository extends PagingAndSortingRepository<Ref
 		   @Param("maxFxPriceSpread") Double maxFxPriceSpread,
 		   @Param("minContangoBackwardation") Double minContangoBackwardation, 
 		   @Param("maxContangoBackwardation") Double maxContangoBackwardation,
-		   @Param("idContractType") List<Long> idContractType,
 		   @Param("legIds") List<Long> legIds,
 		   @Param("minLegNotional") Double minLegNotional, 
 		   @Param("maxLegNotional") Double maxLegNotional,

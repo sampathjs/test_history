@@ -564,6 +564,10 @@ public class Validator {
     		throw new IllegalValueException(clazz, method, argument + ".executionLikelihood", " > 0", "" + order.executionLikelihood());
     	}
     	
+    	verifyDefaultReference (order.idContractType(),
+				Arrays.asList(DefaultReferenceType.CONTRACT_TYPE_LIMIT_ORDER),
+				clazz, method , argument + ".idContractType", false);
+    	
     	if (!isNew) {    		
         	// verify status change
     		List<ProcessTransition> availableTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(DefaultReference.LIMIT_ORDER_TRANSITION.getEntity().id(),
@@ -593,7 +597,7 @@ public class Validator {
 		validateOrderFields (clazz, method, argument, order, isNew, oldReferenceOrder);
 	    
     	verifyDefaultReference (order.idContractType(),
-				Arrays.asList(DefaultReferenceType.CONTRACT_TYPE),
+				Arrays.asList(DefaultReferenceType.CONTRACT_TYPE_REFERENCE_ORDER),
 				clazz, method , argument + ".idContractType", false);
 
     	if (order.metalPriceSpread()  != null && order.metalPriceSpread() <= 0) {
