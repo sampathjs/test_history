@@ -1,20 +1,26 @@
 package com.olf.jm.fixGateway.fieldMapper;
 
 import com.olf.jm.fixGateway.fieldMapper.fields.EnumExecutionReport;
-import com.olf.jm.fixGateway.fieldMapper.fields.FixField;
+import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.TRANF_FIELD;
 
 /*
  * History:
  * 2017-10-10 - V0.1 - scurran - Initial Version
- */
+ * 2020-05-14 - V0.2 - jwaechter - FIX Tag is now a string.
+ *                               - Base class is now FieldMapperBaseForUserTable
+ *                                */
 
 
 /**
  * Class responsible for mapping the Internal Contact.
  */
-public class InternalContactFieldMapper extends FieldMapperBase {
+public class InternalContactFieldMapper extends FieldMapperBaseForUserTable {
 	
+	public InternalContactFieldMapper() {
+		super("BBG Tradebook", "Int Contact");
+	}
+
 	/* (non-Javadoc)
 	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTranFieldName()
 	 */
@@ -27,8 +33,13 @@ public class InternalContactFieldMapper extends FieldMapperBase {
 	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTagFieldName()
 	 */
 	@Override
-	public FixField getTagFieldName() {
-		return EnumExecutionReport.DELIVER_TO_SUB_ID;
+	public String getTagFieldName() {
+		return EnumExecutionReport.DELIVER_TO_SUB_ID.getTagName();
+	}
+
+	@Override
+	protected String getComplexTagValue(Table message) {
+		return null; // no complex logics
 	}
 
 

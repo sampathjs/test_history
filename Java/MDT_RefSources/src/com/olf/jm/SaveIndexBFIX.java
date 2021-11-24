@@ -10,6 +10,7 @@ import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
 public class SaveIndexBFIX implements IScript {
+	ConstRepository repository = null;
 
 	public void execute(IContainerContext context) throws OException
 	{
@@ -38,7 +39,7 @@ public class SaveIndexBFIX implements IScript {
 
 			Table tblPrices = Table.tableNew();
 			DBaseTable.execISql(tblPrices, strSQL);
-
+			String[] spotDays = retrieveSpotDays();
 			
 			for(int i =1;i<=tblPrices.getNumRows();i++){
 				
@@ -47,8 +48,9 @@ public class SaveIndexBFIX implements IScript {
 				
 				dblPrice = tblPrices.getDouble("price",i);
 				strIndexName = tblPrices.getString("target_idx",i);
-				
-				saveHistorical(dblPrice, strIndexName, strRefSrc);
+				for(int j=0;j<=spotDays.length - 1;j++){
+					saveHistorical(dblPrice, strIndexName, strRefSrc, spotDays[j]);
+				}
 				
 			}
 			
@@ -65,11 +67,20 @@ public class SaveIndexBFIX implements IScript {
 		
 		
 	}
-	
+	private String[] retrieveSpotDays() throws OException {
+		String[] spotDaysArr;
+		try {
+			String spotDays = repository.getStringValue("spotDays", "2d"); 
+			spotDaysArr = spotDays.split(",");
+		} catch (OException ex) {
+			throw new RuntimeException ("Error initializing the ConstRepo", ex);
+		}
+		return spotDaysArr;
+	}
 	
 	private void setUpLog() throws OException {
 		try {
-			ConstRepository repository = new ConstRepository("MiddleOffice", "MDT_RefSources");
+			repository = new ConstRepository("MiddleOffice", "MDT_RefSources");
 			String abOutdir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 			 
 			// retrieve constants repository entry "logLevel" using default value "info" in case if it's not present:
@@ -90,7 +101,7 @@ public class SaveIndexBFIX implements IScript {
 	
 	
 	
-	private void saveHistorical(double dblPrice, String strIndexName, String strRefSrc) throws OException {
+	private void saveHistorical(double dblPrice, String strIndexName, String strRefSrc, String spotDays) throws OException {
 		
 		int holId = 0;
 		int today = OCalendar.today();
@@ -126,7 +137,7 @@ public class SaveIndexBFIX implements IScript {
 		importTable.addCol( "price", COL_TYPE_ENUM.COL_DOUBLE);			
 
 		int importRow = importTable.addRow();
-		int spotDay = OCalendar.parseStringWithHolId("2d", holId, today);
+		int spotDay = OCalendar.parseStringWithHolId(spotDays, holId, today);
 		
 		importTable.setInt("index_id", importRow, targetIndexId);
 		

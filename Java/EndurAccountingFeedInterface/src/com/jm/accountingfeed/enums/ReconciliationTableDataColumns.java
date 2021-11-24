@@ -19,6 +19,7 @@ public enum ReconciliationTableDataColumns {
 	TIME_IN("time_in"), // 
 	DOC_DATE("doc_date"), //
 	CURRENCY("currency"), //
+	TRAN_NUM("tran_num")
 	;
 	
 	private String value;

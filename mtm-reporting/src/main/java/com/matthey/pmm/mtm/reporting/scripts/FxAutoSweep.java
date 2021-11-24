@@ -11,6 +11,7 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.market.EnumBmo;
 import com.olf.openrisk.simulation.EnumResultType;
 import com.olf.openrisk.simulation.ResultType;
 import com.olf.openrisk.simulation.Scenario;
@@ -137,14 +138,47 @@ public class FxAutoSweep extends EnhancedTradeProcessListener {
                                                                                               settleCurrency));
         }
     }
-    
-    private String getTradePrice(Session session, String settleCurrency, String baseCurrency, Date fxDate) {
-        Currency settleCcy = session.getStaticDataFactory().getReferenceObject(Currency.class, settleCurrency);
-        Currency baseCcy = session.getStaticDataFactory().getReferenceObject(Currency.class, baseCurrency);
-        double rate = session.getMarketFactory().getMarket().getFXRate(settleCcy, baseCcy, fxDate);
-        logger.info("raw trade price for {}/{}: {}", settleCurrency, baseCurrency, rate);
-        return new BigDecimal(Double.toString(rate)).setScale(6, RoundingMode.HALF_UP).toPlainString();
-    }
+       
+	private String getTradePrice(Session session, String baseCurrency, String termCurrency, Date settleDate) {
+		session.getMarket().loadUniversal();
+		Currency baseCur = session.getStaticDataFactory().getReferenceObject(Currency.class, baseCurrency);
+		Currency termCur = session.getStaticDataFactory().getReferenceObject(Currency.class, termCurrency);
+		
+		double rate = session.getMarket().getFXRate(baseCur, termCur, settleDate,  EnumBmo.Mid);
+		String message = "Retrieved rate for " + baseCurrency + " to " + termCur
+				+ " and date" + settleDate + " is: " + rate;
+		logger.info(message);
+		session.getDebug().logLine(message);
+		if (rate == 0.0d) {
+			logger.info("Retrieved rate for " + termCur + " to " + baseCur + " is: " + rate);
+			rate = 1.0d/session.getMarket().getFXRate(termCur, baseCur, settleDate,  EnumBmo.Mid);			
+		} 
+		if (termCurrency.equalsIgnoreCase("USD") && !isReversed (session, baseCurrency)) {
+			rate = 1.0d/rate;
+		}
+		
+	    BigDecimal bd = new BigDecimal(Double.toString(rate));
+	    bd = bd.setScale(6, RoundingMode.HALF_UP);
+		return bd.toString();
+	}
+	
+	private boolean isReversed(Session session, String currency) {
+		String sql = 
+				"\nSELECT convention FROM currency WHERE name = '" + currency + "'"
+				;
+		try (Table sqlResult = session.getIOFactory().runSQL(sql)) {
+			if (sqlResult.getRowCount() == 0) {
+				String message = "Currency '" + currency + "' not found ";
+				logger.error(message);
+				throw new RuntimeException (message);
+			}
+			return sqlResult.getInt(0, 0) == 1;
+		} catch (Exception ex) {
+			String message = "\nError executing SQL " + sql + "\n" + ex.toString();
+			logger.error(message);
+			throw ex;
+		}
+	}
     
     private LocalDate getStartTradeDate() {
         try {
@@ -192,10 +226,14 @@ public class FxAutoSweep extends EnhancedTradeProcessListener {
                              "                  ON t.tran_num = i.tran_num AND t.current_flag = 1\n" +
                              "    WHERE type_name = 'Hedge Source'\n" +
                              "      AND t.tran_status = 3\n" +
-                             "      AND value = '${sourceDealNum}'";
+                             "      AND value = '${sourceDealNum}'" +
+                             "      AND t.offset_tran_type = 1 ";
+        
+        
         Map<String, Object> variables = ImmutableMap.of("sourceDealNum", sourceDealNum);
         String sql = new StringSubstitutor(variables).replace(sqlTemplate);
         Table result = session.getIOFactory().runSQL(sql);
+               
         return result.getRowCount() > 0
                ? Optional.of(session.getTradingFactory()
                                      .retrieveTransactionById(result.getInt(0, 0)))

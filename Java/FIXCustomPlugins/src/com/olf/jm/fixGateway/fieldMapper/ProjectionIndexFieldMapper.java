@@ -1,7 +1,6 @@
 package com.olf.jm.fixGateway.fieldMapper;
 
 import com.olf.jm.fixGateway.fieldMapper.fields.EnumInstrumentTags;
-import com.olf.jm.fixGateway.fieldMapper.fields.FixField;
 import com.olf.jm.fixGateway.fieldUtils.FixMessageHelper;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
@@ -11,6 +10,8 @@ import com.olf.jm.logging.Logging;
 /*
  * History:
  * 2017-10-10 - V0.1 - scurran - Initial Version
+ * 2020-05-14 - V0.2 - jwaechter - FIX Tag is now a string.
+ *                               - Base class is now FieldMapperBaseForUserTable
  */
 
 
@@ -20,7 +21,6 @@ import com.olf.jm.logging.Logging;
  * Value is populated as NMX_<metal> where metal is the first 2 characters of the ticker.
  */
 public class ProjectionIndexFieldMapper extends FieldMapperBase {
-
 	/** The Constant INDEX_PREFIX used to build up the proj index name. */
 	private final static String INDEX_PREFIX = "NMX_";
 	
@@ -36,15 +36,13 @@ public class ProjectionIndexFieldMapper extends FieldMapperBase {
 	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTagFieldName()
 	 */
 	@Override
-	public FixField getTagFieldName() {
+	public String getTagFieldName() {
 		return null; // Derived from instrument tags
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.olf.jm.fixGateway.fieldMapper.FieldMapperBase#getTranFieldValue(com.olf.openjvs.Table)
-	 */
 	@Override
-	public String getTranFieldValue(Table message) throws FieldMapperException {
+	public String getTranFieldValue(Table message)
+			throws FieldMapperException {
 		String tagValue = null;
 		
 		try {

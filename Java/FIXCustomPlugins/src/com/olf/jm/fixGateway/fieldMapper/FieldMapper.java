@@ -52,4 +52,28 @@ public interface FieldMapper {
 	 * @throws FieldMapperException 
 	 */
 	String infoFieldName() throws FieldMapperException;
+	
+	/**
+	 * The the seq num 2 the field is applicable for.
+	 * @return
+	 */
+	int getSeqNum2();
+	
+	/**
+	 * The the seq num 3 the field is applicable for.
+	 * @return
+	 */
+	int getSeqNum3();
+	
+	/**
+	 * The the seq num 4 the field is applicable for.
+	 * @return
+	 */
+	int getSeqNum4();
+	
+	/**
+	 * The the seq num 5 the field is applicable for.
+	 * @return
+	 */
+	int getSeqNum5();	
 }

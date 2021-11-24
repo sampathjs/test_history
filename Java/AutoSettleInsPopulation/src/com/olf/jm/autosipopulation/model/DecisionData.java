@@ -12,6 +12,8 @@ import java.util.Set;
  * 2017-05-31	V1.6	jwaechter	- replaced placeholder for offset tran type
  *                                    with real value in the flipInternalExternal method                                   
  * 2018-01-08   V1.7    scurran     - add support for offset type Pass Thru Offset
+ * 2021-02-26   V1.8    Prashanth   - EPI-1825   - Fix for missing SI for FX deals booked via SAP and re-factoring logs
+ * 
  *  */
 
 
@@ -328,37 +330,28 @@ public class DecisionData {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((allocationType == null) ? 0 : allocationType.hashCode());
+		result = prime * result + ((allocationType == null) ? 0 : allocationType.hashCode());
 		result = prime * result + ccyId;
 		result = prime * result + deliveryTypeId;
 		result = prime * result + extPartyId;
 		result = prime * result + extSettleId;
-		result = prime * result
-				+ ((extSettleName == null) ? 0 : extSettleName.hashCode());
+		result = prime * result + ((extSettleName == null) ? 0 : extSettleName.hashCode());
 		result = prime * result + ((form == null) ? 0 : form.hashCode());
-		result = prime * result
-				+ ((formPhys == null) ? 0 : formPhys.hashCode());
+		result = prime * result + ((formPhys == null) ? 0 : formPhys.hashCode());
 		result = prime * result + insType;
 		result = prime * result + intPartyId;
 		result = prime * result + intSettleId;
-		result = prime * result
-				+ ((intSettleName == null) ? 0 : intSettleName.hashCode());
+		result = prime * result	+ ((intSettleName == null) ? 0 : intSettleName.hashCode());
 		result = prime * result + internalExternal;
 		result = prime * result + (isCashTran ? 1231 : 1237);
 		result = prime * result + (isCommPhys ? 1231 : 1237);
 		result = prime * result + legNum;
 		result = prime * result + ((loco == null) ? 0 : loco.hashCode());
-		result = prime * result
-				+ ((offsetTranType == null) ? 0 : offsetTranType.hashCode());
-		result = prime * result
-				+ ((posCoreExtSIs == null) ? 0 : posCoreExtSIs.hashCode());
-		result = prime * result
-				+ ((posCoreIntSIs == null) ? 0 : posCoreIntSIs.hashCode());
-		result = prime * result
-				+ ((savedUnsavedExt == null) ? 0 : savedUnsavedExt.hashCode());
-		result = prime * result
-				+ ((savedUnsavedInt == null) ? 0 : savedUnsavedInt.hashCode());
+		result = prime * result	+ ((offsetTranType == null) ? 0 : offsetTranType.hashCode());
+		result = prime * result	+ ((posCoreExtSIs == null) ? 0 : posCoreExtSIs.hashCode());
+		result = prime * result	+ ((posCoreIntSIs == null) ? 0 : posCoreIntSIs.hashCode());
+		result = prime * result	+ ((savedUnsavedExt == null) ? 0 : savedUnsavedExt.hashCode());
+		result = prime * result	+ ((savedUnsavedInt == null) ? 0 : savedUnsavedInt.hashCode());
 		result = prime * result + siPhys;
 		result = prime * result + siPhysInternal;
 		result = prime * result + tranNum;
@@ -459,20 +452,14 @@ public class DecisionData {
 
 	@Override
 	public String toString() {
-		return "DecisionData [tranNum=" + tranNum + ", legNum=" + legNum
-				+ ", intPartyId=" + intPartyId + ", extPartyId=" + extPartyId
-				+ ", ccyId=" + ccyId + ", intSettleId=" + intSettleId
-				+ ", extSettleId=" + extSettleId + ", deliveryTypeId="
-				+ deliveryTypeId + ", internalExternal=" + internalExternal
-				+ ", insType=" + insType + ", intSettleName=" + intSettleName
-				+ ", extSettleName=" + extSettleName + ", savedUnsavedInt="
-				+ savedUnsavedInt + ", savedUnsavedExt=" + savedUnsavedExt
-				+ ", loco=" + loco + ", form=" + form + ", formPhys="
-				+ formPhys + ", allocationType=" + allocationType
-				+ ", isCashTran=" + isCashTran + ", isCommPhys=" + isCommPhys
-				+ ", offsetTranType=" + offsetTranType + ", useShortList="
-				+ useShortList + ", siPhys=" + siPhys + ", siPhysInternal="
-				+ siPhysInternal + ", posCoreIntSIs=" + posCoreIntSIs
-				+ ", posCoreExtSIs=" + posCoreExtSIs + "]";
+		return "DecisionData [tranNum=" + tranNum + ", legNum=" + legNum + ", intPartyId=" + intPartyId
+				+ ", extPartyId=" + extPartyId + ", ccyId=" + ccyId + ", intSettleId=" + intSettleId + ", extSettleId="
+				+ extSettleId + ", deliveryTypeId=" + deliveryTypeId + ", internalExternal=" + internalExternal
+				+ ", insType=" + insType + "\n, intSettleName=" + intSettleName + ", extSettleName=" + extSettleName
+				+ ", savedUnsavedInt=" + savedUnsavedInt + ", savedUnsavedExt=" + savedUnsavedExt + "\n, loco=" + loco
+				+ ", form=" + form + ", formPhys=" + formPhys + ", allocationType=" + allocationType + ", isCashTran="
+				+ isCashTran + ", isCommPhys=" + isCommPhys + ", offsetTranType=" + offsetTranType + ", useShortList="
+				+ useShortList + ", siPhys=" + siPhys + ", siPhysInternal=" + siPhysInternal + "\n, posCoreIntSIs="
+				+ posCoreIntSIs + "\n, posCoreExtSIs=" + posCoreExtSIs + "]";
 	}
 }

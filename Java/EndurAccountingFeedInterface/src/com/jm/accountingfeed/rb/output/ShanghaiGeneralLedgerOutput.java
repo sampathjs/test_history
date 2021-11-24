@@ -145,6 +145,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
                 String docCcyCode = tblOutputData.getString("document_currency", i);
 	            for (int itemRowNum = i; itemRowNum < rowNumLastOfItemGroup; itemRowNum++) {
 	                int dealNum = tblOutputData.getInt("deal_tracking_num", itemRowNum);
+	                int tranNum = tblOutputData.getInt("deal_tracking_num", itemRowNum);
 	                int endurDocNum = tblOutputData.getInt("endur_doc_num", itemRowNum);
 	                String tradeDateString = tblOutputData.getString("trade_date", itemRowNum);
 	                int tradeDate = ODateTime.strDateTimeToDate(tradeDateString);
@@ -274,6 +275,7 @@ public class ShanghaiGeneralLedgerOutput extends AccountingFeedOutput
 		            items.add(item);           
 		            
 	                reconciliationTableToInsert.setInt(ReconciliationTableDataColumns.DEAL_NUM.toString(), recTableRow, dealNum);
+	                reconciliationTableToInsert.setInt(ReconciliationTableDataColumns.TRAN_NUM.toString(), recTableRow, tranNum);
 	                reconciliationTableToInsert.setString(ReconciliationTableDataColumns.INTERFACE_MODE.toString(), recTableRow, mode);
 	                reconciliationTableToInsert.setInt(ReconciliationTableDataColumns.INTERNAL_BUNIT.toString(), recTableRow, companyId);
 	                reconciliationTableToInsert.setInt(ReconciliationTableDataColumns.TRADE_DATE.toString(), recTableRow, tradeDate);
