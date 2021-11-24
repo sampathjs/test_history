@@ -556,6 +556,9 @@
        <column name="version" type="int">
          <constraints nullable="false"/>
        </column>
+       <column name="order_type_reference_id" type="int">
+         <constraints nullable="true"/>
+       </column>
        <column name="internal_bunit_id" type="int">
          <constraints nullable="false"/>
        </column>
@@ -623,6 +626,18 @@
          <constraints nullable="false"/>
        </column>
     </createTable>
+    
+    
+    
+    <addForeignKeyConstraint
+   	    baseColumnNames="order_type_reference_id"  
+        baseTableName="abstract_order"  
+        constraintName="fk_order_order_type_name_reference_id"          
+        onDelete="NO ACTION"
+        onUpdate="NO ACTION"
+        referencedColumnNames="reference_id"  
+        referencedTableName="reference"
+        validate="true"/>
     
     <addForeignKeyConstraint
    	    baseColumnNames="internal_bunit_id"  

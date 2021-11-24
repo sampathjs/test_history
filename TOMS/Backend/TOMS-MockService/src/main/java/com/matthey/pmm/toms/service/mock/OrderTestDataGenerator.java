@@ -117,14 +117,15 @@ public class OrderTestDataGenerator {
 	protected ReferenceOrderLegRepository referenceOrderLegRepository;
 
 	public Order createTestReferenceOrder() {
-		ReferenceOrder newTestOrder = new ReferenceOrder(1, null, null, 
+		ReferenceOrder newTestOrder = new ReferenceOrder(null, 1, null, null,
 				null, null, null, null, null, null,
-				0.0d, null, null, "reference", null, null,			
+				0.0d, null, null, "reference", null, null,
 				null, null, null, null, null, null,
 				null, 0.0d, Arrays.asList(), Arrays.asList(), Arrays.asList(), 
 				// << order fields
 				0.0d,  0.0d, 0.0d,  Arrays.asList());
 		fillOrderFields(newTestOrder);
+		newTestOrder.setOrderTypeName(refConverter.toManagedEntity(DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity()));
 		newTestOrder.setContangoBackwardation(randomDoubleOrNull(MAX_CONTANGO_BACKWARDATION));
 		newTestOrder.setFxRateSpread(randomDoubleOrNull(MAX_FX_RATE_SPREAD));
 		newTestOrder.setLegs(createLegList());
@@ -134,9 +135,10 @@ public class OrderTestDataGenerator {
 	}
 
 	public Order createTestLimitOrder() {
-		LimitOrder newTestOrder = new LimitOrder(1, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+		LimitOrder newTestOrder = new LimitOrder(null, 1, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
 				null, null, null, null, null, 0.0d, null, null, Arrays.asList(), Arrays.asList(), Arrays.asList(), null, null, null, null, null, null, null, null, null, null, null);
 		fillOrderFields(newTestOrder);
+		newTestOrder.setOrderTypeName(refConverter.toManagedEntity(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity()));		
 		newTestOrder.setCurrencyCrossMetal(selectReferenceValue(DefaultReferenceType.CCY_METAL, true));
 		newTestOrder.setExecutionLikelihood(Math.random()*MAX_EXECUTION_LIKELIYHOOD);
 		newTestOrder.setExpiryDate(randomDate(true));

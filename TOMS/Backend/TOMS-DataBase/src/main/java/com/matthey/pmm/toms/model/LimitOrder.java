@@ -110,7 +110,8 @@ public class LimitOrder extends Order{
 	protected LimitOrder() {
 	}
 	
-	public LimitOrder(final int version, final Party internalBu, final Party externalBu, 
+	public LimitOrder(final Reference orderTypeName,
+			final int version, final Party internalBu, final Party externalBu, 
 			final Party internalLe, final Party externalLe, final Reference intPortfolio,
 			final Reference extPortfolio, final Reference buySell, final Reference baseCurrency,
 			final Double baseQuantity, final Reference baseQuantityUnit, 
@@ -127,7 +128,7 @@ public class LimitOrder extends Order{
 			final Reference stopTriggerType, final Reference currencyCrossMetal,
 			final Reference yesNoPartFillable, final Reference validationType,
 			final Date expiryDate, final Double executionLikelihood) {
-		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
+		super(orderTypeName, internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
 				createdByUser, lastUpdate, updatedByUser, fillPercentage, contractType, ticker, orderComments, 

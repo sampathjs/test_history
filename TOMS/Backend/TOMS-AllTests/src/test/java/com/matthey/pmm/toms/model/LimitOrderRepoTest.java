@@ -111,7 +111,8 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 		// TODO: Add Limit Order with all optional fields being null
 		return () -> {
 			// 1st test case with all fields filled
-			List<LimitOrder> list =  Arrays.asList(new LimitOrder (1,   // version
+			List<LimitOrder> list =  Arrays.asList(new LimitOrder (referenceConverter.toManagedEntity(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity()), // order type name
+										1,   // version
 										partyConverter.toManagedEntity(TestParty.JM_PMM_UK_BU.getEntity()),  // internal bu 
 										partyConverter.toManagedEntity(TestParty.ANGLO_PLATINUM_BU.getEntity()), // external bu
 										partyConverter.toManagedEntity(TestParty.JM_PLC_LE.getEntity()),  // internal le
@@ -150,7 +151,8 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 										new Date(), // expiry date
 										1.0d) // execution likelihood
 					// 2nd test case with only mandatory fields being filled.
-					,new LimitOrder (1,   // version
+					,new LimitOrder (referenceConverter.toManagedEntity(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity()), // order type name
+							1,   // version
 							partyConverter.toManagedEntity(TestParty.JM_PMM_UK_BU.getEntity()),  // internal bu 
 							partyConverter.toManagedEntity(TestParty.ANGLO_PLATINUM_BU.getEntity()), // external bu
 							partyConverter.toManagedEntity(TestParty.JM_PLC_LE.getEntity()),  // internal le

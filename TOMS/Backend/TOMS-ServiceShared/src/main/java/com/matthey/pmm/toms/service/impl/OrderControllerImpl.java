@@ -93,6 +93,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     @Override
     @ApiOperation("Retrieval of All Order Types")
 	public List<OrderTo> getOrders (
+			@ApiParam(value = "List of Order Type IDs, e.g. 13, 14", example = "13, 14", required = false) @RequestParam(required=false) List<Long> idOrderType,			
 			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
 			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
 			@ApiParam(value = "List of the internal BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20006", example = "20006", required = false) @RequestParam(required=false) List<Long> idInternalBu,
@@ -122,10 +123,10 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,
 			@ApiParam(value = "List of ticker IDs, null = all orders, example 231, 271", example = "231, 271", required = false) @RequestParam(required=false) List<Long> idTicker,			
     		@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable,
-			@ApiParam(value = "Min Order Version included", example = "1", required = false) @RequestParam(required=false) List<Long> minVersionId,
-			@ApiParam(value = "Max Order Version included", example = "2", required = false) @RequestParam(required=false) List<Long> maxVersionId,
-			@ApiParam(value = "Min Order ID included", example = "100000", required = false) @RequestParam(required=false) List<Long> minOrderId,
-			@ApiParam(value = "Max Order ID included", example = "100002", required = false) @RequestParam(required=false) List<Long> maxOrderId,
+			@ApiParam(value = "Min Order Version included", example = "1", required = false) @RequestParam(required=false) Long minVersionId,
+			@ApiParam(value = "Max Order Version included", example = "2", required = false) @RequestParam(required=false) Long maxVersionId,
+			@ApiParam(value = "Min Order ID included", example = "100000", required = false) @RequestParam(required=false) Long minOrderId,
+			@ApiParam(value = "Max Order ID included", example = "100002", required = false) @RequestParam(required=false) Long maxOrderId,
 			@ApiParam(value = "Min internal BU included. Note the order is following the alphabetical order of the party name, example 20006", required = false) @RequestParam(required=false) Long idInternalBuMin,
 			@ApiParam(value = "Max internal BU included. Note the order is following the alphabetical order of the party name, example 20006", required = false) @RequestParam(required=false) Long idInternalBuMax,
 			@ApiParam(value = "Min external BU included. Note the order is following the alphabetical order of the party name, example 20022", required = false) @RequestParam(required=false) Long idExternalBuMin,
@@ -167,9 +168,10 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		Map<String,String> allMappings = new HashMap<String, String> ();
 		allMappings.putAll(abstractOrderSearchMap);
 		
-		Pageable mappedPageable = Validator.verifySorts(pageable, getClass(), "getLimitOrders", "sort", allMappings);
+		Pageable mappedPageable = Validator.verifySorts(pageable, getClass(), "getOrders", "sort", allMappings);
 		
-		List<Order> matchingOrders = orderRepo.findByOrderIdAndOptionalParameters(noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
+		List<Order> matchingOrders = orderRepo.findByOrderIdAndOptionalParameters(noEmptyList(idOrderType),
+				noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
 				noEmptyList(idExternalBu), noEmptyList(idInternalLe), noEmptyList(idExternalLe),
 				noEmptyList(idInternalPfolio), noEmptyList(idExternalPfolio), noEmptyList(idBuySell), 
 				noEmptyList(idBaseCurrency), minBaseQuantity, maxBaseQuantity, noEmptyList(idBaseQuantityUnit), noEmptyList(idTermCurrency), reference,

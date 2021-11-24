@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.model.CreditCheck;
 import com.matthey.pmm.toms.model.Fill;
 import com.matthey.pmm.toms.model.IndexEntity;
@@ -114,6 +115,8 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 	public ReferenceOrderTo toTo (ReferenceOrder entity) {
 		return ImmutableReferenceOrderTo.builder()
 				// Order
+				.idOrderType(entity.getOrderTypeName().getId())
+				.displayStringOrderType(entity.getOrderTypeName().getValue())				
 				.id(entity.getOrderId())
 				.version(entity.getVersion())
 				.idInternalBu(entity.getInternalBu().getId())
@@ -167,6 +170,7 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 	@Override
 	public ReferenceOrder toManagedEntity (ReferenceOrderTo to) {	
 		// Order
+		Reference orderTypeName = to.idIntPortfolio()!= null?loadRef(to, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity().id()):null;
 		Date createdAt = parseDateTime(to, to.createdAt());
 		Date lastUpdate = parseDateTime (to, to.lastUpdate());
 		Party internalBu = loadParty(to, to.idInternalBu());
@@ -222,6 +226,7 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 		
 		if (existingEntity.isPresent()) {
 			// Order
+			existingEntity.get().setOrderTypeName(orderTypeName);
 			existingEntity.get().setVersion(existingEntity.get().getVersion()+1);
 			existingEntity.get().setInternalBu(internalBu);
 			existingEntity.get().setExternalBu(externalBu);
@@ -264,7 +269,8 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 			
 			return existingEntity.get();
 		}
-		ReferenceOrder newEntity = new ReferenceOrder(1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
+		ReferenceOrder newEntity = new ReferenceOrder(orderTypeName,
+				1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
 				baseQuantityUnit, termCurrency, to.reference(), metalForm, metalLocation, 
 				orderStatus, contractType, ticker, createdAt, createdByUser, lastUpdate,
 				updatedByUser, 0.0d, orderComments, fills, creditChecks, 

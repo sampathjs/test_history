@@ -82,7 +82,8 @@ public class ReferenceOrder extends Order {
 	protected ReferenceOrder() {
 	}
 
-	public ReferenceOrder(final int version, final Party internalBu, final Party externalBu, 
+	public ReferenceOrder(final Reference orderTypeName,
+			final int version, final Party internalBu, final Party externalBu, 
 			final Party internalLe, final Party externalLe, final Reference intPortfolio,
 			final Reference extPortfolio, final Reference buySell, final Reference baseCurrency,
 			final Double baseQuantity, final Reference baseQuantityUnit, 
@@ -96,7 +97,7 @@ public class ReferenceOrder extends Order {
 			// << order fields
 			final Double metalPriceSpread,  final Double fxRateSpread, final Double contangoBackwardation, 
 			final List<ReferenceOrderLeg> legs) {
-		super(internalBu, externalBu, internalLe, externalLe, intPortfolio,
+		super(orderTypeName, internalBu, externalBu, internalLe, externalLe, intPortfolio,
 				extPortfolio, buySell, baseCurrency, baseQuantity, baseQuantityUnit,
 				termCurrency, reference, metalForm, metalLocation, orderStatus, createdAt,
 				createdByUser, lastUpdate, updatedByUser, fillPercentage, contractType, ticker, orderComments, 

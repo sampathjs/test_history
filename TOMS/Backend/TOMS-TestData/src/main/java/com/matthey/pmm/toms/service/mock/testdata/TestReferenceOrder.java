@@ -88,6 +88,7 @@ public enum TestReferenceOrder {
 			) {
 		// order type has to be limit order always
 		referenceOrder = ImmutableReferenceOrderTo.builder()
+				.idOrderType(DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity().id())
 				.id(orderId)
 				.version(version)				
 				.idInternalBu(internalBu.getEntity().id())

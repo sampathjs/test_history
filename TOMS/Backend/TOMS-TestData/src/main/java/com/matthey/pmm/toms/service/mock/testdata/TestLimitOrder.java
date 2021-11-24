@@ -75,6 +75,7 @@ public enum TestLimitOrder {
 			List<TestFill> fills, List<TestOrderComment> comments) { // << limit order fields
 		// order type has to be limit order always
 		limitOrder = ImmutableLimitOrderTo.builder()
+				.idOrderType(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity().id())				
 				.id(orderId)
 				.version(version)
 				.idInternalBu(internalBu.getEntity().id())

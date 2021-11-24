@@ -227,18 +227,27 @@ public abstract class OrderTo {
     
 	@Auxiliary
 	@Nullable
-	public abstract String displayStringTicker();     
-
-	@Auxiliary
-	@Nullable
 	public abstract Long idTicker(); 
 
 	@Auxiliary
-	public abstract Long idContractType();
-
+	@Nullable
+	public abstract String displayStringTicker();
+	
 	@Auxiliary
+	public abstract Long idContractType();
+	@Auxiliary
+	
 	@Nullable
 	public abstract String displayStringContractType();
+
+	
+	@Auxiliary
+	@Nullable
+	public abstract Long idOrderType();
+	
+	@Auxiliary
+	@Nullable
+	public abstract String displayStringOrderType();
 	
     @Auxiliary
     @Nullable

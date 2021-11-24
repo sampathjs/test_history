@@ -56,7 +56,12 @@ public abstract class Order {
     @GenericGenerator(name = "order-version-generator", 
       strategy = "com.matthey.pmm.toms.model.OrderVersionGenerator")	
     private int version;
-		 
+
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="order_type_reference_id", nullable = false)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.ORDER_TYPE_NAME)
+	private Reference orderTypeName;
+	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="internal_bunit_id", nullable = false)
 	private Party internalBu;
@@ -180,7 +185,8 @@ public abstract class Order {
 	protected Order() {
 	}
 
-	public Order(final Party internalBu, final Party externalBu, 
+	public Order(final Reference orderTypeName, 
+			final Party internalBu, final Party externalBu, 
 			final Party internalLe, final Party externalLe, final Reference intPortfolio,
 			final Reference extPortfolio, final Reference buySell, final Reference baseCurrency,
 			final Double baseQuantity, final Reference baseQuantityUnit, 
@@ -192,6 +198,7 @@ public abstract class Order {
 			final Reference ticker,
 			final List<OrderComment> orderComments,
 			final List<Fill> fills, final List<CreditCheck> creditChecks) {
+		this.orderTypeName = orderTypeName;
 		this.internalBu = internalBu;
 		this.externalBu = externalBu;
 		this.internalLe = internalLe;
@@ -220,6 +227,7 @@ public abstract class Order {
 	}	
 	
 	public Order(Order toClone) {
+		this.orderTypeName = toClone.orderTypeName;
 		this.orderId = toClone.orderId;
 		this.version = toClone.version;
 		this.internalBu = toClone.internalBu;
@@ -253,8 +261,8 @@ public abstract class Order {
     public void onPrePersist() {
     	updateFillPercentage();
     }
-      
-    @PreUpdate
+
+	@PreUpdate
     public void onPreUpdate() { 
     	updateFillPercentage();    	
     }
@@ -275,7 +283,7 @@ public abstract class Order {
     		fillPercentage = baseQuantity == 0.0d ? 0.0d : 1.0d;
     	}
 	}
-
+	
 	public long getOrderId() {
 		return orderId;
 	}
@@ -290,6 +298,14 @@ public abstract class Order {
 
 	public void setVersion(int version) {
 		this.version = version;
+	}
+
+	public Reference getOrderTypeName() {
+		return orderTypeName;
+	}
+
+	public void setOrderTypeName(Reference orderTypeName) {
+		this.orderTypeName = orderTypeName;
 	}
 
 	public Party getInternalBu() {

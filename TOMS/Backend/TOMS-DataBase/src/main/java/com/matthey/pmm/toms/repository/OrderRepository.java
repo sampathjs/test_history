@@ -25,6 +25,7 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
    		   + "WHERE \n"
 		   + "     (COALESCE(:orderIds) IS NULL OR o.orderId IN (:orderIds))\n"
 		   + " AND ((COALESCE(:versionIds) IS NULL AND (o.version = (SELECT MAX(o2.version) FROM Order o2 WHERE o2.orderId = o.orderId))) OR o.version IN (:versionIds))\n"
+   		   + " AND (COALESCE(:orderTypeId) IS NULL OR o.orderTypeName.id IN (:orderTypeId))\n"  
    		   + " AND (COALESCE(:idInternalBu) IS NULL OR o.internalBu.id IN (:idInternalBu))\n"  
 		   + " AND (COALESCE(:idExternalBu) IS NULL OR o.externalBu.id IN (:idExternalBu))\n"
    		   + " AND (COALESCE(:idExternalLe) IS NULL OR o.internalLe.id IN (:idInternalLe))\n"  
@@ -51,7 +52,8 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
 		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"
 		   + " AND (COALESCE(:idTicker) IS NULL OR o.ticker.id IN (:idTicker))\n"
 		   )
-   List<Order> findByOrderIdAndOptionalParameters(@Param("orderIds") List<Long> orderIds, 
+   List<Order> findByOrderIdAndOptionalParameters(@Param("orderTypeId") List<Long> orderTypeId,
+		   @Param("orderIds") List<Long> orderIds, 
 		   @Param("versionIds") List<Integer> versionIds, @Param("idInternalBu") List<Long> idInternalBu,  
 		   @Param("idExternalBu") List<Long> idExternalBu,  @Param("idInternalLe") List<Long> idInternalLe,  
 		   @Param("idExternalLe") List<Long> idExternalLe,  @Param("idInternalPfolio") List<Long> idInternalPfolio, 

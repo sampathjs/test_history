@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.model.CreditCheck;
 import com.matthey.pmm.toms.model.Fill;
 import com.matthey.pmm.toms.model.LimitOrder;
@@ -95,6 +96,8 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 	public LimitOrderTo toTo (LimitOrder entity) {
 		return ImmutableLimitOrderTo.builder()
 				// Order
+				.idOrderType(entity.getOrderTypeName().getId())
+				.displayStringOrderType(entity.getOrderTypeName().getValue())
 				.id(entity.getOrderId())
 				.version(entity.getVersion())
 				.idInternalBu(entity.getInternalBu().getId())
@@ -163,6 +166,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		System.out.println(to);
 		System.out.println("\n********************\n");
 		// Order
+		Reference orderTypeName = to.idIntPortfolio()!= null?loadRef(to, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity().id()):null;
 		Date createdAt = parseDateTime(to, to.createdAt());
 		Date lastUpdate = parseDateTime (to, to.lastUpdate());
 		Party internalBu = loadParty(to, to.idInternalBu());
@@ -222,6 +226,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		
 		if (existingEntity.isPresent()) {
 			// Order
+			existingEntity.get().setOrderTypeName(orderTypeName);
 			existingEntity.get().setVersion(existingEntity.get().getVersion()+1);
 			existingEntity.get().setInternalBu(internalBu);
 			existingEntity.get().setExternalBu(externalBu);
@@ -267,7 +272,8 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 			existingEntity.get().setExecutionLikelihood(to.executionLikelihood());
 			return existingEntity.get();
 		}
-		LimitOrder newEntity = new LimitOrder(1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
+		LimitOrder newEntity = new LimitOrder(orderTypeName,
+				1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
 				baseQuantityUnit, termCurrency, to.reference(), metalForm, metalLocation, 
 				orderStatus, createdAt, createdByUser, lastUpdate,
 				updatedByUser, 0.0d, contractType, ticker, orderComments, fills, creditChecks, 
