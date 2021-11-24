@@ -47,7 +47,7 @@ public interface TomsOrderService {
                         "Default sort order is ascending. " +
                         "Multiple sort criteria are supported.")
     })
-	public Page<OrderTo> getOrders (			
+	public Page<OrderTo> getOrders (
 			@ApiParam(value = "List of Order Type IDs, e.g. 13, 14", example = "13, 14", required = false) @RequestParam(required=false) List<Long> idOrderType,
 			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
 			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
@@ -97,23 +97,25 @@ public interface TomsOrderService {
 			@ApiParam(value = "Min buy/sell ID included. Note the order is following the alphabetical order of the name, example 15", required = false) @RequestParam(required=false) Long idBuySellMin,
 			@ApiParam(value = "Max buy/sell ID included. Note the order is following the alphabetical order of the name, example 16", required = false) @RequestParam(required=false) Long idBuySellMax,
 			@ApiParam(value = "Min base currency ID included. Note the order is following the alphabetical order of the name, example 34", required = false) @RequestParam(required=false) Long idBaseCurrencyMin,
-			@ApiParam(value = "Max base currency ID included. Note the order is following the alphabetical order of the name, exmaple 35", required = false) @RequestParam(required=false) Long idBaseCurrencyMax,
+			@ApiParam(value = "Max base currency ID included. Note the order is following the alphabetical order of the name, example 35", required = false) @RequestParam(required=false) Long idBaseCurrencyMax,
 			@ApiParam(value = "Min base quantity unit ID included. Note the order is following the alphabetical order of the name, example 28", required = false) @RequestParam(required=false) Long idBaseQuantityUnitMin,
-			@ApiParam(value = "Max base quantity unit ID included. Note the order is following the alphabetical order of the name, exmaple 29", required = false) @RequestParam(required=false) Long idBaseQuantityUnitMax,
+			@ApiParam(value = "Max base quantity unit ID included. Note the order is following the alphabetical order of the name, example 29", required = false) @RequestParam(required=false) Long idBaseQuantityUnitMax,
 			@ApiParam(value = "Min term currency unit ID included. Note the order is following the alphabetical order of the name, example 42", required = false) @RequestParam(required=false) Long idTermCurrencyMin,
-			@ApiParam(value = "Max term currency unit ID included. Note the order is following the alphabetical order of the name, exmaple 43", required = false) @RequestParam(required=false) Long idTermCurrencyMax,
+			@ApiParam(value = "Max term currency unit ID included. Note the order is following the alphabetical order of the name, example 43", required = false) @RequestParam(required=false) Long idTermCurrencyMax,
 			@ApiParam(value = "Min reference in alphabetical order", required = false) @RequestParam(required=false) String minReference,
 			@ApiParam(value = "Max reference in alphabetical order", required = false) @RequestParam(required=false) String maxReference,
 			@ApiParam(value = "Min metal form ID included. Note the order is following the alphabetical order of the name, example 164", required = false) @RequestParam(required=false) Long idMetalFormMin,
-			@ApiParam(value = "Max metal form ID included. Note the order is following the alphabetical order of the name, exmaple 165", required = false) @RequestParam(required=false) Long idMetalFormMax,
+			@ApiParam(value = "Max metal form ID included. Note the order is following the alphabetical order of the name, example 165", required = false) @RequestParam(required=false) Long idMetalFormMax,
 			@ApiParam(value = "Min metal form ID included. Note the order is following the alphabetical order of the name, example 168", required = false) @RequestParam(required=false) Long idMetalLocationMin,
-			@ApiParam(value = "Max metal form ID included. Note the order is following the alphabetical order of the name, exmaple 169", required = false) @RequestParam(required=false) Long idMetalLocationMax,
+			@ApiParam(value = "Max metal form ID included. Note the order is following the alphabetical order of the name, example 169", required = false) @RequestParam(required=false) Long idMetalLocationMax,
 			@ApiParam(value = "Min order status ID included. Note the order is following the alphabetical order of the name, example 1", required = false) @RequestParam(required=false) Long idOrderStatusMin,
-			@ApiParam(value = "Max order status ID included. Note the order is following the alphabetical order of the name, exmaple 3", required = false) @RequestParam(required=false) Long idOrderStatusMax,
+			@ApiParam(value = "Max order status ID included. Note the order is following the alphabetical order of the name, example 3", required = false) @RequestParam(required=false) Long idOrderStatusMax,
 			@ApiParam(value = "Min contract type ID included. Note the order is following the alphabetical order of the name, example 224, 225, 227, 228", required = false) @RequestParam(required=false) Long idContractTypeMin,
-			@ApiParam(value = "Max contract type ID included. Note the order is following the alphabetical order of the name, exmaple 224, 225, 227, 228", required = false) @RequestParam(required=false) Long idContractTypeMax,
+			@ApiParam(value = "Max contract type ID included. Note the order is following the alphabetical order of the name, example 224, 225, 227, 228", required = false) @RequestParam(required=false) Long idContractTypeMax,
 			@ApiParam(value = "Min ticker ID included. Note the order is following the alphabetical order of the name, example 231", required = false) @RequestParam(required=false) Long idTickerMin,
-			@ApiParam(value = "Max ticker ID included. Note the order is following the alphabetical order of the name, exmaple 271", required = false) @RequestParam(required=false) Long idTickerMax			
+			@ApiParam(value = "Max ticker ID included. Note the order is following the alphabetical order of the name, example 271", required = false) @RequestParam(required=false) Long idTickerMax,		
+			@ApiParam(value = "Min order type ID included. Note the order is following the alphabetical order of the name, example 13", required = false) @RequestParam(required=false) Long idOrderTypeMin,
+			@ApiParam(value = "Max order type ID included. Note the order is following the alphabetical order of the name, example 14", required = false) @RequestParam(required=false) Long idOrderTypeMax
 			);
 	
 	// limit order

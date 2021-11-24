@@ -135,12 +135,12 @@ public abstract class Order {
 	private String reference;
 		
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="metal_form_reference_id", nullable = true)
+	@JoinColumn(name="metal_form_reference_id", nullable = false)
 	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.METAL_FORM})
 	private Reference metalForm;
 
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="metal_location_reference_id", nullable = true)
+	@JoinColumn(name="metal_location_reference_id", nullable = false)
 	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.METAL_LOCATION})
 	private Reference metalLocation;
 	

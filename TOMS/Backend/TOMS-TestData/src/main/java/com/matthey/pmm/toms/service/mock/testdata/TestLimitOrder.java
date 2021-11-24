@@ -35,7 +35,7 @@ public enum TestLimitOrder {
 	TEST_ORDER_2(100001, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
-			DefaultReference.CCY_EUR,"TEST_ORDER_2", null, null,
+			DefaultReference.CCY_EUR,"TEST_ORDER_2", DefaultReference.METAL_FORM_NONE, DefaultReference.METAL_LOCATION_NONE,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_FIXED, DefaultReference.TICKER_XPTGBP, 
 			TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			DefaultReference.PRICE_TYPE_FORWARD, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1), 

@@ -133,8 +133,8 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 										new Date(), // last update
 										userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),  // updated by
 										0.0d, // fillPercentage, going to get updated automatically before persisting to database
-										referenceConverter.toManagedEntity(DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE.getEntity()),
-										referenceConverter.toManagedEntity(DefaultReference.TICKER_XIRUSD.getEntity()),										
+										referenceConverter.toManagedEntity(DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE.getEntity()), // contract type
+										referenceConverter.toManagedEntity(DefaultReference.TICKER_XIRUSD.getEntity()),	// ticker	
 										Arrays.asList(orderCommentConverter.toManagedEntity(TestOrderComment.TEST_COMMENT_1.getEntity())), // order comments
 										Arrays.asList(fillConverter.toManagedEntity(TestFill.TEST_LIMIT_ORDER_FILL_2.getEntity())),  // fills
 										Arrays.asList(creditCheckConverter.toManagedEntity(TestCreditCheck.TEST_CREDIT_CHECK_1.getEntity())), // credit checks
@@ -165,8 +165,8 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 							referenceConverter.toManagedEntity(DefaultReference.QUANTITY_TOZ.getEntity()),  // base quantity unit
 							referenceConverter.toManagedEntity(DefaultReference.CCY_GBP.getEntity()), // term currency 
 							"Reference", // reference
-							null, // metal form
-							null, // metal location
+							referenceConverter.toManagedEntity(DefaultReference.METAL_FORM_INGOT.getEntity()), // metal form
+							referenceConverter.toManagedEntity(DefaultReference.METAL_LOCATION_ROYSTON.getEntity()), // metal location 
 							orderStatusConverter.toManagedEntity(DefaultOrderStatus.LIMIT_ORDER_PENDING.getEntity()),  // order status
 							new Date(),  // created at
 							userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),  // created by

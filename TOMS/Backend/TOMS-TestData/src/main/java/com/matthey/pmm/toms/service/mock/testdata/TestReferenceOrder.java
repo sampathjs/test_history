@@ -41,7 +41,7 @@ public enum TestReferenceOrder {
 	TEST_ORDER_2(100004, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
-			DefaultReference.CCY_EUR, "TEST_ORDER_2", null, null,
+			DefaultReference.CCY_EUR, "TEST_ORDER_2", DefaultReference.METAL_FORM_GRAIN, DefaultReference.METAL_LOCATION_ROYSTON,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, 
 			DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING, DefaultReference.TICKER_XAGCNY,
 			TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,

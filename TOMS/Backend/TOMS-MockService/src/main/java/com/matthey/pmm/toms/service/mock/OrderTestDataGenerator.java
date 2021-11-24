@@ -187,8 +187,8 @@ public class OrderTestDataGenerator {
 		newTestOrder.setInternalLe(partyConverter.toManagedEntity(selectOneOf(TestParty.asListInternalLe(), false)));
 		newTestOrder.setIntPortfolio(selectReferenceValue(DefaultReferenceType.PORTFOLIO, true));
 		newTestOrder.setLastUpdate(randomDate(false));
-		newTestOrder.setMetalForm(selectReferenceValue (DefaultReferenceType.METAL_FORM, true));
-		newTestOrder.setMetalLocation(selectReferenceValue (DefaultReferenceType.METAL_LOCATION, true));
+		newTestOrder.setMetalForm(selectReferenceValue (DefaultReferenceType.METAL_FORM, false));
+		newTestOrder.setMetalLocation(selectReferenceValue (DefaultReferenceType.METAL_LOCATION, false));
 		newTestOrder.setOrderComments(createOrderCommentList());
 		newTestOrder.setOrderStatus(orderStatusConverter.toManagedEntity(selectOneOf(DefaultOrderStatus.asList(), false)));
 		newTestOrder.setReference(selectOneOf(Arrays.asList("Reference 1", "Example Reference", "Very long long long long long long long long long long long long long long long long long long long long long long reference"), true));
