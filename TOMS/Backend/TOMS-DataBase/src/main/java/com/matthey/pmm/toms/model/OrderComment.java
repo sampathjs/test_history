@@ -38,20 +38,20 @@ public class OrderComment {
 	@Column(name = "comment_text", nullable = false)
 	private String commentText;
 
-	@Column(name = "created_at")
+	@Column(name = "created_at", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date createdAt;
  
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="created_by_user_id")
+	@JoinColumn(name="created_by_user_id", nullable = false)
 	private User createdByUser;
 
-	@Column(name = "last_update")
+	@Column(name = "last_update", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastUpdate;
  
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="updated_by_user_id")
+	@JoinColumn(name="updated_by_user_id", nullable = false)
 	private User updatedByUser;
 	
 	@OneToOne(fetch=FetchType.EAGER)

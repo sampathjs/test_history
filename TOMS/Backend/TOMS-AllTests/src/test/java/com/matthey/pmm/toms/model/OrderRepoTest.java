@@ -21,6 +21,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.repository.FillRepository;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
+import com.matthey.pmm.toms.repository.OrderRepository;
 import com.matthey.pmm.toms.service.conversion.CreditCheckConverter;
 import com.matthey.pmm.toms.service.conversion.FillConverter;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
@@ -40,7 +41,7 @@ import com.matthey.pmm.toms.testall.TestJpaApplication;
 @AutoConfigureTestDatabase(replace=Replace.NONE)
 @SpringBootTest(classes={TestJpaApplication.class})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, OrderVersionId, LimitOrderRepository> {
+public class OrderRepoTest extends AbstractRepositoryTestBase<Order, OrderVersionId, OrderRepository> {
 	@Autowired
 	protected LimitOrderConverter converter;
 		
@@ -104,11 +105,11 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 	}	
 	
 	@Override
-	protected Supplier<List<LimitOrder>> listProvider() {
+	protected Supplier<List<Order>> listProvider() {
 		// TODO: Add Limit Order with all optional fields being null
 		return () -> {
 			// 1st test case with all fields filled
-			List<LimitOrder> list =  Arrays.asList(new LimitOrder (referenceConverter.toManagedEntity(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity()), // order type name
+			List<Order> list =  Arrays.asList(new LimitOrder (referenceConverter.toManagedEntity(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity()), // order type name
 										1,   // version
 										partyConverter.toManagedEntity(TestParty.JM_PMM_UK_BU.getEntity()),  // internal bu 
 										partyConverter.toManagedEntity(TestParty.ANGLO_PLATINUM_BU.getEntity()), // external bu
@@ -195,7 +196,7 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 	}
 
 	@Override
-	protected Function<LimitOrder, OrderVersionId> idProvider() {
+	protected Function<Order, OrderVersionId> idProvider() {
 		return x -> new OrderVersionId(x.getOrderId(), x.getVersion());
 	}
 }
