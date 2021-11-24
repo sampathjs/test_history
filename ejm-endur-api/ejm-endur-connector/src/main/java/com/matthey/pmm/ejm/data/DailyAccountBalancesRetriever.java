@@ -25,7 +25,7 @@ public class DailyAccountBalancesRetriever extends AbstractRetriever {
                              "                          unit,\n" +
                              "                          SUM(COALESCE(-para_position, 0)) OVER (PARTITION BY account_number, metal ORDER BY reset_date) AS position,\n" +
                              "                          SUM(IIF(para_position IS NULL, 0, 1)) OVER (PARTITION BY reset_date )             AS num_event\n" +
-                             "              FROM (SELECT '${account}' AS account_number,\n" +
+                             "              FROM (SELECT DISTINCT '${account}' AS account_number,\n" +
                              "                           '${metal}'   AS metal,\n" +
                              "                           gbds.reset_date,\n" +
                              "                           abs.para_position,\n" +
@@ -38,7 +38,7 @@ public class DailyAccountBalancesRetriever extends AbstractRetriever {
                              "                                                    JOIN account acc\n" +
                              "                                                         ON i.account_id = acc.account_id) ru\n" +
                              "                                      ON ru.account_number = '${account}'\n" +
-                             "                                 LEFT OUTER JOIN (SELECT acc.account_number,\n" +
+                             "                                 LEFT OUTER JOIN (SELECT DISTINCT acc.account_number,\n" +
                              "                                                         ccy.name,\n" +
                              "                                                         ate.event_date,\n" +
                              "                                                         ate.para_position\n" +
