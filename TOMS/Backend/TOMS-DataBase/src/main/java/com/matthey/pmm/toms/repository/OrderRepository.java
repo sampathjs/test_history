@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -52,7 +53,7 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
 		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"
 		   + " AND (COALESCE(:idTicker) IS NULL OR o.ticker.id IN (:idTicker))\n"
 		   )
-   List<Order> findByOrderIdAndOptionalParameters(@Param("orderTypeId") List<Long> orderTypeId,
+   Page<Order> findByOrderIdAndOptionalParameters(@Param("orderTypeId") List<Long> orderTypeId,
 		   @Param("orderIds") List<Long> orderIds, 
 		   @Param("versionIds") List<Integer> versionIds, @Param("idInternalBu") List<Long> idInternalBu,  
 		   @Param("idExternalBu") List<Long> idExternalBu,  @Param("idInternalLe") List<Long> idInternalLe,  

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -92,7 +93,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	// all order types
     @Override
     @ApiOperation("Retrieval of All Order Types")
-	public List<OrderTo> getOrders (
+	public Page<OrderTo> getOrders (
 			@ApiParam(value = "List of Order Type IDs, e.g. 13, 14", example = "13, 14", required = false) @RequestParam(required=false) List<Long> idOrderType,			
 			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
 			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
@@ -170,7 +171,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		
 		Pageable mappedPageable = Validator.verifySorts(pageable, getClass(), "getOrders", "sort", allMappings);
 		
-		List<Order> matchingOrders = orderRepo.findByOrderIdAndOptionalParameters(noEmptyList(idOrderType),
+		Page<Order> matchingOrders = orderRepo.findByOrderIdAndOptionalParameters(noEmptyList(idOrderType),
 				noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
 				noEmptyList(idExternalBu), noEmptyList(idInternalLe), noEmptyList(idExternalLe),
 				noEmptyList(idInternalPfolio), noEmptyList(idExternalPfolio), noEmptyList(idBuySell), 
@@ -194,14 +195,16 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 //				idMetalLocationMin, idMetalLocationMax,
 //				idOrderStatusMin, idOrderStatusMax
 				);
-		return matchingOrders.stream()
+		PageImpl<OrderTo> pageForTos = new PageImpl<OrderTo>(matchingOrders.getContent().stream()
 				.map(x -> x instanceof LimitOrder?limitOrderConverter.toTo((LimitOrder)x):referenceOrderConverter.toTo((ReferenceOrder)x))
-				.collect(Collectors.toList());
+				.collect(Collectors.toList()),
+				mappedPageable, matchingOrders.getTotalElements());
+		return pageForTos;
     }
 		
 	@Override
     @ApiOperation("Retrieval of Limit Order Data")
-	public List<OrderTo> getLimitOrders (
+	public Page<OrderTo> getLimitOrders (
 			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
 			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
 			@ApiParam(value = "List of the internal BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20006", example = "20006", required = false) @RequestParam(required=false) List<Long> idInternalBu,
@@ -269,7 +272,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				
 		Pageable mappedPageable = Validator.verifySorts(pageable, getClass(), "getLimitOrders", "sort", allMappings);
 		
-		List<LimitOrder> matchingOrders = limitOrderRepo.findByOrderIdAndOptionalParameters(noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
+		Page<Order> matchingOrders = limitOrderRepo.findByOrderIdAndOptionalParameters(noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
 				noEmptyList(idExternalBu), noEmptyList(idInternalLe), noEmptyList(idExternalLe),
 				noEmptyList(idInternalPfolio), noEmptyList(idExternalPfolio), noEmptyList(idBuySell), 
 				noEmptyList(idBaseCurrency), minBaseQuantity, maxBaseQuantity, noEmptyList(idBaseQuantityUnit), noEmptyList(idTermCurrency), reference,
@@ -281,9 +284,11 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				noEmptyList(idStopTriggerType), noEmptyList(idCurrencyCrossMetal),
 				noEmptyList(idValidationType), minExpiry, maxExpiry, minExecutionLikelihood, maxExecutionLikelihood, minLimitPrice, maxLimitPrice,
 				mappedPageable);
-		return matchingOrders.stream()
-				.map(x -> limitOrderConverter.toTo(x))
-				.collect(Collectors.toList());
+		PageImpl<OrderTo> pageForTos = new PageImpl<OrderTo>(matchingOrders.getContent().stream()
+					.map(x -> limitOrderConverter.toTo((LimitOrder)x))
+					.collect(Collectors.toList()),
+					mappedPageable, matchingOrders.getTotalElements());
+		return pageForTos;
 	}
 
 	@ApiOperation("Creation of a new Limit Order")
@@ -326,7 +331,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
                         "Default sort order is ascending. " +
                         "Multiple sort criteria are supported.")
     })	
-	public List<OrderTo> getReferenceOrders (
+	public Page<OrderTo> getReferenceOrders (
 			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
 			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
 			@ApiParam(value = "List of the internal BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20006", example = "20006", required = false) @RequestParam(required=false) List<Long> idInternalBu,
@@ -409,9 +414,11 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				mappedPageable
 				);
 				
-		return matchingOrders.stream()
-				.map(x -> referenceOrderConverter.toTo(x))
-				.collect(Collectors.toList());
+		PageImpl<OrderTo> pageForTos = new PageImpl<OrderTo>(matchingOrders.getContent().stream()
+				.map(x -> referenceOrderConverter.toTo((ReferenceOrder)x))
+				.collect(Collectors.toList()),
+				mappedPageable, matchingOrders.getTotalElements());
+		return pageForTos;
 	}
     
     @ApiOperation("Creation of a new Reference Order")
