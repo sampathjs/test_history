@@ -114,6 +114,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.idOrderStatus(entity.getOrderStatus().getId())
 				.creditChecksIds(entity.getCreditChecks().stream().map( x -> x.getId()).collect(Collectors.toList()))
 				.createdAt(formatDateTime(entity.getCreatedAt()))
+				.reference(entity.getReference())
 				.idCreatedByUser(entity.getCreatedByUser().getId())
 				.lastUpdate(formatDateTime(entity.getLastUpdate()))
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
@@ -246,6 +247,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 			existingEntity.get().setUpdatedByUser(updatedByUser);
 			existingEntity.get().setContractType(contractType);	
 			existingEntity.get().setTicker(ticker);
+			existingEntity.get().setReference(to.reference());
 			if (    !existingEntity.get().getOrderComments().containsAll(orderComments) | 
 					!orderComments.containsAll(existingEntity.get().getOrderComments())) {
 				existingEntity.get().setOrderComments(orderComments);

@@ -341,15 +341,6 @@ public class Validator {
 		PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), mappedSort);
 		return pageRequest;
 	}
-
-
-	public static String verifySort (String toAttributeName, Long id, Sort.Direction direction, Class clazz, String method, String argument, Map<String, String> columnMap) {
-		if (!columnMap.containsKey(toAttributeName)) {
-			throw new IllegalSortColumnException(clazz, method, argument, toAttributeName, columnMap.keySet().toString());
-		}
-		
-		return columnMap.get(toAttributeName) + (direction == Direction.ASC?">=":"<=");
-	}
 	
 	private <T> void verifyUnchangedStates (Class clazz, String method, String argument, ProcessTransitionTo transition, T oldEntity, T newEntity) {
 		for (String methodName : transition.unchangeableAttributes()) {

@@ -139,7 +139,8 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.fillPercentage(entity.getFillPercentage())
 				.idContractType (entity.getContractType() != null?entity.getContractType().getId():null)
 				.idTicker(entity.getTicker() != null?entity.getTicker().getId():null)
-				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))				
+				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))	
+				.reference(entity.getReference())
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.displayStringBaseCurrency(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)
 				.displayStringBaseQuantityUnit(entity.getBaseQuantityUnit() != null?entity.getBaseQuantityUnit().getValue():null)
@@ -246,6 +247,7 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 			existingEntity.get().setCreatedByUser(createdByUser);
 			existingEntity.get().setLastUpdate(lastUpdate);
 			existingEntity.get().setUpdatedByUser(updatedByUser);
+			existingEntity.get().setReference(to.reference());
 			if (    !existingEntity.get().getOrderComments().containsAll(orderComments) | 
 					!orderComments.containsAll(existingEntity.get().getOrderComments())) {
 				existingEntity.get().setOrderComments(orderComments);

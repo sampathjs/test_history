@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +16,7 @@ import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.OrderVersionId;
 
 @Repository
-public interface OrderRepository extends PagingAndSortingRepository<Order, OrderVersionId> {
+public interface OrderRepository extends PagingAndSortingRepository<Order, OrderVersionId>, JpaSpecificationExecutor<Order>{
    List<Order> findByOrderId(long orderId); 
    
    @Query("SELECT o FROM Order o WHERE o.orderId = :orderId AND o.version = (SELECT MAX(lo2.version) FROM LimitOrder lo2 WHERE lo2.orderId = :orderId)") 
@@ -28,8 +29,9 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
 		   + " AND ((COALESCE(:versionIds) IS NULL AND (o.version = (SELECT MAX(o2.version) FROM Order o2 WHERE o2.orderId = o.orderId))) OR o.version IN (:versionIds))\n"
    		   + " AND (COALESCE(:orderTypeId) IS NULL OR o.orderTypeName.id IN (:orderTypeId))\n"  
    		   + " AND (COALESCE(:idInternalBu) IS NULL OR o.internalBu.id IN (:idInternalBu))\n"  
+   		   + " AND (COALESCE(:idInternalLe) IS NULL OR o.internalLe.id IN (:idInternalLe))\n"  
 		   + " AND (COALESCE(:idExternalBu) IS NULL OR o.externalBu.id IN (:idExternalBu))\n"
-   		   + " AND (COALESCE(:idExternalLe) IS NULL OR o.internalLe.id IN (:idInternalLe))\n"  
+   		   + " AND (COALESCE(:idExternalLe) IS NULL OR o.externalLe.id IN (:idExternalLe))\n"  
 		   + " AND (COALESCE(:idInternalPfolio) IS NULL OR o.intPortfolio.id IN (:idInternalPfolio))\n"
 		   + " AND (COALESCE(:idExternalPfolio) IS NULL OR o.extPortfolio.id IN (:idExternalPfolio))\n"
 		   + " AND (COALESCE(:idBuySell) IS NULL OR o.buySell.id IN (:idBuySell))\n"
@@ -48,8 +50,8 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
 		   + " AND (COALESCE(:idUpdatedByUser) IS NULL OR o.updatedByUser.id IN (:idUpdatedByUser))\n"
 		   + " AND (:minLastUpdate IS NULL OR o.lastUpdate >= :minLastUpdate)\n" 
 		   + " AND (:maxLastUpdate IS NULL OR o.lastUpdate <= :maxLastUpdate)\n"
-		   + " AND (:minFillPercentage IS NULL OR o.fillPercentage >= :minFillPercentage)\n" 
-		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"	
+		   + " AND (:minFillPercentage IS NULL OR o.fillPercentage >= :minFillPercentage)\n"
+		   + " AND (:maxFillPercentage IS NULL OR o.fillPercentage <= :maxFillPercentage)\n"
 		   + " AND (COALESCE(:idContractType) IS NULL OR o.contractType.id IN (:idContractType))\n"
 		   + " AND (COALESCE(:idTicker) IS NULL OR o.ticker.id IN (:idTicker))\n"
 		   )
@@ -72,19 +74,5 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
 		   @Param("idContractType") List<Long> idContractType,
 		   @Param("idTicker") List<Long> idTicker,
 		   Pageable pageable
-//		   String idInternalBuMin, String idInternalBuMax,
-//		   String idExternalBuMin, String idExternalBuMax,
-//		   String idInternalLeMin, String idInternalLeMax,
-//		   String idExternalLeMin, String idExternalLeMax,
-//		   String idIntPortfolioMin, String idIntPortfolioMax,
-//		   String idExtPortfolioMin, String idExtPortfolioMax,
-//		   String idBuySellMin, String idBuySellMax,
-//		   String idBaseCurrencyMin, String idBaseCurrencyMax,
-//		   String idBaseQuantityUnitMin, String idBaseQuantityUnitMax,
-//		   String idTermCurrencyMin, String idTermCurrencyMax,
-//		   String minReference, String maxReference,
-//		   String idMetalFormMin, String idMetalFormMax,
-//		   String idMetalLocationMin, String idMetalLocationMax,
-//		   String idOrderStatusMin, String idOrderStatusMax
 		   );
 }
