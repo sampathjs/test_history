@@ -34,7 +34,7 @@ public class OrderStatusRepoTest extends AbstractRepositoryTestBase<OrderStatus,
 					new OrderStatus(refConverter.toManagedEntity(DefaultReference.ORDER_STATUS_PARTIAL_CANCELLED.getEntity()),  
 							refConverter.toManagedEntity(DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity()),  
 							refConverter.toManagedEntity(DefaultReference.ORDER_TYPE_CATEGORY_OPEN.getEntity()),
-							333333333l)
+							333333334l)
 					);
 		};
 	}
