@@ -41,6 +41,7 @@
         </dependency>
     </dependencies>
     <build>
+      <pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -61,5 +62,6 @@
                 <version>3.0.0-M3</version>
             </plugin>
         </plugins>
+      </pluginManagement>
     </build>
 </project>

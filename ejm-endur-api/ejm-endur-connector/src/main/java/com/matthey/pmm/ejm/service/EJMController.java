@@ -1,10 +1,24 @@
 package com.matthey.pmm.ejm.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.matthey.pmm.ejm.Account;
 import com.matthey.pmm.ejm.AccountBalance;
 import com.matthey.pmm.ejm.BSTransaction;
 import com.matthey.pmm.ejm.DTRTransaction;
 import com.matthey.pmm.ejm.DailyAccountBalance;
+import com.matthey.pmm.ejm.EmailConfirmationAction;
+import com.matthey.pmm.ejm.GenericAction;
 import com.matthey.pmm.ejm.ServiceUser;
 import com.matthey.pmm.ejm.Specification;
 import com.matthey.pmm.ejm.SpecificationSummary;
@@ -15,22 +29,21 @@ import com.matthey.pmm.ejm.data.AccountRetriever;
 import com.matthey.pmm.ejm.data.BSTransactionRetriever;
 import com.matthey.pmm.ejm.data.DTRTransactionRetriever;
 import com.matthey.pmm.ejm.data.DailyAccountBalancesRetriever;
+import com.matthey.pmm.ejm.data.EmailConfirmationActionProcessor;
+import com.matthey.pmm.ejm.data.GenericActionRetriever;
 import com.matthey.pmm.ejm.data.ServiceAccountRetriever;
 import com.matthey.pmm.ejm.data.SpecificationRetriever;
 import com.matthey.pmm.ejm.data.SpecificationSummaryRetriever;
 import com.matthey.pmm.ejm.data.StatementsRetriever;
 import com.matthey.pmm.ejm.data.TransactionsRetriever;
 import com.olf.openrisk.application.Session;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Set;
 
 @RestController
 @RequestMapping("/ejm")
 public class EJMController {
+	
+    private static final Logger logger = LogManager.getLogger(EJMController.class);
+
 
     private final Session session;
 
@@ -98,5 +111,17 @@ public class EJMController {
     @GetMapping("/users")
     public Set<ServiceUser> getServiceUsers() {
         return new ServiceAccountRetriever(session).retrieve();
+    }
+    
+    @GetMapping("/generic_action")
+    public Set<GenericAction> getGenericAction(@RequestParam String actionId) {
+    	logger.info("Retrieving generic action");
+        return new GenericActionRetriever(session).retrieve(actionId);
+    }
+        
+    
+    @PostMapping("emailConfirmation/response")
+    public String postEmailConfirmationAction(@RequestParam String actionId) {
+    	return new EmailConfirmationActionProcessor(session).processPost(actionId);
     }
 }
