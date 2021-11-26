@@ -3,6 +3,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Vector;
 
+import com.matthey.openlink.generic.ConstRepoRetrieval;
 import com.matthey.openlink.jde_extract.JDE_Data_Manager;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.IContainerContext;
@@ -361,7 +362,7 @@ public class PNL_FixingsMarketDataRecorder implements IScript {
     	Vector<PNL_MarketDataEntry> dataEntries = new Vector<PNL_MarketDataEntry>();
     	
     	int today = OCalendar.today();
-    	int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "LIBOR.USD");    	
+    	int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, ConstRepoRetrieval.getLiborIndexName());    	
     	int usdCcy = Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, "USD");
     	
     	int dealNum = trn.getFieldInt(TRANF_FIELD.TRANF_DEAL_TRACKING_NUM.toInt());
