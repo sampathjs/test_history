@@ -35,7 +35,7 @@ import com.olf.openrisk.trading.Transaction;
  * History:
  * 2020-03-25	V1.1	YadavP03	- memory leaks & formatting changes
  * 2021-07-26	V1.2	BhardG01	- WO0000000064879 - Physical dispatch risk check - based on value & carrier
- * 2021-09-27	V1.3	BhardG01	- WO0000000077057 - 'Clear Tran Num' feature is not working for the Physical Dispatch deals
+ * 2021-09-27	V1.3	BhardG01	- WO0000000077057 - Clear Tran Num  feature is not working for the Physical Dispatch deals
  */
 
 

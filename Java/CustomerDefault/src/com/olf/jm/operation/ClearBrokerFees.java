@@ -25,7 +25,7 @@ import com.openlink.util.constrepository.ConstRepository;
  * Version  Updated By    Date         Ticket#    Description
  * -----------------------------------------------------------------------------------
  * 	01      Prashanth     23-Jul-2021  EPI-1712   Initial version
- *  02      Gaurav        27-Sep-2021  EPI-1897   'Clear Tran Num'for Physical Dispatch deals. 
+ *  02      Gaurav        27-Sep-2021  EPI-1897   Clear Tran Num for Physical Dispatch deals. 
  */
 
 @ScriptCategory({ EnumScriptCategory.FieldNotification })
