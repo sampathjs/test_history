@@ -274,8 +274,8 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 		ReferenceOrder newEntity = new ReferenceOrder(orderTypeName,
 				1, internalBu, externalBu, internalLe, externalLe, intPortfolio, extPortfolio, buySell, baseCurrency, to.baseQuantity(),
 				baseQuantityUnit, termCurrency, to.reference(), metalForm, metalLocation, 
-				orderStatus, contractType, ticker, createdAt, createdByUser, lastUpdate,
-				updatedByUser, 0.0d, orderComments, fills, creditChecks, 
+				orderStatus, createdAt, createdByUser, lastUpdate,
+				updatedByUser, 0.0d, contractType, ticker, orderComments, fills, creditChecks, 
 				to.metalPriceSpread(), to.fxRateSpread(), to.contangoBackwardation(), legs);
 		if (to.version() != 0) {
 			newEntity.setVersion(to.version());

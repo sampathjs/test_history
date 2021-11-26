@@ -59,8 +59,7 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 			party.setName(to.name());
 			party.setSortColumn(to.sortColumn());
 		} else {
-			party = new Party(to.name(), type, legalEntity.orElse(null), to.sortColumn());
-			party.setId(to.id());
+			party = new Party(to.id() , to.name(), type, legalEntity.orElse(null), to.sortColumn());
 			party = partyRepo.save(party);
 		}
 		return party;

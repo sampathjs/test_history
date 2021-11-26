@@ -77,16 +77,25 @@ public class User {
 	protected User() {
 	}
 
-	public User(final String email, final String firstName, final String lastName,
+	public User(final Long id, final String email, final String firstName, final String lastName,
 			final Reference role, final Boolean active, final List<Party> tradeableParties,
 			final List<Reference> tradeablePortfolios) {
+		this.id = id;
 		this.email = email;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.role = role;
 		this.active = active;
-		this.tradeableParties = new ArrayList<>(tradeableParties);
-		this.tradeablePortfolios = new ArrayList<>(tradeablePortfolios);
+		if (tradeableParties != null) {
+			this.tradeableParties = new ArrayList<>(tradeableParties);
+		} else {
+			this.tradeableParties = null;
+		}
+		if (tradeablePortfolios != null) {
+			this.tradeablePortfolios = new ArrayList<>(tradeablePortfolios);
+		} else {
+			this.tradeablePortfolios = null;
+		}
 	}
 
 	public Long getId() {

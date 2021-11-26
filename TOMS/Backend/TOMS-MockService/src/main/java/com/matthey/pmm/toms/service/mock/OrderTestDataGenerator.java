@@ -120,8 +120,8 @@ public class OrderTestDataGenerator {
 		ReferenceOrder newTestOrder = new ReferenceOrder(null, 1, null, null,
 				null, null, null, null, null, null,
 				0.0d, null, null, "reference", null, null,
-				null, null, null, null, null, null,
-				null, 0.0d, Arrays.asList(), Arrays.asList(), Arrays.asList(), 
+				null, null, null, null, 
+				null, 0.0d, null, null, Arrays.asList(), Arrays.asList(), Arrays.asList(), 
 				// << order fields
 				0.0d,  0.0d, 0.0d,  Arrays.asList());
 		fillOrderFields(newTestOrder);

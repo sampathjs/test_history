@@ -107,8 +107,7 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 			}
 			return entity.get();
 		}
-		User newEntity = new User (to.email(), to.firstName(), to.lastName(), role, to.active(), tradeableParties, tradeablePortfolios);
-		newEntity.setId(to.id());
+		User newEntity = new User (to.id(), to.email(), to.firstName(), to.lastName(), role, to.active(), tradeableParties, tradeablePortfolios);
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;
 	}

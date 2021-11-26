@@ -53,7 +53,8 @@ public class Party {
 	protected Party() {
 	}
 
-	public Party(final String name, final Reference type, Party legalEntity, Long sortColumn) {
+	public Party(final Long id, final String name, final Reference type, Party legalEntity, Long sortColumn) {
+		this.id = id;
 		this.name = name;
 		this.type = type;
 		this.legalEntity = legalEntity;
