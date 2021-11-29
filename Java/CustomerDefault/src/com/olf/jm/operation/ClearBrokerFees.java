@@ -1,9 +1,18 @@
 package com.olf.jm.operation;
 
-import com.olf.embedded.trading.AbstractTransactionListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import com.olf.embedded.application.Context;
-import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.application.EnumScriptCategory;
+import com.olf.embedded.application.ScriptCategory;
+import com.olf.embedded.trading.AbstractTransactionListener;
+import com.olf.openrisk.trading.EnumFeeFieldId;
+import com.olf.openrisk.trading.EnumLegFieldId;
+import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
+import com.olf.openrisk.trading.EnumTransactionFieldId;
+import com.olf.openrisk.trading.Fee;
+import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
@@ -34,8 +43,13 @@ public class ClearBrokerFees extends AbstractTransactionListener {
 	@Override
 	public void notify(Context context, Transaction tran) {
 		try {
-			init();
-			
+			init();			
+			if(isDispatchDeals(tran)){
+				Logging.info("Dispatch Deal:, Clear Tran is starting");
+				processClearTranForPhyDispatch(tran, context);
+				Logging.info("Dispatch Deal:, Clear Tran is complating");
+			 } 
+
 			//Clear Broker
 			if(tran.getField("Broker").isApplicable() && tran.getField("Broker").getValueAsInt()>0){
 				tran.getField("Broker").setValue(0); 
@@ -48,22 +62,50 @@ public class ClearBrokerFees extends AbstractTransactionListener {
 		}
 	}
 	
+	private boolean isDispatchDeals(Transaction tran) {
+
+		String  insType = tran.getField(EnumTransactionFieldId.InstrumentType).getValueAsString(); 
+		String buySellFixLeg = tran.getField(EnumTransactionFieldId.BuySell).getValueAsString();    
+		 
+	 	if(buySellFixLeg.equalsIgnoreCase("Sell") && tran.getField("Dispatch Status").isApplicable() && insType.equalsIgnoreCase("COMM-PHYS")){
+	 		return true;
+		  }
+		return false;
+		
+	}
+
+	private void processClearTranForPhyDispatch(Transaction tran, Context context) {
+	 	tran.getField("Dispatch Status").setValue("None");
+	 	Date tradingDate = context.getTradingDate();  
+	 	for (Leg leg : tran.getLegs()) {
+			if(!( leg.getField(EnumLegFieldId.StartDate).isReadOnly())){
+				 leg.getField(EnumLegFieldId.StartDate).setValue(tradingDate  );
+			}
+			if(!( leg.getField(EnumLegFieldId.RateSpread).isReadOnly())){
+				 leg.getField(EnumLegFieldId.RateSpread).setValue("1.00");
+			}
+			
+			if(!( leg.getResetDefinition().getField(EnumResetDefinitionFieldId.PaymentDateOffset).isReadOnly())){
+					leg.getResetDefinition().getField(EnumResetDefinitionFieldId.PaymentDateOffset).setValue(new SimpleDateFormat("dd-MMM-yyyy").format(tradingDate)); 
+					 
+				}  
+			  
+		 	for (Fee fee :  leg.getFees()) {
+				if(!( fee.getField(EnumFeeFieldId.OneTimePaymentDate).isReadOnly())){
+					fee.getField(EnumFeeFieldId.OneTimePaymentDate).setValue(tradingDate); 
+					
+				}  
+			}
+	 	} 
+	}
+
+	
 	/**
 	 * Initialise the class loggers.
 	 *
 	 * @throws Exception the exception
 	 */	private void init() throws Exception {
-		constRep = new ConstRepository(CONTEXT, SUBCONTEXT);
-
-		String logLevel = "Error";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = null;
-
 		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
 			Logging.init(this.getClass(), constRep.getContext(), constRep.getSubcontext());
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
