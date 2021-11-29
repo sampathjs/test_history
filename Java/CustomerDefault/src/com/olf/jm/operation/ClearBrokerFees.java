@@ -25,8 +25,7 @@ import com.olf.jm.logging.Logging;
  * Version  Updated By    Date         Ticket#    Description
  * -----------------------------------------------------------------------------------
  * 	01      Prashanth     23-Jul-2021  EPI-1712   Initial version
- * 	02      Gaurav        11-Nov-2021  EPI-1532   Passthrough Changes
- * 	03      Gaurav       27-Sep-2021  EPI-1897    Clear Tran Num for Physical Dispatch deals
+ * 	02      Gaurav        11-Nov-2021  EPI-1532   Passthrough Changes 
  */
 
 @ScriptCategory({ EnumScriptCategory.FieldNotification })
