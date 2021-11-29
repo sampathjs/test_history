@@ -7,7 +7,6 @@ import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.trading.AbstractTransactionListener;
-import com.olf.jm.logging.Logging;
 import com.olf.openrisk.trading.EnumFeeFieldId;
 import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumResetDefinitionFieldId;
@@ -16,6 +15,7 @@ import com.olf.openrisk.trading.Fee;
 import com.olf.openrisk.trading.Leg;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
+import com.olf.jm.logging.Logging;
 
 /**
  * 
@@ -25,8 +25,8 @@ import com.openlink.util.constrepository.ConstRepository;
  * Version  Updated By    Date         Ticket#    Description
  * -----------------------------------------------------------------------------------
  * 	01      Prashanth     23-Jul-2021  EPI-1712   Initial version
- * 	02      Gaurav        11-Nov-2021  EPI-1532   Passthrough Changes
- *  03      Gaurav        27-Sep-2021  EPI-1897   'Clear Tran Num' for Physical Dispatch deals 
+ *  02      Gaurav        11-Nov-2021  EPI-1532   Passthrough Changes
+ *  03      Gaurav        27-Sep-2021  EPI-1897   'Clear Tran Num'for Physical Dispatch deals.  
  */
 
 @ScriptCategory({ EnumScriptCategory.FieldNotification })
