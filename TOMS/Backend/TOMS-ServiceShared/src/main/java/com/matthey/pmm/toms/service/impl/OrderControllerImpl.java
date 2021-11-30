@@ -589,7 +589,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		 			attributeValueSubquery.select(subQueryRoot.get(attributeName[0]));	 				
 	 			}
 	 			attributeValueSubquery.where(criteriaBuilder.and(subQueryRoot.get("orderId").in(firstOrderIncludedList)),
-	 					criteriaBuilder.and(root.get("version").in(versionSubquery)));
+	 					criteriaBuilder.and(subQueryRoot.get("version").in(versionSubquery)));
 	 			if (sortE.isAscending()) {
 	 				if (path != null) {
 						predicates.add(criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(path.get(attributeName[attributeName.length-1]), attributeValueSubquery)));	 					
