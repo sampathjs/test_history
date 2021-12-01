@@ -147,7 +147,6 @@ public abstract class Order {
 	@Column(name = "fill_percentage", nullable=false)
 	private double fillPercentage;		
 	
-	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="contract_type_reference_id", nullable = false)
 	@ReferenceTypeDesignator(referenceTypes = {DefaultReferenceType.CONTRACT_TYPE_LIMIT_ORDER, DefaultReferenceType.CONTRACT_TYPE_REFERENCE_ORDER})

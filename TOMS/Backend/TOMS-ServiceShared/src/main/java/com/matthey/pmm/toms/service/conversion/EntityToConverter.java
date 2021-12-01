@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.matthey.pmm.toms.model.CreditCheck;
+import com.matthey.pmm.toms.model.DatabaseFile;
 import com.matthey.pmm.toms.model.Fill;
 import com.matthey.pmm.toms.model.IndexEntity;
+import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.OrderComment;
 import com.matthey.pmm.toms.model.OrderStatus;
 import com.matthey.pmm.toms.model.Party;
@@ -19,9 +21,11 @@ import com.matthey.pmm.toms.model.ReferenceOrderLeg;
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.CreditCheckRepository;
+import com.matthey.pmm.toms.repository.DatabaseFileRepository;
 import com.matthey.pmm.toms.repository.FillRepository;
 import com.matthey.pmm.toms.repository.IndexRepository;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
+import com.matthey.pmm.toms.repository.OrderRepository;
 import com.matthey.pmm.toms.repository.OrderStatusRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
@@ -130,11 +134,29 @@ public abstract class EntityToConverter <Entity, TO> {
 	}
 	
 	/**
-	 * Overwrite this method in case you want to use the {@link #loadIndex(Object, long)} method
+	 * Overwrite this method in case you want to use the {@link #loadReferenceOrderLeg(Object, long)} method
 	 * in the child class.
 	 * @return
 	 */
 	public ReferenceOrderLegRepository referenceOrderLegRepo() {
+		return null;
+	}
+	
+	/**
+	 * Overwrite this method in case you want to use the {@link #loadDatabaseFile(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public DatabaseFileRepository databaseFileRepo() {
+		return null;
+	}
+	
+	/**
+	 * Overwrite this method in case you want to use the {@link #loadOrder(Object, long)} method
+	 * in the child class.
+	 * @return
+	 */
+	public OrderRepository orderRepo() {
 		return null;
 	}
 	
@@ -347,7 +369,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	/**
  	 * Implement the {@link #referenceOrderLegRepo()} method in the base class to provide a valid repository in case you want to use this method.
 	 * @param to
-	 * @param indexId
+	 * @param legId
 	 * @return
 	 */
 	protected ReferenceOrderLeg loadReferenceOrderLeg(TO to, long legId) {
@@ -360,5 +382,41 @@ public abstract class EntityToConverter <Entity, TO> {
 			throw new RuntimeException (msg);
 		}
 		return leg.get();
+	}
+	
+	/**
+ 	 * Implement the {@link #databaseFileRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param databaseFileId
+	 * @return 
+	 */
+	protected DatabaseFile loadDatabaseFile(TO to, long databaseFileId) {
+		Optional<DatabaseFile> file = databaseFileRepo().findById(databaseFileId);
+		if (!file.isPresent()) {
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
+					+ " can't find the Database File having ID #" + databaseFileId + "."
+					+ " Please ensure all instances of member variables are present before conversion.";			
+			logger.error(msg);
+			throw new RuntimeException (msg);
+		}
+		return file.get();
+	}
+	
+	/**
+ 	 * Implement the {@link #databaseFileRepo()} method in the base class to provide a valid repository in case you want to use this method.
+	 * @param to
+	 * @param databaseFileId
+	 * @return 
+	 */
+	protected Order loadOrder(TO to, long orderId) {
+		Optional<Order> file = orderRepo().findLatestByOrderId(orderId);
+		if (!file.isPresent()) {
+			String msg = "Error while converting Transport Object '" + to.toString() + "': "
+					+ " can't find the Order having ID #" + orderId + "."
+					+ " Please ensure all instances of member variables are present before conversion.";			
+			logger.error(msg);
+			throw new RuntimeException (msg);
+		}
+		return file.get();
 	}
 }

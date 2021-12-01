@@ -221,6 +221,53 @@
    	<createIndex indexName="i_cache_invalidate_id" tableName="cache_invalidate" unique="true">
     	<column name="cache_invalidate_id"/>
   	</createIndex>
+  	
+  	<!-- Database File -->
+   	<createIndex indexName="i_database_file_id" tableName="database_file" unique="true">
+    	<column name="database_file_id"/>
+  	</createIndex>
+   	<createIndex indexName="i_database_file_file_type_reference" tableName="database_file" unique="false">
+    	<column name="file_type_reference_id"/>
+  	</createIndex>
+   	<createIndex indexName="i_database_file_path_name" tableName="database_file" unique="true">
+    	<column name="path"/>
+    	<column name="name"/>
+  	</createIndex>
+
+  	<!-- Email -->
+   	<createIndex indexName="i_email_id" tableName="email" unique="true">
+    	<column name="email_id"/>
+  	</createIndex>
+   	<createIndex indexName="i_email_email_status_reference_id" tableName="email" unique="false">
+    	<column name="email_status_reference_id"/>
+  	</createIndex>
+  	
+   	<createIndex indexName="i_email_to_email_id" tableName="email_to" unique="false">
+    	<column name="email_id"/>
+  	</createIndex>  	
+   	<createIndex indexName="i_email_cc_email_id" tableName="email_cc" unique="false">
+    	<column name="email_id"/>
+  	</createIndex>
+   	<createIndex indexName="i_email_bcc_email_id" tableName="email_bcc" unique="false">
+    	<column name="email_id"/>
+  	</createIndex>
+  	
+   	<createIndex indexName="i_email_order_map_email_id" tableName="email_order_map" unique="false">
+    	<column name="email_id"/>
+  	</createIndex>
+   	<createIndex indexName="i_email_order_map_order_id" tableName="email_order_map" unique="false">
+    	<column name="order_id"/>
+  	</createIndex>
+  	
+ 	<createIndex indexName="i_email_attachments_email_id" tableName="email_attachments" unique="false">
+    	<column name="email_id"/>
+  	</createIndex>
+   	<createIndex indexName="i_email_attachments_database_file_id" tableName="database_file" unique="false">
+    	<column name="database_file_id"/>
+  	</createIndex>  	  	
+  	
+  	
+  	
   </changeSet> 
     
 </databaseChangeLog>

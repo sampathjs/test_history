@@ -277,6 +277,20 @@ public enum DefaultReference {
 	TICKER_XRUUSD (DefaultReferenceType.TICKER, 269, "XRU/USD", 488000l),
 	TICKER_XRUZAR (DefaultReferenceType.TICKER, 270, "XRU/ZAR", 489000l),
 	TICKER_ZARXPT (DefaultReferenceType.TICKER, 271, "ZAR/XPT", 490000l),
+	FILE_TYPE_PDF (DefaultReferenceType.FILE_TYPE, 272, "PDF", 600000l),
+	FILE_TYPE_DOCX (DefaultReferenceType.FILE_TYPE, 273, "Microsoft Word Document", 610000l),
+	FILE_TYPE_XLSX (DefaultReferenceType.FILE_TYPE, 274, "Microsoft Excel Spreadsheet", 620000l),
+	FILE_TYPE_TXT (DefaultReferenceType.FILE_TYPE, 275, "Plain Text File", 630000l),
+	EMAIL_STATUS_SUBMITTED (DefaultReferenceType.EMAIL_STATUS, 276, "Submitted", 700000l),
+	EMAIL_STATUS_SENDING (DefaultReferenceType.EMAIL_STATUS, 277, "Sending", 710000l),
+	EMAIL_STATUS_SENT_SUCCESS (DefaultReferenceType.EMAIL_STATUS, 278, "Success", 720000l),
+	EMAIL_STATUS_SENT_FAILED (DefaultReferenceType.EMAIL_STATUS, 279, "Failed", 730000l),
+	EMAIL_CATEGORY_ORDER_CONFIRMATION (DefaultReferenceType.EMAIL_CATEGORY, 280, "Order Confirmation", 800000l),
+	EMAIL_CATEGORY_ORDER_REJECTION (DefaultReferenceType.EMAIL_CATEGORY, 281, "Order Rejection", 810000l),
+	EMAIL_CATEGORY_ORDER_PARTIAL_FILL (DefaultReferenceType.EMAIL_CATEGORY, 282, "Order Partial Fill", 820000l),
+	EMAIL_CATEGORY_ORDER_COMPLETED (DefaultReferenceType.EMAIL_CATEGORY, 283, "Order Complete Fill", 830000l),
+	EMAIL_CATEGORY_ORDER_EXPIRED (DefaultReferenceType.EMAIL_CATEGORY, 284, "Order Expired", 840000l),
+	EMAIL_CATEGORY_SYSTEM_NOTIFICATION (DefaultReferenceType.EMAIL_CATEGORY, 285, "System Notification", 850000l),
 	;
 	
 	private final ReferenceTo ref;

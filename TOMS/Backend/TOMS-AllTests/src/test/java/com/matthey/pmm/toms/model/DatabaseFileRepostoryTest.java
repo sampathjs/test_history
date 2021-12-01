@@ -16,8 +16,8 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.matthey.pmm.toms.repository.FillRepository;
-import com.matthey.pmm.toms.service.conversion.FillConverter;
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
+import com.matthey.pmm.toms.repository.DatabaseFileRepository;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
@@ -29,18 +29,18 @@ import com.matthey.pmm.toms.testall.TestJpaApplication;
 @AutoConfigureTestDatabase(replace=Replace.NONE)
 @SpringBootTest(classes={TestJpaApplication.class})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-public class FillRepostoryTest extends AbstractRepositoryTestBase<Fill, Long, FillRepository> {	
+public class DatabaseFileRepostoryTest extends AbstractRepositoryTestBase<DatabaseFile, Long, DatabaseFileRepository> {	
 	@Autowired
-	protected FillConverter conv;
+	protected ReferenceConverter referenceCon;	
 
 	@Autowired
-	protected UserConverter userConv;
-
-	@Autowired
-	protected ReferenceConverter referenceCon;
+	protected UserConverter userConverter;	
 	
-	@Autowired
-	protected PartyConverter partyConverter;	
+	@Autowired 
+	protected PartyConverter partyConverter;
+	
+	private static final byte[] TEST_FILE_CONTENT = "Test File Content".getBytes();
+	private static final byte[] TEST_FILE_CONTENT2 = "Test File Content2".getBytes();
 	
 	@Before
 	public void setupTestData () {
@@ -53,26 +53,36 @@ public class FillRepostoryTest extends AbstractRepositoryTestBase<Fill, Long, Fi
 			.filter(x -> x.idLegalEntity() > 0)
 			.forEach(x -> partyConverter.toManagedEntity(x));		
 	}
-
 	
 	@Override
-	protected Supplier<List<Fill>> listProvider() {		
+	protected Supplier<List<DatabaseFile>> listProvider() {		
 		return () -> {
-			final List<Fill> fills = Arrays.asList(new Fill(1000d, 345d, 1234567,
-							userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()), userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()),
-					new Date()),
-					new Fill(2000d, 678d, 1234568,
-							userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()), userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()),
-							new Date()),
-					new Fill(3000d, 678d, 1234569,
-							userConv.toManagedEntity(TestUser.JACOB_SMITH.getEntity()), userConv.toManagedEntity(TestUser.PAT_MCCOURT.getEntity()),
-							new Date()));
-			return fills;
+			final List<DatabaseFile> users = Arrays.asList(new DatabaseFile("Filename.txt", 
+							"/test/testdata/",
+							referenceCon.toManagedEntity(DefaultReference.FILE_TYPE_TXT.getEntity()), 
+							TEST_FILE_CONTENT, 
+							new Date(), userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),
+							new Date(), userConverter.toManagedEntity(TestUser.ARINDAM_RAY.getEntity())),
+					new DatabaseFile("Filename2.txt", 
+							"/test/testdata2/",
+							referenceCon.toManagedEntity(DefaultReference.FILE_TYPE_TXT.getEntity()), 
+							TEST_FILE_CONTENT2, 
+							new Date(), userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),
+							new Date(), userConverter.toManagedEntity(TestUser.ARINDAM_RAY.getEntity())),
+					new DatabaseFile("Filename3.txt", 
+							"/test/testdata3/",
+							referenceCon.toManagedEntity(DefaultReference.FILE_TYPE_TXT.getEntity()), 
+							TEST_FILE_CONTENT2, 
+							new Date(), userConverter.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),
+							new Date(), userConverter.toManagedEntity(TestUser.ARINDAM_RAY.getEntity())
+							)
+					);  // 
+			return users;
 		};
 	}
 
 	@Override
-	protected Function<Fill, Long> idProvider() {
+	protected Function<DatabaseFile, Long> idProvider() {
 		return x -> x.getId();
 	}
 }

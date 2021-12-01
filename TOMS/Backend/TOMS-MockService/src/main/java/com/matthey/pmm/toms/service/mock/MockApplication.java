@@ -14,6 +14,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.matthey.pmm.toms.model.DbConstants;
 import com.matthey.pmm.toms.service.conversion.CreditCheckConverter;
+import com.matthey.pmm.toms.service.conversion.DatabaseFileConverter;
+import com.matthey.pmm.toms.service.conversion.EmailConverter;
 import com.matthey.pmm.toms.service.conversion.FillConverter;
 import com.matthey.pmm.toms.service.conversion.IndexConverter;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
@@ -23,6 +25,8 @@ import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
 import com.matthey.pmm.toms.service.mock.testdata.TestCreditCheck;
+import com.matthey.pmm.toms.service.mock.testdata.TestDatabaseFile;
+import com.matthey.pmm.toms.service.mock.testdata.TestEmail;
 import com.matthey.pmm.toms.service.mock.testdata.TestFill;
 import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
 import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
@@ -74,7 +78,8 @@ public class MockApplication implements WebMvcConfigurer {
     		LimitOrderConverter limitOrderConverter, FillConverter fillConverter,
     		CreditCheckConverter creditCheckConverter, OrderCommentConverter orderCommentConverter,
     		IndexConverter indexConverter, UserConverter userConverter, PartyConverter partyConverter,
-    		ReferenceOrderLegConverter referenceOrderLegConverter) {
+    		ReferenceOrderLegConverter referenceOrderLegConverter,
+    		DatabaseFileConverter databaseFileConverter, EmailConverter emailConverter) {
 
       return (args) -> {
     	  TestParty.asList() // legal entities first (LEs are not assigned to another LE)
@@ -117,6 +122,14 @@ public class MockApplication implements WebMvcConfigurer {
     	  TestReferenceOrder.asList() 
   	  		.stream()
   	  		.forEach(x -> referenceOrderConverter.toManagedEntity(x));
+    	  
+    	  TestDatabaseFile.asList() 
+  	  		.stream()
+  	  		.forEach(x -> databaseFileConverter.toManagedEntity(x));
+
+    	  TestEmail.asList() 
+  	  		.stream()
+  	  		.forEach(x -> emailConverter.toManagedEntity(x));
       };
     }
 }

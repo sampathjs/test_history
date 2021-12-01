@@ -39,7 +39,9 @@ public enum DefaultReferenceType {
 	CONTRACT_TYPE_LIMIT_ORDER (28, "Contract Type Limit Order", 2800l),
 	ORDER_TYPE_CATEGORY (29, "Order Type Category", 2900l),
 	TICKER (30, "Ticker", 3000l),
-	
+	FILE_TYPE(31, "File Type", 3100l),
+	EMAIL_STATUS(32, "Email Status", 3200l),
+	EMAIL_CATEGORY(33, "Email Category", 3300l),
 	;
 	
 	private final ReferenceTypeTo refType;
