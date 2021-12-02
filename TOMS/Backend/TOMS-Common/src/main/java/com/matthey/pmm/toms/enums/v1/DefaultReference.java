@@ -291,6 +291,10 @@ public enum DefaultReference {
 	EMAIL_CATEGORY_ORDER_COMPLETED (DefaultReferenceType.EMAIL_CATEGORY, 283, "Order Complete Fill", 830000l),
 	EMAIL_CATEGORY_ORDER_EXPIRED (DefaultReferenceType.EMAIL_CATEGORY, 284, "Order Expired", 840000l),
 	EMAIL_CATEGORY_SYSTEM_NOTIFICATION (DefaultReferenceType.EMAIL_CATEGORY, 285, "System Notification", 850000l),
+	FILL_STATUS_OPEN (DefaultReferenceType.FILL_STATUS, 286, "Open", 900000l),
+	FILL_STATUS_COMPLETED (DefaultReferenceType.FILL_STATUS, 287, "Completed", 910000l),
+	FILL_STATUS_FAILED (DefaultReferenceType.FILL_STATUS, 288, "Failed", 920000l),
+	FILL_STATUS_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 289, "Transition for Fill Status", 233000l),
 	;
 	
 	private final ReferenceTo ref;

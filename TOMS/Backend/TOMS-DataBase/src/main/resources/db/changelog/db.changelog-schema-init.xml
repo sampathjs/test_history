@@ -437,6 +437,9 @@
 			<column name="fill_id" type="int">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
+			<column name="fill_status_reference_id" type="int">
+				<constraints nullable="false" />
+			</column>
 			<column name="fill_quantity" type="double">
 				<constraints nullable="false" />
 			</column>
@@ -456,10 +459,21 @@
 			<column name="last_update" type="timestamp">
 				<constraints nullable="false" />
 			</column>
+			<column name="error_message" type="varchar(512)">
+				<constraints nullable="true" />
+			</column>			
 		</createTable>
 
 		<createSequence sequenceName="fill_id_seq"
 			incrementBy="1" startValue="1000000" />
+		
+		<addForeignKeyConstraint
+			baseColumnNames="fill_status_reference_id"
+			baseTableName="fill"
+			constraintName="fk_fill_status_reference_id"
+			onDelete="NO ACTION" onUpdate="NO ACTION"
+			referencedColumnNames="reference_id" referencedTableName="reference"
+			validate="true" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="trader_user_id" baseTableName="fill"

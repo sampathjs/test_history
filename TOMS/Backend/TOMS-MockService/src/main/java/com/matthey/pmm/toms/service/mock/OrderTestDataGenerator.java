@@ -222,13 +222,17 @@ public class OrderTestDataGenerator {
 		int fillCount = (int)(Math.random()*(MAX_FILL_COUNT+1));
 		List<Fill> newFills = new ArrayList<>(fillCount);
 		for (int i=0; i < fillCount; i++) {
-			Fill newFill = new Fill(null, null, 0l, null, null, null);
+			Fill newFill = new Fill(null, null, 0l, null, null, null, null, null);
 			newFill.setFillPrice(Math.random()*MAX_FILL_PRICE);
 			newFill.setFillQuantity(Math.random()*MAX_FILL_QUANTITY);
 			newFill.setLastUpdateDateTime(randomDate(false));
 			newFill.setTradeId(FILL_TRADE_ID_COUNTER++);
 			newFill.setTrader(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
 			newFill.setUpdatedBy(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
+			newFill.setFillStatus(selectReferenceValue(DefaultReferenceType.FILL_STATUS, false));
+			if (newFill.getFillStatus().getId() == DefaultReference.FILL_STATUS_FAILED.getEntity().id()) {
+				newFill.setErrorMessage(selectOneOf(Arrays.asList("Error1", "Error2", "Long Long Long Error Message Message Message"), false));
+			}
 			newFill = fillRepo.save(newFill);
 			newFills.add(newFill);
 		}

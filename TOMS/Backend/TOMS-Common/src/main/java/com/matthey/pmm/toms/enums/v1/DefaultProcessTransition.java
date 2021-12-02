@@ -187,6 +187,14 @@ public enum DefaultProcessTransition {
 	REFERENCE_ORDER_LEG_PENDING_TO_PENDING(300, DefaultReference.REFERENCE_ORDER_LEG_TRANSITION, 
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultOrderStatus.REFERENCE_ORDER_PENDING, Arrays.asList(),
 			200000l),
+	
+
+	FILL_STATUS_OPEN_TO_COMPLETED(401, DefaultReference.FILL_STATUS_TRANSITION,
+			DefaultReference.FILL_STATUS_OPEN, DefaultReference.FILL_STATUS_COMPLETED, Arrays.asList(),
+			300000l),
+	FILL_STATUS_OPEN_TO_FAILED(402, DefaultReference.FILL_STATUS_TRANSITION,
+			DefaultReference.FILL_STATUS_OPEN, DefaultReference.FILL_STATUS_FAILED,  Arrays.asList(),
+			350000l),	
 	;
 	
 	private final ProcessTransitionTo processStatus;

@@ -8,9 +8,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.model.Fill;
 import com.matthey.pmm.toms.model.LimitOrder;
 import com.matthey.pmm.toms.model.ReferenceOrder;
@@ -20,15 +22,19 @@ import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.service.TomsFillService;
 import com.matthey.pmm.toms.service.common.Validator;
 import com.matthey.pmm.toms.service.conversion.FillConverter;
+import com.matthey.pmm.toms.service.conversion.OrderStatusConverter;
 import com.matthey.pmm.toms.transport.FillTo;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @RestController
-public abstract class FillControllerImpl implements TomsFillService {
+public abstract class FillControllerImpl implements TomsFillService {	
 	@Autowired 
 	protected Validator validator;
+	
+	@Autowired
+	protected OrderStatusConverter orderStatusConverter;
 	
 	@Autowired 
 	protected FillRepository fillRepo;
@@ -83,7 +89,38 @@ public abstract class FillControllerImpl implements TomsFillService {
     	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
 		limitOrder.get().getFills().add(persisted);
 		limitOrder.get().setLastUpdate(new Date());
-		limitOrderRepo.save(limitOrder.get());
+		limitOrder.get().onPreUpdate();
+   		if (limitOrder.get().getFillPercentage() >= 0.999999) {
+    		limitOrder.get().setOrderStatus(orderStatusConverter.toManagedEntity(DefaultOrderStatus.LIMIT_ORDER_FILLED.getEntity())); 
+   		} else if (limitOrder.get().getFillPercentage() >= 0.00d) {
+    		limitOrder.get().setOrderStatus(orderStatusConverter.toManagedEntity(DefaultOrderStatus.LIMIT_ORDER_PART_FILLED.getEntity()));    			
+   		}
+		limitOrderRepo.save(limitOrder.get());		
+
+		return persisted.getId();
+    }
+    
+    @ApiOperation("Update of an existing fill for a Limit Order")
+    public long updateLimitOrderFill (
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable long limitOrderId,
+    		@ApiParam(value = "The ID of the fill object to be updated", example = "1") @PathVariable long fillId,
+    		@ApiParam(value = "The new fill. ID has to be fillId.", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
+    	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "updateLimitOrderFill", "limitOrderId", false);
+    	Optional<Fill> existingFill = validator.verifyFill(limitOrder.get(), limitOrderId, getClass(), "updateReferenceOrderFill", "fillId", false);
+
+    	// validation checks
+    	validator.validateFillFields(this.getClass(), "updateLimitOrderFill", "newOrderFill", newOrderFill, true, fillConverter.toTo(existingFill.get()));
+
+    	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
+		limitOrder.get().setLastUpdate(new Date());
+		limitOrder.get().onPreUpdate();
+   		if (limitOrder.get().getFillPercentage() >= 0.999999) {
+    		limitOrder.get().setOrderStatus(orderStatusConverter.toManagedEntity(DefaultOrderStatus.LIMIT_ORDER_FILLED.getEntity())); 
+   		} else if (limitOrder.get().getFillPercentage() >= 0.00d) {
+    		limitOrder.get().setOrderStatus(orderStatusConverter.toManagedEntity(DefaultOrderStatus.LIMIT_ORDER_PART_FILLED.getEntity()));    			
+   		}
+		limitOrderRepo.save(limitOrder.get());		
+
 		return persisted.getId();
     }
     	
@@ -114,6 +151,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
 		referenceOrder.get().getFills().add(persisted);
 		referenceOrder.get().setLastUpdate(new Date());
+		referenceOrder.get().onPreUpdate();
 		referenceOrderRepo.save(referenceOrder.get());
 		return persisted.getId();
     }
@@ -131,5 +169,24 @@ public abstract class FillControllerImpl implements TomsFillService {
     	Optional<Fill> fill =  validator.verifyFill (referenceOrder.get(), fillId, getClass(), "getReferenceOrderFill", "fillId", false);    	
        	return fillConverter.toTo(fill.get());  	
     }
+    
+    @ApiOperation("Update of an existing fill for a Reference Order")
+    public long updateReferenceOrderFill (
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The ID of the fill object to be updated", example = "1") @PathVariable long fillId,    		
+    		@ApiParam(value = "The new fill. ID has to be matching fillId.", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) { 
+    	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "updateReferenceOrderFill", "referenceOrderId", false);
+    	Optional<Fill> existingFill = validator.verifyFill(referenceOrder.get(), referenceOrderId, getClass(), "updateReferenceOrderFill", "fillId", false);
+    	    	
+    	// validation checks
+    	validator.validateFillFields(this.getClass(), "updateReferenceOrderFill", "newOrderFill", newOrderFill, true, fillConverter.toTo(existingFill.get()));
+
+    	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
+		referenceOrder.get().setLastUpdate(new Date());
+		referenceOrder.get().onPreUpdate();
+		referenceOrderRepo.save(referenceOrder.get());
+		return persisted.getId();
+    }
+
 
 }

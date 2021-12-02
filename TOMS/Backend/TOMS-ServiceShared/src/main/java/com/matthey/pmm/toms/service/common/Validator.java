@@ -300,7 +300,7 @@ public class Validator {
 		}
 		Optional<Reference> creditCheckRunStatus = verifyDefaultReference(creditCheck.idCreditCheckRunStatus(), Arrays.asList(DefaultReferenceType.CREDIT_CHECK_RUN_STATUS), clazz, method, argument + ".idCreditCheckRunStatus", false);
 		Optional<Reference> creditCheckOutcome = verifyDefaultReference(creditCheck.idCreditCheckOutcome(), Arrays.asList(DefaultReferenceType.CREDIT_CHECK_OUTCOME), clazz, method, argument + ".idCreditCheckOutcome", false);
-		    	
+
     	if (!isNew) {
     		Optional<ProcessTransition> transition = processTransitionRepo.findByReferenceCategoryIdAndFromStatusIdAndToStatusId(
     				DefaultReference.CREDIT_CHECK_RUN_STATUS_TRANSITION.getEntity().id(), oldCreditCheck.idCreditCheckRunStatus(), creditCheck.idCreditCheckRunStatus());
@@ -427,8 +427,7 @@ public class Validator {
     		if (orderFill.id() != -1) {
         		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + orderFill.id());
         	}
-    	} 
-    	
+    	}     	
     	
     	if (orderFill.fillQuantity() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".fillQuantity", " > 0", "" + orderFill.fillQuantity());
@@ -459,6 +458,43 @@ public class Validator {
     	if (fillForTradeId.isPresent()) {
     		throw new IllegalIdException (clazz, method, argument, "not equal to " + orderFill.idTrade() + " as there is already a fill for this trade ID ", Long.toString(orderFill.idTrade()));
     	}
+    	
+    	if (orderFill.idFillStatus() == DefaultReference.FILL_STATUS_FAILED.getEntity().id()) {
+    		if (orderFill.errorMessage() == null) {
+    			throw new IllegalValueException(clazz, method, "errorMessage", "not null", "null");
+    		}
+    	}
+    	
+    	if (orderFill.idFillStatus() != DefaultReference.FILL_STATUS_FAILED.getEntity().id()) {
+    		if (orderFill.errorMessage() != null) {
+    			throw new IllegalValueException(clazz, method, "errorMessage", "null", "not null");
+    		}
+    	}
+
+    	
+    	if (!isNew) {
+    		Optional<ProcessTransition> transition = processTransitionRepo.findByReferenceCategoryIdAndFromStatusIdAndToStatusId(
+    				DefaultReference.FILL_STATUS_TRANSITION.getEntity().id(), oldOrderFillTo.idFillStatus(), orderFill.idFillStatus());
+    		
+    		if (!transition.isPresent()) {
+    			List<ProcessTransition> possibleTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(
+        				DefaultReference.FILL_STATUS_TRANSITION.getEntity().id(),  oldOrderFillTo.idFillStatus());
+    			
+    			Reference fromStatusName = refRepo.findById(oldOrderFillTo.idFillStatus()).get();    			
+    			Reference toStatusName =  refRepo.findById (orderFill.idFillStatus()).get();
+    			    			    			
+        		List<String> possibleTransitionsText = possibleTransitions.stream()
+        				.map(x -> x.getFromStatusId() + " -> " + 
+        						x.getToStatusId())
+        				.collect(Collectors.toList());
+    			throw new IllegalStateChangeException (clazz, method,
+    					argument, fromStatusName.getValue(), toStatusName.getValue(), possibleTransitionsText.toString());
+    		} else {
+    			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(transition.get()), oldOrderFillTo, orderFill);
+    		}
+    	}
+
+    	
 	}
 	
 	public void validateCommentFields(Class clazz, String method,

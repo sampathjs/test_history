@@ -17,6 +17,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
+
 /**
  * Entity storing a comment for an order. The relationship is maintained within the order classes.
  * 
@@ -57,6 +59,14 @@ public class Fill {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date lastUpdateDateTime;
 	
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="fill_status_reference_id", nullable = false)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.FILL_STATUS)
+	private Reference fillStatus;
+	
+	@Column(name = "error_message", nullable = true)
+	private String errorMessage;
+	
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
@@ -65,13 +75,16 @@ public class Fill {
 	}
 
 	public Fill(final Double fillQuantity, final Double fillPrice, final long tradeId,
-			final User trader, final User updatedBy, final Date lastUpdateDateTime) {
+			final User trader, final User updatedBy, final Date lastUpdateDateTime,
+			final Reference fillStatus, final String errorMessage) {
 		this.fillQuantity = fillQuantity;
 		this.fillPrice = fillPrice;
 		this.tradeId = tradeId;
 		this.trader = trader;
 		this.updatedBy = updatedBy;
 		this.lastUpdateDateTime = lastUpdateDateTime;
+		this.fillStatus = fillStatus;
+		this.errorMessage = errorMessage;
 	}
 
 	public Long getId() {
@@ -130,6 +143,22 @@ public class Fill {
 		this.lastUpdateDateTime = lastUpdateDateTime;
 	}
 
+	public Reference getFillStatus() {
+		return fillStatus;
+	}
+
+	public void setFillStatus(Reference fillStatus) {
+		this.fillStatus = fillStatus;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -154,7 +183,7 @@ public class Fill {
 
 	@Override
 	public String toString() {
-		return "Fill [id=" + id + ", fillQuantity=" + fillQuantity + ", fillPrice=" + fillPrice + ", tradeId=" + tradeId
-				+ "]";
+		return "Fill [id=" + id + ", fillStatus" + fillStatus + ", fillQuantity=" + fillQuantity + ", fillPrice=" + fillPrice + ", tradeId=" + tradeId
+				+ ", errorMessage=" + errorMessage + "]";
 	}
 }

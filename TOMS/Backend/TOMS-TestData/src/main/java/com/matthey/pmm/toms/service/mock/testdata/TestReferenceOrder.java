@@ -10,7 +10,7 @@ import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 public enum TestReferenceOrder {
-	TEST_ORDER_1A(1000003, 1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_1A(100003, 1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_UK_PLATINUM, null,
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
@@ -25,7 +25,7 @@ public enum TestReferenceOrder {
 			30d, 45d, 
 			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_1)
 			),
-	TEST_ORDER_1B(1000003, 2, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_1B(100003, 2, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_UK_PLATINUM, null,
 			DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
@@ -38,7 +38,7 @@ public enum TestReferenceOrder {
 			100d, 30d, 45d, 
 			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_1, TestReferenceOrderLeg.TEST_LEG_2)
 			),
-	TEST_ORDER_2(1000004, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_2(100004, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, "TEST_ORDER_2", DefaultReference.METAL_FORM_GRAIN, DefaultReference.METAL_LOCATION_ROYSTON,
@@ -51,7 +51,7 @@ public enum TestReferenceOrder {
 			100d, null, 45d, 
 			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_9)
 			),		
-	TEST_ORDER_3(1000005, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_3(100005, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, "TEST_ORDER_3", DefaultReference.METAL_FORM_GRAIN, DefaultReference.METAL_LOCATION_BRANDENBERGER,

@@ -56,4 +56,15 @@ public abstract class FillTo {
     
     @Auxiliary
     public abstract String lastUpdateDateTime();
+    
+    @Auxiliary
+    public abstract long idFillStatus();    
+    
+    @Auxiliary
+    @Nullable
+    public abstract String displayStringFillStatus();
+    
+    @Auxiliary
+    @Nullable
+    public abstract String errorMessage();
 }

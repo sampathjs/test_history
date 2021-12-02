@@ -28,6 +28,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 
 /**
@@ -264,13 +265,15 @@ public abstract class Order {
 	@PreUpdate
     public void onPreUpdate() { 
     	updateFillPercentage();    	
-    }
+    }	
     
 	private void updateFillPercentage() {
 		if (fills != null) {
     		double fp = 0.0d;
     		for (Fill f : fills) {
-    			fp += f.getFillQuantity();
+    			if (f.getFillStatus().getId() == DefaultReference.FILL_STATUS_COMPLETED.getEntity().id()) {
+        			fp += f.getFillQuantity();    				
+    			}
     		}
     		if (baseQuantity != 0.0d) {
 				fp = fp / baseQuantity;    			

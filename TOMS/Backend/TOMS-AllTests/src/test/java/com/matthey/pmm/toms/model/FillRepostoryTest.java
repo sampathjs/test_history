@@ -16,6 +16,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.repository.FillRepository;
 import com.matthey.pmm.toms.service.conversion.FillConverter;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
@@ -60,13 +61,13 @@ public class FillRepostoryTest extends AbstractRepositoryTestBase<Fill, Long, Fi
 		return () -> {
 			final List<Fill> fills = Arrays.asList(new Fill(1000d, 345d, 1234567,
 							userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()), userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()),
-					new Date()),
+							new Date(), referenceCon.toManagedEntity(DefaultReference.FILL_STATUS_OPEN.getEntity()), "Error Message"),
 					new Fill(2000d, 678d, 1234568,
 							userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()), userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()),
-							new Date()),
+							new Date(), referenceCon.toManagedEntity(DefaultReference.FILL_STATUS_FAILED.getEntity()), "Error Message"),
 					new Fill(3000d, 678d, 1234569,
 							userConv.toManagedEntity(TestUser.JACOB_SMITH.getEntity()), userConv.toManagedEntity(TestUser.PAT_MCCOURT.getEntity()),
-							new Date()));
+							new Date(), referenceCon.toManagedEntity(DefaultReference.FILL_STATUS_COMPLETED.getEntity()), null));
 			return fills;
 		};
 	}

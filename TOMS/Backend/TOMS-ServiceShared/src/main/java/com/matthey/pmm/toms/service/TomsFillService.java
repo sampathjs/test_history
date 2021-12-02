@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -38,6 +39,13 @@ public interface TomsFillService {
     public long postLimitOrderFill (
     		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable long limitOrderId,
     		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill);
+
+    @ApiOperation("Update of an existing fill for a Limit Order")
+    @PutMapping("/limitOrder/{limitOrderId}/fill/{fillId}")    
+    public long updateLimitOrderFill (
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable long limitOrderId,
+    		@ApiParam(value = "The ID of the fill object to be updated", example = "1") @PathVariable long fillId,
+    		@ApiParam(value = "The new fill. ID has to be fillId.", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill);
     
 
     @Cacheable({"ReferenceOrderFill"})
@@ -60,5 +68,11 @@ public interface TomsFillService {
     public long postReferenceOrderFill (
     		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable long referenceOrderId,
     		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill);    
-    
+
+    @ApiOperation("Update of an existing fill for a Reference Order")
+    @PutMapping("/referenceOrder/{referenceOrderId}/fill/{fillId}")
+    public long updateReferenceOrderFill (
+    		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "1") @PathVariable long referenceOrderId,
+    		@ApiParam(value = "The ID of the fill object to be updated", example = "1") @PathVariable long fillId,    		
+    		@ApiParam(value = "The new fill. ID has to be matching fillId.", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill);    
 }
