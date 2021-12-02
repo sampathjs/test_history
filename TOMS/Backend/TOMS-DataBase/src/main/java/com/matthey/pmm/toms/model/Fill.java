@@ -44,8 +44,8 @@ public class Fill {
 	@Column(name = "fill_price", nullable = false)
 	private Double fillPrice;
 	
-	@Column(name = "trade_id", nullable = false, unique = true)
-	private long tradeId;
+	@Column(name = "trade_id", nullable = true)
+	private Long tradeId;
   
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="trader_user_id", nullable=false)
@@ -74,7 +74,7 @@ public class Fill {
 		
 	}
 
-	public Fill(final Double fillQuantity, final Double fillPrice, final long tradeId,
+	public Fill(final Double fillQuantity, final Double fillPrice, final Long tradeId,
 			final User trader, final User updatedBy, final Date lastUpdateDateTime,
 			final Reference fillStatus, final String errorMessage) {
 		this.fillQuantity = fillQuantity;
@@ -111,11 +111,11 @@ public class Fill {
 		this.fillPrice = fillPrice;
 	}
 
-	public long getTradeId() {
+	public Long getTradeId() {
 		return tradeId;
 	}
 
-	public void setTradeId(long tradeId) {
+	public void setTradeId(Long tradeId) {
 		this.tradeId = tradeId;
 	}
 

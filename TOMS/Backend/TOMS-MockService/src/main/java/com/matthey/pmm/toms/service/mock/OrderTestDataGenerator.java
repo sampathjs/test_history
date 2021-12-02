@@ -76,7 +76,7 @@ public class OrderTestDataGenerator {
 
 	private static final double MAX_REFERENCE_ORDER_LEG_NOTIONAL = 100;
 
-	private static int FILL_TRADE_ID_COUNTER=10000000;
+	private static long FILL_TRADE_ID_COUNTER=10000000;
 
 	
 	@Autowired

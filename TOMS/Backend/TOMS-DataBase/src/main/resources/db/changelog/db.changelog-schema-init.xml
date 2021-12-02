@@ -447,8 +447,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="trade_id" type="int">
-				<constraints nullable="false" unique="true"
-					uniqueConstraintName="unique_constraint_fill_trade_id" />
+				<constraints nullable="true" />
 			</column>
 			<column name="trader_user_id" type="int">
 				<constraints nullable="false" />

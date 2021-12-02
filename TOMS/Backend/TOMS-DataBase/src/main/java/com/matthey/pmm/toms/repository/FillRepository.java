@@ -10,4 +10,6 @@ import com.matthey.pmm.toms.model.Fill;
 @Repository
 public interface FillRepository extends JpaRepository<Fill, Long> {
   Optional<Fill> findByTradeId(long tradeId);
+  
+  Optional<Fill> findTopByOrderByTradeIdDesc ();
 }

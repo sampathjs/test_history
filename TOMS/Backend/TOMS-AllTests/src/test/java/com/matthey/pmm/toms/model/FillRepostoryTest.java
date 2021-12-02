@@ -59,13 +59,13 @@ public class FillRepostoryTest extends AbstractRepositoryTestBase<Fill, Long, Fi
 	@Override
 	protected Supplier<List<Fill>> listProvider() {		
 		return () -> {
-			final List<Fill> fills = Arrays.asList(new Fill(1000d, 345d, 1234567,
+			final List<Fill> fills = Arrays.asList(new Fill(1000d, 345d, 1234567l,
 							userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()), userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()),
 							new Date(), referenceCon.toManagedEntity(DefaultReference.FILL_STATUS_OPEN.getEntity()), "Error Message"),
-					new Fill(2000d, 678d, 1234568,
+					new Fill(2000d, 678d, 1234568l,
 							userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()), userConv.toManagedEntity(TestUser.JENS_WAECHTER.getEntity()),
 							new Date(), referenceCon.toManagedEntity(DefaultReference.FILL_STATUS_FAILED.getEntity()), "Error Message"),
-					new Fill(3000d, 678d, 1234569,
+					new Fill(3000d, 678d, 1234569l,
 							userConv.toManagedEntity(TestUser.JACOB_SMITH.getEntity()), userConv.toManagedEntity(TestUser.PAT_MCCOURT.getEntity()),
 							new Date(), referenceCon.toManagedEntity(DefaultReference.FILL_STATUS_COMPLETED.getEntity()), null));
 			return fills;

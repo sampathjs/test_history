@@ -30,7 +30,8 @@ public abstract class FillTo {
      * Endur side Trade ID
      */
     @Auxiliary
-    public abstract long idTrade();
+    @Nullable
+    public abstract Long idTrade();
 
     /**
      * User ID
