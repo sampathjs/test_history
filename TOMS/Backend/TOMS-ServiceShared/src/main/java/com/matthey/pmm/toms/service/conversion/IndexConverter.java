@@ -32,6 +32,7 @@ public class IndexConverter extends EntityToConverter<IndexEntity, IndexTo>{
 				.idCurrencyTwoName(entity.getCurrencyTwoName().getId())
 				.idCurrencyOneName(entity.getCurrencyOneName().getId())
 				.id(entity.getId())
+				.idLifecycle(entity.getLifecycleStatus().getEndurId())
 				.sortColumn(entity.getSortColumn())
 				.build();
 	}
@@ -42,15 +43,17 @@ public class IndexConverter extends EntityToConverter<IndexEntity, IndexTo>{
 		Reference indexName  = loadRef(to, to.idIndexName());
 		Reference currencyOneName  = loadRef(to, to.idCurrencyOneName());
 		Reference currencyTwoName  = loadRef(to, to.idCurrencyTwoName());
+		Reference lifecycleStatus  = loadRef(to, to.idLifecycle());
 		
 		if (existingEntity.isPresent()) {
 			existingEntity.get().setIndexName(indexName);
 			existingEntity.get().setCurrencyOneName(currencyOneName);
 			existingEntity.get().setCurrencyTwoName(currencyTwoName);
+			existingEntity.get().setLifecycleStatus(lifecycleStatus);
 			existingEntity.get().setSortColumn(to.sortColumn());
 			return existingEntity.get();
 		}
-		IndexEntity newEntity = new IndexEntity(to.id(), indexName, currencyOneName, currencyTwoName, to.sortColumn());
+		IndexEntity newEntity = new IndexEntity(to.id(), indexName, currencyOneName, currencyTwoName, lifecycleStatus, to.sortColumn());
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;
 	}

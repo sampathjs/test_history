@@ -41,5 +41,9 @@ public abstract class ReferenceTo {
     
     @Auxiliary
     @Nullable
+    public abstract Long idLifecycle();
+    
+    @Auxiliary
+    @Nullable
     public abstract Long sortColumn();
 }

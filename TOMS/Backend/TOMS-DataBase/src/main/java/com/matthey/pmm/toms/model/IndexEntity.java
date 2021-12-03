@@ -42,9 +42,14 @@ public class IndexEntity {
 	@JoinColumn(name="reference_currency_two_id")
 	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.CCY_CURRENCY, DefaultReferenceType.CCY_METAL })
 	private Reference currencyTwoName;
+
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="reference_lifecycle_status_id")
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.LIFECYCLE_STATUS)
+	private Reference lifecycleStatus;
 	
 	@Column(name = "sort_column", nullable = true)
-	private Long sortColumn;
+	private Long sortColumn;	
 		
 	/**
 	 * For JPA purposes only. Do not use.
@@ -53,11 +58,14 @@ public class IndexEntity {
 	}
 
 	public IndexEntity(final Long id, final Reference indexName, 
-			final Reference currencyOneName, final Reference currencyTwoName, Long sortColumn) {
+			final Reference currencyOneName, final Reference currencyTwoName,
+			final Reference lifecycleStatus,
+			Long sortColumn) {
 		this.id = id;
 		this.indexName = indexName;
 		this.currencyOneName = currencyOneName;
 		this.currencyTwoName = currencyTwoName;
+		this.lifecycleStatus = lifecycleStatus;
 		this.sortColumn = sortColumn;
 	}
 
@@ -91,6 +99,14 @@ public class IndexEntity {
 
 	public void setCurrencyTwoName(Reference currencyTwoName) {
 		this.currencyTwoName = currencyTwoName;
+	}
+
+	public Reference getLifecycleStatus() {
+		return lifecycleStatus;
+	}
+
+	public void setLifecycleStatus(Reference lifecycleStatus) {
+		this.lifecycleStatus = lifecycleStatus;
 	}
 
 	public Long getSortColumn() {

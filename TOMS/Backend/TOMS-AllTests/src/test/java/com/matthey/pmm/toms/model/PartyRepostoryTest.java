@@ -36,10 +36,12 @@ public class PartyRepostoryTest extends AbstractRepositoryTestBase<Party, Long, 
 	public void setupTestData () {
 		internalTestLe = repo.save(new Party(1000l, "Internal Test LE - Persisted", 
 				referenceCon.toManagedEntity(DefaultReference.PARTY_TYPE_EXTERNAL_LE.getEntity()), 
-				null, 123456l));
+				null, referenceCon.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity()),
+				123456l));
 		externalTestLe = repo.save(new Party(1001l, "External Test LE - Persisted", 
 				referenceCon.toManagedEntity(DefaultReference.PARTY_TYPE_EXTERNAL_LE.getEntity()), 
-				null, 123457l));
+				null, referenceCon.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity()),
+				123457l));
 	}
 	
 	@Override
@@ -47,16 +49,16 @@ public class PartyRepostoryTest extends AbstractRepositoryTestBase<Party, Long, 
 		return () -> {
 			final List<Party> parties = Arrays.asList(new Party(10000l, "External Test LE", 
 					referenceCon.toManagedEntity(DefaultReference.PARTY_TYPE_EXTERNAL_LE.getEntity()), 
-					null, 12345l),
+					null, referenceCon.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity()), 12345l),
 					new Party(10001l, "Internal Test LE", 
 							referenceCon.toManagedEntity(DefaultReference.PARTY_TYPE_INTERNAL_LE.getEntity()), 
-							null, 12346l),
+							null, referenceCon.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity()), 12346l),
 					new Party(10002l, "Internal Test BU", 
 							referenceCon.toManagedEntity(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT.getEntity()), 
-							internalTestLe, 12346l),
+							internalTestLe, referenceCon.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity()), 12346l),
 					new Party(10003l,"External Test BU", 
 							referenceCon.toManagedEntity(DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT.getEntity()), 
-							externalTestLe, 12346l)				
+							externalTestLe, referenceCon.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity()), 12346l)				
 					);			
 			return parties;
 		};

@@ -52,6 +52,8 @@ public class FileProcessor {
 			setLegField (line);
 		}else if (checkForAddLeg(line)) {
 			addLeg (line);
+		} else if (checkForSetResetDefinitionValue(line)) {
+			setResetDefinitionField (line);
 		} else { // if line is not known
 			String errorMsg = "Could not process line '" + line + "' as it was not categorised into any of the existing commands";
 			Logging.error(errorMsg);
@@ -73,6 +75,46 @@ public class FileProcessor {
 		return true;
 	}
 	
+	private void setResetDefinitionField(String line) {
+		Logging.info("Line '" + line + "' categorised as setResetDefinitionField");
+		String lineNormalised = line.trim();
+		String legNumber = lineNormalised.substring(24, lineNormalised.indexOf(",")).trim();
+		String resetDefField = lineNormalised.substring(lineNormalised.indexOf(",")+1, lineNormalised.lastIndexOf(",")).trim();
+		String newValue = lineNormalised.substring(lineNormalised.lastIndexOf(",")+1, lineNormalised.indexOf(")")).trim();
+		Logging.info("On Leg #'" + legNumber + " setting the field '" + resetDefField + "' on the reset definition to new value '" + newValue + "'");
+		int legNo;
+		try {
+			legNo = Integer.parseInt(legNumber);
+		} catch (NumberFormatException ex) {
+			String errorMsg = "The provided leg '" + legNumber + "' in the first parameter is  not a number.";
+			Logging.error(errorMsg);
+			throw new RuntimeException (errorMsg);
+		}
+		Leg leg = newDeal.getLeg(legNo);
+		Field field = leg.getResetDefinition().getField(resetDefField);
+		if (field == null) {
+			String errorMsg ="The field '"  + resetDefField + "' was not found on the reset definition.";
+			Logging.error(errorMsg);	
+			throw new RuntimeException(errorMsg);
+		}
+		field.setValue(newValue);
+		Logging.info("Successfully set On Leg #'" + legNumber + " the field '" + resetDefField + "' on the reset definition to new value '" + newValue + "'");
+	}
+
+	private boolean checkForSetResetDefinitionValue(String line) {
+		String lineNormalised = line.trim();
+		if (!lineNormalised.startsWith("setResetDefinitionField(")) {
+			return false;
+		}		
+		if (!lineNormalised.endsWith(")")) {
+			return false;
+		}
+		if (lineNormalised.split(",").length != 3) {
+			return false;
+		}
+		return true;
+	}
+	
 	private void setLegField(String line) {
 		Logging.info("Line '" + line + "' categorised as setLegField");
 		String lineNormalised = line.trim();
@@ -90,6 +132,11 @@ public class FileProcessor {
 		}
 		Leg leg = newDeal.getLeg(legNo);
 		Field field = leg.getField(legField);
+		if (field == null) {
+			String errorMsg ="The leg field '"  + legField + "' was not found.";
+			Logging.error(errorMsg);	
+			throw new RuntimeException(errorMsg);
+		}
 		field.setValue(newValue);
 		Logging.info("Successfully set On Leg #'" + legNumber + " the field '" + legField + "' to new value '" + newValue + "'");
 	}

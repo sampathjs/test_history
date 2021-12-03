@@ -67,7 +67,7 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 		
 		return ImmutableUserTo.builder()
 				.id(entity.getId())
-				.active(entity.getActive())
+				.idLifecycleStatus(entity.getLifecycleStatus().getId())
 				.addAllTradeableCounterPartyIds(tradeableCounterPartyIds)
 				.addAllTradeableInternalPartyIds(tradeableInternalPartyIds)
 				.email(entity.getEmail())
@@ -80,6 +80,7 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 	@Override
 	public User toManagedEntity (UserTo to) {
 		Reference role = loadRef(to, to.roleId());
+		Reference lifecycleStatus = loadRef(to, to.idLifecycleStatus());
 		List<Party> tradeableParties = 
 				Streams.concat(to.tradeableCounterPartyIds().stream(), to.tradeableInternalPartyIds().stream())
 				.map(x -> super.loadParty(to, x))
@@ -92,7 +93,7 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 		
 		Optional<User> entity = entityRepo.findById(to.id());
 		if (entity.isPresent()) {
-			entity.get().setActive(to.active());
+			entity.get().setLifecycleStatus(lifecycleStatus);
 			entity.get().setEmail(to.email());
 			entity.get().setFirstName(to.firstName());
 			entity.get().setLastName(to.lastName());
@@ -107,7 +108,7 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 			}
 			return entity.get();
 		}
-		User newEntity = new User (to.id(), to.email(), to.firstName(), to.lastName(), role, to.active(), tradeableParties, tradeablePortfolios);
+		User newEntity = new User (to.id(), to.email(), to.firstName(), to.lastName(), role, lifecycleStatus, tradeableParties, tradeablePortfolios);
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;
 	}

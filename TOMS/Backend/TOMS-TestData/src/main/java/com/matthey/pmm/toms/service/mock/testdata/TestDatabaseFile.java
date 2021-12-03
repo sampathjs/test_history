@@ -11,22 +11,29 @@ import com.matthey.pmm.toms.transport.DatabaseFileTo;
 import com.matthey.pmm.toms.transport.ImmutableDatabaseFileTo;
 
 public enum TestDatabaseFile {
-		TEST_DATABASE_FILE_1 (1000000l, "FileName1", "/email/attachments/", DefaultReference.FILE_TYPE_TXT, "File Content\n Line 2\nLine 3\n Line 4",
+		TEST_DATABASE_FILE_1 (1000000l, "FileName1", "/email/attachments/", DefaultReference.FILE_TYPE_TXT, 
+				DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, "File Content\n Line 2\nLine 3\n Line 4",
 				"2000-01-01 08:00:00", TestUser.JENS_WAECHTER, "2000-01-01 08:00:00", TestUser.JENS_WAECHTER),
-		TEST_DATABASE_FILE_2 (1000001l, "FileName2", "/email/attachments/", DefaultReference.FILE_TYPE_TXT, "Another File Content\n\n",
+		TEST_DATABASE_FILE_2 (1000001l, "FileName2", "/email/attachments/", DefaultReference.FILE_TYPE_TXT, 
+				DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, "Another File Content\n\n",
 				"2000-01-01 08:00:00", TestUser.JENS_WAECHTER, "2000-01-01 08:00:00", TestUser.JENS_WAECHTER),
-		TEST_DATABASE_FILE_3 (1000002l, "FileName3", "/email/attachments/", DefaultReference.FILE_TYPE_TXT, "More files, more attachments, more content",
+		TEST_DATABASE_FILE_3 (1000002l, "FileName3", "/email/attachments/", DefaultReference.FILE_TYPE_TXT, 
+				DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,"More files, more attachments, more content",
 				"2000-01-01 08:00:00", TestUser.JENS_WAECHTER, "2000-01-01 08:00:00", TestUser.JENS_WAECHTER),
-		TEST_DATABASE_FILE_4 (1000003l, "FileName4", "/email/attachments/", DefaultReference.FILE_TYPE_TXT, "More file content",
+		TEST_DATABASE_FILE_4 (1000003l, "FileName4", "/email/attachments/", DefaultReference.FILE_TYPE_TXT, 
+				DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, "More file content",
 				"2000-01-01 08:00:00", TestUser.JENS_WAECHTER, "2000-01-01 08:00:00", TestUser.JENS_WAECHTER),
-		TEST_DATABASE_FILE_5 (1000004l, "FileName5", "/other/", DefaultReference.FILE_TYPE_PDF, "File Content\n Line 2\nLine 3\n Line 4",
+		TEST_DATABASE_FILE_5 (1000004l, "FileName5", "/other/", DefaultReference.FILE_TYPE_PDF, 
+				DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, "File Content\n Line 2\nLine 3\n Line 4",
 				"2000-01-01 08:00:00", TestUser.JENS_WAECHTER, "2000-01-01 08:00:00", TestUser.JENS_WAECHTER),
+		
 	;
 	
 	private final DatabaseFileTo databaseFile;
 	
 	private TestDatabaseFile (long id, String name, String path,
-			DefaultReference fileType,  String fileContent,
+			DefaultReference fileType, DefaultReference lifecycleStatus,  
+			String fileContent,
 			String createdAt, TestUser createdBy,
 			String updatedAt, TestUser updatedBy) {
 		this.databaseFile = ImmutableDatabaseFileTo.builder()
@@ -35,6 +42,7 @@ public enum TestDatabaseFile {
 				.idFileType(fileType.getEntity().id())
 				.name(name)
 				.path(path)
+				.idLifecycle(lifecycleStatus.getEntity().id())
 				.lastUpdate(updatedAt)
 				.createdAt(createdAt)
 				.idUpdatedByUser(updatedBy.getEntity().id())

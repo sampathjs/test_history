@@ -42,7 +42,8 @@ public enum DefaultReferenceType {
 	FILE_TYPE(31, "File Type", 3100l),
 	EMAIL_STATUS(32, "Email Status", 3200l),
 	EMAIL_CATEGORY(33, "Email Category", 3300l),
-	FILL_STATUS(34, "Fill Status", 3400l)
+	FILL_STATUS(34, "Fill Status", 3400l),
+	LIFECYCLE_STATUS(35, "Lifecycle Status", 3500l)
 	;
 	
 	private final ReferenceTypeTo refType;

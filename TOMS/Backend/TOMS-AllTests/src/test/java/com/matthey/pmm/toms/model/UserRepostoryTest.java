@@ -52,7 +52,7 @@ public class UserRepostoryTest extends AbstractRepositoryTestBase<User, Long, Us
 			final List<User> users = Arrays.asList(new User(3333l, "test1@matthey.com", 
 							"Firstname1", "Lastname1",
 							referenceCon.toManagedEntity(DefaultReference.USER_ROLE_ADMIN.getEntity()), 
-							true, // active 
+							referenceCon.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity()),
 							Arrays.asList(partyConverter.toManagedEntity(TestParty.TANAKA_BU.getEntity()),
 									partyConverter.toManagedEntity(TestParty.BARCLAYS_BANK_BU.getEntity())), // tradeableParties
 							Arrays.asList(referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_UK_GOLD.getEntity()), // tradeablePortfolios
@@ -60,7 +60,7 @@ public class UserRepostoryTest extends AbstractRepositoryTestBase<User, Long, Us
 					new User(4444l, "test2@matthey.com", 
 							"Firstname2", "Lastname2",
 							referenceCon.toManagedEntity(DefaultReference.USER_ROLE_ADMIN.getEntity()), 
-							true, // active 
+							referenceCon.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity()),
 							null, // tradeableParties
 							null));  // tradeablePortfolios
 			return users;

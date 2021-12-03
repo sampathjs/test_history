@@ -49,6 +49,7 @@ public class DatabaseFileConverter extends EntityToConverter<DatabaseFile, Datab
 				.idCreatedByUser(entity.getCreatedByUser().getId())
 				.lastUpdate(formatDateTime(entity.getLastUpdate()))
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
+				.idLifecycle(entity.getLifecycleStatus().getId())
 				.build();
 	}
 	
@@ -60,6 +61,7 @@ public class DatabaseFileConverter extends EntityToConverter<DatabaseFile, Datab
 		User createdBy = loadUser (to, to.idCreatedByUser());
 		User updatedBy = loadUser (to, to.idUpdatedByUser());
 		Reference fileType = loadRef(to, to.idFileType());
+		Reference lifecycleStatus = loadRef(to, to.idLifecycle());
 		
 		Optional<DatabaseFile> existingEntity = entityRepo.findById(to.id());
 		if (existingEntity.isPresent()) {
@@ -70,10 +72,11 @@ public class DatabaseFileConverter extends EntityToConverter<DatabaseFile, Datab
 			existingEntity.get().setLastUpdate(lastUpdate);
 			existingEntity.get().setUpdatedByUser(updatedBy);
 			existingEntity.get().setPath(to.path());
-			existingEntity.get().setName(to.name());			
+			existingEntity.get().setName(to.name());	
+			existingEntity.get().setLifecycleStatus(lifecycleStatus);
 			return existingEntity.get();
 		}
-		DatabaseFile newEntity = new DatabaseFile(to.name(), to.path(), fileType, fileContent, createdAt, createdBy, lastUpdate, updatedBy);
+		DatabaseFile newEntity = new DatabaseFile(to.name(), to.path(), fileType, lifecycleStatus, fileContent, createdAt, createdBy, lastUpdate, updatedBy);
 		newEntity.setId(to.id());
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;

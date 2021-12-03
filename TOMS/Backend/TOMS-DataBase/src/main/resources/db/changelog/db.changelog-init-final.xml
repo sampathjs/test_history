@@ -146,8 +146,8 @@
       <column name="user_id"/>
     </createIndex>  
     
-    <createIndex indexName="i_user_active" tableName="user" unique="false">
-      <column name="active"/>
+    <createIndex indexName="i_user_reference_lifecycle_status" tableName="user" unique="false">
+      <column name="reference_lifecycle_status_id"/>
     </createIndex>  
 
     <createIndex indexName="i_user_role_id" tableName="user" unique="false">

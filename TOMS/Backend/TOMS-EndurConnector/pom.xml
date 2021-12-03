@@ -84,6 +84,13 @@
         </dependency>
         <dependency>
             <groupId>com.olf</groupId>
+            <artifactId>olf_openjvs_enums</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${env.OLF_LIB}/olf_openjvs_enums.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.olf</groupId>
             <artifactId>olf_openrisk_java</artifactId>
             <version>1.0.0</version>
             <scope>system</scope>
@@ -95,6 +102,20 @@
             <version>1.0.0</version>
             <scope>system</scope>
             <systemPath>${env.OLF_LIB}/olf_openrisk_java_enums.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.olf</groupId>
+            <artifactId>olf_report_builder_jvs</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${env.OLF_LIB}/olf_report_builder_jvs.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.olf</groupId>
+            <artifactId>olf_report_builder_jvs_enums</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${env.OLF_LIB}/olf_report_builder_jvs_enums.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>

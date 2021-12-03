@@ -44,6 +44,11 @@ public class Party {
 	@JoinColumn(name="legal_entity_id", nullable = true)
 	private Party legalEntity;
 	
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="reference_lifecycle_status_id")
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.LIFECYCLE_STATUS)
+	private Reference lifecycleStatus;
+	
 	@Column(name = "sort_column", nullable = true)
 	private Long sortColumn;
 	
@@ -53,11 +58,13 @@ public class Party {
 	protected Party() {
 	}
 
-	public Party(final Long id, final String name, final Reference type, Party legalEntity, Long sortColumn) {
+	public Party(final Long id, final String name, final Reference type, Party legalEntity, 
+			final Reference lifeCycleStatus, final Long sortColumn) {
 		this.id = id;
 		this.name = name;
 		this.type = type;
 		this.legalEntity = legalEntity;
+		this.lifecycleStatus = lifeCycleStatus;
 		this.sortColumn = sortColumn;
 	}
 
@@ -91,6 +98,14 @@ public class Party {
 
 	public void setLegalEntity(Party legalEntity) {
 		this.legalEntity = legalEntity;
+	}
+
+	public Reference getLifecycleStatus() {
+		return lifecycleStatus;
+	}
+
+	public void setLifecycleStatus(Reference lifecycleStatus) {
+		this.lifecycleStatus = lifecycleStatus;
 	}
 
 	public Long getSortColumn() {
@@ -134,6 +149,6 @@ public class Party {
 
 	@Override
 	public String toString() {
-		return "Party [id=" + id + ", name=" + name + ", type=" + type + ", legalEntity=" + legalEntity + "]";
+		return "Party [id=" + id + ", name=" + name + ", type=" + type + ", legalEntity=" + legalEntity + ", lifecycleStatus=" + lifecycleStatus+ "]";
 	}
 }

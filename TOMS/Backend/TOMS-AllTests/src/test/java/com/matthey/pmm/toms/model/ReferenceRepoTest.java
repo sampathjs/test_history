@@ -12,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
@@ -32,7 +33,8 @@ public class ReferenceRepoTest extends AbstractRepositoryTestBase<Reference, Lon
 	@Override
 	protected Supplier<List<Reference>> listProvider() {
 		return () -> {
-			return Arrays.asList(new Reference(refTypeConverter.toManagedEntity(DefaultReferenceType.BUY_SELL.getEntity()), "value", "display name", -1, 1000l));
+			return Arrays.asList(new Reference(refTypeConverter.toManagedEntity(DefaultReferenceType.BUY_SELL.getEntity()), "value", "display name", -1, 
+					converter.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity()), 1000l));
 		};
 	}
 

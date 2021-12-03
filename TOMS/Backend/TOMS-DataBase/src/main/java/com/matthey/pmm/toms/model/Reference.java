@@ -13,6 +13,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
+
 /**
  * Generic entity containing reference objects of different types that had been previously
  * saved as enums or simple string values.
@@ -49,6 +51,11 @@ public class Reference {
 	@Column(name = "endur_id")
 	private Long endurId;
 	
+	@OneToOne(fetch=FetchType.LAZY, optional = true)
+	@JoinColumn(name="reference_lifecycle_status_id")
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.LIFECYCLE_STATUS)
+	private Reference lifecycleStatus;
+	
 	@Column(name = "sort_column", nullable = true)
 	private Long sortColumn;
 	
@@ -59,11 +66,13 @@ public class Reference {
 	}
 
 	public Reference(final ReferenceType type, final String value, final String displayName, 
-			long endurId, Long sortColumn) {
+			final long endurId, final Reference lifecycleStatus, 
+			final Long sortColumn) {
 		this.value = value;
 		this.type = type;
 		this.displayName = displayName;
 		this.endurId = endurId;
+		this.lifecycleStatus = lifecycleStatus;
 		this.sortColumn = sortColumn;
 	}
 
@@ -107,6 +116,14 @@ public class Reference {
 		this.endurId = endurId;
 	}
 	
+	public Reference getLifecycleStatus() {
+		return lifecycleStatus;
+	}
+
+	public void setLifecycleStatus(Reference lifecycleStatus) {
+		this.lifecycleStatus = lifecycleStatus;
+	}
+
 	public Long getSortColumn() {
 		return sortColumn;
 	}

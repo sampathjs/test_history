@@ -40,8 +40,8 @@ public abstract class UserTo {
     public abstract String lastName();
 
     @Auxiliary
-    public abstract Boolean active();
-
+    public abstract long idLifecycleStatus();
+    
     @Auxiliary
     public abstract long roleId();
     

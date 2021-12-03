@@ -12,19 +12,26 @@ import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.UserTo;
 
 public enum TestUser {
-	SERVICE_USER(20046, "GRPEndurSupportTeam@matthey.com", "Service", "Account", Boolean.TRUE, DefaultReference.USER_ROLE_SERVICE_USER.getEntity(),
+	SERVICE_USER(20046, "GRPEndurSupportTeam@matthey.com", "Service", "Account", DefaultReference.USER_ROLE_SERVICE_USER.getEntity(),
+			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			TestParty.asListInternal(), TestParty.asListExternal(), DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
-	DENNIS_WILDISH(20035, "dennis.wildish@matthey.com", "Dennis", "Wildish", Boolean.FALSE, DefaultReference.USER_ROLE_ADMIN.getEntity(),
+	DENNIS_WILDISH(20035, "dennis.wildish@matthey.com", "Dennis", "Wildish", DefaultReference.USER_ROLE_ADMIN.getEntity(),
+			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			TestParty.asListInternal(), TestParty.asListExternal(), DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
-	JENS_WAECHTER(23113, "jens.waetcher@matthey.com", "Jens", "Wächter", Boolean.TRUE, DefaultReference.USER_ROLE_ADMIN.getEntity(),
+	JENS_WAECHTER(23113, "jens.waetcher@matthey.com", "Jens", "Wächter", DefaultReference.USER_ROLE_ADMIN.getEntity(),
+			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			TestParty.asListInternal(), TestParty.asListExternal(), DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
-	MURALI_KRISHNAN(24208, "Murali.Krishnan@matthey.com", "Murali", "Krishnan", Boolean.TRUE, DefaultReference.USER_ROLE_ADMIN.getEntity(),
+	MURALI_KRISHNAN(24208, "Murali.Krishnan@matthey.com", "Murali", "Krishnan", DefaultReference.USER_ROLE_ADMIN.getEntity(),
+			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			TestParty.asListInternal(), TestParty.asListExternal(), DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
-	ARINDAM_RAY(20014, "Arindam.Ray@matthey.com", "Arindam", "Ray", Boolean.FALSE, DefaultReference.USER_ROLE_ADMIN.getEntity(),
+	ARINDAM_RAY(20014, "Arindam.Ray@matthey.com", "Arindam", "Ray", DefaultReference.USER_ROLE_ADMIN.getEntity(),
+			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			TestParty.asListInternal(), TestParty.asListExternal(), DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
-	NIVEDITH_SAJJA(20073, "Nivedith.Sajja3@matthey.com", "Nivedith", "Sajja", Boolean.TRUE, DefaultReference.USER_ROLE_ADMIN.getEntity(),
+	NIVEDITH_SAJJA(20073, "Nivedith.Sajja3@matthey.com", "Nivedith", "Sajja", DefaultReference.USER_ROLE_ADMIN.getEntity(),
+			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			TestParty.asListInternal(), TestParty.asListExternal(), DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
-	JACOB_SMITH(20026, "Jacob.Smith@matthey.com", "Jacob", "Smith", Boolean.TRUE, DefaultReference.USER_ROLE_PMM_USER.getEntity(),
+	JACOB_SMITH(20026, "Jacob.Smith@matthey.com", "Jacob", "Smith", DefaultReference.USER_ROLE_PMM_USER.getEntity(),
+			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Arrays.asList(TestParty.JM_PLC_LE.getEntity(), TestParty.JM_PMM_UK_BU.getEntity()),
 			Arrays.asList(TestParty.TANAKA_LE.getEntity(), TestParty.TANAKA_BU.getEntity(),
 						  TestParty.GOLDEN_BILLION_LE.getEntity(), TestParty.GOLDEN_BILLION_BU.getEntity(),
@@ -41,7 +48,8 @@ public enum TestUser {
 					DefaultReference.PORTFOLIO_UK_UNDHEDGED.getEntity(), DefaultReference.PORTFOLIO_UK_AVERAGING.getEntity(),
 					DefaultReference.PORTFOLIO_UK_PHYSICAL_OFFSET.getEntity(), DefaultReference.PORTFOLIO_UK_NICKEL.getEntity())),
 	
-	PAT_MCCOURT(20944, "Pat.McCourt@jmusa.com", "Patrick", "McCourt", Boolean.TRUE, DefaultReference.USER_ROLE_PMM_USER.getEntity(),
+	PAT_MCCOURT(20944, "Pat.McCourt@jmusa.com", "Patrick", "McCourt", DefaultReference.USER_ROLE_PMM_USER.getEntity(),
+			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Arrays.asList(TestParty.JM_INC_LE.getEntity(), TestParty.JM_PMM_US_BU.getEntity()),
 			Arrays.asList(TestParty.BARCLAYS_BANK_LE.getEntity(), TestParty.BARCLAYS_BANK_BU.getEntity(),
 						  TestParty.INEOS_LE.getEntity(), TestParty.INEOS_BU.getEntity(),
@@ -55,14 +63,15 @@ public enum TestUser {
 					DefaultReference.PORTFOLIO_US_SILVER.getEntity(), DefaultReference.PORTFOLIO_US_GAINS_AND_LOSSES.getEntity(),
 					DefaultReference.PORTFOLIO_US_UNHEDGED.getEntity(), DefaultReference.PORTFOLIO_US_AVERAGING.getEntity(),
 					DefaultReference.PORTFOLIO_US_PHYSICAL_OFFSET.getEntity())),
-	ANDREW_BAYNES (23211, "Andrew.Baynes@matthey.com", "Andrew", "Baynes", Boolean.TRUE, DefaultReference.USER_ROLE_PMM_TRADER.getEntity(),
+	ANDREW_BAYNES (23211, "Andrew.Baynes@matthey.com", "Andrew", "Baynes", DefaultReference.USER_ROLE_PMM_TRADER.getEntity(),
+			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			TestParty.asListInternal(), TestParty.asListExternal(), DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
 	;
 	
 	private final UserTo user;
 	
 	private TestUser (long id, String email, String firstName,
-			String lastName, Boolean active, ReferenceTo role,
+			String lastName, ReferenceTo role, DefaultReference lifecycleStatus,
 			List<PartyTo> tradeableInternalPartyIds,
 			List<PartyTo> tradeableCounterPartyIds,
 			List<ReferenceTo> tradeablePortfolioIds) {
@@ -71,7 +80,7 @@ public enum TestUser {
 				.email(email)
 				.firstName(firstName)
 				.lastName(lastName)
-				.active(active)
+				.idLifecycleStatus(lifecycleStatus.getEntity().id())
 				.roleId(role.id())
 				.tradeableCounterPartyIds(tradeableCounterPartyIds.stream().map(x -> x.id()).collect(Collectors.toList()))
 				.tradeableInternalPartyIds(tradeableInternalPartyIds.stream().map(x -> x.id()).collect(Collectors.toList()))

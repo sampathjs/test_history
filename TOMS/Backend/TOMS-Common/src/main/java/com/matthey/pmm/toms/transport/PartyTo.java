@@ -38,5 +38,9 @@ public abstract class PartyTo {
     public abstract Long idLegalEntity();
     
     @Auxiliary
+    public abstract long idLifecycle();
+    
+    @Auxiliary
     public abstract long sortColumn();
+
 }

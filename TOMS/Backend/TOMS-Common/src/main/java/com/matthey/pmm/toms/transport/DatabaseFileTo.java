@@ -33,6 +33,9 @@ public abstract class DatabaseFileTo {
     public abstract long idFileType();
     
     @Auxiliary
+    public abstract long idLifecycle();
+    
+    @Auxiliary
     public abstract String fileContent();
     
     @Auxiliary

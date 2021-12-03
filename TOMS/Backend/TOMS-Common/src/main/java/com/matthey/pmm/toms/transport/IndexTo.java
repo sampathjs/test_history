@@ -34,6 +34,9 @@ public abstract class IndexTo {
     
     @Auxiliary
     public abstract long idCurrencyTwoName();
+
+    @Auxiliary
+    public abstract long idLifecycle();
     
     @Auxiliary
     @Nullable

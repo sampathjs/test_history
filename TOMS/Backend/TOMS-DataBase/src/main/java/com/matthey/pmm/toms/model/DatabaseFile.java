@@ -50,10 +50,15 @@ public class DatabaseFile {
 	@ReferenceTypeDesignator(referenceTypes=DefaultReferenceType.FILE_TYPE)
 	private Reference fileType;
 	
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="reference_lifecycle_status_id")
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.LIFECYCLE_STATUS)
+	private Reference lifecycleStatus;
+	
 	@Lob
 	@Column(name="file_content", nullable = false)
 	private byte[] fileContent;
-	
+		
 	@Column(name = "created_at")
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date createdAt;
@@ -69,23 +74,25 @@ public class DatabaseFile {
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="updated_by", nullable = false)
 	private User updatedByUser;
-		
+	
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
 	protected DatabaseFile() {
 	}
 
-	public DatabaseFile(final String name, final String path, final Reference fileType, final byte[] fileContent,
+	public DatabaseFile(final String name, final String path, final Reference fileType, final Reference lifecycleStatus, 
+			final byte[] fileContent,
 			final Date createdAt, final User createdByUser, final Date lastUpdate, final User updatedByUser) {
 		this.name = name;
 		this.path = path;
 		this.fileType = fileType;
+		this.lifecycleStatus = lifecycleStatus;
 		this.fileContent = fileContent;
 		this.createdAt = createdAt;
 		this.createdByUser = createdByUser;
 		this.lastUpdate = lastUpdate;
-		this.updatedByUser = updatedByUser;
+		this.updatedByUser = updatedByUser;		
 	}
 
 	public Long getId() {
@@ -118,6 +125,14 @@ public class DatabaseFile {
 
 	public void setFileType(Reference fileType) {
 		this.fileType = fileType;
+	}
+
+	public Reference getLifecycleStatus() {
+		return lifecycleStatus;
+	}
+
+	public void setLifecycleStatus(Reference lifecycleStatus) {
+		this.lifecycleStatus = lifecycleStatus;
 	}
 
 	public byte[] getFileContent() {
@@ -188,6 +203,7 @@ public class DatabaseFile {
 	@Override
 	public String toString() {
 		return "DatabaseFile [id=" + id + ", name=" + name + ", path=" + path + ", fileType=" + fileType
+				+ ", lifecycleStatus=" + lifecycleStatus
 				+ ", fileContent=" + Arrays.toString(fileContent) + "]";
 	}
 }

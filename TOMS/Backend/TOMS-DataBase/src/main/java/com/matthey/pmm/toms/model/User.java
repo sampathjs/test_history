@@ -32,7 +32,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 @Entity
 @Table(name = "user", 
     indexes = { @Index(name = "i_user_id", columnList = "user_id", unique = true),
-        @Index(name = "i_user_active", columnList = "active", unique = false),
+        @Index(name = "i_user_reference_lifecycle_status", columnList = "reference_lifecycle_status_id", unique = false),
         @Index(name = "i_user_role_id", columnList = "role_id", unique = false)})
 public class User {	
 	@Id
@@ -52,9 +52,11 @@ public class User {
 	@JoinColumn(name="role_id", nullable = false)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.USER_ROLE)
 	private Reference role;
-
-	@Column(name = "active", nullable = false)
-	private Boolean active;
+	
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="reference_lifecycle_status_id")
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.LIFECYCLE_STATUS)
+	private Reference lifecycleStatus;
 	
 	@ManyToMany(cascade = CascadeType.ALL)
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -78,14 +80,15 @@ public class User {
 	}
 
 	public User(final Long id, final String email, final String firstName, final String lastName,
-			final Reference role, final Boolean active, final List<Party> tradeableParties,
+			final Reference role, final Reference lifecycleStatus, 
+			final List<Party> tradeableParties,
 			final List<Reference> tradeablePortfolios) {
 		this.id = id;
 		this.email = email;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.role = role;
-		this.active = active;
+		this.lifecycleStatus = lifecycleStatus;
 		if (tradeableParties != null) {
 			this.tradeableParties = new ArrayList<>(tradeableParties);
 		} else {
@@ -138,12 +141,12 @@ public class User {
 		this.role = role;
 	}
 
-	public Boolean getActive() {
-		return active;
+	public Reference getLifecycleStatus() {
+		return lifecycleStatus;
 	}
 
-	public void setActive(Boolean active) {
-		this.active = active;
+	public void setLifecycleStatus(Reference lifecycleStatus) {
+		this.lifecycleStatus = lifecycleStatus;
 	}
 
 	public List<Party> getTradeableParties() {
@@ -208,6 +211,6 @@ public class User {
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", email=" + email + ", firstName=" + firstName + ", lastName=" + lastName + ", role="
-				+ role + ", active=" + active + "]";
+				+ role + ", lifecycleStatus=" + lifecycleStatus + "]";
 	}	
 }

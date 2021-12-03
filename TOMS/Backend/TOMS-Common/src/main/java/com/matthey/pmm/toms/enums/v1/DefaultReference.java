@@ -295,6 +295,10 @@ public enum DefaultReference {
 	FILL_STATUS_COMPLETED (DefaultReferenceType.FILL_STATUS, 287, "Completed", 910000l),
 	FILL_STATUS_FAILED (DefaultReferenceType.FILL_STATUS, 288, "Failed", 920000l),
 	FILL_STATUS_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 289, "Transition for Fill Status", 233000l),
+	LIFECYCLE_STATUS_PENDING_AUTHORISATION(DefaultReferenceType.LIFECYCLE_STATUS, 290, "Authorisation Pending", 240000l),
+	LIFECYCLE_STATUS_AUTHORISED_ACTIVE(DefaultReferenceType.LIFECYCLE_STATUS, 291, "Authorised and Active", 241000l),
+	LIFECYCLE_STATUS_AUTHORISED_INACTIVE(DefaultReferenceType.LIFECYCLE_STATUS, 292, "Authorised and Inactive", 242000l),
+	LIFECYCLE_STATUS_DELETED(DefaultReferenceType.LIFECYCLE_STATUS, 293, "Deleted", 243000l),
 	;
 	
 	private final ReferenceTo ref;
@@ -311,6 +315,19 @@ public enum DefaultReference {
 				.build();
 	}
 	
+	private DefaultReference (DefaultReferenceType type, long id, String name, Long sortColumn,
+			DefaultReference lifeCycle) {
+		this.refType = type.getEntity();
+		ref = ImmutableReferenceTo.builder()
+				.id(id)
+				.name(name)
+				.endurId(null)
+				.idType(type.getEntity().id())
+				.idLifecycle(lifeCycle != null?lifeCycle.getEntity().id():null)
+				.sortColumn(sortColumn)
+				.build();
+	}
+	
 	private DefaultReference (DefaultReferenceType type, long id, String name, long endurId, Long sortColumn) {
 		this.refType = type.getEntity();
 		ref = ImmutableReferenceTo.builder()
@@ -318,6 +335,19 @@ public enum DefaultReference {
 				.name(name)
 				.endurId(endurId)
 				.idType(type.getEntity().id())
+				.sortColumn(sortColumn)
+				.build();
+	}
+	
+	private DefaultReference (DefaultReferenceType type, long id, String name, long endurId, Long sortColumn,
+			DefaultReference lifeCycle) {
+		this.refType = type.getEntity();
+		ref = ImmutableReferenceTo.builder()
+				.id(id)
+				.name(name)
+				.endurId(endurId)
+				.idType(type.getEntity().id())
+				.idLifecycle(lifeCycle != null?lifeCycle.getEntity().id():null)
 				.sortColumn(sortColumn)
 				.build();
 	}

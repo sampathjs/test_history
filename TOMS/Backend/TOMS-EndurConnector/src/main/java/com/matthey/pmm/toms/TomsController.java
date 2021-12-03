@@ -1,20 +1,19 @@
-package com.matthey.pmm.toms.service;
+package com.matthey.pmm.toms;
 
+
+import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.olf.openrisk.application.Session;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+//import com.olf.openrisk.application.Session;
 
-@SuppressWarnings("MVCPathVariableInspection") // the paths are actually defined in AbstractEndurConnectorController
 @RestController
+@RequestMapping("/toms/endur/")
 public class TomsController {
     private final Session session;
 
@@ -22,6 +21,16 @@ public class TomsController {
         this.session = session;
     }
     
+//    /**
+//     * Returns party instances that are different or new compared to the provided list of knownParties. 
+//     * @param knownParties
+//     * @return
+//     */
+//    @GetMapping("parties")
+//    public List<PartyTo> retrieveEndurPartyList (List<PartyTo> knownParties) {
+//    	
+//    }
+//    
     
     public String getCurrentDate() {
         return LocalDate.fromDateFields(session.getTradingDate()).toString();

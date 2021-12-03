@@ -50,6 +50,7 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 		Optional<Party> existingEntity  = partyRepo.findById(to.id());
 		Optional<Party> legalEntity  = partyRepo.findById(to.idLegalEntity());
 		Reference type  = loadRef(to, to.typeId());
+		Reference lifecycleStatus  = loadRef(to, to.idLifecycle());
 		
 		Party party;
 		if (existingEntity.isPresent()) {
@@ -57,9 +58,10 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 			party.setLegalEntity(legalEntity.isPresent()?legalEntity.get():null);
 			party.setType(type);
 			party.setName(to.name());
+			party.setLifecycleStatus(lifecycleStatus);
 			party.setSortColumn(to.sortColumn());
 		} else {
-			party = new Party(to.id() , to.name(), type, legalEntity.orElse(null), to.sortColumn());
+			party = new Party(to.id() , to.name(), type, legalEntity.orElse(null), lifecycleStatus, to.sortColumn());
 			party = partyRepo.save(party);
 		}
 		return party;
