@@ -7,13 +7,12 @@ import java.util.stream.Collectors;
 
 import com.matthey.pmm.toms.transport.ImmutableOrderStatusTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
 
 public enum DefaultOrderStatus {
 	LIMIT_ORDER_PENDING (1, DefaultReference.ORDER_TYPE_LIMIT_ORDER, DefaultReference.ORDER_STATUS_PENDING, 
 			DefaultReference.ORDER_TYPE_CATEGORY_OPEN, 1000l),
 	LIMIT_ORDER_PULLED (2, DefaultReference.ORDER_TYPE_LIMIT_ORDER, DefaultReference.ORDER_STATUS_PULLED, 
-			DefaultReference.ORDER_TYPE_CATEGORY_OPEN, 2000l),
+			DefaultReference.ORDER_TYPE_CATEGORY_CLOSED, 2000l),
 	LIMIT_ORDER_CONFIRMED (3, DefaultReference.ORDER_TYPE_LIMIT_ORDER, DefaultReference.ORDER_STATUS_CONFIRMED, 
 			DefaultReference.ORDER_TYPE_CATEGORY_OPEN, 3000l),
 	LIMIT_ORDER_FILLED (4, DefaultReference.ORDER_TYPE_LIMIT_ORDER, DefaultReference.ORDER_STATUS_FILLED, 
@@ -36,9 +35,9 @@ public enum DefaultOrderStatus {
 	REFERENCE_ORDER_PENDING (100, DefaultReference.ORDER_TYPE_REFERENCE_ORDER, DefaultReference.ORDER_STATUS_PENDING,
 			DefaultReference.ORDER_TYPE_CATEGORY_OPEN, 50000l),
 	REFERENCE_ORDER_PULLED (101, DefaultReference.ORDER_TYPE_REFERENCE_ORDER, DefaultReference.ORDER_STATUS_PULLED,
-			DefaultReference.ORDER_TYPE_CATEGORY_OPEN, 51000l),
+			DefaultReference.ORDER_TYPE_CATEGORY_CLOSED, 51000l),
 	REFERENCE_ORDER_CONFIRMED (102, DefaultReference.ORDER_TYPE_REFERENCE_ORDER, DefaultReference.ORDER_STATUS_CONFIRMED,
-			DefaultReference.ORDER_TYPE_CATEGORY_OPEN, 52000l),
+			DefaultReference.ORDER_TYPE_CATEGORY_CLOSED, 52000l),
 	REFERENCE_ORDER_REJECTED (103, DefaultReference.ORDER_TYPE_REFERENCE_ORDER, DefaultReference.ORDER_STATUS_REJECTED,
 			DefaultReference.ORDER_TYPE_CATEGORY_CLOSED, 53000l),
 	REFERENCE_ORDER_FILLED (104, DefaultReference.ORDER_TYPE_REFERENCE_ORDER,
