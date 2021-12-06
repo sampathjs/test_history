@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.service;
+package com.matthey.pmm.toms.service.live;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
