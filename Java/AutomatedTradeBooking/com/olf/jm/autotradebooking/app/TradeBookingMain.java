@@ -21,6 +21,8 @@ public class TradeBookingMain extends AbstractGenericScript {
 	public static final String CONST_REPO_CONTEXT = "DealBooking";
 	public static final String CONST_REPO_SUBCONTEXT = "MainScript";	
 	
+	private ConstRepository constRepo;
+	
     /**
      * @param context
      *            the current script context
@@ -35,12 +37,12 @@ public class TradeBookingMain extends AbstractGenericScript {
         	if (!checkParamTable(table)) {
         		return null;
         	}
-        	FileProcessor fileProcessor = new FileProcessor(session);
+        	FileProcessor fileProcessor = new FileProcessor(session, constRepo);
         	Table fileTable = table.getTable("Files", 0);
         	for (int row = 0; row < table.getRowCount(); row++) {
         		String fileNameToProces = fileTable.getString("filename", row);
         		Logging.info("Now processing file' " + fileNameToProces + "'");
-        		String errorMessage = fileProcessor.processFile(fileNameToProces);
+        		fileProcessor.processFile(fileNameToProces);
         		Logging.info("Processing of ' " + fileNameToProces + "' finished successfully");
         	}
         	return null;    		
@@ -111,7 +113,7 @@ public class TradeBookingMain extends AbstractGenericScript {
 	 */
 	private void init(Session session) {
 		try {
-			ConstRepository constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 			
 			try {
 				Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
