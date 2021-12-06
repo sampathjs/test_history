@@ -13,7 +13,7 @@ public enum TestIndex {
 	INDEX_PX_XAG_CNY (DefaultReference.INDEX_NAME_PX_XAG_CNY, DefaultReference.METAL_XAG, DefaultReference.CCY_CNY, 1020668, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 100l),
 	INDEX_PX_XAG_EUR (DefaultReference.INDEX_NAME_PX_XAG_EUR, DefaultReference.METAL_XAG, DefaultReference.CCY_EUR, 1020182, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 200l),
 	INDEX_PX_XAG_GBP (DefaultReference.INDEX_NAME_PX_XAG_GBP, DefaultReference.METAL_XAG, DefaultReference.CCY_GBP, 1020183, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 300l),
-	INDEX_PX_XAG_USD (DefaultReference.INDEX_NAME_PX_XAG_USD, DefaultReference.METAL_XAG, DefaultReference.CCY_USD, 1020019, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,400l),
+	INDEX_PX_XAG_USD (DefaultReference.INDEX_NAME_PX_XAG_USD, DefaultReference.METAL_XAG, DefaultReference.CCY_USD, 1020019, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 400l),
 	
 	INDEX_PX_XAU_CNY (DefaultReference.INDEX_NAME_PX_XAU_CNY, DefaultReference.METAL_XAU, DefaultReference.CCY_CNY, 1020669, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 500l),
 	INDEX_PX_XAU_EUR (DefaultReference.INDEX_NAME_PX_XAU_EUR, DefaultReference.METAL_XAU, DefaultReference.CCY_EUR, 1020176, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 600l),
@@ -57,18 +57,18 @@ public enum TestIndex {
 	INDEX_FX_EUR_USD (DefaultReference.INDEX_NAME_FX_EUR_USD, DefaultReference.CCY_EUR, DefaultReference.CCY_USD, 1020051, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 3700l),
 	INDEX_FX_EUR_ZAR (DefaultReference.INDEX_NAME_FX_EUR_ZAR, DefaultReference.CCY_EUR, DefaultReference.CCY_ZAR, 1020073, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 3800l),
 
-	INDEX_FX_GBP_CHF (DefaultReference.INDEX_NAME_FX_GBP_CHF, DefaultReference.CCY_GBP, DefaultReference.CCY_CHF, 1020128, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 3800l),
-	INDEX_FX_GBP_CNY (DefaultReference.INDEX_NAME_FX_GBP_CNY, DefaultReference.CCY_GBP, DefaultReference.CCY_CNY, 1020075, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 3900l),
-	INDEX_FX_GBP_HKD (DefaultReference.INDEX_NAME_FX_GBP_HKD, DefaultReference.CCY_GBP, DefaultReference.CCY_HKD, 1020072, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4000l),
-	INDEX_FX_GBP_USD (DefaultReference.INDEX_NAME_FX_GBP_USD, DefaultReference.CCY_GBP, DefaultReference.CCY_USD, 1020116, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4100l),
-	INDEX_FX_GBP_ZAR (DefaultReference.INDEX_NAME_FX_GBP_ZAR, DefaultReference.CCY_GBP, DefaultReference.CCY_ZAR, 1020045, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4200l),
+	INDEX_FX_GBP_CHF (DefaultReference.INDEX_NAME_FX_GBP_CHF, DefaultReference.CCY_GBP, DefaultReference.CCY_CHF, 1020128, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 3900l),
+	INDEX_FX_GBP_CNY (DefaultReference.INDEX_NAME_FX_GBP_CNY, DefaultReference.CCY_GBP, DefaultReference.CCY_CNY, 1020075, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4000l),
+	INDEX_FX_GBP_HKD (DefaultReference.INDEX_NAME_FX_GBP_HKD, DefaultReference.CCY_GBP, DefaultReference.CCY_HKD, 1020072, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4100l),
+	INDEX_FX_GBP_USD (DefaultReference.INDEX_NAME_FX_GBP_USD, DefaultReference.CCY_GBP, DefaultReference.CCY_USD, 1020116, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4200l),
+	INDEX_FX_GBP_ZAR (DefaultReference.INDEX_NAME_FX_GBP_ZAR, DefaultReference.CCY_GBP, DefaultReference.CCY_ZAR, 1020045, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4300l),
 	
-	INDEX_FX_HKD_USD (DefaultReference.INDEX_NAME_FX_HKD_USD, DefaultReference.CCY_HKD, DefaultReference.CCY_USD, 1020144, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4300l),
+	INDEX_FX_HKD_USD (DefaultReference.INDEX_NAME_FX_HKD_USD, DefaultReference.CCY_HKD, DefaultReference.CCY_USD, 1020144, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4400l),
 
-	INDEX_FX_USD_CHF (DefaultReference.INDEX_NAME_FX_USD_CHF, DefaultReference.CCY_USD, DefaultReference.CCY_CHF, 1020083, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4400l),
-	INDEX_FX_USD_CNY (DefaultReference.INDEX_NAME_FX_USD_CNY, DefaultReference.CCY_USD, DefaultReference.CCY_CNY, 1020064, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4500l),
-	INDEX_FX_USD_HKD (DefaultReference.INDEX_NAME_FX_USD_HKD, DefaultReference.CCY_USD, DefaultReference.CCY_HKD, 1020071, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4600l),
-	INDEX_FX_USD_ZAR (DefaultReference.INDEX_NAME_FX_USD_ZAR, DefaultReference.CCY_USD, DefaultReference.CCY_ZAR, 1020070, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4700l),	
+	INDEX_FX_USD_CHF (DefaultReference.INDEX_NAME_FX_USD_CHF, DefaultReference.CCY_USD, DefaultReference.CCY_CHF, 1020083, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4500l),
+	INDEX_FX_USD_CNY (DefaultReference.INDEX_NAME_FX_USD_CNY, DefaultReference.CCY_USD, DefaultReference.CCY_CNY, 1020064, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4600l),
+	INDEX_FX_USD_HKD (DefaultReference.INDEX_NAME_FX_USD_HKD, DefaultReference.CCY_USD, DefaultReference.CCY_HKD, 1020071, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4700l),
+	INDEX_FX_USD_ZAR (DefaultReference.INDEX_NAME_FX_USD_ZAR, DefaultReference.CCY_USD, DefaultReference.CCY_ZAR, 1020070, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE, 4800l),	
 	;
 	
 	private final IndexTo index;
