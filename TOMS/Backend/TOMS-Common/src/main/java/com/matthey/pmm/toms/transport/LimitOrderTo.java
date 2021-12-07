@@ -8,8 +8,6 @@ import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -22,8 +20,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(as = ImmutableLimitOrderTo.class)
 @JsonDeserialize(as = ImmutableLimitOrderTo.class)
 @JsonRootName (value = "limitOrder")
-@JsonTypeName(value = "limitOrder")
-@JsonTypeInfo(include = JsonTypeInfo.As.WRAPPER_OBJECT, use = JsonTypeInfo.Id.NAME)
 public abstract class LimitOrderTo extends OrderTo {  
 	/*
 	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.
@@ -47,9 +43,7 @@ public abstract class LimitOrderTo extends OrderTo {
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_EXPIRED = Arrays.asList(
 			  "settleDate", "idExpirationStatus", "limitPrice", "idYesNoPartFillable",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
-			);
-
-	
+			);	
 	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED_TO_CANCELLED_EXPIRED = Arrays.asList(
 			  "settleDate", "idExpirationStatus", "limitPrice", "idYesNoPartFillable",
