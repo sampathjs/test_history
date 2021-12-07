@@ -42,6 +42,7 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 				.name(entity.getName())
 				.typeId(entity.getType().getId())
 				.sortColumn(entity.getSortColumn())
+				.idLifecycle(entity.getLifecycleStatus().getId())
 				.build();
 	}
 	
