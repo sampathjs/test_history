@@ -18,7 +18,8 @@ public abstract class  AbstractToDiffService <T> {
 	protected abstract T updateLifeCycleStatus(T knownTo, DefaultReference lifecycleStatus);	
 	
 	protected abstract List<T> convertReportToTransferObjects(Table endurSideData);
-
+	
+	protected abstract void syncEndurSideIds (List<T> knownTos, List<T> endurSideTos);
 	
 	public AbstractToDiffService (final Session session) {
 		this.session = session;
@@ -33,6 +34,7 @@ public abstract class  AbstractToDiffService <T> {
 	}
 	
 	private List<T> createToDiff( List<T> knownTos, List<T> endurSideDataAsTo) {
+		syncEndurSideIds (knownTos, endurSideDataAsTo);
 		List<T> diffList = new ArrayList<T>(knownTos.size() + endurSideDataAsTo.size());
 		// update existing TOs present in TOMS that either have been modified 
 		// or deleted. Ignore identical values.

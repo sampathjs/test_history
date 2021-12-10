@@ -1,7 +1,9 @@
 package com.matthey.pmm.toms;
 
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.joda.time.LocalDate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,8 +13,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
+import com.matthey.pmm.toms.service.AbstractReferenceService;
+import com.matthey.pmm.toms.service.BuySellService;
+import com.matthey.pmm.toms.service.CurrenciesService;
+import com.matthey.pmm.toms.service.IndexService;
+import com.matthey.pmm.toms.service.MetalFormService;
+import com.matthey.pmm.toms.service.MetalLocationService;
 import com.matthey.pmm.toms.service.PartyService;
+import com.matthey.pmm.toms.service.PortfolioService;
+import com.matthey.pmm.toms.service.QuantityUnitService;
+import com.matthey.pmm.toms.service.RefSourceService;
+import com.matthey.pmm.toms.service.TickerService;
 import com.matthey.pmm.toms.service.UserService;
+import com.matthey.pmm.toms.service.YesNoService;
 import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.TwoListsTo;
@@ -52,6 +66,33 @@ public class TomsController {
     	UserService service = new UserService(session, knownUsersAndPortfolios.listTwo());
     	return service.createToListDifference(knownUsersAndPortfolios.listOne());
     }
+    
+    @PostMapping("references")
+    public List<ReferenceTo> retrieveReferences (@RequestBody List<ReferenceTo> knownReferenceData) {
+    	// we are receiving a list with all references (of all reference types) so we split them up by type 
+    	// and process each type separately and then merge back all sublists for the return value;
+    	List<ReferenceTo> globalDiffList = new ArrayList<>(knownReferenceData.size()+10);
+    	
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new BuySellService(session));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new CurrenciesService(session));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new IndexService(session));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new MetalFormService(session));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new MetalLocationService(session));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new PortfolioService(session));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new QuantityUnitService(session));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new RefSourceService(session));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new TickerService(session));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new YesNoService(session));
+    	
+    	return globalDiffList;    	
+    }
+
+	private void addReferenceDataDiff(List<ReferenceTo> knownReferenceData, List<ReferenceTo> globalDiffList,
+			AbstractReferenceService service) {
+		globalDiffList.addAll(service.createToListDifference(knownReferenceData.stream()
+    			.filter(x -> x.idType() == DefaultReferenceType.YES_NO.getEntity().id())
+    			.collect(Collectors.toList())));
+	}
     
     public String getCurrentDate() {
         return LocalDate.fromDateFields(session.getTradingDate()).toString();

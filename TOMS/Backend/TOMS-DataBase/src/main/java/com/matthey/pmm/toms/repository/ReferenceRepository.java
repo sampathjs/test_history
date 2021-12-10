@@ -16,5 +16,7 @@ public interface ReferenceRepository extends JpaRepository<Reference, Long> {
   
   List<Reference> findByTypeId(Long value);  
 
+  List<Reference> findByTypeIdIn(List<Long> ids);
+  
   List<Reference> findByTypeName(String typeName);
 }

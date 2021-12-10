@@ -28,6 +28,11 @@ public class UserService extends AbstractToDiffService<UserTo> {
 	
 
 	@Override
+	protected void syncEndurSideIds(List<UserTo> knownTos, List<UserTo> endurSideTos) {		
+		// nothing to do for UserTo
+	}
+
+	@Override
 	protected List<UserTo> convertReportToTransferObjects(Table endurSideData) {
 		try (Table tradeableParties = ReportBuilderHelper.runReport(session.getTableFactory(), "UserDataTradeableParties");
 			Table tradeablePortfolios = ReportBuilderHelper.runReport(session.getTableFactory(), "UserDataTradeablePortfolios")) {

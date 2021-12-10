@@ -19,6 +19,10 @@ public class PartyService extends AbstractToDiffService<PartyTo> {
 		return "PartyData";		
 	}
 	
+	@Override
+	protected void syncEndurSideIds(List<PartyTo> knownTos, List<PartyTo> endurSideTos) {
+		// nothing to do for parties
+	}
 
 	@Override
 	protected List<PartyTo> convertReportToTransferObjects(Table endurSideData) {
