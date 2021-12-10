@@ -64,13 +64,10 @@ public class MBSBorrowingDiff implements IScript{
 			rptTable.setInt("found", i, outputTable.getInt("found", i) );
 		}
 		rptTable.group("region");
-		rptTable.sum();
-		if (hasMBSDiff(rptTable)) {
-//			rptTable.viewTable();
-			returnt.select(rptTable, "*", "found EQ 1");
-			returnt.addCol("rpt_date", COL_TYPE_ENUM.COL_INT);
-			returnt.setColValInt("rpt_date", OCalendar.getLgbd(OCalendar.today()));
-		}
+		returnt.select(rptTable, "*", "found EQ 1");
+		returnt.addCol("rpt_date", COL_TYPE_ENUM.COL_INT);
+		returnt.setColValInt("rpt_date", OCalendar.getLgbd(OCalendar.today()));
+
 		rptTable.destroy();
 	}
 
@@ -101,7 +98,7 @@ public class MBSBorrowingDiff implements IScript{
 				}
 			}
 		}
-		rptTable.clearSumRows();
+//		rptTable.clearSumRows();
 		return result;
 	}
 
