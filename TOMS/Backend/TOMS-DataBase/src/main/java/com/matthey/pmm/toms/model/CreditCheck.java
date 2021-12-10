@@ -25,14 +25,14 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "credit_check", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "credit_check", 
     indexes = { @Index(name = "i_credit_check_id", columnList = "credit_check_id", unique = true),
     		@Index(name = "i_credit_check_party", columnList = "party_id", unique = false)})
 public class CreditCheck {    
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "credit_check_id_seq")
 	@SequenceGenerator(name = "credit_check_id_seq", initialValue = 1000000, allocationSize = 1,
-	    sequenceName = "credit_check_id_seq")
+	    sequenceName = "credit_check_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "credit_check_id", updatable = false, nullable = false)
 	private Long id;
 

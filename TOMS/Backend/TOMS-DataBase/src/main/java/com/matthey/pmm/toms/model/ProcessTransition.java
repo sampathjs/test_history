@@ -25,7 +25,7 @@ import javax.persistence.UniqueConstraint;
  * @version 1.0
  */
 @Entity
-@Table(name = "process_transition", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "process_transition", 
     indexes = { @Index(name = "i_process_transition_id", columnList = "process_transition_id", unique = true),
         @Index(name = "i_process_transition_category", columnList = "reference_category_id", unique = false),
         @Index(name = "i_process_transition_sort_column", columnList = "sort_column", unique = false)},
@@ -34,7 +34,7 @@ public class ProcessTransition {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "process_transition_id_seq")
 	@SequenceGenerator(name = "process_transition_id_seq", initialValue = 100000, allocationSize = 1,
-	    sequenceName = "process_transition_id_seq")
+	    sequenceName = "process_transition_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "process_transition_id", updatable = false, nullable = false)
 	private Long id;
 	
@@ -50,7 +50,8 @@ public class ProcessTransition {
 	
 	@ElementCollection (fetch = FetchType.EAGER)
     @CollectionTable(name = "process_transition_attributes", joinColumns = @JoinColumn(name = "process_transition_id"),
-    		indexes = { @Index(name = "i_process_transition_attributes", columnList = "process_transition_id") } )
+    		indexes = { @Index(name = "i_process_transition_attributes", columnList = "process_transition_id") }
+    	    , schema = DbConstants.SCHEMA_NAME)
     @Column(name = "unchangeable_attribute")
 	private List<String> unchangeableAttributes;
 	

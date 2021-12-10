@@ -22,7 +22,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "party", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "party", 
     indexes = { @Index(name = "i_party_id", columnList = "party_id", unique = true),
         @Index(name = "i_party_type", columnList = "reference_party_type_id", unique = false),
         @Index(name = "i_party_sort_column", columnList = "sort_column", unique = false)},

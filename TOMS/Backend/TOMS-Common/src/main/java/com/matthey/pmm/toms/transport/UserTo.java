@@ -39,7 +39,6 @@ public abstract class UserTo {
     @Auxiliary
     public abstract String lastName();
 
-    @Auxiliary
     public abstract long idLifecycleStatus();
     
     @Auxiliary

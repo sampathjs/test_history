@@ -26,7 +26,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "limit_order", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "limit_order", 
     indexes = { @Index(name = "i_limit_order_order_id", columnList = "order_id,version", unique = true)})
 @PrimaryKeyJoinColumns(value = {
         @PrimaryKeyJoinColumn( name = "order_id", referencedColumnName = "order_id" ),

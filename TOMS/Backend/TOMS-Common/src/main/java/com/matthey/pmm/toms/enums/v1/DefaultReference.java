@@ -12,10 +12,10 @@ import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 public enum DefaultReference {
 	PARTY_TYPE_INTERNAL_BUNIT(DefaultReferenceType.PARTY_TYPE, 1, "Internal Business Unit", 1000l),
 	PARTY_TYPE_EXTERNAL_BUNIT(DefaultReferenceType.PARTY_TYPE, 2, "External Business Unit", 2000l),
-	USER_ROLE_PMM_USER (DefaultReferenceType.USER_ROLE, 3, "PMM User", 10000l),
+	USER_ROLE_PMM_FO (DefaultReferenceType.USER_ROLE, 3, "PMM Front Office User", 10000l),
 	USER_ROLE_PMM_TRADER (DefaultReferenceType.USER_ROLE, 4, "PMM Trader", 11000l),
 	USER_ROLE_ADMIN (DefaultReferenceType.USER_ROLE, 5, "Admin", 12000l),
-	USER_ROLE_SERVICE_USER (DefaultReferenceType.USER_ROLE, 6, "Service User", 13000l),
+	USER_ROLE_SERVICE_USER (DefaultReferenceType.USER_ROLE, 6, "Technical or Service User", 13000l),
 	ORDER_STATUS_PENDING (DefaultReferenceType.ORDER_STATUS_NAME, 7, "Pending", 20000l),
 	ORDER_STATUS_FILLED (DefaultReferenceType.ORDER_STATUS_NAME, 9, "Filled", 21000l),
 	ORDER_STATUS_CANCELLED (DefaultReferenceType.ORDER_STATUS_NAME, 10, "Cancelled", 22000l),
@@ -299,6 +299,9 @@ public enum DefaultReference {
 	LIFECYCLE_STATUS_AUTHORISED_ACTIVE(DefaultReferenceType.LIFECYCLE_STATUS, 291, "Authorised and Active", 241000l),
 	LIFECYCLE_STATUS_AUTHORISED_INACTIVE(DefaultReferenceType.LIFECYCLE_STATUS, 292, "Authorised and Inactive", 242000l),
 	LIFECYCLE_STATUS_DELETED(DefaultReferenceType.LIFECYCLE_STATUS, 293, "Deleted", 243000l),
+	USER_ROLE_PMM_SUPPORT (DefaultReferenceType.USER_ROLE, 294, "PMM Support", 14000l),
+	USER_ROLE_EXTERNAL (DefaultReferenceType.USER_ROLE, 295, "External User", 15000l),
+	
 	;
 	
 	private final ReferenceTo ref;

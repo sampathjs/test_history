@@ -9,29 +9,29 @@
   <changeSet author="Jens Waechter" id="Schema Init Finalisation">
 
 	<!--  reference type -->
-	<createIndex indexName="i_reference_type_id" tableName="reference_type" unique="true">
+	<createIndex indexName="i_reference_type_id" tableName="reference_type" unique="true" schemaName="dbo">
       <column name="reference_type_id"/>
     </createIndex>
 
-	<createIndex indexName="i_reference_type_name" tableName="reference_type" unique="true">
+	<createIndex indexName="i_reference_type_name" tableName="reference_type" unique="true" schemaName="dbo">
       <column name="name"/>
     </createIndex>
 
-	<createIndex indexName="i_reference_type_sort_column" tableName="reference_type" unique="false">
+	<createIndex indexName="i_reference_type_sort_column" tableName="reference_type" unique="false" schemaName="dbo">
       <column name="sort_column"/>
     </createIndex>
 
 	<!--  reference  -->
-	<createIndex indexName="i_reference_id" tableName="reference" unique="true">
+	<createIndex indexName="i_reference_id" tableName="reference" unique="true" schemaName="dbo">
       <column name="reference_id"/>
     </createIndex>
 
-	<createIndex indexName="i_reference_type_value" tableName="reference" unique="true">
+	<createIndex indexName="i_reference_type_value" tableName="reference" unique="true" schemaName="dbo">
       <column name="reference_type_id"/>
       <column name="value"/>
     </createIndex>
     
-  	<createIndex indexName="i_reference_sort_column" tableName="reference" unique="false">
+  	<createIndex indexName="i_reference_sort_column" tableName="reference" unique="false" schemaName="dbo">
       <column name="sort_column"/>
     </createIndex>    
     
@@ -39,19 +39,19 @@
             tableName="reference"
             columnNames="reference_type_id, value"  
             constraintName="unique_constraint_reference"
-            validate="true"/>  
+            validate="true" schemaName="dbo"/>  
 
 	<!--  Attribute Calculation -->
-	<createIndex indexName="i_attribute_calc_id" tableName="attribute_calc" unique="true">
+	<createIndex indexName="i_attribute_calc_id" tableName="attribute_calc" unique="true" schemaName="dbo">
       <column name="attribute_calc_id"/>
     </createIndex>
 
-	<createIndex indexName="i_attribute_calc_class_attribute" tableName="attribute_calc" unique="true">
+	<createIndex indexName="i_attribute_calc_class_attribute" tableName="attribute_calc" unique="true" schemaName="dbo">
       <column name="class_name"/>
       <column name="attribute_name"/>
     </createIndex>
 
-	<createIndex indexName="i_attribute_calc_attributes" tableName="attribute_calc_attributes" unique="false">
+	<createIndex indexName="i_attribute_calc_attributes" tableName="attribute_calc_attributes" unique="false" schemaName="dbo">
       <column name="attribute_calc_id"/>
     </createIndex>
     
@@ -59,18 +59,18 @@
             tableName="attribute_calc"
             columnNames="class_name,attribute_name"  
             constraintName="unique_constraint_attribute_calc"
-            validate="true"/>
+            validate="true" schemaName="dbo"/>
             
     <!-- Expiration Status  -->
-  	<createIndex indexName="i_expiration_status_id" tableName="expiration_status" unique="true">
+  	<createIndex indexName="i_expiration_status_id" tableName="expiration_status" unique="true" schemaName="dbo">
       <column name="expiration_status_id"/>
     </createIndex>
 
-  	<createIndex indexName="i_expiration_status_name_reference" tableName="expiration_status" unique="false">
+  	<createIndex indexName="i_expiration_status_name_reference" tableName="expiration_status" unique="false" schemaName="dbo">
       <column name="name_reference_id"/>
     </createIndex>
     
-  	<createIndex indexName="i_expiration_status_sort_column" tableName="expiration_status" unique="false">
+  	<createIndex indexName="i_expiration_status_sort_column" tableName="expiration_status" unique="false" schemaName="dbo">
       <column name="sort_column"/>
     </createIndex>
 
@@ -78,18 +78,18 @@
             tableName="expiration_status"
             columnNames="name_reference_id,order_type_reference_id"  
             constraintName="unique_constraint_expiration_status"
-            validate="true"/>            
+            validate="true" schemaName="dbo"/>            
     
     <!-- Order Status  -->
-  	<createIndex indexName="i_order_status_id" tableName="order_status" unique="true">
+  	<createIndex indexName="i_order_status_id" tableName="order_status" unique="true" schemaName="dbo">
       <column name="order_status_id"/>
     </createIndex>
 
-  	<createIndex indexName="i_order_status_name_reference" tableName="order_status" unique="false">
+  	<createIndex indexName="i_order_status_name_reference" tableName="order_status" unique="false" schemaName="dbo">
       <column name="name_reference_id"/>
     </createIndex>
     
-  	<createIndex indexName="i_order_status_sort_column" tableName="order_status" unique="false">
+  	<createIndex indexName="i_order_status_sort_column" tableName="order_status" unique="false" schemaName="dbo">
       <column name="sort_column"/>
     </createIndex>
 
@@ -97,22 +97,22 @@
             tableName="order_status"
             columnNames="name_reference_id,order_type_reference_id"  
             constraintName="unique_constraint_order_status"
-            validate="true"/>    
+            validate="true" schemaName="dbo"/>    
             
     <!-- Process Transition -->
-  	<createIndex indexName="i_process_transition_id" tableName="process_transition" unique="true">
+  	<createIndex indexName="i_process_transition_id" tableName="process_transition" unique="true" schemaName="dbo">
       <column name="process_transition_id"/>
     </createIndex>
     
-  	<createIndex indexName="i_process_transition_category" tableName="process_transition" unique="false">
+  	<createIndex indexName="i_process_transition_category" tableName="process_transition" unique="false" schemaName="dbo">
       <column name="reference_category_id"/>
     </createIndex>
 
-  	<createIndex indexName="i_process_transition_attributes" tableName="process_transition_attributes" unique="false">
+  	<createIndex indexName="i_process_transition_attributes" tableName="process_transition_attributes" unique="false" schemaName="dbo">
       <column name="process_transition_id"/>
     </createIndex>
     
-   	<createIndex indexName="i_process_transition_sort_column" tableName="process_transition" unique="false">
+   	<createIndex indexName="i_process_transition_sort_column" tableName="process_transition" unique="false" schemaName="dbo">
       <column name="sort_column"/>
     </createIndex>
     
@@ -120,18 +120,18 @@
          tableName="process_transition"
          columnNames="reference_category_id,from_status_id,to_status_id"  
          constraintName="unique_constraint_process_transition"
-         validate="true"/>
+         validate="true" schemaName="dbo"/>
          
     <!--  Party -->
-    <createIndex indexName="i_party_id" tableName="party" unique="true">
+    <createIndex indexName="i_party_id" tableName="party" unique="true" schemaName="dbo">
       <column name="party_id"/>
     </createIndex>  
 
-    <createIndex indexName="i_party_type" tableName="party" unique="false">
+    <createIndex indexName="i_party_type" tableName="party" unique="false" schemaName="dbo">
       <column name="reference_party_type_id"/>
     </createIndex>  
     
-  	<createIndex indexName="i_party_sort_column" tableName="party" unique="false">
+  	<createIndex indexName="i_party_sort_column" tableName="party" unique="false" schemaName="dbo">
       <column name="sort_column"/>
     </createIndex>
 
@@ -139,135 +139,132 @@
          tableName="party"
          columnNames="reference_party_type_id,name"  
          constraintName="unique_constraint_party"
-         validate="true"/>
+         validate="true" schemaName="dbo"/>
          
     <!-- user -->
-    <createIndex indexName="i_user_id" tableName="user" unique="true">
+    <createIndex indexName="i_user_id" tableName="user" unique="true" schemaName="dbo">
       <column name="user_id"/>
     </createIndex>  
     
-    <createIndex indexName="i_user_reference_lifecycle_status" tableName="user" unique="false">
+    <createIndex indexName="i_user_reference_lifecycle_status" tableName="user" unique="false" schemaName="dbo">
       <column name="reference_lifecycle_status_id"/>
     </createIndex>  
 
-    <createIndex indexName="i_user_role_id" tableName="user" unique="false">
+    <createIndex indexName="i_user_role_id" tableName="user" unique="false" schemaName="dbo">
       <column name="role_id"/>
     </createIndex>
 	
 	  <!-- Index -->
-  	<createIndex indexName="i_index_id" tableName="index" unique="true">
+  	<createIndex indexName="i_index_id" tableName="index" unique="true" schemaName="dbo">
     	<column name="index_id"/>
   	</createIndex>
 
-  	<createIndex indexName="i_index_name" tableName="index" unique="true">
+  	<createIndex indexName="i_index_name" tableName="index" unique="true" schemaName="dbo">
     	<column name="reference_index_name_id"/>
   	</createIndex>
   	
-  	<createIndex indexName="i_index_sort_column" tableName="index" unique="false">
+  	<createIndex indexName="i_index_sort_column" tableName="index" unique="false" schemaName="dbo">
       <column name="sort_column"/>
     </createIndex>
   	
   	<!--  Order Comment -->
-  	<createIndex indexName="i_order_comment_id" tableName="order_comment" unique="true">
+  	<createIndex indexName="i_order_comment_id" tableName="order_comment" unique="true" schemaName="dbo">
     	<column name="order_comment_id"/>
   	</createIndex>
   	
   	<!-- Credit Check -->
-   	<createIndex indexName="i_credit_check_id" tableName="credit_check" unique="true">
+   	<createIndex indexName="i_credit_check_id" tableName="credit_check" unique="true" schemaName="dbo">
     	<column name="credit_check_id"/>
   	</createIndex>
   	
-   	<createIndex indexName="i_credit_check_party" tableName="credit_check" unique="false">
+   	<createIndex indexName="i_credit_check_party" tableName="credit_check" unique="false" schemaName="dbo">
     	<column name="party_id"/>
   	</createIndex>
   	
   	<!-- Fill -->
-   	<createIndex indexName="i_fill_id" tableName="fill" unique="true">
+   	<createIndex indexName="i_fill_id" tableName="fill" unique="true" schemaName="dbo">
     	<column name="fill_id"/>
   	</createIndex>
   	
-   	<createIndex indexName="i_fill_trade_id" tableName="fill" unique="false">
+   	<createIndex indexName="i_fill_trade_id" tableName="fill" unique="false" schemaName="dbo">
     	<column name="trade_id"/>
   	</createIndex>  	
   	
   	<!--  Order --> 
-   	<createIndex indexName="i_order_order_id_version" tableName="abstract_order" unique="true">
+   	<createIndex indexName="i_order_order_id_version" tableName="abstract_order" unique="true" schemaName="dbo">
     	<column name="order_id"/>
     	<column name="version"/>    	
   	</createIndex>
   	
-   	<createIndex indexName="i_order_internal_bunit" tableName="abstract_order" unique="false">
+   	<createIndex indexName="i_order_internal_bunit" tableName="abstract_order" unique="false" schemaName="dbo">
     	<column name="internal_bunit_id"/>
   	</createIndex>
 
 	<!--  Limit Order -->
-   	<createIndex indexName="i_limit_order_order_id" tableName="limit_order" unique="true">
+   	<createIndex indexName="i_limit_order_order_id" tableName="limit_order" unique="true" schemaName="dbo">
     	<column name="order_id"/>
     	<column name="version"/>
   	</createIndex>
 
 	<!--  Reference Order -->
-   	<createIndex indexName="i_reference_order_order_id" tableName="reference_order" unique="true">
+   	<createIndex indexName="i_reference_order_order_id" tableName="reference_order" unique="true" schemaName="dbo">
     	<column name="order_id"/>
     	<column name="version"/>
   	</createIndex>
 
 	<!-- Reference Order Legs -->
-   	<createIndex indexName="i_reference_order_leg_leg_id" tableName="reference_order_leg" unique="true">
+   	<createIndex indexName="i_reference_order_leg_leg_id" tableName="reference_order_leg" unique="true" schemaName="dbo">
     	<column name="leg_id"/>
   	</createIndex>
   	
   	<!-- Cache Invalidate -->
-   	<createIndex indexName="i_cache_invalidate_id" tableName="cache_invalidate" unique="true">
+   	<createIndex indexName="i_cache_invalidate_id" tableName="cache_invalidate" unique="true" schemaName="dbo">
     	<column name="cache_invalidate_id"/>
   	</createIndex>
   	
   	<!-- Database File -->
-   	<createIndex indexName="i_database_file_id" tableName="database_file" unique="true">
+   	<createIndex indexName="i_database_file_id" tableName="database_file" unique="true" schemaName="dbo">
     	<column name="database_file_id"/>
   	</createIndex>
-   	<createIndex indexName="i_database_file_file_type_reference" tableName="database_file" unique="false">
+   	<createIndex indexName="i_database_file_file_type_reference" tableName="database_file" unique="false" schemaName="dbo">
     	<column name="file_type_reference_id"/>
   	</createIndex>
-   	<createIndex indexName="i_database_file_path_name" tableName="database_file" unique="true">
+   	<createIndex indexName="i_database_file_path_name" tableName="database_file" unique="true" schemaName="dbo">
     	<column name="path"/>
     	<column name="name"/>
   	</createIndex>
 
   	<!-- Email -->
-   	<createIndex indexName="i_email_id" tableName="email" unique="true">
+   	<createIndex indexName="i_email_id" tableName="email" unique="true" schemaName="dbo">
     	<column name="email_id"/>
   	</createIndex>
-   	<createIndex indexName="i_email_email_status_reference_id" tableName="email" unique="false">
+   	<createIndex indexName="i_email_email_status_reference_id" tableName="email" unique="false" schemaName="dbo">
     	<column name="email_status_reference_id"/>
   	</createIndex>
   	
-   	<createIndex indexName="i_email_to_email_id" tableName="email_to" unique="false">
+   	<createIndex indexName="i_email_to_email_id" tableName="email_to" unique="false" schemaName="dbo">
     	<column name="email_id"/>
   	</createIndex>  	
-   	<createIndex indexName="i_email_cc_email_id" tableName="email_cc" unique="false">
+   	<createIndex indexName="i_email_cc_email_id" tableName="email_cc" unique="false" schemaName="dbo">
     	<column name="email_id"/>
   	</createIndex>
-   	<createIndex indexName="i_email_bcc_email_id" tableName="email_bcc" unique="false">
+   	<createIndex indexName="i_email_bcc_email_id" tableName="email_bcc" unique="false" schemaName="dbo">
     	<column name="email_id"/>
   	</createIndex>
   	
-   	<createIndex indexName="i_email_order_map_email_id" tableName="email_order_map" unique="false">
+   	<createIndex indexName="i_email_order_map_email_id" tableName="email_order_map" unique="false" schemaName="dbo">
     	<column name="email_id"/>
   	</createIndex>
-   	<createIndex indexName="i_email_order_map_order_id" tableName="email_order_map" unique="false">
+   	<createIndex indexName="i_email_order_map_order_id" tableName="email_order_map" unique="false" schemaName="dbo">
     	<column name="order_id"/>
   	</createIndex>
   	
- 	<createIndex indexName="i_email_attachments_email_id" tableName="email_attachments" unique="false">
+ 	<createIndex indexName="i_email_attachments_email_id" tableName="email_attachments" unique="false" schemaName="dbo">
     	<column name="email_id"/>
   	</createIndex>
-   	<createIndex indexName="i_email_attachments_database_file_id" tableName="database_file" unique="false">
+   	<createIndex indexName="i_email_attachments_database_file_id" tableName="database_file" unique="false" schemaName="dbo">
     	<column name="database_file_id"/>
-  	</createIndex>  	  	
-  	
-  	
-  	
+  	</createIndex>
   </changeSet> 
     
 </databaseChangeLog>

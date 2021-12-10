@@ -23,7 +23,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "order_status", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "order_status", 
     indexes = { @Index(name = "i_order_status_id", columnList = "order_status_id", unique = true),
         @Index(name = "i_order_status_name_reference", columnList = "name_reference_id", unique = false),
         @Index(name = "i_order_status_sort_column", columnList = "sort_column", unique = false)},
@@ -32,7 +32,7 @@ public class OrderStatus {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_status_id_seq")
 	@SequenceGenerator(name = "order_status_id_seq", initialValue = 10000, allocationSize = 1,
-	    sequenceName = "order_status_id_seq")
+	    sequenceName = "order_status_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "order_status_id", updatable = false, nullable = false)
 	private Long id; 
 	

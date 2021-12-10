@@ -9,7 +9,7 @@
 
 	<changeSet author="Jens Waechter" id="Schema Init">
 		<!-- Reference Type -->
-		<createTable tableName="reference_type">
+		<createTable tableName="reference_type" schemaName="dbo">
 			<column name="reference_type_id" type="int">
 				<constraints primaryKey="true" />
 			</column>
@@ -20,12 +20,12 @@
 				<constraints nullable="true" />
 			</column>
 		</createTable>
-
+		
 		<createSequence sequenceName="reference_type_id_seq"
-			incrementBy="1" startValue="10000" />
+			incrementBy="1" startValue="10000" schemaName="dbo"/>
 
 		<!-- Reference -->
-		<createTable tableName="reference">
+		<createTable tableName="reference" schemaName="dbo">
 			<column name="reference_id" type="int">
 				<constraints primaryKey="true" />
 			</column>
@@ -51,19 +51,19 @@
 			baseColumnNames="reference_type_id" baseTableName="reference"
 			constraintName="fk_reference_reference_type_id" onDelete="CASCADE"
 			onUpdate="RESTRICT" referencedColumnNames="reference_type_id"
-			referencedTableName="reference_type" validate="true" />
+			referencedTableName="reference_type" validate="true" schemaName="dbo"/>
 			
 		<addForeignKeyConstraint
 			baseColumnNames="reference_lifecycle_status_id" baseTableName="reference"
 			constraintName="fk_reference_lifecycle_status_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />			
+			referencedTableName="reference" validate="true" schemaName="dbo"/>			
 
 		<createSequence sequenceName="reference_id_seq"
-			incrementBy="1" startValue="10000" />
+			incrementBy="1" startValue="10000" schemaName="dbo"/>
 
 		<!-- Attribute Calculation -->
-		<createTable tableName="attribute_calc">
+		<createTable tableName="attribute_calc" schemaName="dbo">
 			<column name="attribute_calc_id" type="int">
 				<constraints primaryKey="true" />
 			</column>
@@ -77,7 +77,7 @@
 			</column>
 		</createTable>
 
-		<createTable tableName="attribute_calc_attributes">
+		<createTable tableName="attribute_calc_attributes" schemaName="dbo">
 			<column name="attribute_calc_id" type="int">
 			</column>
 			<column name="dependent_attribute_name" type="varchar(64)">
@@ -85,17 +85,17 @@
 		</createTable>
 
 		<createSequence sequenceName="attribute_calc_id_seq"
-			incrementBy="1" startValue="1000000" />
+			incrementBy="1" startValue="1000000" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="attribute_calc_id"
 			baseTableName="attribute_calc_attributes"
 			constraintName="fk_attribute_calc_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="attribute_calc_id"
-			referencedTableName="attribute_calc" validate="true" />
+			referencedTableName="attribute_calc" validate="true" schemaName="dbo"/>
 
 		<!-- Expiration Status -->
-		<createTable tableName="expiration_status">
+		<createTable tableName="expiration_status" schemaName="dbo">
 			<column name="expiration_status_id" type="int">
 				<constraints primaryKey="true" />
 			</column>
@@ -111,23 +111,23 @@
 		</createTable>
 
 		<createSequence sequenceName="expiration_status_id_seq"
-			incrementBy="1" startValue="10000" />
+			incrementBy="1" startValue="10000" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="name_reference_id" baseTableName="expiration_status"
 			constraintName="fk_exp_status_name_ref_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="order_type_reference_id"
 			baseTableName="expiration_status"
 			constraintName="fk_exp_status_order_type_ref_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<!-- Order Status -->
-		<createTable tableName="order_status">
+		<createTable tableName="order_status" schemaName="dbo">
 			<column name="order_status_id" type="int">
 				<constraints primaryKey="true" />
 			</column>
@@ -146,13 +146,13 @@
 		</createTable>
 
 		<createSequence sequenceName="order_status_id_seq"
-			incrementBy="1" startValue="10000" />
+			incrementBy="1" startValue="10000" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="name_reference_id" baseTableName="order_status"
 			constraintName="fk_order_status_name_ref_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="order_type_reference_id"
@@ -160,7 +160,7 @@
 			constraintName="fk_order_status_order_type_ref_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="order_type_category_reference_id"
@@ -168,10 +168,10 @@
 			constraintName="fk_order_status_category_order_type_ref_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<!-- Process Transition -->
-		<createTable tableName="process_transition">
+		<createTable tableName="process_transition" schemaName="dbo">
 			<column name="process_transition_id" type="int">
 				<constraints primaryKey="true" />
 			</column>
@@ -191,9 +191,9 @@
 
 		<createSequence
 			sequenceName="process_transition_id_seq" incrementBy="1"
-			startValue="10000" />
+			startValue="10000" schemaName="dbo"/>
 
-		<createTable tableName="process_transition_attributes">
+		<createTable tableName="process_transition_attributes" schemaName="dbo">
 			<column name="process_transition_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -208,10 +208,10 @@
 			constraintName="fk_proccess_transition_attributes"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="process_transition_id"
-			referencedTableName="process_transition" validate="true" />
+			referencedTableName="process_transition" validate="true" schemaName="dbo"/>
 
 		<!-- Party -->
-		<createTable tableName="party">
+		<createTable tableName="party" schemaName="dbo">
 			<column name="party_id" type="int">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
@@ -236,23 +236,23 @@
 			baseColumnNames="reference_party_type_id" baseTableName="party"
 			constraintName="fk_party_type" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="legal_entity_id" baseTableName="party"
 			constraintName="fk_party_legal_entity" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="party_id"
-			referencedTableName="party" validate="true" />
+			referencedTableName="party" validate="true" schemaName="dbo"/>
 			
 		<addForeignKeyConstraint
 			baseColumnNames="reference_lifecycle_status_id" baseTableName="party"
 			constraintName="fk_party_lifecycle_status_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 
 		<!-- User -->
-		<createTable tableName="user">
+		<createTable tableName="user" schemaName="dbo">
 			<column name="user_id" type="int">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
@@ -277,15 +277,15 @@
 			baseColumnNames="role_id" baseTableName="user"
 			constraintName="fk_user_role_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 		
 		<addForeignKeyConstraint
 			baseColumnNames="reference_lifecycle_status_id" baseTableName="user"
 			constraintName="fk_user_lifecycle_status_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
-		<createTable tableName="user_tradeable_parties">
+		<createTable tableName="user_tradeable_parties" schemaName="dbo">
 			<column name="user_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -294,7 +294,7 @@
 			</column>
 		</createTable>
 
-		<createTable tableName="user_tradeable_portfolios">
+		<createTable tableName="user_tradeable_portfolios" schemaName="dbo">
 			<column name="user_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -307,29 +307,29 @@
 			baseColumnNames="user_id" baseTableName="user_tradeable_parties"
 			constraintName="fk_user_parties_user_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="party_id" baseTableName="user_tradeable_parties"
 			constraintName="fk_user_parties_party_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="party_id"
-			referencedTableName="party" validate="true" />
+			referencedTableName="party" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="user_id" baseTableName="user_tradeable_portfolios"
 			constraintName="fk_user_portfolios_user_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="reference_portfolio_id"
 			baseTableName="user_tradeable_portfolios"
 			constraintName="fk_user_portfolios_portfolio_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo" />
 
 		<!-- Index -->
-		<createTable tableName="index">
+		<createTable tableName="index" schemaName="dbo">
 			<column name="index_id" type="int">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
@@ -354,32 +354,32 @@
 			baseColumnNames="reference_index_name_id" baseTableName="index"
 			constraintName="fk_index_name_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="reference_currency_one_id" baseTableName="index"
 			constraintName="fk_index_currency_one_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="reference_currency_two_id" baseTableName="index"
 			constraintName="fk_index_currency_two_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="reference_lifecycle_status_id" baseTableName="index"
 			constraintName="fk_index_lifecycle_status_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo" />
 			
 
 		<!-- Order Comment -->
-		<createTable tableName="order_comment">
+		<createTable tableName="order_comment" schemaName="dbo">
 			<column name="order_comment_id" type="int">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
@@ -404,30 +404,30 @@
 		</createTable>
 
 		<createSequence sequenceName="order_comment_id_seq"
-			incrementBy="1" startValue="1000000" />
+			incrementBy="1" startValue="1000000" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="created_by_user_id" baseTableName="order_comment"
 			constraintName="fk_order_comment_created_by_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="updated_by_user_id" baseTableName="order_comment"
 			constraintName="fk_order_comment_updated_by_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="deletion_flag_reference_id"
 			baseTableName="order_comment"
 			constraintName="fk_deletion_flag_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo" />
 
 		<!-- Credit Check -->
 
-		<createTable tableName="credit_check">
+		<createTable tableName="credit_check" schemaName="dbo">
 			<column name="credit_check_id" type="int">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
@@ -452,30 +452,30 @@
 		</createTable>
 
 		<createSequence sequenceName="credit_check_id_seq"
-			incrementBy="1" startValue="1000000" />
+			incrementBy="1" startValue="1000000" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="party_id" baseTableName="credit_check"
 			constraintName="fk_credit_check_party_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="party_id"
-			referencedTableName="party" validate="true" />
+			referencedTableName="party" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="reference_credit_check_run_status_id"
 			baseTableName="credit_check"
 			constraintName="fk_credit_check_run_status_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="reference_credit_check_outcome_id"
 			baseTableName="credit_check"
 			constraintName="fk_credit_check_outcome_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<!-- Fill -->
-		<createTable tableName="fill">
+		<createTable tableName="fill" schemaName="dbo">
 			<column name="fill_id" type="int">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
@@ -506,7 +506,7 @@
 		</createTable>
 
 		<createSequence sequenceName="fill_id_seq"
-			incrementBy="1" startValue="1000000" />
+			incrementBy="1" startValue="1000000" schemaName="dbo"/>
 		
 		<addForeignKeyConstraint
 			baseColumnNames="fill_status_reference_id"
@@ -514,23 +514,23 @@
 			constraintName="fk_fill_status_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="trader_user_id" baseTableName="fill"
 			constraintName="fk_fill_trader_user_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="updated_by_user_id" baseTableName="fill"
 			constraintName="fk_fill_updated_by_user_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 
 		<!-- Order -->
-		<createTable tableName="abstract_order">
+		<createTable tableName="abstract_order" schemaName="dbo">
 			<column name="order_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -607,6 +607,12 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+		
+		<addPrimaryKey  
+            columnNames="order_id, version"  
+            constraintName="pk_abstract_order_id"  
+            tableName="abstract_order"  
+            validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="order_type_reference_id"
@@ -614,54 +620,54 @@
 			constraintName="fk_order_order_type_name_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="internal_bunit_id" baseTableName="abstract_order"
 			constraintName="fk_order_internal_bunit_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="party_id"
-			referencedTableName="party" validate="true" />
+			referencedTableName="party" validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="external_bunit_id" baseTableName="abstract_order"
 			constraintName="fk_order_external_bunit_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="party_id"
-			referencedTableName="party" validate="true" />
+			referencedTableName="party" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="internal_legal_entity_id"
 			baseTableName="abstract_order"
 			constraintName="fk_order_internal_lentity_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="party_id"
-			referencedTableName="party" validate="true" />
+			referencedTableName="party" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="external_legal_entity_id"
 			baseTableName="abstract_order"
 			constraintName="fk_order_external_lentity_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="party_id"
-			referencedTableName="party" validate="true" />
+			referencedTableName="party" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="internal_portfolio_id"
 			baseTableName="abstract_order"
 			constraintName="fk_order_internal_pfolio_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="external_portfolio_id"
 			baseTableName="abstract_order"
 			constraintName="fk_order_external_pfolio_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="buy_sell_reference_id"
 			baseTableName="abstract_order" constraintName="fk_order_buy_sell_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="base_currency_reference_id"
@@ -669,7 +675,7 @@
 			constraintName="fk_order_base_currency_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="base_quantity_unit_reference_id"
@@ -677,7 +683,7 @@
 			constraintName="fk_order_quantity_currency_unit_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="term_currency_reference_id"
@@ -685,57 +691,57 @@
 			constraintName="fk_order_term_currency_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="metal_form_reference_id"
 			baseTableName="abstract_order"
 			constraintName="fk_metal_form_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="metal_location_reference_id"
 			baseTableName="abstract_order"
 			constraintName="fk_metal_location_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="order_status_id" baseTableName="abstract_order"
 			constraintName="fk_order_order_status_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="order_status_id"
-			referencedTableName="order_status" validate="true" />
+			referencedTableName="order_status" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="created_by" baseTableName="abstract_order"
 			constraintName="fk_order_created_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="updated_by" baseTableName="abstract_order"
 			constraintName="fk_order_updated_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="contract_type_reference_id"
 			baseTableName="abstract_order"
 			constraintName="fk_order_contract_type_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="ticker_reference_id" baseTableName="abstract_order"
 			constraintName="fk_order_ticker_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<createSequence sequenceName="order_id_seq"
-			incrementBy="1" startValue="1000000" />
+			incrementBy="1" startValue="1000000" schemaName="dbo"/>
 
-		<createTable tableName="order_comment_map">
+		<createTable tableName="order_comment_map" schemaName="dbo">
 			<column name="order_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -751,16 +757,16 @@
 			baseColumnNames="order_id, version" baseTableName="order_comment_map"
 			constraintName="fk_order_comment_map_order_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="order_id, version"
-			referencedTableName="abstract_order" validate="true" />
+			referencedTableName="abstract_order" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="order_comment_id" baseTableName="order_comment_map"
 			constraintName="fk_order_comment_map_order_comment_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="order_comment_id"
-			referencedTableName="order_comment" validate="true" />
+			referencedTableName="order_comment" validate="true" schemaName="dbo"/>
 
-		<createTable tableName="order_fills_map">
+		<createTable tableName="order_fills_map" schemaName="dbo">
 			<column name="order_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -776,15 +782,15 @@
 			baseColumnNames="order_id, version" baseTableName="order_fills_map"
 			constraintName="fk_order_fills_order_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="order_id, version"
-			referencedTableName="abstract_order" validate="true" />
+			referencedTableName="abstract_order" validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="fill_id" baseTableName="order_fills_map"
 			constraintName="fk_order_fills_fill_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="fill_id"
-			referencedTableName="fill" validate="true" />
+			referencedTableName="fill" validate="true" schemaName="dbo" />
 
-		<createTable tableName="order_credit_check_map">
+		<createTable tableName="order_credit_check_map" schemaName="dbo">
 			<column name="order_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -802,7 +808,7 @@
 			constraintName="fk_order_credit_check_map_order_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="order_id, version"
-			referencedTableName="abstract_order" validate="true" />
+			referencedTableName="abstract_order" validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="credit_check_id"
@@ -810,10 +816,10 @@
 			constraintName="fk_order_credit_check_map_credit_check_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="credit_check_id"
-			referencedTableName="credit_check" validate="true" />
+			referencedTableName="credit_check" validate="true" schemaName="dbo" />
 
 		<!-- Limit Order -->
-		<createTable tableName="limit_order">
+		<createTable tableName="limit_order" schemaName="dbo">
 			<column name="order_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -854,12 +860,18 @@
 				<constraints nullable="true" />
 			</column>
 		</createTable>
+		
+		<addPrimaryKey  
+            columnNames="order_id, version"  
+            constraintName="pk_limit_order_id"  
+            tableName="limit_order"  
+            validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="order_id, version" baseTableName="limit_order"
 			constraintName="fk_limit_order_order_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="order_id, version"
-			referencedTableName="abstract_order" validate="true" />
+			referencedTableName="abstract_order" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="part_fillable_reference_id"
@@ -867,7 +879,7 @@
 			constraintName="fk_limit_order_part_fillable_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="validation_type_reference_id"
@@ -875,7 +887,7 @@
 			constraintName="fk_limit_order_validation_type_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="start_date_symbolic_reference_id"
@@ -883,7 +895,7 @@
 			constraintName="fk_limit_order_start_date_symblic_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 
 		<addForeignKeyConstraint
@@ -892,7 +904,7 @@
 			constraintName="fk_limit_order_stop_trigger_type_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="currency_cross_metal_reference_id"
@@ -900,10 +912,10 @@
 			constraintName="fk_limit_order_currency_cross_metal_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo" />
 
 		<!-- Reference Order -->
-		<createTable tableName="reference_order">
+		<createTable tableName="reference_order" schemaName="dbo">
 			<column name="order_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -919,19 +931,24 @@
 			<column name="contango_backwardation" type="double">
 				<constraints nullable="true" />
 			</column>
-
 		</createTable>
+		
+		<addPrimaryKey  
+            columnNames="order_id, version"  
+            constraintName="pk_reference_order_id"  
+            tableName="reference_order"  
+            validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="order_id, version" baseTableName="reference_order"
 			constraintName="fk_reference_order_order_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="order_id, version"
-			referencedTableName="abstract_order" validate="true" />
+			referencedTableName="abstract_order" validate="true" schemaName="dbo"/>
 
 		<!-- Reference Order Legs -->
-		<createTable tableName="reference_order_leg">
+		<createTable tableName="reference_order_leg" schemaName="dbo">
 			<column name="leg_id" type="int">
-				<constraints nullable="false" />
+				<constraints nullable="false" primaryKey="true"/>
 			</column>
 			<column name="fixing_start_date" type="timestamp">
 				<constraints nullable="true" />
@@ -955,14 +972,14 @@
 				<constraints nullable="true" />
 			</column>
 		</createTable>
-
+		
 		<addForeignKeyConstraint
 			baseColumnNames="payment_offset_reference_id"
 			baseTableName="reference_order_leg"
 			constraintName="fk_reference_order_payment_offset_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="settle_currency_reference_id"
@@ -970,7 +987,7 @@
 			constraintName="fk_reference_order_settle_currency_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="ref_source_reference_id"
@@ -978,7 +995,7 @@
 			constraintName="fk_reference_order_ref_source_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="fx_index_ref_source_reference_id"
@@ -986,12 +1003,12 @@
 			constraintName="fk_reference_order_fx_index_ref_source_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo" />
 
 		<createSequence sequenceName="leg_id_seq"
-			incrementBy="1" startValue="1000000" />
+			incrementBy="1" startValue="1000000" schemaName="dbo"/>
 
-		<createTable tableName="reference_order_leg_map">
+		<createTable tableName="reference_order_leg_map" schemaName="dbo">
 			<column name="order_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -1009,17 +1026,17 @@
 			constraintName="fk_reference_order_leg_map_order_id_order_version"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="order_id, version"
-			referencedTableName="reference_order" validate="true" />
+			referencedTableName="reference_order" validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="leg_id" baseTableName="reference_order_leg_map"
 			constraintName="fk_reference_order_leg_map_leg_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="leg_id"
-			referencedTableName="reference_order_leg" validate="true" />
+			referencedTableName="reference_order_leg" validate="true" schemaName="dbo"/>
 
 		<!-- Cache Invalidates -->
-		<createTable tableName="cache_invalidate">
+		<createTable tableName="cache_invalidate" schemaName="dbo">
 			<column name="cache_invalidate_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -1040,12 +1057,12 @@
 			validate="true" />
 
 		<createSequence sequenceName="cache_invalidate_id_seq"
-			incrementBy="1" startValue="10000" />
+			incrementBy="1" startValue="10000" schemaName="dbo"/>
 
 		<!-- Database File -->
-		<createTable tableName="database_file">
+		<createTable tableName="database_file" schemaName="dbo">
 			<column name="database_file_id" type="int">
-				<constraints nullable="false" />
+				<constraints nullable="false" primaryKey="true" />
 			</column>
 			<column name="name" type="varchar(1024)">
 				<constraints nullable="false" />
@@ -1075,12 +1092,12 @@
 				<constraints nullable="false" />
 			</column>
 		</createTable>
-		
+				
 		<addForeignKeyConstraint
 			baseColumnNames="reference_lifecycle_status_id" baseTableName="database_file"
 			constraintName="fk_database_file_lifecycle_status_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
-			referencedTableName="reference" validate="true" />
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="file_type_reference_id"
@@ -1088,27 +1105,27 @@
 			constraintName="fk_database_file_file_type_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="created_by" baseTableName="database_file"
 			constraintName="fk_database_file_created_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="updated_by" baseTableName="database_file"
 			constraintName="fk_database_file_updated_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<createSequence sequenceName="database_file_id_seq"
-			incrementBy="1" startValue="1000000" />
+			incrementBy="1" startValue="1000000" schemaName="dbo"/>
 
 		<!-- Email -->
-		<createTable tableName="email">
+		<createTable tableName="email" schemaName="dbo">
 			<column name="email_id" type="int">
-				<constraints nullable="false" />
+				<constraints nullable="false" primaryKey="true"/>
 			</column>
 			<column name="subject" type="varchar(512)">
 				<constraints nullable="false" />
@@ -1146,31 +1163,31 @@
 			baseColumnNames="send_as_user_id" baseTableName="email"
 			constraintName="fk_email_send_as_user_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="email_status_reference_id" baseTableName="email"
 			constraintName="fk_email_email_status_reference_id_reference_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" />
+			validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="created_by" baseTableName="email"
 			constraintName="fk_email_created_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="updated_by" baseTableName="email"
 			constraintName="fk_email_updated_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" />
+			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<createSequence sequenceName="email_id_seq"
-			incrementBy="1" startValue="1000000" />
+			incrementBy="1" startValue="1000000" schemaName="dbo"/>
 
-		<createTable tableName="email_to">
+		<createTable tableName="email_to" schemaName="dbo">
 			<column name="email_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -1183,9 +1200,9 @@
 			baseColumnNames="email_id" baseTableName="email_to"
 			constraintName="fk_email_to_email_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="email_id"
-			referencedTableName="email" validate="true" />
+			referencedTableName="email" validate="true" schemaName="dbo" />
 
-		<createTable tableName="email_cc">
+		<createTable tableName="email_cc" schemaName="dbo">
 			<column name="email_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -1198,9 +1215,9 @@
 			baseColumnNames="email_id" baseTableName="email_cc"
 			constraintName="fk_email_cc_email_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="email_id"
-			referencedTableName="email" validate="true" />
+			referencedTableName="email" validate="true" schemaName="dbo" />
 
-		<createTable tableName="email_bcc">
+		<createTable tableName="email_bcc" schemaName="dbo">
 			<column name="email_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -1213,9 +1230,9 @@
 			baseColumnNames="email_id" baseTableName="email_bcc"
 			constraintName="fk_email_bcc_email_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="email_id"
-			referencedTableName="email" validate="true" />
+			referencedTableName="email" validate="true" schemaName="dbo"/>
 
-		<createTable tableName="email_attachments">
+		<createTable tableName="email_attachments" schemaName="dbo">
 			<column name="email_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -1228,16 +1245,16 @@
 			baseColumnNames="email_id" baseTableName="email_attachments"
 			constraintName="fk_email_attachments_email_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="email_id"
-			referencedTableName="email" validate="true" />
+			referencedTableName="email" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="database_file_id" baseTableName="email_attachments"
 			constraintName="fk_email_attachments_database_file_id"
 			onDelete="NO ACTION" onUpdate="NO ACTION"
 			referencedColumnNames="database_file_id"
-			referencedTableName="database_file" validate="true" />
+			referencedTableName="database_file" validate="true" schemaName="dbo"/>
 
-		<createTable tableName="email_order_map">
+		<createTable tableName="email_order_map" schemaName="dbo">
 			<column name="email_id" type="int">
 				<constraints nullable="false" />
 			</column>
@@ -1250,7 +1267,6 @@
 			baseColumnNames="email_id" baseTableName="email_order_map"
 			constraintName="fk_email_order_map_bcc_email_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="email_id"
-			referencedTableName="email" validate="true" />
-
+			referencedTableName="email" validate="true" schemaName="dbo"/>
 	</changeSet>
 </databaseChangeLog>

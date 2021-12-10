@@ -25,13 +25,13 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "order_comment", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "order_comment", 
     indexes = { @Index(name = "i_order_comment_id", columnList = "order_comment_id", unique = true)})
 public class OrderComment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_comment_id_seq")
 	@SequenceGenerator(name = "order_comment_id_seq", initialValue = 1000000, allocationSize = 1,
-	    sequenceName = "order_comment_id_seq")
+	    sequenceName = "order_comment_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "order_comment_id", updatable = false, nullable = false)
 	private Long id;
 

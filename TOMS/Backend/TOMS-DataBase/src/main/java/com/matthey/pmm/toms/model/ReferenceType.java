@@ -19,7 +19,7 @@ import javax.persistence.Table;
  * @version 1.0
  */
 @Entity
-@Table(name = "reference_type", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "reference_type", 
     indexes = { @Index(name = "i_reference_type_id", columnList = "reference_type_id", unique = true),
         @Index(name = "i_reference_type_name", columnList = "name", unique = true),
     	@Index(name = "i_reference_type_sort_column", columnList = "sort_column", unique = false)})
@@ -27,7 +27,7 @@ public class ReferenceType {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reference_type_id_seq")
 	@SequenceGenerator(name = "reference_type_id_seq", initialValue = 10000, allocationSize = 1,
-	    sequenceName = "reference_type_id_seq")
+	    sequenceName = "reference_type_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "reference_type_id", updatable = false, nullable = false)
 	private Long id;
 

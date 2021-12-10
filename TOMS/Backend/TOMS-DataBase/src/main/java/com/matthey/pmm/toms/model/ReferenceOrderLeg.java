@@ -26,14 +26,14 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "reference_order_leg", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "reference_order_leg", 
     indexes = { @Index(name = "i_reference_order_leg_leg_id", columnList = "leg_id", unique = true)})
 
 public class ReferenceOrderLeg {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "leg_id_seq")
 	@SequenceGenerator(name = "leg_id_seq", initialValue = 1000000, allocationSize = 1,
-	    sequenceName = "leg_id_seq")
+	    sequenceName = "leg_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "leg_id", updatable = false, nullable = false)
 	private Long id;
 	

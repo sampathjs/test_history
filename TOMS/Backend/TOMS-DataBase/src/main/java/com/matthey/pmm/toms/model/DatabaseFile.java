@@ -27,7 +27,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "database_file", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "database_file", 
     indexes = { @Index(name = "i_database_file_id", columnList = "database_file_id", unique = true),
         @Index(name = "i_database_file_file_type_reference", columnList = "file_type_reference_id", unique = false),
         @Index(name = "i_database_file_path_name", columnList = "path,name", unique = true)})
@@ -35,7 +35,7 @@ public class DatabaseFile {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "database_file_id_seq")
 	@SequenceGenerator(name = "database_file_id_seq", initialValue = 10000, allocationSize = 1,
-	    sequenceName = "database_file_id_seq")
+	    sequenceName = "database_file_id_seq" , schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "database_file_id", updatable = false, nullable = false)
 	private Long id; 
 	

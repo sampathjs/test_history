@@ -25,13 +25,13 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "cache_invalidate", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "cache_invalidate", 
     indexes = { @Index(name = "i_cache_invalidate_id", columnList = "cache_invalidate_id", unique = true)})
 public class CacheInvalidate {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cache_invalidate_id_seq")
 	@SequenceGenerator(name = "cache_invalidate_id_seq", initialValue = 10000, allocationSize = 1,
-	    sequenceName = "cache_invalidate_id_seq")
+	    sequenceName = "cache_invalidate_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "cache_invalidate_id", updatable = false, nullable = false)
 	private Long id;
  

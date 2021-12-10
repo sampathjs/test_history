@@ -26,7 +26,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "fill", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "fill", 
     indexes = { @Index(name = "i_fill_id", columnList = "fill_id", unique = true),
     		@Index(name = "i_fill_trade_id", columnList = "trade_id", unique = false)},
     		uniqueConstraints = { @UniqueConstraint(columnNames = { "trade_id"})})
@@ -34,7 +34,7 @@ public class Fill {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fill_id_seq")
 	@SequenceGenerator(name = "fill_id_seq", initialValue = 1000000, allocationSize = 1,
-	    sequenceName = "fill_id_seq")
+	    sequenceName = "fill_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "fill_id", updatable = false, nullable = false)
 	private Long id;
 	

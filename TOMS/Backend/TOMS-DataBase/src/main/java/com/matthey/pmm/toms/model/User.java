@@ -30,7 +30,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "user", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "user", 
     indexes = { @Index(name = "i_user_id", columnList = "user_id", unique = true),
         @Index(name = "i_user_reference_lifecycle_status", columnList = "reference_lifecycle_status_id", unique = false),
         @Index(name = "i_user_role_id", columnList = "role_id", unique = false)})
@@ -62,14 +62,16 @@ public class User {
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "user_tradeable_parties",
 	            joinColumns=@JoinColumn(name = "user_id"),
-	            inverseJoinColumns=@JoinColumn(name = "party_id"))
+	            inverseJoinColumns=@JoinColumn(name = "party_id")
+				, schema = DbConstants.SCHEMA_NAME)
 	private List<Party> tradeableParties;
 
 	@ManyToMany(cascade = CascadeType.ALL)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "user_tradeable_portfolios",
 	            joinColumns=@JoinColumn(name = "user_id"),
-	            inverseJoinColumns=@JoinColumn(name = "reference_portfolio_id"))
+	            inverseJoinColumns=@JoinColumn(name = "reference_portfolio_id")
+				, schema = DbConstants.SCHEMA_NAME)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.PORTFOLIO)
 	private List<Reference> tradeablePortfolios;
 	

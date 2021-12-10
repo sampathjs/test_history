@@ -20,7 +20,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "index", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "index", 
     indexes = { @Index(name = "i_index_id", columnList = "index_id", unique = true),
     		@Index(name = "i_index_name", columnList = "reference_index_name_id", unique = true),
     		@Index(name = "i_index_sort_column", columnList = "sort_column", unique = false)})

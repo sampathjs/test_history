@@ -182,7 +182,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				addLeAttribute ("fillPercentage", null, maxFillPercentage, root, query, criteriaBuilder, predicates);
 				addIdInAttribute ("contractType", "id", idContractType, root, query, criteriaBuilder, predicates);
 				addIdInAttribute ("ticker", "id", idTicker, root, query, criteriaBuilder, predicates);
-				addFirstOrderIncluded (idFirstOrderIncluded, mappedPageable, root, query, criteriaBuilder, predicates);
+				addFirstOrderIncluded (idFirstOrderIncluded, mappedPageable, Order.class, root, query, criteriaBuilder, predicates);
 			
 				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
 			}
@@ -190,18 +190,6 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		
 		Page<Order> matchingOrders = orderRepo.findAll(spec, mappedPageable);
 		
-		
-//		Page<Order> matchingOrders = orderRepo.findByOrderIdAndOptionalParameters(noEmptyList(idOrderType),
-//				noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
-//				noEmptyList(idExternalBu), noEmptyList(idInternalLe), noEmptyList(idExternalLe),
-//				noEmptyList(idInternalPfolio), noEmptyList(idExternalPfolio), noEmptyList(idBuySell), 
-//				noEmptyList(idBaseCurrency), minBaseQuantity, maxBaseQuantity, noEmptyList(idBaseQuantityUnit), noEmptyList(idTermCurrency), reference,
-//				noEmptyList(idMetalForm), noEmptyList(idMetalLocation), noEmptyList(idOrderStatus), 
-//				noEmptyList(idCreatedByUser), minCreatedAt, maxCreatedAt, noEmptyList (idUpdatedByUser), minLastUpdate, maxLastUpdate,
-//				minFillPercentage, maxFillPercentage, noEmptyList(idContractType), noEmptyList(idTicker),
-//				mappedPageable,
-//				filterMinElement
-//				);
 		PageImpl<OrderTo> pageForTos = new PageImpl<OrderTo>(matchingOrders.getContent().stream()
 				.map(x -> x instanceof LimitOrder?limitOrderConverter.toTo((LimitOrder)x):referenceOrderConverter.toTo((ReferenceOrder)x))
 				.collect(Collectors.toList()),
@@ -212,6 +200,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Override
     @ApiOperation("Retrieval of Limit Order Data")
 	public Page<OrderTo> getLimitOrders (
+			@ApiParam(value = "List of Order Type IDs, e.g. 13, 14", example = "13, 14", required = false) @RequestParam(required=false) List<Long> idOrderType,			
 			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
 			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
 			@ApiParam(value = "List of the internal BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20006", example = "20006", required = false) @RequestParam(required=false) List<Long> idInternalBu,
@@ -257,6 +246,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "Max Execution Likelihood, all orders returned have a at max the provided base quantity , Null = no restrictions", example = "1.00", required = false) @RequestParam(required=false) Double maxExecutionLikelihood,
     		@ApiParam(value = "Min limit price, Null = no restrictions", example = "500.00", required = false) @RequestParam(required=false) Double minLimitPrice,
     		@ApiParam(value = "Max limit price, Null = no restrictions", example = "1250.00", required = false) @RequestParam(required=false) Double maxLimitPrice,
+			@ApiParam(value = "The ID of the order to be the first element according to the provided sort", example = "100003", required = false) @RequestParam(required=false) Long idFirstOrderIncluded,
     		@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable) {
 	    // Validation of the input parameters required or not?
 //		Optional<Party> intBu = validator.verifyParty(internalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), getClass(), "getLimitOrders", "internalBuId", true);
@@ -278,19 +268,63 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		allMappings.putAll(limitOrderSearchMap);
 				
 		Pageable mappedPageable = Validator.verifySorts(pageable, getClass(), "getLimitOrders", "sort", allMappings);
+
+		Specification<LimitOrder> spec = new Specification<LimitOrder>() {
+			@Override
+			public Predicate toPredicate(Root<LimitOrder> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				List<Predicate> predicates = new ArrayList<>();
+				addIdInAttribute ("orderTypeName", "id", idOrderType, root, query, criteriaBuilder, predicates);				
+				addIdInAttribute ("orderId", null, orderIds, root, query, criteriaBuilder, predicates);				
+				addVersionAttribute(versionIds, root, query, criteriaBuilder, predicates);				
+				addIdInAttribute ("internalBu", "id", idInternalBu, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("externalBu", "id", idExternalBu, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("internalLe", "id", idInternalLe, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("externalLe", "id", idExternalLe, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("intPortfolio", "id", idInternalPfolio, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("extPortfolio", "id", idExternalPfolio, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("buySell", "id", idBuySell, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("baseCurrency", "id", idBaseCurrency, root, query, criteriaBuilder, predicates);
+				addGeAttribute ("baseQuantity", null, minBaseQuantity, root, query, criteriaBuilder, predicates);
+				addLeAttribute ("baseQuantity", null, maxBaseQuantity, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("baseQuantityUnit", "id", idBaseQuantityUnit, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("termCurrency", "id", idTermCurrency, root, query, criteriaBuilder, predicates);
+				addStringLike("reference", null, reference, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("metalForm", "id", idMetalForm, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("metalLocation", "id", idMetalLocation, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("orderStatus", "id", idOrderStatus, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("createdByUser", "id", idCreatedByUser, root, query, criteriaBuilder, predicates);
+				addGeAttributeDate ("createdAt", null, minCreatedAt, root, query, criteriaBuilder, predicates);
+				addLeAttributeDate ("createdAt", null, maxCreatedAt, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("updatedByUser", "id", idUpdatedByUser, root, query, criteriaBuilder, predicates);
+				addGeAttributeDate ("lastUpdate", null, minLastUpdate, root, query, criteriaBuilder, predicates);
+				addLeAttributeDate ("lastUpdate", null, maxLastUpdate, root, query, criteriaBuilder, predicates);
+				addGeAttribute ("fillPercentage", null, minFillPercentage, root, query, criteriaBuilder, predicates);
+				addLeAttribute ("fillPercentage", null, maxFillPercentage, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("contractType", "id", idContractType, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("ticker", "id", idTicker, root, query, criteriaBuilder, predicates);
+				addFirstOrderIncluded (idFirstOrderIncluded, mappedPageable, LimitOrder.class, root, query, criteriaBuilder, predicates);
+				addGeAttributeDate ("settleDate", null, minCreatedAt, root, query, criteriaBuilder, predicates);
+				addLeAttributeDate ("settleDate", null, maxCreatedAt, root, query, criteriaBuilder, predicates);
+				addGeAttributeDate ("startDateConcrete", null, minStartConcrete, root, query, criteriaBuilder, predicates);
+				addLeAttributeDate ("startDateConcrete", null, maxStartConcrete, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("startDateSymbolic", "id", idStartDateSymbolic, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("priceType", "id", idPriceType, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("yesNoPartFillable", "id", idYesNoPartFillable, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("stopTriggerType", "id", idStopTriggerType, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("currencyCrossMetal", "id", idCurrencyCrossMetal, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("validationType", "id", idValidationType, root, query, criteriaBuilder, predicates);
+				addGeAttributeDate ("expiryDate", null, minExpiry, root, query, criteriaBuilder, predicates);
+				addLeAttributeDate ("expiryDate", null, maxExpiry, root, query, criteriaBuilder, predicates);
+				addGeAttribute ("executionLikelihood", null, minExecutionLikelihood, root, query, criteriaBuilder, predicates);
+				addLeAttribute ("executionLikelihood", null, maxExecutionLikelihood, root, query, criteriaBuilder, predicates);
+				addGeAttribute ("limitPrice", null, minLimitPrice, root, query, criteriaBuilder, predicates);
+				addLeAttribute ("limitPrice", null, maxLimitPrice, root, query, criteriaBuilder, predicates);			
+				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+		};
 		
-		Page<Order> matchingOrders = limitOrderRepo.findByOrderIdAndOptionalParameters(noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
-				noEmptyList(idExternalBu), noEmptyList(idInternalLe), noEmptyList(idExternalLe),
-				noEmptyList(idInternalPfolio), noEmptyList(idExternalPfolio), noEmptyList(idBuySell), 
-				noEmptyList(idBaseCurrency), minBaseQuantity, maxBaseQuantity, noEmptyList(idBaseQuantityUnit), noEmptyList(idTermCurrency), reference,
-				noEmptyList(idMetalForm), noEmptyList(idMetalLocation), noEmptyList(idOrderStatus), 
-				noEmptyList(idCreatedByUser), minCreatedAt, maxCreatedAt, noEmptyList (idUpdatedByUser), minLastUpdate, maxLastUpdate,
-				minFillPercentage, maxFillPercentage, noEmptyList(idContractType),	noEmptyList(idTicker),
-				// all above: order fields, all below: limit order fields
-				minSettle, maxSettle, minStartConcrete, maxStartConcrete, noEmptyList(idStartDateSymbolic), noEmptyList(idPriceType), noEmptyList(idYesNoPartFillable), 
-				noEmptyList(idStopTriggerType), noEmptyList(idCurrencyCrossMetal),
-				noEmptyList(idValidationType), minExpiry, maxExpiry, minExecutionLikelihood, maxExecutionLikelihood, minLimitPrice, maxLimitPrice,
-				mappedPageable);
+		Page<LimitOrder> matchingOrders = limitOrderRepo.findAll(spec, mappedPageable);
+		
 		PageImpl<OrderTo> pageForTos = new PageImpl<OrderTo>(matchingOrders.getContent().stream()
 					.map(x -> limitOrderConverter.toTo((LimitOrder)x))
 					.collect(Collectors.toList()),
@@ -339,6 +373,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
                         "Multiple sort criteria are supported.")
     })	
 	public Page<OrderTo> getReferenceOrders (
+			@ApiParam(value = "List of Order Type IDs, e.g. 13, 14", example = "13, 14", required = false) @RequestParam(required=false) List<Long> idOrderType,			
 			@ApiParam(value = "List of Order IDs or null for all orders, e.g. 100001, 100002", example = "[100001, 100002]", required = false) @RequestParam(required=false) List<Long> orderIds,
 			@ApiParam(value = "List of Version IDs, null = latest order version, e.g. 1", example = "1", required = false) @RequestParam(required=false) List<Integer> versionIds,
 			@ApiParam(value = "List of the internal BU IDs the orders are supposed to be retrieved for. Null = all orders, example 20006", example = "20006", required = false) @RequestParam(required=false) List<Long> idInternalBu,
@@ -366,7 +401,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "Min fill percentage, a real number between 0 and 1,  null for no restriction", example = "0.0", required = false) @RequestParam(required=false) Double minFillPercentage,
 			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,
 			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,
-			@ApiParam(value = "List of ticker IDs, null = all orders, example 231, 271", example = "231, 271", required = false) @RequestParam(required=false) List<Long> idTicker,			
+			@ApiParam(value = "List of ticker IDs, null = all orders, example 231, 271", example = "231, 271", required = false) @RequestParam(required=false) List<Long> idTicker,
 			// all above: order fields, all below: reference order fields
 			@ApiParam(value = "Min metal price spread, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double minMetalPriceSpread,
 			@ApiParam(value = "Max metal price spread, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double maxMetalPriceSpread,
@@ -385,6 +420,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "List of leg settlement currencies, null = no restriction, example 34,35,36,42,43", example = "34,35,36,42,43", required = false) @RequestParam(required=false) List<Long> idLegSettleCurrency,
 			@ApiParam(value = "List of leg ref sources, null = no restriction, example 190, 191, 192, 193", example = "190, 191, 192, 193", required = false) @RequestParam(required=false) List<Long> idLegRefSource,
 			@ApiParam(value = "List of leg index ref sources, null = no restriction, example 190, 191, 192, 193", example = "190, 191, 192, 193", required = false) @RequestParam(required=false) List<Long> idLegFxIndexRefSource,
+			@ApiParam(value = "The ID of the order to be the first element according to the provided sort", example = "100003", required = false) @RequestParam(required=false) Long idFirstOrderIncluded,
 			@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable) {
 		// validation of input required or not?
 //		Optional<Party> intBu = validator.verifyParty(internalBuId, Arrays.asList(DefaultReference.PARTY_TYPE_INTERNAL_BUNIT), getClass(), "getReferenceOrders", "internalBuId", true);
@@ -406,21 +442,63 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		
 		Pageable mappedPageable = Validator.verifySorts(pageable,  getClass(), "getReferenceOrders", "sort", allMappings);
 		
-		Page<ReferenceOrder> matchingOrders = referenceOrderRepo.findByOrderIdAndOptionalParameters(noEmptyList(orderIds), noEmptyList(versionIds), noEmptyList(idInternalBu), 
-				noEmptyList(idExternalBu), noEmptyList(idInternalLe), noEmptyList(idExternalLe),
-				noEmptyList(idInternalPfolio), noEmptyList(idExternalPfolio), noEmptyList(idBuySell), 
-				noEmptyList(idBaseCurrency), minBaseQuantity, maxBaseQuantity, noEmptyList(idBaseQuantityUnit), noEmptyList(idTermCurrency), reference,
-				noEmptyList(idMetalForm), noEmptyList(idMetalLocation), noEmptyList(idOrderStatus), 
-				noEmptyList(idCreatedByUser), minCreatedAt, maxCreatedAt, noEmptyList (idUpdatedByUser), minLastUpdate, maxLastUpdate,
-				minFillPercentage, maxFillPercentage, noEmptyList(idContractType), noEmptyList(idTicker),
-				// all above: order fields, all below: reference order fields
-				minMetalPriceSpread, maxMetalPriceSpread, minFxRateSpread, maxFxRateSpread, minContangoBackwardation, maxContangoBackwardation,		
-				noEmptyList(idLeg), minLegNotonal, maxLegNotional, minLegFixingStart, 
-				maxLegFixingStart, minLegFixingEnd, maxLegFixingEnd, 
-				noEmptyList(idLegPaymentOffset), noEmptyList(idLegSettleCurrency), noEmptyList(idLegRefSource), noEmptyList(idLegFxIndexRefSource),
-				mappedPageable
-				);
-				
+		Specification<ReferenceOrder> spec = new Specification<ReferenceOrder>() {
+			@Override
+			public Predicate toPredicate(Root<ReferenceOrder> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+				List<Predicate> predicates = new ArrayList<>();
+				addIdInAttribute ("orderTypeName", "id", idOrderType, root, query, criteriaBuilder, predicates);				
+				addIdInAttribute ("orderId", null, orderIds, root, query, criteriaBuilder, predicates);				
+				addVersionAttribute(versionIds, root, query, criteriaBuilder, predicates);				
+				addIdInAttribute ("internalBu", "id", idInternalBu, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("externalBu", "id", idExternalBu, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("internalLe", "id", idInternalLe, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("externalLe", "id", idExternalLe, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("intPortfolio", "id", idInternalPfolio, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("extPortfolio", "id", idExternalPfolio, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("buySell", "id", idBuySell, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("baseCurrency", "id", idBaseCurrency, root, query, criteriaBuilder, predicates);
+				addGeAttribute ("baseQuantity", null, minBaseQuantity, root, query, criteriaBuilder, predicates);
+				addLeAttribute ("baseQuantity", null, maxBaseQuantity, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("baseQuantityUnit", "id", idBaseQuantityUnit, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("termCurrency", "id", idTermCurrency, root, query, criteriaBuilder, predicates);
+				addStringLike("reference", null, reference, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("metalForm", "id", idMetalForm, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("metalLocation", "id", idMetalLocation, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("orderStatus", "id", idOrderStatus, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("createdByUser", "id", idCreatedByUser, root, query, criteriaBuilder, predicates);
+				addGeAttributeDate ("createdAt", null, minCreatedAt, root, query, criteriaBuilder, predicates);
+				addLeAttributeDate ("createdAt", null, maxCreatedAt, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("updatedByUser", "id", idUpdatedByUser, root, query, criteriaBuilder, predicates);
+				addGeAttributeDate ("lastUpdate", null, minLastUpdate, root, query, criteriaBuilder, predicates);
+				addLeAttributeDate ("lastUpdate", null, maxLastUpdate, root, query, criteriaBuilder, predicates);
+				addGeAttribute ("fillPercentage", null, minFillPercentage, root, query, criteriaBuilder, predicates);
+				addLeAttribute ("fillPercentage", null, maxFillPercentage, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("contractType", "id", idContractType, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("ticker", "id", idTicker, root, query, criteriaBuilder, predicates);
+				addFirstOrderIncluded (idFirstOrderIncluded, mappedPageable, ReferenceOrder.class, root, query, criteriaBuilder, predicates);
+				addGeAttribute ("metalPriceSpread", null, minMetalPriceSpread, root, query, criteriaBuilder, predicates);
+				addLeAttribute ("metalPriceSpread", null, maxMetalPriceSpread, root, query, criteriaBuilder, predicates);
+				addGeAttribute ("fxRateSpread", null, minFxRateSpread, root, query, criteriaBuilder, predicates);
+				addLeAttribute ("fxRateSpread", null, maxFxRateSpread, root, query, criteriaBuilder, predicates);
+				addGeAttribute ("contangoBackwardation", null, minContangoBackwardation, root, query, criteriaBuilder, predicates);
+				addLeAttribute ("contangoBackwardation", null, maxContangoBackwardation, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("legs", "id", idLeg, root, query, criteriaBuilder, predicates);
+				addGeAttribute ("legs", "notional", minLegNotonal, root, query, criteriaBuilder, predicates);
+				addLeAttribute ("legs", "notional", maxLegNotional, root, query, criteriaBuilder, predicates);
+				addGeAttributeDate ("legs", "fixingStartDate", minLegFixingStart, root, query, criteriaBuilder, predicates);
+				addLeAttributeDate ("legs", "fixingStartDate", maxLegFixingStart, root, query, criteriaBuilder, predicates);
+				addGeAttributeDate ("legs", "fixingEndDate", minLegFixingEnd, root, query, criteriaBuilder, predicates);
+				addLeAttributeDate ("legs", "fixingEndDate", maxLegFixingEnd, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("legs", "paymentOffset", "id", idLegPaymentOffset, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("legs", "settleCurrency", "id", idLegSettleCurrency, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("legs", "refSource", "id", idLegRefSource, root, query, criteriaBuilder, predicates);
+				addIdInAttribute ("legs", "fxIndexRefSource", "id", idLegFxIndexRefSource, root, query, criteriaBuilder, predicates);
+				return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
+			}
+		};
+		
+		Page<ReferenceOrder> matchingOrders = referenceOrderRepo.findAll(spec, mappedPageable);
+		
 		PageImpl<OrderTo> pageForTos = new PageImpl<OrderTo>(matchingOrders.getContent().stream()
 				.map(x -> referenceOrderConverter.toTo((ReferenceOrder)x))
 				.collect(Collectors.toList()),
@@ -550,7 +628,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	 * @param criteriaBuilder
 	 * @param predicates
 	 */
-	private void addFirstOrderIncluded(Long idFirstOrderIncluded, Pageable pageable, Root<Order> root,
+	private <T> void addFirstOrderIncluded(Long idFirstOrderIncluded, Pageable pageable, Class<T> clazz, Root<T> root,
 			CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
 		if (idFirstOrderIncluded != null && pageable != null) {
 			List<Long> firstOrderIncludedList = Arrays.asList(idFirstOrderIncluded);
@@ -568,7 +646,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	 			} 		
 				Class type = path != null?path.getClass():root.get(attributeName[0]).getJavaType();
 	 			Subquery attributeValueSubquery = query.subquery(type);
-	 			Root<Order> subQueryRoot = attributeValueSubquery.from(Order.class);
+	 			Root<T> subQueryRoot = attributeValueSubquery.from(Order.class);
 	 			Path<?> pathSubQuery = null;
 				for (int i=0; i < attributeName.length-1; i++) { // path in subquery
 					String an = attributeName[i];
@@ -579,7 +657,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	 				}
 	 			} 			
 	 			Subquery<Integer> versionSubquery = query.subquery(Integer.class);
-	 			Root<Order> versionSubQueryRoot = versionSubquery.from(Order.class);
+	 			Root<T> versionSubQueryRoot = versionSubquery.from(clazz);
 	 			versionSubquery.select(criteriaBuilder.max(versionSubQueryRoot.get("version")));
 	 			versionSubquery.where(versionSubQueryRoot.get("orderId").in(firstOrderIncludedList));
 
@@ -608,8 +686,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	}
 	
 
-	private void addIdInAttribute(String orderAttribute, String idAttributeInChildAttribute, List allowedIds,
-			Root<Order> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
+	private <T> void addIdInAttribute(String orderAttribute, String idAttributeInChildAttribute, List allowedIds,
+			Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
 		if (allowedIds != null && allowedIds.size() > 0) { 
 			if (idAttributeInChildAttribute != null) {
 				predicates.add(criteriaBuilder.and(root.get(orderAttribute).get(idAttributeInChildAttribute).in(allowedIds)));				
@@ -619,8 +697,15 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		}
 	}			
 	
-	private void addVersionAttribute(List allowedIds,
-			Root<Order> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
+	private <T> void addIdInAttribute(String orderAttribute, String attributeInChildAttribute, String idAttributeInChildOfChild,List allowedIds,
+			Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
+		if (allowedIds != null && allowedIds.size() > 0) { 
+			predicates.add(criteriaBuilder.and(root.get(orderAttribute).get(attributeInChildAttribute).get(idAttributeInChildOfChild).in(allowedIds)));				
+		}
+	}			
+	
+	private <T> void addVersionAttribute(List allowedIds,
+			Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
 		if (allowedIds != null && allowedIds.size() > 0) { 
 			predicates.add(criteriaBuilder.and(root.get("version").in(allowedIds)));
  		}  else {
@@ -632,8 +717,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
  		}
 	}			
 
-	private void addGeAttribute(String orderAttribute, String valueAttributeInChild, Double limit,
-			Root<Order> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
+	private <T> void addGeAttribute(String orderAttribute, String valueAttributeInChild, Double limit,
+			Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
 		if (limit != null) { 
 			if (valueAttributeInChild != null) {
 				predicates.add(criteriaBuilder.and(criteriaBuilder.ge(root.get(orderAttribute).get(valueAttributeInChild), limit)));								
@@ -643,8 +728,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		}
 	}	
 	
-	private void addLeAttribute(String orderAttribute, String valueAttributeInChild, Double limit,
-			Root<Order> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
+	private <T> void addLeAttribute(String orderAttribute, String valueAttributeInChild, Double limit,
+			Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
 		if (limit != null) { 
 			if (valueAttributeInChild != null) {
 				predicates.add(criteriaBuilder.and(criteriaBuilder.ge(root.get(orderAttribute).get(valueAttributeInChild), limit)));								
@@ -654,8 +739,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		}
 	}		
 	
-	private void addLeAttributeDate(String orderAttribute, String valueAttributeInChild, Date limit,
-			Root<Order> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
+	private <T> void addLeAttributeDate(String orderAttribute, String valueAttributeInChild, Date limit,
+			Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
 		if (limit != null) { 
 			if (valueAttributeInChild != null) {
 				predicates.add(criteriaBuilder.and(criteriaBuilder.lessThanOrEqualTo(root.get(orderAttribute).<Date>get(valueAttributeInChild), limit)));								
@@ -665,8 +750,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		}
 	}	
 
-	private void addGeAttributeDate(String orderAttribute, String valueAttributeInChild, Date limit,
-			Root<Order> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
+	private <T> void addGeAttributeDate(String orderAttribute, String valueAttributeInChild, Date limit,
+			Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
 		if (limit != null) { 
 			if (valueAttributeInChild != null) {
 				predicates.add(criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.get(orderAttribute).<Date>get(valueAttributeInChild), limit)));								
@@ -676,8 +761,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		}
 	}	
 
-	private void addStringLike(String orderAttribute, String valueAttributeInChild, String searchString,
-			Root<Order> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
+	private <T> void addStringLike(String orderAttribute, String valueAttributeInChild, String searchString,
+			Root<T> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
 		if (searchString != null) { 
 			if (valueAttributeInChild != null) {
 				predicates.add(criteriaBuilder.and(criteriaBuilder.like(criteriaBuilder.upper(root.get(orderAttribute).get(valueAttributeInChild)), "%" + searchString.toUpperCase() + "%")));								

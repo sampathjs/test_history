@@ -25,7 +25,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "reference", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "reference", 
     indexes = { @Index(name = "i_reference_id", columnList = "reference_id", unique = true),
         @Index(name = "i_reference_type_value", columnList = "reference_type_id,value", unique = true),
         @Index(name = "i_reference_sort_column", columnList = "sort_column",  unique=false)},
@@ -34,7 +34,7 @@ public class Reference {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "reference_id_seq")
 	@SequenceGenerator(name = "reference_id_seq", initialValue = 10000, allocationSize = 1,
-	    sequenceName = "reference_id_seq")
+	    sequenceName = "reference_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "reference_id", updatable = false, nullable = false)
 	private Long id;
 

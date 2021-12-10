@@ -39,7 +39,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  */
 @IdClass (OrderVersionId.class)
 @Entity
-@Table(name = "abstract_order", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "abstract_order", 
     indexes = { @Index(name = "i_order_order_id_version", columnList = "order_id,version", unique = true),
         @Index(name = "i_order_internal_bunit", columnList = "internal_bunit_id", unique = false) })
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -162,21 +162,21 @@ public abstract class Order {
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "order_comment_map",
 	            joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
-	            inverseJoinColumns=@JoinColumn(name = "order_comment_id"))
+	            inverseJoinColumns=@JoinColumn(name = "order_comment_id"), schema = DbConstants.SCHEMA_NAME)
 	private List<OrderComment> orderComments;
 	
 	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "order_fills_map", 
             joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
-	            inverseJoinColumns=@JoinColumn(name = "fill_id"))
+	            inverseJoinColumns=@JoinColumn(name = "fill_id"), schema = DbConstants.SCHEMA_NAME)
 	private List<Fill> fills;
 	
 	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "order_credit_check_map",
             joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
-	            inverseJoinColumns=@JoinColumn(name = "credit_check_id"))
+	            inverseJoinColumns=@JoinColumn(name = "credit_check_id"), schema = DbConstants.SCHEMA_NAME)
 	private List<CreditCheck> creditChecks;	
 	
 	/**

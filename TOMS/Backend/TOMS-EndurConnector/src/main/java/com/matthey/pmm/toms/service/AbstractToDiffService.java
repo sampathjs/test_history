@@ -9,7 +9,7 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 
 public abstract class  AbstractToDiffService <T> {
-	private Session session;
+	protected Session session;
 
 	public abstract String getSyncCategory ();
 	

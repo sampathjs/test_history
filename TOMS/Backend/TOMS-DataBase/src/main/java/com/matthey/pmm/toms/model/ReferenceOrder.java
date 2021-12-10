@@ -29,7 +29,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "reference_order", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "reference_order", 
     indexes = { @Index(name = "i_reference_order_order_id", columnList = "order_id", unique = true)})
 @PrimaryKeyJoinColumns(value = {
         @PrimaryKeyJoinColumn( name = "order_id", referencedColumnName = "order_id" ),
@@ -70,7 +70,8 @@ public class ReferenceOrder extends Order {
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "reference_order_leg_map",
             joinColumns= { @JoinColumn(name = "order_id"), @JoinColumn(name = "version") },
-	        inverseJoinColumns=@JoinColumn(name = "leg_id"))
+	        inverseJoinColumns=@JoinColumn(name = "leg_id")
+			, schema = DbConstants.SCHEMA_NAME)
 	private List<ReferenceOrderLeg> legs;
 	
 	// new columns end

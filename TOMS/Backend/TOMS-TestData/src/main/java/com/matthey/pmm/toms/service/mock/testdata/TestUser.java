@@ -30,7 +30,7 @@ public enum TestUser {
 	NIVEDITH_SAJJA(20073, "Nivedith.Sajja3@matthey.com", "Nivedith", "Sajja", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			TestParty.asListInternal(), TestParty.asListExternal(), DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
-	JACOB_SMITH(20026, "Jacob.Smith@matthey.com", "Jacob", "Smith", DefaultReference.USER_ROLE_PMM_USER.getEntity(),
+	JACOB_SMITH(20026, "Jacob.Smith@matthey.com", "Jacob", "Smith", DefaultReference.USER_ROLE_PMM_FO.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Arrays.asList(TestParty.JM_PLC_LE.getEntity(), TestParty.JM_PMM_UK_BU.getEntity()),
 			Arrays.asList(TestParty.TANAKA_LE.getEntity(), TestParty.TANAKA_BU.getEntity(),
@@ -48,7 +48,7 @@ public enum TestUser {
 					DefaultReference.PORTFOLIO_UK_UNDHEDGED.getEntity(), DefaultReference.PORTFOLIO_UK_AVERAGING.getEntity(),
 					DefaultReference.PORTFOLIO_UK_PHYSICAL_OFFSET.getEntity(), DefaultReference.PORTFOLIO_UK_NICKEL.getEntity())),
 	
-	PAT_MCCOURT(20944, "Pat.McCourt@jmusa.com", "Patrick", "McCourt", DefaultReference.USER_ROLE_PMM_USER.getEntity(),
+	PAT_MCCOURT(20944, "Pat.McCourt@jmusa.com", "Patrick", "McCourt", DefaultReference.USER_ROLE_PMM_FO.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Arrays.asList(TestParty.JM_INC_LE.getEntity(), TestParty.JM_PMM_US_BU.getEntity()),
 			Arrays.asList(TestParty.BARCLAYS_BANK_LE.getEntity(), TestParty.BARCLAYS_BANK_BU.getEntity(),

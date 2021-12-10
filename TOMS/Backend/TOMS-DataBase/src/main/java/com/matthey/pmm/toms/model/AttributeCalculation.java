@@ -27,7 +27,7 @@ import javax.persistence.UniqueConstraint;
  * @version 1.0
  */
 @Entity
-@Table(name = "attribute_calc", 
+@Table(schema = DbConstants.SCHEMA_NAME,name = "attribute_calc", 
     indexes = { @Index(name = "i_attribute_calc_id", columnList = "attribute_calc_id", unique = true),
         @Index(name = "i_attribute_calc_class_attribute", columnList = "class_name, attribute_name", unique = true) },
     		uniqueConstraints = { @UniqueConstraint(columnNames = { "class_name", "attribute_name" }) })
@@ -35,7 +35,7 @@ public class AttributeCalculation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "attribute_calc_id_seq")
 	@SequenceGenerator(name = "attribute_calc_id_seq", initialValue = 100000, allocationSize = 1,
-	    sequenceName = "attribute_calc_id_seq")
+	    sequenceName = "attribute_calc_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "attribute_calc_id", updatable = false, nullable = false)
 	private Long id;
 		
@@ -44,7 +44,8 @@ public class AttributeCalculation {
 	private String className;
 	
 	@ElementCollection (fetch = FetchType.EAGER)
-    @CollectionTable(name = "attribute_calc_attributes", joinColumns = @JoinColumn(name = "attribute_calc_id"),
+    @CollectionTable(schema = DbConstants.SCHEMA_NAME, 
+    		name = "attribute_calc_attributes", joinColumns = @JoinColumn(name = "attribute_calc_id"),
     		indexes = { @Index(name = "i_attribute_calc_attributes", columnList = "attribute_calc_id", unique = false) } )
     @Column(name = "dependent_attribute_name")
 	private List<String> dependentAttributes;

@@ -39,14 +39,14 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(name = "email", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "email", 
     indexes = { @Index(name = "i_email_id", columnList = "email_id", unique = true),
         @Index(name = "i_email_email_status_reference_id", columnList = "email_status_reference_id", unique = false)})
 public class Email {	
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "email_id_seq")
 	@SequenceGenerator(name = "email_id_seq", initialValue = 1000000, allocationSize = 1,
-	    sequenceName = "email_id_seq")
+	    sequenceName = "email_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "email_id", updatable = false, nullable = false)
 	private Long id;
 
@@ -61,17 +61,17 @@ public class Email {
 	private User sendAs;
 	 
 	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "email_to", joinColumns = @JoinColumn(name = "email_id"))
+	@CollectionTable(name = "email_to", joinColumns = @JoinColumn(name = "email_id"), schema = DbConstants.SCHEMA_NAME)
 	@Column (name="to")
 	private Set<String> toSet;
 
 	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "email_cc", joinColumns = @JoinColumn(name = "email_id"))
+	@CollectionTable(name = "email_cc", joinColumns = @JoinColumn(name = "email_id"), schema = DbConstants.SCHEMA_NAME)
 	@Column (name="cc")
 	private Set<String> ccSet;
 
 	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "email_bcc", joinColumns = @JoinColumn(name = "email_id"))
+	@CollectionTable(name = "email_bcc", joinColumns = @JoinColumn(name = "email_id"), schema = DbConstants.SCHEMA_NAME)
 	@Column (name="bcc")
 	private Set<String> bccSet;
 		
@@ -79,7 +79,7 @@ public class Email {
 	@LazyCollection(LazyCollectionOption.TRUE)
 	@JoinTable(name = "email_attachments",
 	            joinColumns=@JoinColumn(name = "email_id"),
-	            inverseJoinColumns=@JoinColumn(name = "database_file_id"))
+	            inverseJoinColumns=@JoinColumn(name = "database_file_id") , schema = DbConstants.SCHEMA_NAME)
 	private Set<DatabaseFile> attachments;
 	
 	// metadata
@@ -112,7 +112,7 @@ public class Email {
 	
 	
 	@ElementCollection(fetch = FetchType.EAGER)
-	@CollectionTable(name = "email_order_map", joinColumns = @JoinColumn(name = "email_id"))
+	@CollectionTable(name = "email_order_map", joinColumns = @JoinColumn(name = "email_id"), schema = DbConstants.SCHEMA_NAME)
 	@Column (name="order_id")
 	private Set<Long> associatedOrders;
 	
