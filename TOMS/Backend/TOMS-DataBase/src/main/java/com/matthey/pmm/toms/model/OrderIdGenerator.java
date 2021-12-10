@@ -18,7 +18,7 @@ public class OrderIdGenerator
     	if (obj instanceof LimitOrder) {
     		LimitOrder limitOrder = (LimitOrder)obj;
     		if (limitOrder.getOrderId() <= 0) {
-    			return sequenceGetter.getID(session, "order_id_seq");
+    			return sequenceGetter.getID(session, "dbo.order_id_seq");
     		} else {
     			return limitOrder.getOrderId();
     		}
@@ -26,7 +26,7 @@ public class OrderIdGenerator
     	if (obj instanceof ReferenceOrder) {
     		ReferenceOrder referenceOrder = (ReferenceOrder)obj;
     		if (referenceOrder.getOrderId() <= 0) {
-    			return sequenceGetter.getID(session, "order_id_seq");
+    			return sequenceGetter.getID(session, "dbo.order_id_seq");
     		} else {
     			return referenceOrder.getOrderId();
     		}
