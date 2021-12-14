@@ -535,10 +535,12 @@ public class Validator {
 		validateOrderFields (clazz, method, argument, order, isNew, oldLimitOrder);
 		// validate input data		
 		SimpleDateFormat sdfDate = new SimpleDateFormat (TomsService.DATE_FORMAT);
-		try {
-			Date parsedTime = sdfDate.parse (order.settleDate());
-		} catch (ParseException pe) {
-			throw new IllegalDateFormatException (clazz, method, argument + ".settleDate", TomsService.DATE_FORMAT, order.settleDate());
+		if (order.settleDate() != null) {
+			try {
+				Date parsedTime = sdfDate.parse (order.settleDate());
+			} catch (ParseException pe) {
+				throw new IllegalDateFormatException (clazz, method, argument + ".settleDate", TomsService.DATE_FORMAT, order.settleDate());
+			}			
 		}
 		
     	if (order.startDateConcrete() != null) {
