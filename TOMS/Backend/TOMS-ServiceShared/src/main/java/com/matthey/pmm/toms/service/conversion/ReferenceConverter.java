@@ -2,6 +2,8 @@ package com.matthey.pmm.toms.service.conversion;
 
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,7 @@ import com.matthey.pmm.toms.transport.ImmutableReferenceTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 
 @Service
+@Transactional
 public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo> {
 	@Autowired
 	private ReferenceRepository entityRepo;
@@ -56,7 +59,13 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 			entity.get().setSortColumn(to.sortColumn());
 			return entity.get();
 		}
-		Reference newEntity = new Reference (type, to.name(), to.displayName(), to.endurId(), lifecycleStatus, to.sortColumn());
+		Reference newEntity = new Reference (
+				type,
+				to.name(), 
+				to.displayName(),
+				to.endurId(), 
+				lifecycleStatus, 
+				to.sortColumn());
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;
 	}

@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.model;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -44,14 +45,14 @@ public class Reference {
 	@Column(name = "display_name")
 	private String displayName;
  
-	@OneToOne(fetch=FetchType.EAGER)
+	@OneToOne(fetch=FetchType.EAGER, cascade = CascadeType.MERGE)
 	@JoinColumn(name="reference_type_id")
 	private ReferenceType type;
 
 	@Column(name = "endur_id")
 	private Long endurId;
 	
-	@OneToOne(fetch=FetchType.LAZY, optional = true)
+	@OneToOne(fetch=FetchType.LAZY, optional = true, cascade = CascadeType.MERGE)
 	@JoinColumn(name="reference_lifecycle_status_id")
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.LIFECYCLE_STATUS)
 	private Reference lifecycleStatus;

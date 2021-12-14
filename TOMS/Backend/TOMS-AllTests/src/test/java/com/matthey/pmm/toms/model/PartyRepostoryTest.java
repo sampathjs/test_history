@@ -11,8 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
@@ -23,7 +21,6 @@ import com.matthey.pmm.toms.testall.TestJpaApplication;
 @RunWith(SpringJUnit4ClassRunner.class)
 @AutoConfigureTestDatabase(replace=Replace.NONE)
 @SpringBootTest(classes={TestJpaApplication.class})
-@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class PartyRepostoryTest extends AbstractRepositoryTestBase<Party, Long, PartyRepository> {	
 	@Autowired
 	protected ReferenceConverter referenceCon;	

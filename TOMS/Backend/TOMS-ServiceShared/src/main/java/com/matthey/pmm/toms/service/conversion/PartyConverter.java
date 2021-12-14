@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
@@ -47,6 +48,7 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
 	}
 	
 	@Override
+    @Transactional	
 	public Party toManagedEntity (PartyTo to) {		
 		Optional<Party> existingEntity  = partyRepo.findById(to.id());
 		Optional<Party> legalEntity  = partyRepo.findById(to.idLegalEntity());

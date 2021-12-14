@@ -55,9 +55,9 @@ public class OrderComment {
 	private User updatedByUser;
 	
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="deletion_flag_reference_id", nullable = false)
-	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.DELETION_FLAG)
-	private Reference deletionFlag;
+	@JoinColumn(name="lifecycle_status_reference_id", nullable = false)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.LIFECYCLE_STATUS)
+	private Reference lifecycleStatus;
 	
 	/**
 	 * For JPA purposes only. Do not use.
@@ -67,13 +67,13 @@ public class OrderComment {
 	}
 
 	public OrderComment(final String commentText, final Date createdAt, final User createdByUser,
-			final Date lastUpdate, final User updatedByUser, final Reference deletionFlag) {
+			final Date lastUpdate, final User updatedByUser, final Reference lifecycleStatus) {
 		this.commentText = commentText;
 		this.createdAt = createdAt;
 		this.createdByUser = createdByUser;
 		this.lastUpdate = lastUpdate;
 		this.updatedByUser = updatedByUser;
-		this.deletionFlag = deletionFlag;		
+		this.lifecycleStatus = lifecycleStatus;		
 	}
 
 	public Long getId() {
@@ -124,12 +124,12 @@ public class OrderComment {
 		this.updatedByUser = updatedByUser;
 	}
 
-	public Reference getDeletionFlag() {
-		return deletionFlag;
+	public Reference getLifecycleStatus() {
+		return lifecycleStatus;
 	}
 
-	public void setDeletionFlag(Reference deletionFlag) {
-		this.deletionFlag = deletionFlag;
+	public void setLifecycleStatus(Reference lifecycleStatus) {
+		this.lifecycleStatus = lifecycleStatus;
 	}
 
 	@Override

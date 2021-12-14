@@ -110,7 +110,7 @@ public class EmailConverter extends EntityToConverter<Email, EmailTo>{
 			existingEntity.get().setUpdatedByUser(updatedBy);
 			return existingEntity.get();
 		}
-		Email newEntity =  new Email(to.id(), sendAs,to.subject(), to.body(), to.toList(), to.ccList(), to.bccList(), attachments, emailStatus, to.errorMessage(), to.retryCount(), 
+		Email newEntity =  new Email(sendAs,to.subject(), to.body(), to.toList(), to.ccList(), to.bccList(), attachments, emailStatus, to.errorMessage(), to.retryCount(), 
 				parseDateTime(to, to.createdAt()), createdBy, parseDateTime(to, to.lastUpdate()), updatedBy, associatedOrders);
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;

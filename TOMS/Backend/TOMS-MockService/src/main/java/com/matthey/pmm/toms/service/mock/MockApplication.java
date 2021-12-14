@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -24,6 +25,7 @@ import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
+import com.matthey.pmm.toms.service.mock.testdata.TestBunit;
 import com.matthey.pmm.toms.service.mock.testdata.TestCreditCheck;
 import com.matthey.pmm.toms.service.mock.testdata.TestDatabaseFile;
 import com.matthey.pmm.toms.service.mock.testdata.TestEmail;
@@ -31,7 +33,7 @@ import com.matthey.pmm.toms.service.mock.testdata.TestFill;
 import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
 import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestOrderComment;
-import com.matthey.pmm.toms.service.mock.testdata.TestParty;
+import com.matthey.pmm.toms.service.mock.testdata.TestLenit;
 import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrderLeg;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
@@ -74,6 +76,7 @@ public class MockApplication implements WebMvcConfigurer {
     }
                  
     @Bean
+    @Transactional
     public CommandLineRunner loadLimitOrder (ReferenceOrderConverter referenceOrderConverter,
     		LimitOrderConverter limitOrderConverter, FillConverter fillConverter,
     		CreditCheckConverter creditCheckConverter, OrderCommentConverter orderCommentConverter,
@@ -82,54 +85,7 @@ public class MockApplication implements WebMvcConfigurer {
     		DatabaseFileConverter databaseFileConverter, EmailConverter emailConverter) {
 
       return (args) -> {
-    	  TestParty.asList() // legal entities first (LEs are not assigned to another LE)
-  	  		.stream()
-  	  		.filter(x -> x.idLegalEntity() <= 0)
-  	  		.forEach(x -> partyConverter.toManagedEntity(x));
-    	  TestParty.asList() // now the business units (everything that has an LE)
-  	  		.stream()
-  	  		.filter(x -> x.idLegalEntity() > 0)
-  	  		.forEach(x -> partyConverter.toManagedEntity(x));
     	  
-    	  TestUser.asList() 
-  	  		.stream()
-  	  		.forEach(x -> userConverter.toManagedEntity(x));
-    	  
-    	  TestIndex.asList()
-  	  		.stream()
-  	  		.forEach(x -> indexConverter.toManagedEntity(x));    	  
-    	  
-    	  TestOrderComment.asList() 
-    	  	.stream()
-    	  	.forEach(x -> orderCommentConverter.toManagedEntity(x));   
-    	  
-    	  TestCreditCheck.asList() 
-  	  		.stream()
-  	  		.forEach(x -> creditCheckConverter.toManagedEntity(x));    	  
-   
-    	  TestFill.asList() 
-   	  		.stream()
-   	  		.forEach(x -> fillConverter.toManagedEntity(x));
-          
-    	  TestLimitOrder.asList() 
-    	  	.stream()
-    	  	.forEach(x -> limitOrderConverter.toManagedEntity(x));
- 
-    	  TestReferenceOrderLeg.asList()
-    	  	.stream()
-    	  	.forEach(x -> referenceOrderLegConverter.toManagedEntity(x));
-    	  
-    	  TestReferenceOrder.asList() 
-  	  		.stream()
-  	  		.forEach(x -> referenceOrderConverter.toManagedEntity(x));
-    	  
-    	  TestDatabaseFile.asList() 
-  	  		.stream()
-  	  		.forEach(x -> databaseFileConverter.toManagedEntity(x));
-
-    	  TestEmail.asList() 
-  	  		.stream()
-  	  		.forEach(x -> emailConverter.toManagedEntity(x));
       };
     }
 }

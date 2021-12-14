@@ -36,7 +36,6 @@ public abstract class ReferenceTo {
     
     @Auxiliary
     @Nullable
-    @JsonIgnore
     public abstract Long endurId();
     
     @Auxiliary

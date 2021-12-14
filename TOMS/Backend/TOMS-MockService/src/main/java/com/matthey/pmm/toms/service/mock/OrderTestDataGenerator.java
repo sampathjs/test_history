@@ -38,7 +38,8 @@ import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
-import com.matthey.pmm.toms.service.mock.testdata.TestParty;
+import com.matthey.pmm.toms.service.mock.testdata.TestBunit;
+import com.matthey.pmm.toms.service.mock.testdata.TestLenit;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 
@@ -179,12 +180,12 @@ public class OrderTestDataGenerator {
 		newTestOrder.setBaseQuantityUnit(selectReferenceValue(DefaultReferenceType.QUANTITY_UNIT, false));
 		newTestOrder.setCreatedAt(randomDate(false));
 		newTestOrder.setCreditChecks(createCreditCheckList());
-		newTestOrder.setExternalBu(partyConverter.toManagedEntity(selectOneOf(TestParty.asListExternalBu(), false)));
-		newTestOrder.setExternalLe(partyConverter.toManagedEntity(selectOneOf(TestParty.asListExternalLe(), false)));
+		newTestOrder.setExternalBu(partyConverter.toManagedEntity(selectOneOf(TestBunit.asListExternalBu(), false)));
+		newTestOrder.setExternalLe(partyConverter.toManagedEntity(selectOneOf(TestLenit.asListExternalLe(), false)));
 		newTestOrder.setExtPortfolio(selectReferenceValue(DefaultReferenceType.PORTFOLIO, true));
 		newTestOrder.setFills(createFillList());
-		newTestOrder.setInternalBu(partyConverter.toManagedEntity(selectOneOf(TestParty.asListInternalBu(), false)));
-		newTestOrder.setInternalLe(partyConverter.toManagedEntity(selectOneOf(TestParty.asListInternalLe(), false)));
+		newTestOrder.setInternalBu(partyConverter.toManagedEntity(selectOneOf(TestBunit.asListInternalBu(), false)));
+		newTestOrder.setInternalLe(partyConverter.toManagedEntity(selectOneOf(TestLenit.asListInternalLe(), false)));
 		newTestOrder.setIntPortfolio(selectReferenceValue(DefaultReferenceType.PORTFOLIO, true));
 		newTestOrder.setLastUpdate(randomDate(false));
 		newTestOrder.setMetalForm(selectReferenceValue (DefaultReferenceType.METAL_FORM, false));
@@ -193,7 +194,7 @@ public class OrderTestDataGenerator {
 		newTestOrder.setOrderStatus(orderStatusConverter.toManagedEntity(selectOneOf(DefaultOrderStatus.asList(), false)));
 		newTestOrder.setReference(selectOneOf(Arrays.asList("Reference 1", "Example Reference", "Very long long long long long long long long long long long long long long long long long long long long long long reference"), true));
 		newTestOrder.setTermCurrency(selectReferenceValue(DefaultReferenceType.CCY_CURRENCY, false));
-		newTestOrder.setUpdatedByUser(selectUserForOrder(newTestOrder, false));
+		newTestOrder.setUpdatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
 		newTestOrder.setTicker(selectReferenceValue(DefaultReferenceType.TICKER, false));
 		DoubleSummaryStatistics summary = newTestOrder.getFills().stream().map(x -> x.getFillQuantity()).collect(Collectors.summarizingDouble(Double::doubleValue));
 		if (summary.getSum()/newTestOrder.getBaseQuantity() > newTestOrder.getFillPercentage()) {
@@ -210,7 +211,7 @@ public class OrderTestDataGenerator {
 			newCreditCheck.setCreditCheckRunStatus(selectReferenceValue(DefaultReferenceType.CREDIT_CHECK_RUN_STATUS, false));
 			newCreditCheck.setCreditLimit(randomDoubleOrNull(MAX_CREDIT_LIMIT));
 			newCreditCheck.setCurrentUtilization(randomDoubleOrNull(MAX_CREDIT_LIMIT));
-			newCreditCheck.setParty(partyConverter.toManagedEntity(selectOneOf(TestParty.asListBu(), false)));
+			newCreditCheck.setParty(partyConverter.toManagedEntity(selectOneOf(TestBunit.asListBu(), false)));
 			newCreditCheck.setRunDateTime(randomDate(true));
 			newCreditCheck = creditCheckRepo.save(newCreditCheck);
 			newCreditChecks.add(newCreditCheck);
@@ -247,7 +248,7 @@ public class OrderTestDataGenerator {
 			newOrderComment.setCommentText(selectOneOf(Arrays.asList("Example Comment", "Another Example Comment", "More comments", "Even more comments"), false));
 			newOrderComment.setCreatedAt(randomDate(false));
 			newOrderComment.setCreatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
-			newOrderComment.setDeletionFlag(selectReferenceValue(DefaultReferenceType.DELETION_FLAG, false));
+			newOrderComment.setLifecycleStatus(selectReferenceValue(DefaultReferenceType.LIFECYCLE_STATUS, false));
 			newOrderComment.setLastUpdate(randomDate(false));
 			newOrderComment.setUpdatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
 			newOrderComment = orderCommentRepo.save(newOrderComment);

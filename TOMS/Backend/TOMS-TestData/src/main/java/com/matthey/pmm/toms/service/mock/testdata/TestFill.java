@@ -9,9 +9,9 @@ import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.transport.FillTo;
 
 public enum TestFill {
-	TEST_LIMIT_ORDER_FILL_1 (1000000, 100d, 200d, 1001000, TestUser.ARINDAM_RAY, TestUser.ARINDAM_RAY, "2000-01-02 16:00:00", DefaultReference.FILL_STATUS_OPEN, null),
-	TEST_LIMIT_ORDER_FILL_2 (1000001, 100d, 500d, 1002000, TestUser.JENS_WAECHTER, TestUser.NIVEDITH_SAJJA, "2000-01-05 12:00:00", DefaultReference.FILL_STATUS_FAILED, "Error"),
-	TEST_REFERENCE_ORDER_FILL_1 (1000002, 100d, 200d, 1003000, TestUser.PAT_MCCOURT, TestUser.ARINDAM_RAY, "2000-11-05 08:00:00", DefaultReference.FILL_STATUS_COMPLETED, null),	
+	TEST_LIMIT_ORDER_FILL_1 (100000, 100d, 200d, 1001000, TestUser.ARINDAM_RAY, TestUser.ARINDAM_RAY, "2000-01-02 16:00:00", DefaultReference.FILL_STATUS_OPEN, null),
+	TEST_LIMIT_ORDER_FILL_2 (100001, 100d, 500d, 1002000, TestUser.JENS_WAECHTER, TestUser.NIVEDITH_SAJJA, "2000-01-05 12:00:00", DefaultReference.FILL_STATUS_FAILED, "Error"),
+	TEST_REFERENCE_ORDER_FILL_1 (100002, 100d, 200d, 1003000, TestUser.PAT_MCCOURT, TestUser.ARINDAM_RAY, "2000-11-05 08:00:00", DefaultReference.FILL_STATUS_COMPLETED, null),	
 	;
 	
 	private final FillTo orderFill;

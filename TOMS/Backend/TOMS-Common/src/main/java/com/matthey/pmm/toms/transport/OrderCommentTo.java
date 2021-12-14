@@ -45,4 +45,7 @@ public abstract class OrderCommentTo {
     @Auxiliary
     @Nullable
     public abstract String displayStringUpdatedByUser();
+    
+    @Auxiliary
+    public abstract long idLifeCycle();
 }

@@ -2,7 +2,10 @@ package com.matthey.pmm.toms;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.joda.time.LocalDate;
@@ -27,11 +30,15 @@ import com.matthey.pmm.toms.service.RefSourceService;
 import com.matthey.pmm.toms.service.TickerService;
 import com.matthey.pmm.toms.service.UserService;
 import com.matthey.pmm.toms.service.YesNoService;
+import com.matthey.pmm.toms.service.misc.ReportBuilderHelper;
+import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
+import com.matthey.pmm.toms.transport.ImmutableCounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.TwoListsTo;
 import com.matthey.pmm.toms.transport.UserTo;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.table.Table;
 
 //import com.olf.openrisk.application.Session;
 
@@ -73,24 +80,68 @@ public class TomsController {
     	// and process each type separately and then merge back all sublists for the return value;
     	List<ReferenceTo> globalDiffList = new ArrayList<>(knownReferenceData.size()+10);
     	
-    	addReferenceDataDiff(knownReferenceData, globalDiffList, new BuySellService(session));
-    	addReferenceDataDiff(knownReferenceData, globalDiffList, new CurrenciesService(session));
-    	addReferenceDataDiff(knownReferenceData, globalDiffList, new IndexService(session));
-    	addReferenceDataDiff(knownReferenceData, globalDiffList, new MetalFormService(session));
-    	addReferenceDataDiff(knownReferenceData, globalDiffList, new MetalLocationService(session));
-    	addReferenceDataDiff(knownReferenceData, globalDiffList, new PortfolioService(session));
-    	addReferenceDataDiff(knownReferenceData, globalDiffList, new QuantityUnitService(session));
-    	addReferenceDataDiff(knownReferenceData, globalDiffList, new RefSourceService(session));
-    	addReferenceDataDiff(knownReferenceData, globalDiffList, new TickerService(session));
-    	addReferenceDataDiff(knownReferenceData, globalDiffList, new YesNoService(session));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new BuySellService(session), Arrays.asList(DefaultReferenceType.BUY_SELL));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new CurrenciesService(session), Arrays.asList(DefaultReferenceType.CCY_CURRENCY));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new IndexService(session), Arrays.asList(DefaultReferenceType.INDEX_NAME));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new MetalFormService(session), Arrays.asList(DefaultReferenceType.METAL_FORM));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new MetalLocationService(session), Arrays.asList(DefaultReferenceType.METAL_LOCATION));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new PortfolioService(session), Arrays.asList(DefaultReferenceType.PORTFOLIO));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new QuantityUnitService(session), Arrays.asList(DefaultReferenceType.QUANTITY_UNIT));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new RefSourceService(session), Arrays.asList(DefaultReferenceType.REF_SOURCE));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new TickerService(session), Arrays.asList(DefaultReferenceType.TICKER));
+    	addReferenceDataDiff(knownReferenceData, globalDiffList, new YesNoService(session), Arrays.asList(DefaultReferenceType.YES_NO));
     	
     	return globalDiffList;    	
     }
+    
+    @PostMapping("counterPartyTickerRule")
+    public List<CounterPartyTickerRuleTo> retrieveCounterPartyTickerRules (List<ReferenceTo> references) {
+    	String reportName = ReportBuilderHelper.retrieveReportBuilderNameForSyncCategory(session.getIOFactory(), "RuleCounterPartyTicker");
+    	Table reportData = ReportBuilderHelper.runReport(session.getTableFactory(), reportName);
+    	List<CounterPartyTickerRuleTo> rules = new ArrayList<>(reportData.getRowCount());
+    	Map<String, Long> metalFormEndurToTomsIdMap = new HashMap<>();
+    	references.stream()
+    		.filter(x -> x.idType() == DefaultReferenceType.METAL_FORM.getEntity().id())
+    		.forEach(x -> metalFormEndurToTomsIdMap.put(x.name(), x.id()));
+
+    	Map<String, Long> metalLocationEndurToTomsIdMap = new HashMap<>();
+    	references.stream()
+    		.filter(x -> x.idType() == DefaultReferenceType.METAL_LOCATION.getEntity().id())
+    		.forEach(x -> metalFormEndurToTomsIdMap.put(x.name(), x.id()));
+    	
+    	Map<String, Long> tickerEndurToTomsIdMap = new HashMap<>();
+    	references.stream()
+    		.filter(x -> x.idType() == DefaultReferenceType.TICKER.getEntity().id())
+    		.forEach(x -> metalFormEndurToTomsIdMap.put(x.name(), x.id()));    	
+
+    	
+    	for (int row = reportData.getRowCount()-1; row >= 0; row--) {
+    		long metalFormReferenceId = metalFormEndurToTomsIdMap.get(reportData.getString("form", row));
+    		long metalLocationId = metalLocationEndurToTomsIdMap.get(reportData.getString("loco", row));
+    		long tickerId = metalLocationEndurToTomsIdMap.get(reportData.getString("toms_product", row));
+    		
+    		CounterPartyTickerRuleTo rule = ImmutableCounterPartyTickerRuleTo.builder()
+    				.accountName(reportData.getString("account_name", row))
+    				.counterPartyDisplayName(reportData.getDisplayString(reportData.getColumnId("party_id"), row))
+    				.idCounterParty(reportData.getInt("party_id", row))
+    				.idMetalForm(metalFormReferenceId)
+    				.idMetalLocation(metalLocationId)
+    				.idTicker(tickerId)
+    				.metalFormDisplayString(reportData.getString("form", row))
+    				.metalLocationDisplayString(reportData.getString("loco", row))
+    				.tickerDisplayName(reportData.getString("toms_product", row))
+    				.build();
+    		rules.add(rule);
+    	}
+    	return rules;
+    	
+    }
+    
 
 	private void addReferenceDataDiff(List<ReferenceTo> knownReferenceData, List<ReferenceTo> globalDiffList,
-			AbstractReferenceService service) {
+			AbstractReferenceService service, List<DefaultReferenceType> expectedTypes) {
 		globalDiffList.addAll(service.createToListDifference(knownReferenceData.stream()
-    			.filter(x -> x.idType() == DefaultReferenceType.YES_NO.getEntity().id())
+    			.filter(x -> expectedTypes.stream().map( y -> y.getEntity().id()).collect(Collectors.toList()).contains(x.idType()))
     			.collect(Collectors.toList())));
 	}
     

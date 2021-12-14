@@ -2,7 +2,6 @@ package com.matthey.pmm.toms.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;

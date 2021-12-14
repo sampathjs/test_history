@@ -2,7 +2,10 @@ package com.matthey.pmm.toms.service.conversion;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,18 +81,10 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 	}
 	
 	@Override
+	@Transactional
 	public User toManagedEntity (UserTo to) {
 		Reference role = loadRef(to, to.roleId());
 		Reference lifecycleStatus = loadRef(to, to.idLifecycleStatus());
-		List<Party> tradeableParties = 
-				Streams.concat(to.tradeableCounterPartyIds().stream(), to.tradeableInternalPartyIds().stream())
-				.map(x -> super.loadParty(to, x))
-				.collect(Collectors.toList());
-		
-		List<Reference> tradeablePortfolios = 
-				to.tradeablePortfolioIds().stream()
-				.map(x -> super.loadRef(to, x))
-				.collect(Collectors.toList());
 		
 		Optional<User> entity = entityRepo.findById(to.id());
 		if (entity.isPresent()) {
@@ -98,16 +93,24 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 			entity.get().setFirstName(to.firstName());
 			entity.get().setLastName(to.lastName());
 			entity.get().setRole(role);
-			if (    !entity.get().getTradeableParties().containsAll(tradeableParties) | 
-					!tradeableParties.containsAll(entity.get().getTradeableParties())) {
-				entity.get().setTradeableParties(tradeableParties);				
+			Set<Long> tradeablePartyIds= entityRepo.findTradeablePartiesIdById(entity.get().getId());
+			Set<Long> tradeablePortfolioIds= entityRepo.findTradeablePortfolioIdById(entity.get().getId());
+			
+			if (    !entity.get().getTradeableParties().stream().map(x -> x.getId()).collect(Collectors.toList()).containsAll(tradeablePartyIds) | 
+					!tradeablePartyIds.containsAll(entity.get().getTradeableParties().stream().map(x -> x.getId()).collect(Collectors.toList()))) {
+				List<Party> tradeableParties = entityRepo.findTradeablePartiesById(entity.get().getId());
+				entity.get().setTradeableParties(tradeableParties);	
 			}
-			if (    !entity.get().getTradeablePortfolios().containsAll(tradeablePortfolios) | 
-					!tradeablePortfolios.containsAll(entity.get().getTradeablePortfolios())) {
+			if (    !entity.get().getTradeablePortfolios().stream().map(x -> x.getId()).collect(Collectors.toList()).containsAll(tradeablePortfolioIds) | 
+					!tradeablePortfolioIds.containsAll(entity.get().getTradeablePortfolios().stream().map(x -> x.getId()).collect(Collectors.toList()))) {
+				List<Reference> tradeablePortfolios = entityRepo.findTradeablePortfolioById(entity.get().getId());
 				entity.get().setTradeablePortfolios(tradeablePortfolios);				
 			}
 			return entity.get();
 		}
+
+		List<Reference> tradeablePortfolios = entityRepo.findTradeablePortfolioById(entity.get().getId());
+		List<Party> tradeableParties = entityRepo.findTradeablePartiesById(entity.get().getId());
 		User newEntity = new User (to.id(), to.email(), to.firstName(), to.lastName(), role, lifecycleStatus, tradeableParties, tradeablePortfolios);
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;

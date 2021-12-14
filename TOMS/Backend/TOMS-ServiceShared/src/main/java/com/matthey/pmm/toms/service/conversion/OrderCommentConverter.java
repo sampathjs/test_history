@@ -10,6 +10,7 @@ import com.matthey.pmm.toms.model.OrderComment;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.User;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
+import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.UserRepository;
 import com.matthey.pmm.toms.transport.ImmutableOrderCommentTo;
 import com.matthey.pmm.toms.transport.OrderCommentTo;
@@ -23,12 +24,18 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 	private OrderCommentRepository entityRepo;
 	
 	@Autowired
-	private ReferenceConverter referenceConverter;
+	private ReferenceRepository refRepo;
 	
 	@Override
 	public UserRepository userRepo() {
 		return userRepo;
 	}
+	
+	@Override
+	public ReferenceRepository refRepo () {
+		return refRepo;
+	}
+	
 	
 	@Override
 	public OrderCommentTo toTo (OrderComment entity) {
@@ -41,6 +48,7 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
 				.displayStringCreatedByUser(entity.getCreatedByUser() != null?entity.getCreatedByUser().getLastName():null)
 				.displayStringUpdatedByUser(entity.getUpdatedByUser() != null?entity.getUpdatedByUser().getLastName():null)
+				.idLifeCycle(entity.getLifecycleStatus().getId())
 				.build();
 	}
 	
@@ -48,6 +56,7 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 	public OrderComment toManagedEntity (OrderCommentTo to) {		
 		User createdBy = loadUser(to, to.idCreatedByUser());
 		User updatedBy = loadUser(to, to.idUpdatedByUser());
+		Reference lifeCycleStatus = loadRef(to, to.idLifeCycle());
 		Optional<OrderComment> existingOrderComment = entityRepo.findById(to.id());
 		
 		if (existingOrderComment.isPresent()) {
@@ -56,11 +65,11 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 			existingOrderComment.get().setLastUpdate(parseDateTime(to, to.lastUpdate()));
 			existingOrderComment.get().setCreatedByUser(createdBy);
 			existingOrderComment.get().setUpdatedByUser(updatedBy);
+			existingOrderComment.get().setLifecycleStatus(lifeCycleStatus);
 			return existingOrderComment.get();
 		}
-		Reference deletedFlag = referenceConverter.toManagedEntity(DefaultReference.DELETION_FLAG_NOT_DELETED.getEntity());
 		OrderComment newOrderComment =  new OrderComment(to.commentText(), parseDateTime(to, to.createdAt()), 
-				createdBy, parseDateTime(to, to.lastUpdate()), updatedBy, deletedFlag);
+				createdBy, parseDateTime(to, to.lastUpdate()), updatedBy, lifeCycleStatus);
 		newOrderComment = entityRepo.save(newOrderComment);
 		return newOrderComment;
 	}

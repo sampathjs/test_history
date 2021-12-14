@@ -58,7 +58,7 @@ public class User {
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.LIFECYCLE_STATUS)
 	private Reference lifecycleStatus;
 	
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "user_tradeable_parties",
 	            joinColumns=@JoinColumn(name = "user_id"),
@@ -66,7 +66,7 @@ public class User {
 				, schema = DbConstants.SCHEMA_NAME)
 	private List<Party> tradeableParties;
 
-	@ManyToMany(cascade = CascadeType.ALL)
+	@ManyToMany(cascade = CascadeType.MERGE)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@JoinTable(name = "user_tradeable_portfolios",
 	            joinColumns=@JoinColumn(name = "user_id"),

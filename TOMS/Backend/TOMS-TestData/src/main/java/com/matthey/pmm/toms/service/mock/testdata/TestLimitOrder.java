@@ -10,7 +10,7 @@ import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
 
 public enum TestLimitOrder {
-	TEST_ORDER_1A(100000, 1, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_1A(100000, 1, TestBunit.JM_PMM_UK, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
 			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, "TEST_ORDER_1A", DefaultReference.METAL_FORM_INGOT, DefaultReference.METAL_LOCATION_ROYSTON,
@@ -21,7 +21,7 @@ public enum TestLimitOrder {
 			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
 			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, "2010-01-31", 1.0d, null,
 			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
-	TEST_ORDER_1B(100000, 2, TestParty.JM_PMM_UK_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_1B(100000, 2, TestBunit.JM_PMM_UK, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
 			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_NONE, DefaultReference.METAL_LOCATION_NONE,
@@ -32,7 +32,7 @@ public enum TestLimitOrder {
 			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
 			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, null, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_1, TestFill.TEST_LIMIT_ORDER_FILL_2),
 			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
-	TEST_ORDER_2(100001, 1, TestParty.JM_PMM_US_BU, TestParty.ANGLO_PLATINUM_BU, 
+	TEST_ORDER_2(100001, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
 			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR,"TEST_ORDER_2", DefaultReference.METAL_FORM_NONE, DefaultReference.METAL_LOCATION_NONE,
@@ -43,7 +43,7 @@ public enum TestLimitOrder {
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
 			DefaultReference.METAL_XRU, null, "2010-01-31", 1.0d, Arrays.asList(), Arrays.asList()
 			),
-	TEST_ORDER_3(100002, 1, TestParty.JM_PMM_US_BU, TestParty.JM_PMM_UK_BU, 
+	TEST_ORDER_3(100002, 1, TestBunit.JM_PMM_US, TestBunit.JM_PMM_UK, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, DefaultReference.PORTFOLIO_UK_RUTHENIUM, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR,  "TEST_ORDER_3", DefaultReference.METAL_FORM_GRAIN, DefaultReference.METAL_LOCATION_BRANDENBERGER,
@@ -58,7 +58,7 @@ public enum TestLimitOrder {
 	
 	private LimitOrderTo limitOrder;
 	
-	private TestLimitOrder (long orderId, int version, TestParty internalBu,  TestParty externalBu, 
+	private TestLimitOrder (long orderId, int version, TestBunit internalBu,  TestBunit externalBu, 
 			DefaultReference intPfolio, DefaultReference extPfolio,
 			DefaultReference buySell,
 			DefaultReference baseCurrency, Double baseQuantity, DefaultReference baseQuantityUnit, 

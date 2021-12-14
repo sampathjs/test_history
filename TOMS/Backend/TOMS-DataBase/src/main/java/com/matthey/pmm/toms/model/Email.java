@@ -122,14 +122,13 @@ public class Email {
 	protected Email() {
 	}
 
-	public Email(final Long id, final User sendAs, final String subject, final String body,
+	public Email(final User sendAs, final String subject, final String body,
 			final Set<String> toSet, final Set<String> ccSet, final Set<String> bccSet,
 			final Set<DatabaseFile> attachments, final Reference emailStatus,
 			final String errorMessage, final int retryCount, 
 			final Date createdAt, final User createdByUser,
 			final Date lastUpdate, final User updatedByUser,
 			final Set<Order> associatedOrders) {
-		this.id = id;
 		this.sendAs = sendAs;
 		this.subject = subject;
 		this.body = body;

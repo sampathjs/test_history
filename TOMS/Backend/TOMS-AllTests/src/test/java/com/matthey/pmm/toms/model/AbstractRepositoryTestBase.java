@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import javax.transaction.Transactional;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +20,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@Transactional
 public abstract class AbstractRepositoryTestBase <E, ID, R extends CrudRepository<E, ID>> {	
 	protected abstract Supplier<List<E>> listProvider ();
 
@@ -73,7 +76,7 @@ public abstract class AbstractRepositoryTestBase <E, ID, R extends CrudRepositor
 	    	if (existingEntity.isEmpty()) {
 		    	persistedEntities.add(persisted);	    		
 	    	}
-	    	assertThat(repo.findById(idProvider().apply(toBePersisted)).isPresent()).isTrue();
+	    	assertThat(repo.findById(idProvider().apply(persisted)).isPresent()).isTrue();
 	    }
    }
 

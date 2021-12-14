@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,6 +21,7 @@ import com.matthey.pmm.toms.service.common.Validator;
 import com.matthey.pmm.toms.service.conversion.AttributeCalculationConverter;
 import com.matthey.pmm.toms.service.conversion.ProcessTransitionConverter;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
+import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 
 import io.swagger.annotations.ApiOperation;
@@ -70,5 +73,5 @@ public abstract class MetadataControllerImpl implements TomsMetadataService {
 					.map(x -> attributeCalculationConverter.toTo(x))
 					.collect(Collectors.toSet());
     	}
-    }
+    }    
 }

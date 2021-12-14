@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
+import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 
 import io.swagger.annotations.Api;
@@ -31,4 +32,8 @@ public interface TomsMetadataService {
 	public Set<AttributeCalculationTo> getAttributeCalculations (
 			@ApiParam(value = "Optional class name to restrict results for a single class", example = "com.matthey.pmm.toms.transport.ImmutableLimitOrderTo", required = false) @RequestParam(required=false) String className);
 
+    @Cacheable({"CounterPartyTickerRules"})
+    @ApiOperation("Retrieval of the mapping between counter parties, tickers, metal locations, metal forms and accounts")
+	@GetMapping("/counterPartyTickerRules")
+	public Set<CounterPartyTickerRuleTo> getCounterPartyTickerRules ();
 }

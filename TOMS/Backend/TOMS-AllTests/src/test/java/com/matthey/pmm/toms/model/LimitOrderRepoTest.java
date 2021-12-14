@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
@@ -29,17 +27,17 @@ import com.matthey.pmm.toms.service.conversion.OrderStatusConverter;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
+import com.matthey.pmm.toms.service.mock.testdata.TestBunit;
 import com.matthey.pmm.toms.service.mock.testdata.TestCreditCheck;
 import com.matthey.pmm.toms.service.mock.testdata.TestFill;
+import com.matthey.pmm.toms.service.mock.testdata.TestLenit;
 import com.matthey.pmm.toms.service.mock.testdata.TestOrderComment;
-import com.matthey.pmm.toms.service.mock.testdata.TestParty;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 import com.matthey.pmm.toms.testall.TestJpaApplication;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @AutoConfigureTestDatabase(replace=Replace.NONE)
 @SpringBootTest(classes={TestJpaApplication.class})
-@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, OrderVersionId, LimitOrderRepository> {
 	@Autowired
 	protected LimitOrderConverter converter;
@@ -71,36 +69,12 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 	
 	@Before
 	public void insertTestData () {
-  	  TestParty.asList() // legal entities first (LEs are not assigned to another LE)
-	  		.stream()
-	  		.filter(x -> x.idLegalEntity() <= 0)
-	  		.forEach(x -> partyConverter.toManagedEntity(x));
-  	  TestParty.asList() // now the business units (everything that has an LE)
-	  		.stream()
-	  		.filter(x -> x.idLegalEntity() > 0)
-	  		.forEach(x -> partyConverter.toManagedEntity(x));
-  	  
-  	  TestUser.asList() 
-	  		.stream()
-	  		.forEach(x -> userConverter.toManagedEntity(x));
-  	    	  
-  	  TestOrderComment.asList() 
-  	  	.stream()
-  	  	.forEach(x -> orderCommentConverter.toManagedEntity(x));   
-  	  
-  	  TestCreditCheck.asList() 
-	  		.stream()
-	  		.forEach(x -> creditCheckConverter.toManagedEntity(x));    	  
- 
-  	  TestFill.asList() 
- 	  		.stream()
- 	  		.forEach(x -> fillConverter.toManagedEntity(x));
 
 	}
 	
 	@After
 	public void forDebug () {
-		fillRepo.findAll();
+//		fillRepo.findAll();
 	}	
 	
 	@Override
@@ -110,10 +84,10 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 			// 1st test case with all fields filled
 			List<LimitOrder> list =  Arrays.asList(new LimitOrder (referenceConverter.toManagedEntity(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity()), // order type name
 										1,   // version
-										partyConverter.toManagedEntity(TestParty.JM_PMM_UK_BU.getEntity()),  // internal bu 
-										partyConverter.toManagedEntity(TestParty.ANGLO_PLATINUM_BU.getEntity()), // external bu
-										partyConverter.toManagedEntity(TestParty.JM_PLC_LE.getEntity()),  // internal le
-										partyConverter.toManagedEntity(TestParty.ANGLO_PLATINUM_LE.getEntity()), // external le
+										partyConverter.toManagedEntity(TestBunit.JM_PMM_UK.getEntity()),  // internal bu 
+										partyConverter.toManagedEntity(TestBunit.ANGLO_PLATINUM_MARKETING___BU.getEntity()), // external bu
+										partyConverter.toManagedEntity(TestLenit.JM_PLC.getEntity()),  // internal le
+										partyConverter.toManagedEntity(TestLenit.ANGLO_PLATINUM_MARKETING___LE.getEntity()), // external le
 										referenceConverter.toManagedEntity(DefaultReference.PORTFOLIO_UK_GOLD.getEntity()), // internal portfolio
 										referenceConverter.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity()),  // external portfolio
 										referenceConverter.toManagedEntity(DefaultReference.BUY_SELL_BUY.getEntity()), // buy / sell
@@ -150,10 +124,10 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 					// 2nd test case with only mandatory fields being filled.
 					,new LimitOrder (referenceConverter.toManagedEntity(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity()), // order type name
 							1,   // version
-							partyConverter.toManagedEntity(TestParty.JM_PMM_UK_BU.getEntity()),  // internal bu 
-							partyConverter.toManagedEntity(TestParty.ANGLO_PLATINUM_BU.getEntity()), // external bu
-							partyConverter.toManagedEntity(TestParty.JM_PLC_LE.getEntity()),  // internal le
-							partyConverter.toManagedEntity(TestParty.ANGLO_PLATINUM_LE.getEntity()), // external le
+							partyConverter.toManagedEntity(TestBunit.JM_PMM_UK.getEntity()),  // internal bu 
+							partyConverter.toManagedEntity(TestBunit.ANGLO_PLATINUM_MARKETING___BU.getEntity()), // external bu
+							partyConverter.toManagedEntity(TestLenit.JM_PLC.getEntity()),  // internal le
+							partyConverter.toManagedEntity(TestLenit.ANGLO_PLATINUM_MARKETING___LE.getEntity()), // external le
 							referenceConverter.toManagedEntity(DefaultReference.PORTFOLIO_UK_GOLD.getEntity()), // internal portfolio
 							null,  // external portfolio
 							referenceConverter.toManagedEntity(DefaultReference.BUY_SELL_BUY.getEntity()), // buy / sell

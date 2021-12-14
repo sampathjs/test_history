@@ -43,7 +43,7 @@ public class ReferenceOrderLeg {
 	
 	@Column(name = "fixing_end_date", nullable = true)
 	@Temporal(TemporalType.DATE)
-	private Date fixingEndDate;  
+	private Date fixingEndDate;
 	
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="payment_offset_reference_id", nullable = true)

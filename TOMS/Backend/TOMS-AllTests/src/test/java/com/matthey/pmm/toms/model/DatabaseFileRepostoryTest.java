@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
@@ -21,14 +19,13 @@ import com.matthey.pmm.toms.repository.DatabaseFileRepository;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
-import com.matthey.pmm.toms.service.mock.testdata.TestParty;
+import com.matthey.pmm.toms.service.mock.testdata.TestLenit;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 import com.matthey.pmm.toms.testall.TestJpaApplication;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @AutoConfigureTestDatabase(replace=Replace.NONE)
 @SpringBootTest(classes={TestJpaApplication.class})
-@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class DatabaseFileRepostoryTest extends AbstractRepositoryTestBase<DatabaseFile, Long, DatabaseFileRepository> {	
 	@Autowired
 	protected ReferenceConverter referenceCon;	
@@ -44,14 +41,6 @@ public class DatabaseFileRepostoryTest extends AbstractRepositoryTestBase<Databa
 	
 	@Before
 	public void setupTestData () {
-		TestParty.asList() // legal entities first (LEs are not assigned to another LE)
-  			.stream()
-  			.filter(x -> x.idLegalEntity() <= 0)
-  			.forEach(x -> partyConverter.toManagedEntity(x));
-		TestParty.asList() // now the business units (everything that has an LE)
-			.stream()
-			.filter(x -> x.idLegalEntity() > 0)
-			.forEach(x -> partyConverter.toManagedEntity(x));		
 	}
 	
 	@Override

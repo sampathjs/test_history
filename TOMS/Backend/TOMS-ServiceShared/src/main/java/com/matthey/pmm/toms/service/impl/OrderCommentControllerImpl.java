@@ -138,7 +138,7 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     	Optional<OrderComment> existingOrderComment = validator.verifyOrderCommentId (orderCommentId, this.getClass(), methodName, "orderCommentId", false);   	
        	validator.verifyOrderCommentBelongsToOrder (existingOrderComment.get(), order, this.getClass(), methodName, "Order", "Order Comment");
 
-    	existingOrderComment.get().setDeletionFlag(referenceConverter.toManagedEntity(DefaultReference.DELETION_FLAG_DELETED.getEntity()));
+    	existingOrderComment.get().setLifecycleStatus(referenceConverter.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_DELETED.getEntity()));
     	orderCommentRepo.save(existingOrderComment.get());
     }
     
@@ -220,15 +220,14 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     		orderIdArgumentName = "referenceOrderId";
     		validator.verifyReferenceOrderId(orderId, this.getClass(), methodName, orderIdArgumentName, false);
     		order = referenceOrderRepo.findLatestByOrderId(orderId).get();   		
-    	} 	
-
+    	}
     	
     	if (order.getOrderComments() == null) {
     		return null;
     	}
 	
     	return order.getOrderComments().stream()
-    			.filter (x -> x.getDeletionFlag().getId() != DefaultReference.DELETION_FLAG_DELETED.getEntity().id())
+    			.filter (x -> x.getLifecycleStatus().getId() != DefaultReference.LIFECYCLE_STATUS_DELETED.getEntity().id())
     			.map(x -> orderCommentConverter.toTo(x))
     			.collect(Collectors.toSet());
     }

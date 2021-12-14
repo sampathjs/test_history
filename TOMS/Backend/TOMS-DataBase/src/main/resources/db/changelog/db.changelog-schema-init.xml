@@ -215,7 +215,7 @@
 			<column name="party_id" type="int">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
-			<column name="name" type="varchar(64)">
+			<column name="name" type="varchar(512)">
 				<constraints nullable="false" />
 			</column>
 			<column name="reference_party_type_id" type="int">
@@ -398,7 +398,7 @@
 			<column name="updated_by_user_id" type="int">
 				<constraints nullable="false" />
 			</column>
-			<column name="deletion_flag_reference_id" type="int">
+			<column name="lifecycle_status_reference_id" type="int">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
@@ -419,9 +419,9 @@
 			referencedTableName="user" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
-			baseColumnNames="deletion_flag_reference_id"
+			baseColumnNames="lifecycle_status_reference_id"
 			baseTableName="order_comment"
-			constraintName="fk_deletion_flag_reference_id" onDelete="NO ACTION"
+			constraintName="fk_lifecycle_status_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
 			referencedTableName="reference" validate="true" schemaName="dbo" />
 
