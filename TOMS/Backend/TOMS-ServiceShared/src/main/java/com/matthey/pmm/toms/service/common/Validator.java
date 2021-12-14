@@ -702,7 +702,7 @@ public class Validator {
 				Arrays.asList(DefaultReferenceType.CCY_METAL, DefaultReferenceType.CCY_CURRENCY),
 				clazz, method , argument + ".idMetalCurrency", false);
     	
-    	if (order.baseQuantity() <= 0) {
+    	if (order.baseQuantity() != null && order.baseQuantity() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".quantity", " > 0", "" + order.baseQuantity());
     	}
 
@@ -850,12 +850,12 @@ public class Validator {
 	public void verifyOrderCommentBelongsToOrder(OrderComment orderComment, Order order,
 			Class clazz, String methodName, String argumentNameManager, String argumentNameManaged) {
 		for (OrderComment fromOrder : order.getOrderComments()) {
-			if (fromOrder.getId() == orderComment.getId() && fromOrder.getDeletionFlag().getId() != DefaultReference.DELETION_FLAG_DELETED.getEntity().id()) {
+			if (fromOrder.getId() == orderComment.getId() && fromOrder.getLifecycleStatus().getId() != DefaultReference.LIFECYCLE_STATUS_DELETED.getEntity().id()) {
 				return;
 			}
 		}
 		String listOfKnownIds = order.getOrderComments().stream()
-				.filter( x -> x.getDeletionFlag().getId() != DefaultReference.DELETION_FLAG_DELETED.getEntity().id())
+				.filter( x -> x.getLifecycleStatus().getId() != DefaultReference.LIFECYCLE_STATUS_DELETED.getEntity().id())
 				.map(x -> Long.toString(x.getId()))
 				.collect(Collectors.joining(","));
 		throw new InvalidBelongsToException(getClass(), methodName, argumentNameManager, argumentNameManaged, orderComment.getId(), listOfKnownIds);
