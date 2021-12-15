@@ -29,12 +29,14 @@ import com.matthey.pmm.toms.service.QuantityUnitService;
 import com.matthey.pmm.toms.service.RefSourceService;
 import com.matthey.pmm.toms.service.TickerService;
 import com.matthey.pmm.toms.service.UserService;
+import com.matthey.pmm.toms.service.ValidationRuleService;
 import com.matthey.pmm.toms.service.YesNoService;
 import com.matthey.pmm.toms.service.misc.ReportBuilderHelper;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ImmutableCounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TwoListsTo;
 import com.matthey.pmm.toms.transport.UserTo;
 import com.olf.openrisk.application.Session;
@@ -96,47 +98,15 @@ public class TomsController {
     
     @PostMapping("counterPartyTickerRule")
     public List<CounterPartyTickerRuleTo> retrieveCounterPartyTickerRules (List<ReferenceTo> references) {
-    	String reportName = ReportBuilderHelper.retrieveReportBuilderNameForSyncCategory(session.getIOFactory(), "RuleCounterPartyTicker");
-    	Table reportData = ReportBuilderHelper.runReport(session.getTableFactory(), reportName);
-    	List<CounterPartyTickerRuleTo> rules = new ArrayList<>(reportData.getRowCount());
-    	Map<String, Long> metalFormEndurToTomsIdMap = new HashMap<>();
-    	references.stream()
-    		.filter(x -> x.idType() == DefaultReferenceType.METAL_FORM.getEntity().id())
-    		.forEach(x -> metalFormEndurToTomsIdMap.put(x.name(), x.id()));
-
-    	Map<String, Long> metalLocationEndurToTomsIdMap = new HashMap<>();
-    	references.stream()
-    		.filter(x -> x.idType() == DefaultReferenceType.METAL_LOCATION.getEntity().id())
-    		.forEach(x -> metalFormEndurToTomsIdMap.put(x.name(), x.id()));
-    	
-    	Map<String, Long> tickerEndurToTomsIdMap = new HashMap<>();
-    	references.stream()
-    		.filter(x -> x.idType() == DefaultReferenceType.TICKER.getEntity().id())
-    		.forEach(x -> metalFormEndurToTomsIdMap.put(x.name(), x.id()));    	
-
-    	
-    	for (int row = reportData.getRowCount()-1; row >= 0; row--) {
-    		long metalFormReferenceId = metalFormEndurToTomsIdMap.get(reportData.getString("form", row));
-    		long metalLocationId = metalLocationEndurToTomsIdMap.get(reportData.getString("loco", row));
-    		long tickerId = metalLocationEndurToTomsIdMap.get(reportData.getString("toms_product", row));
-    		
-    		CounterPartyTickerRuleTo rule = ImmutableCounterPartyTickerRuleTo.builder()
-    				.accountName(reportData.getString("account_name", row))
-    				.counterPartyDisplayName(reportData.getDisplayString(reportData.getColumnId("party_id"), row))
-    				.idCounterParty(reportData.getInt("party_id", row))
-    				.idMetalForm(metalFormReferenceId)
-    				.idMetalLocation(metalLocationId)
-    				.idTicker(tickerId)
-    				.metalFormDisplayString(reportData.getString("form", row))
-    				.metalLocationDisplayString(reportData.getString("loco", row))
-    				.tickerDisplayName(reportData.getString("toms_product", row))
-    				.build();
-    		rules.add(rule);
-    	}
-    	return rules;
-    	
+    	ValidationRuleService validationRuleService = new ValidationRuleService(session);
+    	return validationRuleService.getCounterPartyTickerRules(references);
     }
-    
+
+    @PostMapping("tickerPortfolioRule")
+    public List<TickerPortfolioRuleTo> retrieveTickerPortfolioRules (List<ReferenceTo> references) {
+    	ValidationRuleService validationRuleService = new ValidationRuleService(session);
+    	return validationRuleService.getTickerPortfolioRules(references);
+    }
 
 	private void addReferenceDataDiff(List<ReferenceTo> knownReferenceData, List<ReferenceTo> globalDiffList,
 			AbstractReferenceService service, List<DefaultReferenceType> expectedTypes) {

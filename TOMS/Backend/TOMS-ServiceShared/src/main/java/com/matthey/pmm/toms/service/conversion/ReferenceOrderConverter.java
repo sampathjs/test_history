@@ -176,8 +176,8 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 		Date lastUpdate = parseDateTime (to, to.lastUpdate());
 		Party internalBu = loadParty(to, to.idInternalBu());
 		Party externalBu = loadParty(to, to.idExternalBu());
-		Party internalLe = loadParty(to, to.idInternalLe());
-		Party externalLe = loadParty(to, to.idExternalLe());
+		Party internalLe = to.idInternalLe() != null?loadParty(to, to.idInternalLe()):null;
+		Party externalLe = to.idExternalLe() != null?loadParty(to, to.idExternalLe()):null;
 		Reference intPortfolio = to.idIntPortfolio()!= null?loadRef(to, to.idIntPortfolio()):null;
 		Reference extPortfolio = to.idExtPortfolio()!= null?loadRef(to, to.idExtPortfolio()):null;
 		Reference buySell = loadRef (to, to.idBuySell());

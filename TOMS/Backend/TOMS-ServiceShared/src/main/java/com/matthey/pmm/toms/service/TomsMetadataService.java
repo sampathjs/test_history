@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
+import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,4 +37,9 @@ public interface TomsMetadataService {
     @ApiOperation("Retrieval of the mapping between counter parties, tickers, metal locations, metal forms and accounts")
 	@GetMapping("/counterPartyTickerRules")
 	public Set<CounterPartyTickerRuleTo> getCounterPartyTickerRules ();
+    
+    @Cacheable({"TickerPortfolioRules"})
+    @ApiOperation("Retrieval of the mapping between portfolio, party, ticker and index")
+	@GetMapping("/tickerPortfolioRules")
+	public Set<TickerPortfolioRuleTo> getTickerPortfolioRules ();
 }

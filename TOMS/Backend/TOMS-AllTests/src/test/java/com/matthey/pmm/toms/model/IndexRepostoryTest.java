@@ -14,13 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
-import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.repository.IndexRepository;
 import com.matthey.pmm.toms.service.conversion.IndexConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.testall.TestJpaApplication;
-import com.matthey.pmm.toms.transport.ImmutableReferenceTo;
-import com.matthey.pmm.toms.transport.ReferenceTo;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @AutoConfigureTestDatabase(replace=Replace.NONE)

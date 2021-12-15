@@ -18,18 +18,19 @@
     <properties>
         <io.springfox.version>2.9.2</io.springfox.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <log4j2.version>2.16.0</log4j2.version>
     </properties>
     <dependencyManagement>
         <dependencies>
       		<dependency>
          		<groupId>com.google.guava</groupId>
          		<artifactId>guava</artifactId>
-         		<version>29.0-jre</version>
+         		<version>29.0-jre</version>    		
       		</dependency>
             <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
-                <version>3.0.2</version>
+                <version>3.0.2</version>            
             </dependency>
             <dependency>
                 <groupId>com.google.errorprone</groupId>
@@ -39,32 +40,32 @@
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-core</artifactId>
-                <version>${io.springfox.version}</version>
+                <version>${io.springfox.version}</version>             
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-spi</artifactId>
-                <version>${io.springfox.version}</version>
+                <version>${io.springfox.version}</version>                
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-spring-web</artifactId>
-                <version>${io.springfox.version}</version>
+                <version>${io.springfox.version}</version>             
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger-ui</artifactId>
-                <version>${io.springfox.version}</version>
+                <version>${io.springfox.version}</version>             
             </dependency>
             <dependency>
                 <groupId>io.springfox</groupId>
                 <artifactId>springfox-swagger2</artifactId>
-                <version>${io.springfox.version}</version>
+                <version>${io.springfox.version}</version>             
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.8.1</version>
+                <version>3.8.1</version>            
             </dependency>
             <dependency>
                 <groupId>org.immutables</groupId>
@@ -78,6 +79,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+        	<dependency>
+	            <groupId>org.apache.logging.log4j</groupId>
+    	        <artifactId>log4j-bom</artifactId>
+        	    <version>2.16.0</version>
+	            <scope>import</scope>
+    	        <type>pom</type>
+        	</dependency>   
+      	    <dependency>
+        		<groupId>org.liquibase</groupId>
+	        	<artifactId>liquibase-core</artifactId>
+	        	<version>3.8.8</version>	        
+	   		</dependency>        	        
         </dependencies>
     </dependencyManagement>
     <build>

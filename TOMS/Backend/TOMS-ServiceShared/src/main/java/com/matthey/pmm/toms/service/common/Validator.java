@@ -589,8 +589,10 @@ public class Validator {
 				Arrays.asList(DefaultReferenceType.METAL_LOCATION),
 				clazz, method , argument + ".idMetalLocation", true);
     	
-    	if (order.executionLikelihood() <= 0) {
-    		throw new IllegalValueException(clazz, method, argument + ".executionLikelihood", " > 0", "" + order.executionLikelihood());
+    	if (order.executionLikelihood() != null) {
+        	if (order.executionLikelihood() <= 0) {
+        		throw new IllegalValueException(clazz, method, argument + ".executionLikelihood", " > 0", "" + order.executionLikelihood());
+        	}    		
     	}
     	
     	verifyDefaultReference (order.idContractType(),
@@ -710,7 +712,7 @@ public class Validator {
 
     	verifyDefaultReference (order.idBaseQuantityUnit(),
 				Arrays.asList(DefaultReferenceType.QUANTITY_UNIT),
-				clazz, method , argument + ".idQuantityUnit", false);
+				clazz, method , argument + ".idBaseQuantityUnit", false);
     	
     	verifyDefaultReference (order.idTermCurrency(),
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY),
