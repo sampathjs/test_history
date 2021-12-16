@@ -84,7 +84,7 @@ public abstract class MetadataControllerImpl implements TomsMetadataService {
     				.filter(x -> x.idCounterParty() == idCounterparty)
     				.collect(Collectors.toSet());
     	}
-    	if (includeDisplayStrings != null && includeDisplayStrings == Boolean.TRUE) {
+    	if (includeDisplayStrings != null && includeDisplayStrings == Boolean.FALSE) {
     		rules = rules.stream()
     				.map(x -> ImmutableCounterPartyTickerRuleTo.builder()
     						.from(x)
