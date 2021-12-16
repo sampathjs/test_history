@@ -158,7 +158,7 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.displayStringCreatedByUser(entity.getCreatedByUser() !=  null?entity.getCreatedByUser().getLastName():null)
 				.displayStringUpdatedByUser(entity.getUpdatedByUser() !=  null?entity.getUpdatedByUser().getLastName():null)
 				.displayStringContractType(entity.getContractType() !=  null?entity.getContractType().getValue():null)
-				.displayStringTicker(entity.getTicker().getValue() !=  null?entity.getTicker().getValue():null)
+				.displayStringTicker(entity.getTicker() !=  null?entity.getTicker().getValue():null)
 				// Reference Order
 				.contangoBackwardation(entity.getContangoBackwardation())
 				.fxRateSpread(entity.getFxRateSpread())
