@@ -167,7 +167,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		System.out.println(to);
 		System.out.println("\n********************\n");
 		// Order
-		Reference orderTypeName = to.idIntPortfolio()!= null?loadRef(to, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity().id()):null;
+		Reference orderTypeName = to.idOrderType()!= null?loadRef(to, DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity().id()):null;
 		Date createdAt = parseDateTime(to, to.createdAt());
 		Date lastUpdate = parseDateTime (to, to.lastUpdate());
 		Party internalBu = loadParty(to, to.idInternalBu());

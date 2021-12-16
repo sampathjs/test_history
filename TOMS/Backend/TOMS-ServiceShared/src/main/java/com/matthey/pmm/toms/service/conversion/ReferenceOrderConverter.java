@@ -171,7 +171,7 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 	@Override
 	public ReferenceOrder toManagedEntity (ReferenceOrderTo to) {	
 		// Order
-		Reference orderTypeName = to.idIntPortfolio()!= null?loadRef(to, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity().id()):null;
+		Reference orderTypeName = to.idOrderType()!= null?loadRef(to, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity().id()):null;
 		Date createdAt = parseDateTime(to, to.createdAt());
 		Date lastUpdate = parseDateTime (to, to.lastUpdate());
 		Party internalBu = loadParty(to, to.idInternalBu());
