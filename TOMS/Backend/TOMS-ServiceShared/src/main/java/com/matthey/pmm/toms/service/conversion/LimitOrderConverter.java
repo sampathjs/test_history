@@ -120,7 +120,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
 				.fillPercentage(entity.getFillPercentage())
 				.idContractType(entity.getContractType().getId())
-				.idTicker(entity.getTicker().getId() != null?entity.getTicker().getId():null)
+				.idTicker(entity.getTicker() != null?entity.getTicker().getId():null)
 				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.displayStringBaseCurrency(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)
