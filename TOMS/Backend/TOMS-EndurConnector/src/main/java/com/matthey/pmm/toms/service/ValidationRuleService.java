@@ -10,8 +10,10 @@ import com.matthey.pmm.toms.service.misc.ReportBuilderHelper;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ImmutableCounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ImmutableTickerPortfolioRuleTo;
+import com.matthey.pmm.toms.transport.ImmutableTickerRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
+import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 
@@ -79,7 +81,7 @@ public class ValidationRuleService {
 		
 		for (int row = reportData.getRowCount()-1; row >= 0; row--) {
 			long portfolioId = portfolioEndurToTomsIdMap.get(reportData.getString("name", row));
-			long tickerId = portfolioEndurToTomsIdMap.get(reportData.getString("toms_product", row));
+			long tickerId = tickerEndurToTomsIdMap.get(reportData.getString("toms_product", row));
 			
 			TickerPortfolioRuleTo rule = ImmutableTickerPortfolioRuleTo.builder()
 					.displayStringIndex(reportData.getString("index_name", row))
@@ -90,6 +92,38 @@ public class ValidationRuleService {
 					.idParty(reportData.getInt ("party_id", row))
 					.idPortfolio(portfolioId)
 					.idTicker(tickerId)
+					.build();
+			rules.add(rule);
+		}
+		return rules;				
+	}
+
+	public List<TickerRefSourceRuleTo> getTickerRefSourceRules(List<ReferenceTo> references) {
+		String reportName = ReportBuilderHelper.retrieveReportBuilderNameForSyncCategory(session.getIOFactory(), "RuleTickerRefSource");
+		Table reportData = ReportBuilderHelper.runReport(session.getTableFactory(), reportName);
+		List<TickerRefSourceRuleTo> rules = new ArrayList<>(reportData.getRowCount());
+
+		Map<String, Long> tickerEndurToTomsIdMap = new HashMap<>();
+		references.stream()
+			.filter(x -> x.idType() == DefaultReferenceType.TICKER.getEntity().id())
+			.forEach(x -> tickerEndurToTomsIdMap.put(x.name(), x.id()));
+		
+		Map<String, Long> refSourceEndurToTomsIdMap = new HashMap<>();
+		references.stream()
+			.filter(x -> x.idType() == DefaultReferenceType.REF_SOURCE.getEntity().id())
+			.forEach(x -> tickerEndurToTomsIdMap.put(x.name(), x.id()));		
+		
+		for (int row = reportData.getRowCount()-1; row >= 0; row--) {
+			long tickerId = tickerEndurToTomsIdMap.get(reportData.getString("toms_product", row));
+			long refSourceId = refSourceEndurToTomsIdMap.get(reportData.getString("ref_source_name", row));
+			
+			TickerRefSourceRuleTo rule = ImmutableTickerRefSourceRuleTo.builder()
+					.displayStringIndex(reportData.getString("index_name", row))
+					.displayStringTicker(reportData.getString("toms_product", row))
+					.displayStringRefSource(reportData.getString("ref_source_name", row))
+					.idIndex(reportData.getInt ("index_id", row))
+					.idTicker(tickerId)
+					.idRefSource(refSourceId)
 					.build();
 			rules.add(rule);
 		}

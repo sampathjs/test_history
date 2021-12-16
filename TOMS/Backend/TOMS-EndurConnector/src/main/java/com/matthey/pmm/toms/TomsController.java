@@ -37,6 +37,7 @@ import com.matthey.pmm.toms.transport.ImmutableCounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
+import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TwoListsTo;
 import com.matthey.pmm.toms.transport.UserTo;
 import com.olf.openrisk.application.Session;
@@ -107,6 +108,12 @@ public class TomsController {
     	ValidationRuleService validationRuleService = new ValidationRuleService(session);
     	return validationRuleService.getTickerPortfolioRules(references);
     }
+
+    @PostMapping("tickerRefSourceRule")
+    public List<TickerRefSourceRuleTo> retrieveTickerRefSourceRules (List<ReferenceTo> references) {
+    	ValidationRuleService validationRuleService = new ValidationRuleService(session);
+    	return validationRuleService.getTickerRefSourceRules(references);
+    }    
 
 	private void addReferenceDataDiff(List<ReferenceTo> knownReferenceData, List<ReferenceTo> globalDiffList,
 			AbstractReferenceService service, List<DefaultReferenceType> expectedTypes) {

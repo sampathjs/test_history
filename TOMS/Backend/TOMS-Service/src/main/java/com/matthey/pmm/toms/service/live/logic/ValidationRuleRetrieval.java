@@ -16,6 +16,7 @@ import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
+import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
 @Component
 public class ValidationRuleRetrieval {
@@ -71,12 +72,36 @@ public class ValidationRuleRetrieval {
 			logger.info("Finished Retrieving Ticker Portfolio Rules from Endur");
 			return rules;
 		} catch (Exception ex) {
-			logger.error("Error while retrieving Retrieving Ticker Portfolio Rules from Endur Connector: " + ex.getMessage());
+			logger.error("Error while retrieving Ticker Portfolio Rules from Endur Connector: " + ex.getMessage());
 			for (StackTraceElement ste : ex.getStackTrace()) {
 				logger.error(ste.toString());
 			}
 			throw ex;
 		} 
 	}
+	
+	public List<TickerRefSourceRuleTo> retrieveTickerRefSourceRules() {
+		logger.info("Starting Retrieving Ticker Reference Source Rules from Endur");
+		try {
+			List<Reference> entities = refRepo.findByTypeIdIn(Arrays.asList(DefaultReferenceType.REF_SOURCE.getEntity().id(),
+					DefaultReferenceType.TICKER.getEntity().id()));
+			
+			List<ReferenceTo> references = entities.stream()
+					.map(x -> refConverter.toTo(x))
+					.collect(Collectors.toList());
+			
+			List<TickerRefSourceRuleTo> rules = Arrays.asList(endurConnector.postWithResponse("/toms/endur/tickerRefSourceRule", TickerRefSourceRuleTo[].class,
+					references));
+			logger.info("Finished Retrieving Ticker Reference Source Rules from Endur");
+			return rules;
+		} catch (Exception ex) {
+			logger.error("Error while retrieving Ticker Reference Source Rules from Endur Connector: " + ex.getMessage());
+			for (StackTraceElement ste : ex.getStackTrace()) {
+				logger.error(ste.toString());
+			}
+			throw ex;
+		} 
+	}
+
 
 }
