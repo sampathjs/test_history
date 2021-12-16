@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.apache.poi.hssf.record.CountryRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import com.matthey.pmm.toms.service.conversion.AttributeCalculationConverter;
 import com.matthey.pmm.toms.service.conversion.ProcessTransitionConverter;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
+import com.matthey.pmm.toms.transport.ImmutableCounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 
 import io.swagger.annotations.ApiOperation;
@@ -74,4 +76,25 @@ public abstract class MetadataControllerImpl implements TomsMetadataService {
 					.collect(Collectors.toSet());
     	}
     }    
+    
+    
+    protected Set<CounterPartyTickerRuleTo> filterCounterPartyTickerRules(Set<CounterPartyTickerRuleTo> rules, Long idCounterparty, Boolean includeDisplayStrings) {
+    	if (idCounterparty != null) {
+    		rules = rules.stream()
+    				.filter(x -> x.idCounterParty() == idCounterparty)
+    				.collect(Collectors.toSet());
+    	}
+    	if (includeDisplayStrings != null && includeDisplayStrings == Boolean.TRUE) {
+    		rules = rules.stream()
+    				.map(x -> ImmutableCounterPartyTickerRuleTo.builder()
+    						.from(x)
+    						.counterPartyDisplayName(null)
+    						.metalFormDisplayString(null)
+    						.metalLocationDisplayString(null)
+    						.tickerDisplayName(null)
+    						.build())
+    				.collect(Collectors.toSet());
+    	}
+    	return rules;
+    }
 }

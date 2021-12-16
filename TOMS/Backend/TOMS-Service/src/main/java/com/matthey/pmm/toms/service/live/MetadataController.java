@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.matthey.pmm.toms.service.impl.MetadataControllerImpl;
@@ -14,6 +14,7 @@ import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 
 @RestController
@@ -22,8 +23,12 @@ public class MetadataController extends MetadataControllerImpl {
 	private ValidationRuleRetrieval validationRuleRetriever;
 	
     @ApiOperation("Retrieval of the mapping between counter parties, tickers, metal locations, metal forms and accounts")
-	public Set<CounterPartyTickerRuleTo> getCounterPartyTickerRules () {
-    	return new HashSet<>(validationRuleRetriever.retrieveCounterPartyTickerRules());
+	public Set<CounterPartyTickerRuleTo> getCounterPartyTickerRules (
+			@ApiParam(value = "Optional restriction to retrieve rules for a certain party only, default = all", example = "20001", required = false) @RequestParam(required=false) Long idCounterparty,
+			@ApiParam(value = "Optional retriction to not populate the display string attributes, default= with display string", example = "true", required = false) @RequestParam(required=false) Boolean includeDisplayStrings) {
+    	Set<CounterPartyTickerRuleTo> rules = new HashSet<>(validationRuleRetriever.retrieveCounterPartyTickerRules());
+    	rules = filterCounterPartyTickerRules (rules, idCounterparty, includeDisplayStrings);
+    	return rules;
     }
     
     @ApiOperation("Retrieval of the mapping between portfolio, party, ticker and index")

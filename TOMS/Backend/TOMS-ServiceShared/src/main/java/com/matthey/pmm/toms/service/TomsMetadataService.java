@@ -37,7 +37,9 @@ public interface TomsMetadataService {
     @Cacheable({"CounterPartyTickerRules"})
     @ApiOperation("Retrieval of the mapping between counter parties, tickers, metal locations, metal forms and accounts")
 	@GetMapping("/counterPartyTickerRules")
-	public Set<CounterPartyTickerRuleTo> getCounterPartyTickerRules ();
+	public Set<CounterPartyTickerRuleTo> getCounterPartyTickerRules (
+			@ApiParam(value = "Optional restriction to retrieve rules for a certain party only, default = all", example = "20001", required = false) @RequestParam(required=false) Long idCounterparty,
+			@ApiParam(value = "Optional retriction to not populate the display string attributes, default= with display string", example = "true", required = false) @RequestParam(required=false) Boolean includeDisplayStrings);
     
     @Cacheable({"TickerPortfolioRules"})
     @ApiOperation("Retrieval of the mapping between portfolio, party, ticker and index")

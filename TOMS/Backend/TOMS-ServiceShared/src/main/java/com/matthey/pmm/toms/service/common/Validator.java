@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
@@ -73,42 +74,42 @@ public class Validator {
 	private static final double EPSILON = 0.00001d; 
 	
 	@Autowired
-	ReferenceRepository refRepo;
+	protected ReferenceRepository refRepo;
 
 	@Autowired
-	ReferenceTypeRepository refTypeRepo;
+	protected ReferenceTypeRepository refTypeRepo;
 	
 	@Autowired
-	PartyRepository partyRepo;
+	protected PartyRepository partyRepo;
 	
 	@Autowired
-	LimitOrderRepository limitOrderRepo;
+	protected LimitOrderRepository limitOrderRepo;
 
 	@Autowired
-	ReferenceOrderRepository referenceOrderRepo;
+	protected ReferenceOrderRepository referenceOrderRepo;
 
 	@Autowired
-	ReferenceOrderLegRepository referenceOrderLegRepo;
+	protected ReferenceOrderLegRepository referenceOrderLegRepo;
 
 	
 	@Autowired
-	ProcessTransitionRepository processTransitionRepo;
+	protected ProcessTransitionRepository processTransitionRepo;
 
 	@Autowired
-	OrderCommentRepository orderCommentRepo;
+	protected OrderCommentRepository orderCommentRepo;
 	
 	@Autowired
-	ProcessTransitionConverter processTransitionConverter;
+	protected ProcessTransitionConverter processTransitionConverter;
 	
 	@Autowired
-	UserRepository userRepo;
+	protected UserRepository userRepo;
 	
 	@Autowired 
-	FillRepository fillRepo;
+	protected FillRepository fillRepo;
 
 	@Autowired 
-	IndexRepository indexRepo;
-	
+	protected IndexRepository indexRepo;
+		
 	/**
 	 * Verifies a provided reference is present in the database and has the type of one of the provided
 	 * expectedRefTypes.
