@@ -41,7 +41,7 @@ public abstract class OrderTo {
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"idYesNoPhysicalDeliveryRequired", "createdAt", "idCreatedByUser", "idPriceType",
+					"createdAt", "idCreatedByUser", "idPriceType",
 					"reference", "idMetalForm", "idMetalLocation");
 
 	
