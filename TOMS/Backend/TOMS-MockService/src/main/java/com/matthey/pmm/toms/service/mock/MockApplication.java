@@ -5,10 +5,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -25,18 +24,6 @@ import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
-import com.matthey.pmm.toms.service.mock.testdata.TestBunit;
-import com.matthey.pmm.toms.service.mock.testdata.TestCreditCheck;
-import com.matthey.pmm.toms.service.mock.testdata.TestDatabaseFile;
-import com.matthey.pmm.toms.service.mock.testdata.TestEmail;
-import com.matthey.pmm.toms.service.mock.testdata.TestFill;
-import com.matthey.pmm.toms.service.mock.testdata.TestIndex;
-import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
-import com.matthey.pmm.toms.service.mock.testdata.TestOrderComment;
-import com.matthey.pmm.toms.service.mock.testdata.TestLenit;
-import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
-import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrderLeg;
-import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -87,5 +74,10 @@ public class MockApplication implements WebMvcConfigurer {
       return (args) -> {
     	  
       };
+    }
+    
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

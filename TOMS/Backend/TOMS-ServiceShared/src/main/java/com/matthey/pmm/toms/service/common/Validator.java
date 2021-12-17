@@ -1,5 +1,7 @@
 package com.matthey.pmm.toms.service.common;
 
+import static com.matthey.pmm.toms.service.TomsService.API_PREFIX;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
@@ -49,6 +51,7 @@ import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.repository.UserRepository;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.conversion.ProcessTransitionConverter;
+import com.matthey.pmm.toms.service.exception.CounterPartyTickerRuleCheckException;
 import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
 import com.matthey.pmm.toms.service.exception.IllegalIdException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
@@ -60,6 +63,8 @@ import com.matthey.pmm.toms.service.exception.IllegalVersionException;
 import com.matthey.pmm.toms.service.exception.InvalidBelongsToException;
 import com.matthey.pmm.toms.service.exception.MissingLegException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
+import com.matthey.pmm.toms.service.logic.ServiceConnector;
+import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
 import com.matthey.pmm.toms.transport.FillTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
@@ -109,6 +114,9 @@ public class Validator {
 
 	@Autowired 
 	protected IndexRepository indexRepo;
+	
+	@Autowired
+	protected ServiceConnector serviceConnector;
 		
 	/**
 	 * Verifies a provided reference is present in the database and has the type of one of the provided
@@ -623,6 +631,7 @@ public class Validator {
     			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(availableTransitions.get(0)), oldLimitOrder, order);    			
     		}
     	}
+    	applyCounterPartyTickerRules(clazz, method, argument, order);
 	}
 	
 	public void validateReferenceOrderFields (Class clazz, String method, String argument, ReferenceOrderTo order, boolean isNew, OrderTo oldReferenceOrder) {
@@ -650,7 +659,7 @@ public class Validator {
     	}
     	
     	for (Long legId : order.legIds()) {
-   			verifyReferenceOrderLegId (legId, clazz, method, argument, false);
+   			verifyReferenceOrderLegId (legId, clazz, method, argument + ".legIds(" + legId + ")", false);
    		}
     	
     	if (!isNew) {
@@ -676,6 +685,7 @@ public class Validator {
     			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(availableTransitions.get(0)), oldReferenceOrder, order);    			
     		}
     	}
+    	applyCounterPartyTickerRules(clazz, method, argument, order);
 	}
 	
 	private void validateOrderFields (Class clazz, String method, String argument, OrderTo order, boolean newOrder, OrderTo oldOrder) {
@@ -757,25 +767,23 @@ public class Validator {
     	if (updatedBy.isEmpty()) {
     		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedByUser" , "User", "" + order.idUpdatedByUser());
     	}    	
-		
     	if (!createdBy.get().getTradeableParties().contains(internalBunit.get())) {
     		throw new IllegalValueException (clazz, method, argument + ".idInternalBu", 
-    				"Not matching allowed internal BU for provided createdBy " + createdBy.get().getId() + " :" + createdBy.get().getTradeableParties(), "" + order.idInternalBu());
+    				"Not matching allowed internal BU for provided createdBy " + createdBy.get().getId() + " :" + 
+    						createdBy.get().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_INTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList())
+    						, "" + order.idInternalBu());
     	}
     	
     	if (!createdBy.get().getTradeableParties().contains(externalBunit.get())) {
     		throw new IllegalValueException (clazz, method, argument + ".idExternalBu", 
-    				"Not matching allowed external BU for provided createdBy " + createdBy.get().getId() + " :" + createdBy.get().getTradeableParties(), "" + order.idInternalBu());
+    				"Not matching allowed external BU for provided createdBy " + createdBy.get().getId() + " :" + 
+    						createdBy.get().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList()), 
+    						"" + order.idExternalBu());
     	}
 
     	if (order.idIntPortfolio() != null && !createdBy.get().getTradeablePortfolios().contains (intPortfolio.get())) {
     		throw new IllegalValueException (clazz, method, argument + ".idIntPortfolio", 
     				"Not matching allowed internal portfolios for provided createdBy " + createdBy.get().getId() + " :" + createdBy.get().getTradeablePortfolios(), "" + order.idIntPortfolio());
-    	}
-
-    	if (order.idExtPortfolio() != null && !createdBy.get().getTradeablePortfolios().contains (extPortfolio.get())) {
-    		throw new IllegalValueException (clazz, method, argument + ".idExtPortfolio", 
-    				"Not matching allowed external portfolios for provided createdBy " + createdBy.get().getId() + " :" + createdBy.get().getTradeablePortfolios(), "" + order.idExtPortfolio());
     	}
     	
 		try {
@@ -784,13 +792,17 @@ public class Validator {
 			throw new IllegalDateFormatException (clazz, method, argument + ".lastUpdate", TomsService.DATE_TIME_FORMAT, order.lastUpdate());
 		}
 
-    	if (!createdBy.get().getTradeableParties().contains (internalBunit.get())) {
-    		throw new IllegalValueException (clazz, method, argument + ".idInternalParty", 
-    				"Not matching allowed internal parties for provided updatedBy " + updatedBy.get().getId() + " :" + updatedBy.get().getTradeableParties(), "" + order.idInternalBu());
+    	if (!updatedBy.get().getTradeableParties().contains (internalBunit.get())) {
+    		throw new IllegalValueException (clazz, method, argument + ".idInternalBu", 
+    				"Not matching allowed internal parties for provided updatedBy " + updatedBy.get().getId() + " :" + 
+    						updatedBy.get().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_INTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList()), 
+    						"" + order.idInternalBu());
     	}
-    	if (!createdBy.get().getTradeableParties().contains (externalBunit.get())) {
-    		throw new IllegalValueException (clazz, method, argument + ".idExternalParty", 
-    				"Not matching allowed external parties for provided updatedBy " + updatedBy.get().getId() + " :" + updatedBy.get().getTradeableParties(), "" + order.idExternalBu());
+    	if (!updatedBy.get().getTradeableParties().contains (externalBunit.get())) {
+    		throw new IllegalValueException (clazz, method, argument + ".idExternalBu", 
+    				"Not matching allowed external parties for provided updatedBy " + updatedBy.get().getId() + " :" + 
+    						updatedBy.get().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList()), 
+    						"" + order.idExternalBu());
     	}
    	}
 	
@@ -849,6 +861,35 @@ public class Validator {
     		} else {
     			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(availableTransitions.get(0)), oldLeg, leg);
     		}
+    	}
+    
+	}
+
+	private void applyCounterPartyTickerRules(Class clazz, String method, String argument, Order order) {
+		List<CounterPartyTickerRuleTo> rules = Arrays.asList(
+    		serviceConnector.get(API_PREFIX + "/counterPartyTickerRules?idCounterparty={idCounterparty}", CounterPartyTickerRuleTo[].class, 
+    				order.getExternalBu().getId()));
+    	List<CounterPartyTickerRuleTo> filteredRules = rules.stream()
+    		.filter(x -> x.idMetalForm() == (order.getMetalForm() != null? order.getMetalForm().getId():0)
+    			&&	x.idMetalLocation() == (order.getMetalLocation() != null?order.getMetalLocation().getId():0) 
+    			&& x.idTicker() == (order.getTicker() != null?order.getTicker().getId():0))
+    		.collect(Collectors.toList());
+    	if (filteredRules.size() == 0) {
+    		throw new CounterPartyTickerRuleCheckException(clazz, method, argument, order, rules);
+    	}
+	}
+	
+	private void applyCounterPartyTickerRules(Class clazz, String method, String argument, OrderTo order) {
+		List<CounterPartyTickerRuleTo> rules = Arrays.asList(
+    		serviceConnector.get(API_PREFIX + "/counterPartyTickerRules?idCounterparty={idCounterparty}", CounterPartyTickerRuleTo[].class, 
+    				order.idExternalBu()));
+    	List<CounterPartyTickerRuleTo> filteredRules = rules.stream()
+    		.filter(x -> x.idMetalForm() == (order.idMetalForm()!=null?order.idMetalForm():0l)
+    			&&	     x.idMetalLocation() == (order.idMetalLocation() != null?order.idMetalLocation():0l) 
+    			&&       x.idTicker() == (order.idTicker() != null?order.idTicker():0l))
+    		.collect(Collectors.toList());
+    	if (filteredRules.size() == 0) {
+    		throw new CounterPartyTickerRuleCheckException(clazz, method, argument, order, rules);
     	}
 	}
 

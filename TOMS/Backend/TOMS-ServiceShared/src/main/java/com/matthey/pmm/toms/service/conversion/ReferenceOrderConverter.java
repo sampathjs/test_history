@@ -141,6 +141,8 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.idTicker(entity.getTicker() != null?entity.getTicker().getId():null)
 				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))	
 				.reference(entity.getReference())
+				.idMetalForm(entity.getMetalForm() != null?entity.getMetalForm().getId():null)
+				.idMetalLocation(entity.getMetalLocation() != null?entity.getMetalLocation().getId():null)				
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.displayStringBaseCurrency(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)
 				.displayStringBaseQuantityUnit(entity.getBaseQuantityUnit() != null?entity.getBaseQuantityUnit().getValue():null)

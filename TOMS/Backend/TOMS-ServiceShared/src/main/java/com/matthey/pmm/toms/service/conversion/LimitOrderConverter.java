@@ -121,6 +121,8 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.fillPercentage(entity.getFillPercentage())
 				.idContractType(entity.getContractType().getId())
 				.idTicker(entity.getTicker() != null?entity.getTicker().getId():null)
+				.idMetalForm(entity.getMetalForm() != null?entity.getMetalForm().getId():null)
+				.idMetalLocation(entity.getMetalLocation() != null?entity.getMetalLocation().getId():null)
 				.orderCommentIds(entity.getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.fillIds(entity.getFills().stream().map(x -> x.getId()).collect(Collectors.toList()))
 				.displayStringBaseCurrency(entity.getBaseCurrency() != null?entity.getBaseCurrency().getValue():null)

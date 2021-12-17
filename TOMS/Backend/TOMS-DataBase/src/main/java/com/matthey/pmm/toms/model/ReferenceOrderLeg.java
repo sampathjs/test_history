@@ -54,7 +54,7 @@ public class ReferenceOrderLeg {
 	private Double notional;
 	
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="settle_currency_reference_id", nullable = false)
+	@JoinColumn(name="settle_currency_reference_id", nullable = true)
 	@ReferenceTypeDesignator(referenceTypes = { DefaultReferenceType.CCY_CURRENCY, DefaultReferenceType.CCY_METAL })
 	private Reference settleCurrency;  	
 	

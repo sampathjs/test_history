@@ -32,6 +32,7 @@ import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
+import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.OrderStatusConverter;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
@@ -39,8 +40,17 @@ import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
 import com.matthey.pmm.toms.service.mock.testdata.TestBunit;
+import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet1;
+import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet2;
+import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet3;
+import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet4;
+import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet5;
+import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet6;
+import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet7;
+import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet8;
 import com.matthey.pmm.toms.service.mock.testdata.TestLenit;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
+import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 
 @Service
@@ -71,6 +81,8 @@ public class OrderTestDataGenerator {
 
 	private static final double MAX_FX_RATE_SPREAD = 100;
 
+	private static final double MAX_METAL_RATE_SPREAD = 100;
+	
 	private static final int MAX_LEG_COUNT = 7;
 
 	private static final int MIN_LEG_COUNT = 1;
@@ -79,6 +91,18 @@ public class OrderTestDataGenerator {
 
 	private static long FILL_TRADE_ID_COUNTER=10000000;
 
+	private static final List<CounterPartyTickerRuleTo> COUNTERPARTY_TICKER_RULES = new ArrayList<>(10000);
+	{
+		COUNTERPARTY_TICKER_RULES.addAll(TestCounterPartyTickerRuleSet1.asList());
+		COUNTERPARTY_TICKER_RULES.addAll(TestCounterPartyTickerRuleSet2.asList());
+		COUNTERPARTY_TICKER_RULES.addAll(TestCounterPartyTickerRuleSet3.asList());
+		COUNTERPARTY_TICKER_RULES.addAll(TestCounterPartyTickerRuleSet4.asList());
+		COUNTERPARTY_TICKER_RULES.addAll(TestCounterPartyTickerRuleSet5.asList());
+		COUNTERPARTY_TICKER_RULES.addAll(TestCounterPartyTickerRuleSet6.asList());
+		COUNTERPARTY_TICKER_RULES.addAll(TestCounterPartyTickerRuleSet7.asList());
+		COUNTERPARTY_TICKER_RULES.addAll(TestCounterPartyTickerRuleSet8.asList());
+	}
+	
 	
 	@Autowired
 	protected LimitOrderConverter limitOrderConverter;
@@ -116,6 +140,9 @@ public class OrderTestDataGenerator {
 	
 	@Autowired
 	protected ReferenceOrderLegRepository referenceOrderLegRepository;
+	
+	@Autowired
+	protected ReferenceRepository refRepo;
 
 	public Order createTestReferenceOrder() {
 		ReferenceOrder newTestOrder = new ReferenceOrder(null, 1, null, null,
@@ -128,7 +155,8 @@ public class OrderTestDataGenerator {
 		fillOrderFields(newTestOrder);
 		newTestOrder.setOrderTypeName(refConverter.toManagedEntity(DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity()));
 		newTestOrder.setContangoBackwardation(randomDoubleOrNull(MAX_CONTANGO_BACKWARDATION));
-		newTestOrder.setFxRateSpread(randomDoubleOrNull(MAX_FX_RATE_SPREAD));
+		newTestOrder.setFxRateSpread(randomDoubleOrNull(0.01d, MAX_FX_RATE_SPREAD));
+		newTestOrder.setMetalPriceSpread(randomDoubleOrNull(0.01d, MAX_METAL_RATE_SPREAD));
 		newTestOrder.setLegs(createLegList());
 		newTestOrder.setContractType(selectReferenceValue(DefaultReferenceType.CONTRACT_TYPE_REFERENCE_ORDER, false));
 		newTestOrder = referenceOrderRepo.save(newTestOrder);
@@ -180,22 +208,33 @@ public class OrderTestDataGenerator {
 		newTestOrder.setBaseQuantityUnit(selectReferenceValue(DefaultReferenceType.QUANTITY_UNIT, false));
 		newTestOrder.setCreatedAt(randomDate(false));
 		newTestOrder.setCreditChecks(createCreditCheckList());
-		newTestOrder.setExternalBu(partyConverter.toManagedEntity(selectOneOf(TestBunit.asListExternalBu(), false)));
-		newTestOrder.setExternalLe(partyConverter.toManagedEntity(selectOneOf(TestLenit.asListExternalLe(), false)));
+		CounterPartyTickerRuleTo selectedCounterPartyTickerRule;
+		do {
+			newTestOrder.setExternalBu(selectOneOf(
+					newTestOrder.getCreatedByUser().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList()), false));
+			 selectedCounterPartyTickerRule = selectOneOf(
+					COUNTERPARTY_TICKER_RULES.stream().filter(x -> x.idCounterParty() == newTestOrder.getExternalBu().getId()).collect(Collectors.toList()), false);
+		} while (selectedCounterPartyTickerRule == null);		
+
+		newTestOrder.setExternalLe(newTestOrder.getExternalBu().getLegalEntity());
 		newTestOrder.setExtPortfolio(selectReferenceValue(DefaultReferenceType.PORTFOLIO, true));
 		newTestOrder.setFills(createFillList());
-		newTestOrder.setInternalBu(partyConverter.toManagedEntity(selectOneOf(TestBunit.asListInternalBu(), false)));
-		newTestOrder.setInternalLe(partyConverter.toManagedEntity(selectOneOf(TestLenit.asListInternalLe(), false)));
-		newTestOrder.setIntPortfolio(selectReferenceValue(DefaultReferenceType.PORTFOLIO, true));
+		newTestOrder.setInternalBu(selectOneOf(
+				newTestOrder.getCreatedByUser().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_INTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList()), false));
+		newTestOrder.setInternalLe(newTestOrder.getInternalBu().getLegalEntity());
+		newTestOrder.setIntPortfolio(selectOneOf(
+				newTestOrder.getCreatedByUser().getTradeablePortfolios(), false));
+		newTestOrder.setExternalLe(newTestOrder.getExternalBu().getLegalEntity());
 		newTestOrder.setLastUpdate(randomDate(false));
-		newTestOrder.setMetalForm(selectReferenceValue (DefaultReferenceType.METAL_FORM, false));
-		newTestOrder.setMetalLocation(selectReferenceValue (DefaultReferenceType.METAL_LOCATION, false));
+		
+		newTestOrder.setMetalForm(refRepo.findById(selectedCounterPartyTickerRule.idMetalForm()).get());
+		newTestOrder.setMetalLocation(refRepo.findById(selectedCounterPartyTickerRule.idMetalLocation()).get());
 		newTestOrder.setOrderComments(createOrderCommentList());
 		newTestOrder.setOrderStatus(orderStatusConverter.toManagedEntity(selectOneOf(DefaultOrderStatus.asList(), false)));
 		newTestOrder.setReference(selectOneOf(Arrays.asList("Reference 1", "Example Reference", "Very long long long long long long long long long long long long long long long long long long long long long long reference"), true));
 		newTestOrder.setTermCurrency(selectReferenceValue(DefaultReferenceType.CCY_CURRENCY, false));
 		newTestOrder.setUpdatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
-		newTestOrder.setTicker(selectReferenceValue(DefaultReferenceType.TICKER, false));
+		newTestOrder.setTicker(refRepo.findById(selectedCounterPartyTickerRule.idTicker()).get());
 		DoubleSummaryStatistics summary = newTestOrder.getFills().stream().map(x -> x.getFillQuantity()).collect(Collectors.summarizingDouble(Double::doubleValue));
 		if (summary.getSum()/newTestOrder.getBaseQuantity() > newTestOrder.getFillPercentage()) {
 			newTestOrder.setBaseQuantity(Math.random() >= 0.5d?summary.getSum() + MAX_BASE_QUANTITY:summary.getSum());			
@@ -343,5 +382,12 @@ public class OrderTestDataGenerator {
 			return null;
 		} 
 		return Math.random()*max;
+	}
+	
+	private Double randomDoubleOrNull(double min, double max) {
+		if (Math.random() >= 0.75) {
+			return null;
+		} 
+		return Math.random()*(max-min)+min;
 	}
 }
