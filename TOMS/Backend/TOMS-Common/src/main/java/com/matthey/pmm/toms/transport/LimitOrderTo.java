@@ -26,42 +26,42 @@ public abstract class LimitOrderTo extends OrderTo {
 	 * Remember to update the lists if the attribute names are refactored, attributes are getting added or removed.
 	 */
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_FILLED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "limitPrice", 
+			  "settleDate", "limitPrice", 
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "limitPrice", 
+			  "settleDate", "limitPrice", 
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "limitPrice", 
+			  "settleDate", "limitPrice", 
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_EXPIRED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "limitPrice",
+			  "settleDate", "limitPrice",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);	
 	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED_TO_CANCELLED_EXPIRED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "limitPrice",
+			  "settleDate", "limitPrice",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_PULLED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "limitPrice",
+			  "settleDate", "limitPrice",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_REJECTED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "limitPrice",
+			  "settleDate", "limitPrice",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_MATURED = Arrays.asList(
-			  "settleDate", "idExpirationStatus", "limitPrice",
+			  "settleDate", "limitPrice",
 			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
 			);
 
