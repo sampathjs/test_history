@@ -20,5 +20,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
         	.anyRequest().access("hasIpAddress('::1') or hasIpAddress('127.0.0.1')")
         	.and().csrf().disable();
+        http.headers().frameOptions().disable();
     }
 }
