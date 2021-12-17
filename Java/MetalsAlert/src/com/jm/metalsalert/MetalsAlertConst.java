@@ -25,6 +25,7 @@ public class MetalsAlertConst {
 	public static final String CONST_alertBalance="Balance";
 	public static final String CONST_alertPrice="Price";
 	public static final String CONST_alertRate="Rate";
+	public static final String CONST_alertCustomer="Customer";
 	public static final String CONST_unitBalance=" TOz, ";
 	public static final String CONST_unitSpotPrice=" USD/TOz, ";
 	public static final String CONST_unitLeaseRate=" %, ";
