@@ -275,6 +275,9 @@ public class InsertTestValues implements CustomSqlChange {
 			for (Long id : user.tradeableCounterPartyIds()) {
 				results.add(new RawSqlStatement(String.format(insertTemplateTradeableParties, user.id(), id)));
 			}
+			for (Long id : user.tradeableInternalPartyIds()) {
+				results.add(new RawSqlStatement(String.format(insertTemplateTradeableParties, user.id(), id)));
+			}
 			for (Long id : user.tradeablePortfolioIds()) {
 				results.add(new RawSqlStatement(String.format(insertTemplateTradeablePortfolios, user.id(), id)));
 			}
