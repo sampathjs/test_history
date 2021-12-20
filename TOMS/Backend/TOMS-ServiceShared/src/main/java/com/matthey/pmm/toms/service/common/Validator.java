@@ -62,6 +62,8 @@ import com.matthey.pmm.toms.service.exception.IllegalValueException;
 import com.matthey.pmm.toms.service.exception.IllegalVersionException;
 import com.matthey.pmm.toms.service.exception.InvalidBelongsToException;
 import com.matthey.pmm.toms.service.exception.MissingLegException;
+import com.matthey.pmm.toms.service.exception.TickerPortfolioRuleCheckException;
+import com.matthey.pmm.toms.service.exception.TickerRefSourceRuleCheckException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.service.logic.ServiceConnector;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
@@ -73,6 +75,8 @@ import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderLegTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
+import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
+import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
 @Service
 public class Validator {
@@ -632,6 +636,7 @@ public class Validator {
     		}
     	}
     	applyCounterPartyTickerRules(clazz, method, argument, order);
+    	applyTickerPortfolioRules(clazz, method, argument, order);
 	}
 	
 	public void validateReferenceOrderFields (Class clazz, String method, String argument, ReferenceOrderTo order, boolean isNew, OrderTo oldReferenceOrder) {
@@ -686,6 +691,11 @@ public class Validator {
     		}
     	}
     	applyCounterPartyTickerRules(clazz, method, argument, order);
+    	applyTickerPortfolioRules(clazz, method, argument, order);
+    	for (Long legId : order.legIds()) {
+    		ReferenceOrderLeg leg = referenceOrderLegRepo.findById(legId).get();
+    		applyTickerRefSourceRules(clazz, method, argument, order, leg);
+    	}
 	}
 	
 	private void validateOrderFields (Class clazz, String method, String argument, OrderTo order, boolean newOrder, OrderTo oldOrder) {
@@ -865,20 +875,6 @@ public class Validator {
     
 	}
 
-	private void applyCounterPartyTickerRules(Class clazz, String method, String argument, Order order) {
-		List<CounterPartyTickerRuleTo> rules = Arrays.asList(
-    		serviceConnector.get(API_PREFIX + "/counterPartyTickerRules?idCounterparty={idCounterparty}", CounterPartyTickerRuleTo[].class, 
-    				order.getExternalBu().getId()));
-    	List<CounterPartyTickerRuleTo> filteredRules = rules.stream()
-    		.filter(x -> x.idMetalForm() == (order.getMetalForm() != null? order.getMetalForm().getId():0)
-    			&&	x.idMetalLocation() == (order.getMetalLocation() != null?order.getMetalLocation().getId():0) 
-    			&& x.idTicker() == (order.getTicker() != null?order.getTicker().getId():0))
-    		.collect(Collectors.toList());
-    	if (filteredRules.size() == 0) {
-    		throw new CounterPartyTickerRuleCheckException(clazz, method, argument, order, rules);
-    	}
-	}
-	
 	private void applyCounterPartyTickerRules(Class clazz, String method, String argument, OrderTo order) {
 		List<CounterPartyTickerRuleTo> rules = Arrays.asList(
     		serviceConnector.get(API_PREFIX + "/counterPartyTickerRules?idCounterparty={idCounterparty}", CounterPartyTickerRuleTo[].class, 
@@ -890,6 +886,31 @@ public class Validator {
     		.collect(Collectors.toList());
     	if (filteredRules.size() == 0) {
     		throw new CounterPartyTickerRuleCheckException(clazz, method, argument, order, rules);
+    	}
+	}
+	
+	private void applyTickerPortfolioRules(Class clazz, String method, String argument, OrderTo order) {
+		List<TickerPortfolioRuleTo> rules = Arrays.asList(
+    		serviceConnector.get(API_PREFIX + "/tickerPortfolioRules", TickerPortfolioRuleTo[].class));
+    	List<TickerPortfolioRuleTo> filteredRules = rules.stream()
+    		.filter(x -> x.idParty() == order.idInternalBu()
+    			&&	     x.idPortfolio() == (order.idIntPortfolio() != null?order.idIntPortfolio():0l) 
+    			&&       x.idTicker() == (order.idTicker() != null?order.idTicker():0l))
+    		.collect(Collectors.toList());
+    	if (filteredRules.size() == 0) {
+    		throw new TickerPortfolioRuleCheckException(clazz, method, argument, order, rules);
+    	}
+	}
+	
+	private void applyTickerRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg) {
+		List<TickerRefSourceRuleTo> rules = Arrays.asList(
+    		serviceConnector.get(API_PREFIX + "/tickerRefSourceRules", TickerRefSourceRuleTo[].class));
+    	List<TickerRefSourceRuleTo> filteredRules = rules.stream()
+    		.filter(x -> x.idRefSource() == (leg.getRefSource() != null?leg.getRefSource().getId():0)
+    			&&       x.idTicker() == (order.idTicker() != null?order.idTicker():0l))
+    		.collect(Collectors.toList());
+    	if (filteredRules.size() == 0) {
+    		throw new TickerRefSourceRuleCheckException(clazz, method, argument, order, leg, rules);
     	}
 	}
 

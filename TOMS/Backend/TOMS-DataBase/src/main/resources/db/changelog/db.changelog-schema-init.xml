@@ -966,10 +966,10 @@
 				<constraints nullable="true" />
 			</column>
 			<column name="ref_source_reference_id" type="int">
-				<constraints nullable="true" />
+				<constraints nullable="false" />
 			</column>
 			<column name="fx_index_ref_source_reference_id" type="int">
-				<constraints nullable="true" />
+				<constraints nullable="false" />
 			</column>
 		</createTable>
 		

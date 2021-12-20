@@ -59,12 +59,12 @@ public class ReferenceOrderLeg {
 	private Reference settleCurrency;  	
 	
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="ref_source_reference_id", nullable = true)
+	@JoinColumn(name="ref_source_reference_id", nullable = false)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.REF_SOURCE)
 	private Reference refSource;
 
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="fx_index_ref_source_reference_id", nullable = true)
+	@JoinColumn(name="fx_index_ref_source_reference_id", nullable = false)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.REF_SOURCE)
 	private Reference fxIndexRefSource;
 

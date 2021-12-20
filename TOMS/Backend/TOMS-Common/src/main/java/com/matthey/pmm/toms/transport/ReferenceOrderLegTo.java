@@ -51,17 +51,15 @@ public abstract class ReferenceOrderLegTo {
     @Nullable
 	public abstract String displayStringSettleCurrency();
     
-    @Nullable
     @Auxiliary
-	public abstract Long idRefSource();
+	public abstract long idRefSource();
 
     @Nullable
 	@Auxiliary
 	public abstract String displayStringRefSource();
     
-    @Nullable
     @Auxiliary
-	public abstract Long idFxIndexRefSource();
+	public abstract long idFxIndexRefSource();
     
     @Nullable
 	@Auxiliary
