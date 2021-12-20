@@ -75,6 +75,15 @@ public class User {
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.PORTFOLIO)
 	private List<Reference> tradeablePortfolios;
 	
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="default_internal_bunit_id", nullable = true)
+	private Party defaultInternalBu;
+	
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="default_internal_portfolio_reference_id", nullable = true)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.PORTFOLIO)
+	private Reference defaultInternalPortfolio;
+	
 	/**
 	 * For JPA purposes only. Do not use.
 	 */
@@ -84,7 +93,9 @@ public class User {
 	public User(final Long id, final String email, final String firstName, final String lastName,
 			final Reference role, final Reference lifecycleStatus, 
 			final List<Party> tradeableParties,
-			final List<Reference> tradeablePortfolios) {
+			final List<Reference> tradeablePortfolios,
+			final Party defaultInternalBu,
+			final Reference defaultInternalPortfolio) {
 		this.id = id;
 		this.email = email;
 		this.firstName = firstName;
@@ -101,6 +112,8 @@ public class User {
 		} else {
 			this.tradeablePortfolios = null;
 		}
+		this.defaultInternalBu = defaultInternalBu;
+		this.defaultInternalPortfolio = defaultInternalPortfolio;
 	}
 
 	public Long getId() {
@@ -165,6 +178,22 @@ public class User {
 
 	public void setTradeablePortfolios(List<Reference> tradeablePortfolios) {
 		this.tradeablePortfolios = tradeablePortfolios;
+	}
+
+	public Party getDefaultInternalBu() {
+		return defaultInternalBu;
+	}
+
+	public void setDefaultInternalBu(Party defaultInternalBu) {
+		this.defaultInternalBu = defaultInternalBu;
+	}
+
+	public Reference getDefaultInternalPortfolio() {
+		return defaultInternalPortfolio;
+	}
+
+	public void setDefaultInternalPortfolio(Reference defaultInternalPortfolio) {
+		this.defaultInternalPortfolio = defaultInternalPortfolio;
 	}
 
 	@Override

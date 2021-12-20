@@ -47,13 +47,17 @@ public class UserRepostoryTest extends AbstractRepositoryTestBase<User, Long, Us
 							Arrays.asList(partyConverter.toManagedEntity(TestBunit.TANAKA_KIKINZOKU_KOGYO_KK___BU.getEntity()),
 									partyConverter.toManagedEntity(TestBunit.BARCLAYS_BANK_PLC__LONDON__UK___BU.getEntity())), // tradeableParties
 							Arrays.asList(referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_UK_GOLD.getEntity()), // tradeablePortfolios
-									referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity()))),
+									referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity())),
+							partyConverter.toManagedEntity(TestBunit.JM_PMM_CN.getEntity()), 
+							referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity())),
 					new User(3333334l, "test2@matthey.com", 
 							"Firstname2", "Lastname2",
 							referenceCon.toManagedEntity(DefaultReference.USER_ROLE_EXTERNAL.getEntity()), 
 							referenceCon.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity()),
 							null, // tradeableParties
-							null));  // tradeablePortfolios
+							null, // tradeablePortfolios
+							null, // default Bunit
+							null)); // default Portfolio  
 			return users;
 		};
 	}

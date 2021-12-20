@@ -52,4 +52,12 @@ public abstract class UserTo {
     
     @Auxiliary
     public abstract List<Long> tradeablePortfolioIds();
+    
+    @Auxiliary
+    @Nullable
+    public abstract Long idDefaultInternalBu();
+
+    @Auxiliary
+    @Nullable
+    public abstract Long idDefaultInternalPortfolio();
 }

@@ -17,32 +17,38 @@ public enum TestUser {
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
-			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
+			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
+			null, null),
 	DENNIS_WILDISH(20035, "dennis.wildish@matthey.com", "Dennis", "Wildish", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
-			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
+			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
+			TestBunit.JM_PMM_UK, DefaultReference.PORTFOLIO_UK_PALLADIUM),
 	JENS_WAECHTER(23113, "jens.waetcher@matthey.com", "Jens", "Wächter", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
-			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
+			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
+			null, null),
 	MURALI_KRISHNAN(24208, "Murali.Krishnan@matthey.com", "Murali", "Krishnan", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
-			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
+			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
+			null, null),
 	ARINDAM_RAY(20014, "Arindam.Ray@matthey.com", "Arindam", "Ray", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
-			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
+			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
+			null, null),
 	NIVEDITH_SAJJA(20073, "Nivedith.Sajja3@matthey.com", "Nivedith", "Sajja", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
-			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
+			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
+			null, null),
 	JACOB_SMITH(20026, "Jacob.Smith@matthey.com", "Jacob", "Smith", DefaultReference.USER_ROLE_PMM_FO.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Arrays.asList(TestLenit.JM_PLC.getEntity(), TestBunit.JM_PMM_UK.getEntity()),
@@ -59,7 +65,8 @@ public enum TestUser {
 					DefaultReference.PORTFOLIO_UK_ZINC.getEntity(), DefaultReference.PORTFOLIO_UK_SILVER.getEntity(),	
 					DefaultReference.PORTFOLIO_UK_GAINS_AND_LOSSES.getEntity(), DefaultReference.PORTFOLIO_UK_MIGRATION.getEntity(),	
 					DefaultReference.PORTFOLIO_UK_UNDHEDGED.getEntity(), DefaultReference.PORTFOLIO_UK_AVERAGING.getEntity(),
-					DefaultReference.PORTFOLIO_UK_PHYSICAL_OFFSET.getEntity(), DefaultReference.PORTFOLIO_UK_NICKEL.getEntity())),
+					DefaultReference.PORTFOLIO_UK_PHYSICAL_OFFSET.getEntity(), DefaultReference.PORTFOLIO_UK_NICKEL.getEntity()),
+			TestBunit.JM_PMM_UK, DefaultReference.PORTFOLIO_UK_PLATINUM),
 	
 	PAT_MCCOURT(20944, "Pat.McCourt@jmusa.com", "Patrick", "McCourt", DefaultReference.USER_ROLE_PMM_FO.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
@@ -73,12 +80,14 @@ public enum TestUser {
 					DefaultReference.PORTFOLIO_US_RHODIUM.getEntity(), DefaultReference.PORTFOLIO_US_RUTHENIUM.getEntity(),
 					DefaultReference.PORTFOLIO_US_SILVER.getEntity(), DefaultReference.PORTFOLIO_US_GAINS_AND_LOSSES.getEntity(),
 					DefaultReference.PORTFOLIO_US_UNHEDGED.getEntity(), DefaultReference.PORTFOLIO_US_AVERAGING.getEntity(),
-					DefaultReference.PORTFOLIO_US_PHYSICAL_OFFSET.getEntity())),
+					DefaultReference.PORTFOLIO_US_PHYSICAL_OFFSET.getEntity()),
+			TestBunit.JM_PMM_US, DefaultReference.PORTFOLIO_US_PLATINUM),
 	ANDREW_BAYNES (23211, "Andrew.Baynes@matthey.com", "Andrew", "Baynes", DefaultReference.USER_ROLE_PMM_TRADER.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
-			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO)),
+			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
+			TestBunit.JM_PMM_US, DefaultReference.PORTFOLIO_US_PLATINUM),
 	;
 	
 	private final UserTo user;
@@ -87,7 +96,9 @@ public enum TestUser {
 			String lastName, ReferenceTo role, DefaultReference lifecycleStatus,
 			List<PartyTo> tradeableInternalPartyIds,
 			List<PartyTo> tradeableCounterPartyIds,
-			List<ReferenceTo> tradeablePortfolioIds) {
+			List<ReferenceTo> tradeablePortfolioIds,
+			TestBunit defaultInternalBu, 
+			DefaultReference defaultInternalPortfolio) {
 		user = ImmutableUserTo.builder()
 				.id(id)
 				.email(email)
@@ -98,6 +109,8 @@ public enum TestUser {
 				.tradeableCounterPartyIds(tradeableCounterPartyIds.stream().map(x -> x.id()).collect(Collectors.toList()))
 				.tradeableInternalPartyIds(tradeableInternalPartyIds.stream().map(x -> x.id()).collect(Collectors.toList()))
 				.tradeablePortfolioIds(tradeablePortfolioIds != null?tradeablePortfolioIds.stream().map(x -> x.id()).collect(Collectors.toList()):Arrays.asList())
+				.idDefaultInternalBu(defaultInternalBu != null?defaultInternalBu.getEntity().id():null)
+				.idDefaultInternalPortfolio(defaultInternalPortfolio != null?defaultInternalPortfolio.getEntity().id():null)
 				.build();
 	}
 

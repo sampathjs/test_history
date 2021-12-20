@@ -251,6 +251,8 @@
 			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 
+
+
 		<!-- User -->
 		<createTable tableName="user" schemaName="dbo">
 			<column name="user_id" type="int">
@@ -271,6 +273,12 @@
 			<column name="reference_lifecycle_status_id" type="int">
 				<constraints nullable="false" />
 			</column>
+			<column name="default_internal_bunit_id" type="int">
+				<constraints nullable="true" />
+			</column>
+			<column name="default_internal_portfolio_reference_id" type="int">
+				<constraints nullable="true" />
+			</column>
 		</createTable>
 
 		<addForeignKeyConstraint
@@ -278,6 +286,18 @@
 			constraintName="fk_user_role_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
 			referencedTableName="reference" validate="true" schemaName="dbo"/>
+
+		<addForeignKeyConstraint
+			baseColumnNames="default_internal_portfolio_reference_id" baseTableName="user"
+			constraintName="fk_user_default_internal_portfolio_reference_id" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="reference_id"
+			referencedTableName="reference" validate="true" schemaName="dbo"/>
+
+		<addForeignKeyConstraint
+			baseColumnNames="default_internal_bunit_id" baseTableName="user"
+			constraintName="fk_user_default_internal_bunit_id" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="party_id"
+			referencedTableName="party" validate="true" schemaName="dbo"/>
 		
 		<addForeignKeyConstraint
 			baseColumnNames="reference_lifecycle_status_id" baseTableName="user"

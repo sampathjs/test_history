@@ -141,7 +141,7 @@
          constraintName="unique_constraint_party"
          validate="true" schemaName="dbo"/>
          
-    <!-- user -->
+    <!-- User -->
     <createIndex indexName="i_user_id" tableName="user" unique="true" schemaName="dbo">
       <column name="user_id"/>
     </createIndex>  

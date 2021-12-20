@@ -77,6 +77,8 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 				.firstName(entity.getFirstName())
 				.lastName(entity.getLastName())
 				.roleId(entity.getRole().getId())
+				.idDefaultInternalBu(entity.getDefaultInternalBu() != null?entity.getDefaultInternalBu().getId():null)
+				.idDefaultInternalPortfolio(entity.getDefaultInternalPortfolio() != null?entity.getDefaultInternalPortfolio().getId():null)
 				.build();
 	}
 	
@@ -85,7 +87,9 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 	public User toManagedEntity (UserTo to) {
 		Reference role = loadRef(to, to.roleId());
 		Reference lifecycleStatus = loadRef(to, to.idLifecycleStatus());
-		
+		Reference defaultInternalPortfolio = to.idDefaultInternalPortfolio() != null?loadRef(to, to.idDefaultInternalPortfolio()):null;
+		Party defaultInternalBu = to.idDefaultInternalBu() != null?loadParty(to, to.idDefaultInternalBu()):null;
+
 		Optional<User> entity = entityRepo.findById(to.id());
 		if (entity.isPresent()) {
 			entity.get().setLifecycleStatus(lifecycleStatus);
@@ -106,12 +110,14 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 				List<Reference> tradeablePortfolios = entityRepo.findTradeablePortfolioById(entity.get().getId());
 				entity.get().setTradeablePortfolios(tradeablePortfolios);				
 			}
+			entity.get().setDefaultInternalBu(defaultInternalBu);
+			entity.get().setDefaultInternalPortfolio(defaultInternalPortfolio);
 			return entity.get();
 		}
-
 		List<Reference> tradeablePortfolios = entityRepo.findTradeablePortfolioById(entity.get().getId());
 		List<Party> tradeableParties = entityRepo.findTradeablePartiesById(entity.get().getId());
-		User newEntity = new User (to.id(), to.email(), to.firstName(), to.lastName(), role, lifecycleStatus, tradeableParties, tradeablePortfolios);
+		User newEntity = new User (to.id(), to.email(), to.firstName(), to.lastName(), role, lifecycleStatus, tradeableParties, 
+				tradeablePortfolios, defaultInternalBu, defaultInternalPortfolio);
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;
 	}
