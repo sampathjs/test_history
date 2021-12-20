@@ -59,7 +59,8 @@ public abstract class ReferenceOrderLegTo {
 	public abstract String displayStringRefSource();
     
     @Auxiliary
-	public abstract long idFxIndexRefSource();
+    @Nullable
+	public abstract Long idFxIndexRefSource();
     
     @Nullable
 	@Auxiliary

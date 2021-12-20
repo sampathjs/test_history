@@ -64,7 +64,7 @@ public class ReferenceOrderLeg {
 	private Reference refSource;
 
 	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="fx_index_ref_source_reference_id", nullable = false)
+	@JoinColumn(name="fx_index_ref_source_reference_id", nullable = true)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.REF_SOURCE)
 	private Reference fxIndexRefSource;
 

@@ -54,10 +54,10 @@ public enum TestReferenceOrder {
 	TEST_ORDER_3(100005, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
-			DefaultReference.CCY_EUR, "TEST_ORDER_3", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_UMICORE_BELGIUM,
+			DefaultReference.CCY_EUR, "TEST_ORDER_3", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
 			DefaultOrderStatus.REFERENCE_ORDER_FILLED, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
 			DefaultReference.TICKER_XRUUSD,
-			TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			TestUser.ANDREW_BAYNES, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_7), null, null,
 			 100d, 
 			// reference order fields

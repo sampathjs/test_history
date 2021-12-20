@@ -49,11 +49,13 @@ import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet6
 import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet7;
 import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet8;
 import com.matthey.pmm.toms.service.mock.testdata.TestLenit;
+import com.matthey.pmm.toms.service.mock.testdata.TestTickerFxRefSourceRule;
 import com.matthey.pmm.toms.service.mock.testdata.TestTickerPortfolioRule;
 import com.matthey.pmm.toms.service.mock.testdata.TestTickerRefSourceRule;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
@@ -248,7 +250,11 @@ public class OrderTestDataGenerator {
 		newTestOrder.setOrderStatus(orderStatusConverter.toManagedEntity(selectOneOf(DefaultOrderStatus.asList(), false)));
 		newTestOrder.setReference(selectOneOf(Arrays.asList("Reference 1", "Example Reference", "Very long long long long long long long long long long long long long long long long long long long long long long reference"), true));
 		newTestOrder.setTermCurrency(selectReferenceValue(DefaultReferenceType.CCY_CURRENCY, false));
-		newTestOrder.setUpdatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
+		newTestOrder.setUpdatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList().stream().filter(
+						x -> x.tradeableCounterPartyIds().contains(newTestOrder.getExternalBu().getId()) 
+					&&  x.tradeableInternalPartyIds().contains(newTestOrder.getInternalBu().getId())
+					&&  x.tradeablePortfolioIds().contains(newTestOrder.getIntPortfolio().getId()))
+				.collect(Collectors.toList()), false)));
 		DoubleSummaryStatistics summary = newTestOrder.getFills().stream().map(x -> x.getFillQuantity()).collect(Collectors.summarizingDouble(Double::doubleValue));
 		if (summary.getSum()/newTestOrder.getBaseQuantity() > newTestOrder.getFillPercentage()) {
 			newTestOrder.setBaseQuantity(Math.random() >= 0.5d?summary.getSum() + MAX_BASE_QUANTITY:summary.getSum());			
@@ -324,11 +330,19 @@ public class OrderTestDataGenerator {
 				selectedTickerRefSourceRule = selectOneOf(selectableRules, false);
 			} while (selectedTickerRefSourceRule == null);
 			newLeg.setRefSource(refRepo.findById(selectedTickerRefSourceRule.idRefSource()).get());
+			
+			TickerFxRefSourceRuleTo selectedTickerFxRefSourceRule=null;
+			do {
+				List<TickerFxRefSourceRuleTo> selectableRules = TestTickerFxRefSourceRule.asList().stream()
+					.filter(x -> x.idTicker() == newTestOrder.getTicker().getId())
+					.collect(Collectors.toList());
+				selectedTickerFxRefSourceRule = selectOneOf(selectableRules, false);
+			} while (selectedTickerFxRefSourceRule == null);
+			newLeg.setFxIndexRefSource(refRepo.findById(selectedTickerFxRefSourceRule.idRefSource()).get());
 			newLeg.setFixingStartDate(randomDate(false));
-			newLeg.setFxIndexRefSource(selectReferenceValue(DefaultReferenceType.REF_SOURCE, false));
 			newLeg.setNotional(Math.random()*MAX_REFERENCE_ORDER_LEG_NOTIONAL);
 			newLeg.setPaymentOffset(selectReferenceValue(DefaultReferenceType.SYMBOLIC_DATE, true));
-			newLeg.setSettleCurrency(selectReferenceValue(DefaultReferenceType.CCY_CURRENCY, true));
+			newLeg.setSettleCurrency(refRepo.findById(selectedTickerFxRefSourceRule.idTermCurrency()).get());
 			newLeg = referenceOrderLegRepository.save(newLeg);
 			newLegs.add(newLeg);
 		}

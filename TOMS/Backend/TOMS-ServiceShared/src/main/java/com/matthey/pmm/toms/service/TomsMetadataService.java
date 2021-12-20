@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
+import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
@@ -50,4 +51,10 @@ public interface TomsMetadataService {
     @ApiOperation("Retrieval of the mapping between ticker, index and reference sources")
 	@GetMapping("/tickerRefSourceRules")
 	public Set<TickerRefSourceRuleTo> getTickerRefSourceRules ();
+    
+    @Cacheable({"TickerFxRefSourceRules"})
+    @ApiOperation("Retrieval of the mapping between ticker, index, leg settle currency and reference sources")
+	@GetMapping("/tickerFxRefSourceRules")
+	public Set<TickerFxRefSourceRuleTo> getTickerFxRefSourceRules ();
+
 }

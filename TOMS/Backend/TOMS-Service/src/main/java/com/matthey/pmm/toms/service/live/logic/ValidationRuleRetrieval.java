@@ -15,6 +15,7 @@ import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
@@ -102,6 +103,27 @@ public class ValidationRuleRetrieval {
 			throw ex;
 		} 
 	}
-
-
+	
+	public List<TickerFxRefSourceRuleTo> retrieveTickerFxRefSourceRules() {
+		logger.info("Starting Retrieving Ticker FX Reference Source Rules from Endur");
+		try {
+			List<Reference> entities = refRepo.findByTypeIdIn(Arrays.asList(DefaultReferenceType.REF_SOURCE.getEntity().id(),
+					DefaultReferenceType.TICKER.getEntity().id(), DefaultReferenceType.CCY_CURRENCY.getEntity().id()));
+			
+			List<ReferenceTo> references = entities.stream()
+					.map(x -> refConverter.toTo(x))
+					.collect(Collectors.toList());
+			
+			List<TickerFxRefSourceRuleTo> rules = Arrays.asList(endurConnector.postWithResponse("/toms/endur/tickerFxRefSourceRule", TickerFxRefSourceRuleTo[].class,
+					references));
+			logger.info("Finished Retrieving Ticker FX Reference Source Rules from Endur");
+			return rules;
+		} catch (Exception ex) {
+			logger.error("Error while retrieving Ticker FX Reference Source Rules from Endur Connector: " + ex.getMessage());
+			for (StackTraceElement ste : ex.getStackTrace()) {
+				logger.error(ste.toString());
+			}
+			throw ex;
+		} 
+	}
 }

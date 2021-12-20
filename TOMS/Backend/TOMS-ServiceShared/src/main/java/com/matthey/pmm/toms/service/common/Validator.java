@@ -62,6 +62,7 @@ import com.matthey.pmm.toms.service.exception.IllegalValueException;
 import com.matthey.pmm.toms.service.exception.IllegalVersionException;
 import com.matthey.pmm.toms.service.exception.InvalidBelongsToException;
 import com.matthey.pmm.toms.service.exception.MissingLegException;
+import com.matthey.pmm.toms.service.exception.TickerFxRefSourceRuleCheckException;
 import com.matthey.pmm.toms.service.exception.TickerPortfolioRuleCheckException;
 import com.matthey.pmm.toms.service.exception.TickerRefSourceRuleCheckException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
@@ -75,6 +76,7 @@ import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderLegTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
+import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
@@ -695,6 +697,7 @@ public class Validator {
     	for (Long legId : order.legIds()) {
     		ReferenceOrderLeg leg = referenceOrderLegRepo.findById(legId).get();
     		applyTickerRefSourceRules(clazz, method, argument, order, leg);
+    		applyTickerFxRefSourceRules(clazz, method, argument, order, leg);
     	}
 	}
 	
@@ -914,6 +917,28 @@ public class Validator {
     	}
 	}
 
+	private void applyTickerFxRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg) {
+		Reference ticker = order.idTicker()!=null?refRepo.findById(order.idTicker()).get():null;
+		if (ticker == null || leg.getSettleCurrency() == null) {
+			return;
+		}
+		String fxCurrencyName = ticker.getValue().substring(4);
+		Reference fxCurrency = refRepo.findByValueAndTypeId(fxCurrencyName, DefaultReferenceType.CCY_CURRENCY.getEntity().id()).get();
+		if (fxCurrency.getId() == leg.getSettleCurrency().getId() ) {
+			return;
+		}
+		List<TickerFxRefSourceRuleTo> rules = Arrays.asList(
+    		serviceConnector.get(API_PREFIX + "/tickerFxRefSourceRules", TickerFxRefSourceRuleTo[].class));
+    	List<TickerFxRefSourceRuleTo> filteredRules = rules.stream()
+    		.filter(x -> x.idRefSource() == (leg.getFxIndexRefSource() != null?leg.getFxIndexRefSource().getId():0l)
+    			&&       x.idTicker() == (order.idTicker() != null?order.idTicker():0l)
+    			&&       x.idTermCurrency() == (leg.getSettleCurrency() != null?leg.getSettleCurrency().getId():0l))
+    		.collect(Collectors.toList());
+    	if (filteredRules.size() == 0) {
+    		throw new TickerFxRefSourceRuleCheckException(clazz, method, argument, order, leg, rules);
+    	}
+	}
+	
 	public void verifyOrderCommentBelongsToOrder(OrderComment orderComment, Order order,
 			Class clazz, String methodName, String argumentNameManager, String argumentNameManaged) {
 		for (OrderComment fromOrder : order.getOrderComments()) {

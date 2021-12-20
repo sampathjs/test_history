@@ -989,7 +989,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="fx_index_ref_source_reference_id" type="int">
-				<constraints nullable="false" />
+				<constraints nullable="true" />
 			</column>
 		</createTable>
 		

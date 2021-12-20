@@ -4,12 +4,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.matthey.pmm.toms.service.impl.MetadataControllerImpl;
 import com.matthey.pmm.toms.service.live.logic.ValidationRuleRetrieval;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
+import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
@@ -39,5 +42,10 @@ public class MetadataController extends MetadataControllerImpl {
     @ApiOperation("Retrieval of the mapping between ticker, index and reference sources")
 	public Set<TickerRefSourceRuleTo> getTickerRefSourceRules () {
     	return new HashSet<>(validationRuleRetriever.retrieveTickerRefSourceRules());    	
+    }
+    
+    @ApiOperation("Retrieval of the mapping between ticker, index, leg settle currency and reference sources")
+	public Set<TickerFxRefSourceRuleTo> getTickerFxRefSourceRules () {
+    	return new HashSet<>(validationRuleRetriever.retrieveTickerFxRefSourceRules());
     }
 }

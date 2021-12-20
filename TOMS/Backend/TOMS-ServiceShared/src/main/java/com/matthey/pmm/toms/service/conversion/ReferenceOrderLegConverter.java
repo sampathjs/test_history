@@ -46,7 +46,7 @@ public class ReferenceOrderLegConverter extends EntityToConverter<ReferenceOrder
 	
 	@Override
 	public ReferenceOrderLeg toManagedEntity (ReferenceOrderLegTo to) {
-		Reference fxIndexRefSource = loadRef(to, to.idFxIndexRefSource());
+		Reference fxIndexRefSource = to.idFxIndexRefSource() != null?loadRef(to, to.idFxIndexRefSource()):null;
 		Reference paymentOffset = to.idPaymentOffset() != null?loadRef (to, to.idPaymentOffset()):null;
 		Reference refSource = loadRef (to, to.idRefSource());
 		Reference settleCurrency = to.idSettleCurrency() != null?loadRef(to, to.idSettleCurrency()):null;

@@ -9,9 +9,11 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.service.misc.ReportBuilderHelper;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ImmutableCounterPartyTickerRuleTo;
+import com.matthey.pmm.toms.transport.ImmutableTickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.ImmutableTickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.ImmutableTickerRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 import com.olf.openrisk.application.Session;
@@ -124,6 +126,47 @@ public class ValidationRuleService {
 					.idIndex(reportData.getInt ("index_id", row))
 					.idTicker(tickerId)
 					.idRefSource(refSourceId)
+					.build();
+			rules.add(rule);
+		}
+		return rules;				
+	}
+	
+	public List<TickerFxRefSourceRuleTo> getTickerFxRefSourceRules(List<ReferenceTo> references) {
+		String reportName = ReportBuilderHelper.retrieveReportBuilderNameForSyncCategory(session.getIOFactory(), "RuleTickerFxRefSource");
+		Table reportData = ReportBuilderHelper.runReport(session.getTableFactory(), reportName);
+		List<TickerFxRefSourceRuleTo> rules = new ArrayList<>(reportData.getRowCount());
+
+		Map<String, Long> tickerEndurToTomsIdMap = new HashMap<>();
+		references.stream()
+			.filter(x -> x.idType() == DefaultReferenceType.TICKER.getEntity().id())
+			.forEach(x -> tickerEndurToTomsIdMap.put(x.name(), x.id()));
+		
+		Map<String, Long> refSourceEndurToTomsIdMap = new HashMap<>();
+		references.stream()
+			.filter(x -> x.idType() == DefaultReferenceType.REF_SOURCE.getEntity().id())
+			.forEach(x -> tickerEndurToTomsIdMap.put(x.name(), x.id()));		
+
+		Map<String, Long> termCurrencyEndurToTomsIdMap = new HashMap<>();
+		references.stream()
+			.filter(x -> x.idType() == DefaultReferenceType.CCY_CURRENCY.getEntity().id())
+			.forEach(x -> termCurrencyEndurToTomsIdMap.put(x.name(), x.id()));		
+
+		
+		for (int row = reportData.getRowCount()-1; row >= 0; row--) {
+			long tickerId = tickerEndurToTomsIdMap.get(reportData.getString("toms_product", row));
+			long refSourceId = refSourceEndurToTomsIdMap.get(reportData.getString("ref_source_name", row));
+			long termCurrencyId = termCurrencyEndurToTomsIdMap.get(reportData.getString("settle_currency_id", row));
+			
+			TickerFxRefSourceRuleTo rule = ImmutableTickerFxRefSourceRuleTo.builder()
+					.displayStringIndex(reportData.getString("index_name", row))
+					.displayStringTicker(reportData.getString("toms_product", row))
+					.displayStringRefSource(reportData.getString("ref_source_name", row))
+					.displayStringTermCurrency(reportData.getString("settle_currency", row))
+					.idIndex(reportData.getInt ("index_id", row))
+					.idTicker(tickerId)
+					.idRefSource(refSourceId)
+					.idTermCurrency(termCurrencyId)
 					.build();
 			rules.add(rule);
 		}

@@ -36,6 +36,7 @@ import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ImmutableCounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TwoListsTo;
@@ -115,6 +116,13 @@ public class TomsController {
     	return validationRuleService.getTickerRefSourceRules(references);
     }    
 
+    @PostMapping("tickerFxRefSourceRule")
+    public List<TickerFxRefSourceRuleTo> retrieveTickerFxRefSourceRules (List<ReferenceTo> references) {
+    	ValidationRuleService validationRuleService = new ValidationRuleService(session);
+    	return validationRuleService.getTickerFxRefSourceRules(references);
+    }    
+
+    
 	private void addReferenceDataDiff(List<ReferenceTo> knownReferenceData, List<ReferenceTo> globalDiffList,
 			AbstractReferenceService service, List<DefaultReferenceType> expectedTypes) {
 		globalDiffList.addAll(service.createToListDifference(knownReferenceData.stream()

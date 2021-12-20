@@ -46,7 +46,7 @@ public class ReferenceOrderLegRepostoryTest extends AbstractRepositoryTestBase<R
 							30d, 
 							referenceCon.toManagedEntity(DefaultReference.CCY_GBP.getEntity()),
 							referenceCon.toManagedEntity(DefaultReference.REF_SOURCE_JM_HK_CLOSING.getEntity()),
-							referenceCon.toManagedEntity(DefaultReference.REF_SOURCE_BLOOMBERG.getEntity())));
+							null));
 			return legs;
 		};
 	}
