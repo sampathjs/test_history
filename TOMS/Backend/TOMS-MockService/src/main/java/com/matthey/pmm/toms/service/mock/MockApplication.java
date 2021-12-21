@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -39,10 +40,14 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EntityScan (basePackages = {"com.matthey.pmm.toms.model"})
 @EnableWebMvc
 public class MockApplication implements WebMvcConfigurer {
+	 private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
+	            "classpath:/META-INF/resources/", "classpath:/resources/",
+	            "classpath:/static/", "classpath:/public/" };
+	
     public static void main(String[] args) {
         SpringApplication.run(MockApplication.class, args);
     }
-    
+        
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
@@ -51,6 +56,8 @@ public class MockApplication implements WebMvcConfigurer {
         registry
             .addResourceHandler("/webjars/**")
             .addResourceLocations("classpath:/META-INF/resources/webjars/");
+        registry.addResourceHandler("/**")
+        	.addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
     }
 
     @Bean
