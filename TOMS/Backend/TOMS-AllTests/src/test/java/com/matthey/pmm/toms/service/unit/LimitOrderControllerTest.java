@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -43,13 +44,13 @@ public class LimitOrderControllerTest {
 	
 	
 	@Before
-	protected void initTest () {
+	public void initTest () {
 		limitOrderToBeDeleted = new ArrayList<>(5);
 		referenceOrderToBeDeleted = new ArrayList<>(5);
 	}
 	
 	@After
-	protected void clearAfterTest () {
+	public void clearAfterTest () {
 		for (LimitOrderTo order : limitOrderToBeDeleted) {
 			limitOrderRepo.deleteById(new OrderVersionId(order.id(), order.version()));
 		}
@@ -58,7 +59,7 @@ public class LimitOrderControllerTest {
 		}
 	}
 	
-	protected long submitNewLimitOrder (LimitOrderTo orderTo, boolean expectSuccess) {
+	private long submitNewLimitOrder (LimitOrderTo orderTo, boolean expectSuccess) {
 		LimitOrderTo withResetOrderIdAndVersion = ImmutableLimitOrderTo.builder()
 				.from(orderTo)
 				.id(0l)
@@ -108,6 +109,11 @@ public class LimitOrderControllerTest {
 				.build();
 		referenceOrderToBeDeleted.add(versionInc);
 		return versionInc;
+	}
+	
+	@Test
+	public void test1 () {
+		
 	}
 	
 }
