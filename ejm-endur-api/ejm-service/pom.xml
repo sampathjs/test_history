@@ -9,10 +9,18 @@
     <artifactId>ejm-service</artifactId>
     <description>eJM Service for eJM Endur API Solution</description>
     <properties>
+    	<log4j2.version>2.16.0</log4j2.version>
         <java.version>11</java.version>
     </properties>
     <dependencyManagement>
         <dependencies>
+	        <dependency>
+	               <groupId>org.apache.logging.log4j</groupId>
+	               <artifactId>log4j-bom</artifactId>
+	               <version>2.16.0</version>
+	                <scope>import</scope>
+	               <type>pom</type>
+	        </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
