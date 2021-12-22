@@ -4,12 +4,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
@@ -20,12 +24,14 @@ import com.matthey.pmm.toms.transport.UserTo;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @AutoConfigureTestDatabase(replace=Replace.NONE)
-@SpringBootTest(classes={TestServiceApplication.class})
+@SpringBootTest(webEnvironment =  WebEnvironment.DEFINED_PORT, classes={TestServiceApplication.class})
+@ContextConfiguration
 public class UserControllerTest {
 	@Autowired
 	protected MockUserController userController;	
 	
 	@Test
+	@Transactional
 	public void testAllUsersPresent() {
 		Set<UserTo> allUsers = userController.getUser(null, null, null);
 		assertThat(allUsers.size()).isEqualTo(TestUser.asList().size());
@@ -34,6 +40,7 @@ public class UserControllerTest {
 	}
 	
 	@Test
+	@Transactional
 	public void testQuerySingleUserId() {
 		Set<UserTo> allUsers = userController.getUser(TestUser.ANDREW_BAYNES.getEntity().id(), null, null);
 		assertThat(allUsers.size()).isEqualTo(1l);
@@ -41,6 +48,7 @@ public class UserControllerTest {
 	}
 	
 	@Test
+	@Transactional
 	public void testQueryByEmail() {
 		Set<UserTo> allUsers = userController.getUser(null, TestUser.ANDREW_BAYNES.getEntity().email(), null);
 		assertThat(allUsers.size()).isEqualTo(1l);
@@ -48,6 +56,7 @@ public class UserControllerTest {
 	}
 
 	@Test
+	@Transactional
 	public void testQueryByRole() {
 		Set<UserTo> allUsers = userController.getUser(null, null, DefaultReference.USER_ROLE_SERVICE_USER.getEntity().id());
 		assertThat(allUsers.size()).isEqualTo(TestUser.asListByRole(DefaultReference.USER_ROLE_SERVICE_USER).size());

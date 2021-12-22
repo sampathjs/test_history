@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -171,6 +173,7 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 	}
 	
 	@Override
+	@Transactional
 	public ReferenceOrder toManagedEntity (ReferenceOrderTo to) {	
 		// Order
 		Reference orderTypeName = to.idOrderType()!= null?loadRef(to, DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity().id()):null;
@@ -230,7 +233,7 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 		if (existingEntity.isPresent()) {
 			// Order
 			existingEntity.get().setOrderTypeName(orderTypeName);
-			existingEntity.get().setVersion(existingEntity.get().getVersion()+1);
+			existingEntity.get().setVersion(existingEntity.get().getVersion());
 			existingEntity.get().setInternalBu(internalBu);
 			existingEntity.get().setExternalBu(externalBu);
 			existingEntity.get().setInternalLe(internalLe);

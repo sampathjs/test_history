@@ -65,9 +65,9 @@ public class OrderTestDataGenerator {
 
 	private static final double MAX_BASE_QUANTITY = 50000d;
 
-	private static final int MIN_YEAR_DATES = 2000;
+	private static final int MIN_YEAR_DATES = 2020;
 
-	private static final int MAX_YEAR_DATES = 2030;
+	private static final int MAX_YEAR_DATES = 2021;
 
 	private static final int MAX_CREDIT_CHECK_COUNT = 5;
 
@@ -210,7 +210,6 @@ public class OrderTestDataGenerator {
 		newTestOrder.setBuySell(selectReferenceValue(DefaultReferenceType.BUY_SELL, false));
 		newTestOrder.setCreatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
 		newTestOrder.setBaseQuantity(Math.random() * MAX_BASE_QUANTITY);
-		newTestOrder.setBaseCurrency(selectReferenceValue(DefaultReferenceType.CCY_METAL, false));
 		newTestOrder.setBaseQuantityUnit(selectReferenceValue(DefaultReferenceType.QUANTITY_UNIT, false));
 		newTestOrder.setCreatedAt(randomDate(false));
 		newTestOrder.setCreditChecks(createCreditCheckList());
@@ -224,7 +223,7 @@ public class OrderTestDataGenerator {
 		newTestOrder.setTicker(refRepo.findById(selectedCounterPartyTickerRule.idTicker()).get());
 		newTestOrder.setMetalForm(refRepo.findById(selectedCounterPartyTickerRule.idMetalForm()).get());
 		newTestOrder.setMetalLocation(refRepo.findById(selectedCounterPartyTickerRule.idMetalLocation()).get());
-		
+		newTestOrder.setBaseCurrency(refRepo.findByValueAndTypeId(newTestOrder.getTicker().getValue().substring(4),DefaultReferenceType.CCY_CURRENCY.getEntity().id()).get());	
 
 		newTestOrder.setExternalLe(newTestOrder.getExternalBu().getLegalEntity());
 		newTestOrder.setExtPortfolio(selectReferenceValue(DefaultReferenceType.PORTFOLIO, true));

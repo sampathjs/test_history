@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -164,6 +166,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 	}
 	
 	@Override
+	@Transactional
 	public LimitOrder toManagedEntity (LimitOrderTo to) {	
 		System.out.println("\n********************\n");
 		System.out.println(to);
@@ -230,7 +233,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 		if (existingEntity.isPresent()) {
 			// Order
 			existingEntity.get().setOrderTypeName(orderTypeName);
-			existingEntity.get().setVersion(existingEntity.get().getVersion()+1);
+			existingEntity.get().setVersion(existingEntity.get().getVersion());
 			existingEntity.get().setInternalBu(internalBu);
 			existingEntity.get().setExternalBu(externalBu);
 			existingEntity.get().setInternalLe(internalLe);

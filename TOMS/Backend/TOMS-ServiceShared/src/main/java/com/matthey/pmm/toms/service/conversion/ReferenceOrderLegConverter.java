@@ -3,6 +3,8 @@ package com.matthey.pmm.toms.service.conversion;
 import java.util.Date;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +47,7 @@ public class ReferenceOrderLegConverter extends EntityToConverter<ReferenceOrder
 	}
 	
 	@Override
+	@Transactional
 	public ReferenceOrderLeg toManagedEntity (ReferenceOrderLegTo to) {
 		Reference fxIndexRefSource = to.idFxIndexRefSource() != null?loadRef(to, to.idFxIndexRefSource()):null;
 		Reference paymentOffset = to.idPaymentOffset() != null?loadRef (to, to.idPaymentOffset()):null;

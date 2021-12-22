@@ -782,21 +782,21 @@ public class Validator {
     	}    	
     	if (!createdBy.get().getTradeableParties().contains(internalBunit.get())) {
     		throw new IllegalValueException (clazz, method, argument + ".idInternalBu", 
-    				"Not matching allowed internal BU for provided createdBy " + createdBy.get().getId() + " :" + 
+    				"Internal BU for provided createdBy " + createdBy.get().getId() + " is not in the list of allowed internal bunits:" + 
     						createdBy.get().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_INTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList())
     						, "" + order.idInternalBu());
     	}
     	
     	if (!createdBy.get().getTradeableParties().contains(externalBunit.get())) {
     		throw new IllegalValueException (clazz, method, argument + ".idExternalBu", 
-    				"Not matching allowed external BU for provided createdBy " + createdBy.get().getId() + " :" + 
+    				"External BU for provided createdBy " + createdBy.get().getId() + " is not on the list of allowed external bunits:" + 
     						createdBy.get().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList()), 
     						"" + order.idExternalBu());
     	}
 
     	if (order.idIntPortfolio() != null && !createdBy.get().getTradeablePortfolios().contains (intPortfolio.get())) {
     		throw new IllegalValueException (clazz, method, argument + ".idIntPortfolio", 
-    				"Not matching allowed internal portfolios for provided createdBy " + createdBy.get().getId() + " :" + createdBy.get().getTradeablePortfolios(), "" + order.idIntPortfolio());
+    				"Internal portfolio for provided createdBy " + createdBy.get().getId() + " is not in the list of allowed internal portfolios:" + createdBy.get().getTradeablePortfolios(), "" + order.idIntPortfolio());
     	}
     	
 		try {

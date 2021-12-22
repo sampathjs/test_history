@@ -11,12 +11,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +29,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,6 +46,7 @@ import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.ReferenceOrderLeg;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.OrderRepository;
+import com.matthey.pmm.toms.repository.OrderStatusRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.service.TomsOrderService;
@@ -52,7 +55,6 @@ import com.matthey.pmm.toms.service.common.Validator;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
-import com.matthey.pmm.toms.service.exception.IllegalSortColumnException;
 import com.matthey.pmm.toms.service.exception.IllegalStateException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
@@ -68,6 +70,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
 @PropertySource("classpath:mapping/Order.properties")
+@Transactional
 public abstract class OrderControllerImpl implements TomsOrderService {
 	@Autowired
 	protected Validator validator;
@@ -86,6 +89,10 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 
 	@Autowired
 	protected OrderRepository orderRepo;
+
+	@Autowired
+	protected OrderStatusRepository orderStatusRepo;
+
 	
 	@Autowired
 	protected ReferenceOrderConverter referenceOrderConverter;	
@@ -102,6 +109,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Value("#{${search.mapping.referenceOrder}}")  
 	private Map<String,String> referenceOrderSearchMap;
 	
+    @PersistenceContext
+    private EntityManager entityManager;
 	
 	// all order types
     @Override
@@ -333,21 +342,23 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	}
 
 	@ApiOperation("Creation of a new Limit Order")
+	@Transactional
 	public long postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
     	// validation checks
     	validator.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null);
 	
 		LimitOrder managedEntity = limitOrderConverter.toManagedEntity(newLimitOrder);
 		managedEntity.setCreatedAt(new Date());
+		managedEntity.setOrderStatus(orderStatusRepo.findById(DefaultOrderStatus.LIMIT_ORDER_PENDING.getEntity().id()).get());
 		managedEntity = limitOrderRepo.save(managedEntity);
     	return managedEntity.getOrderId();
     }
     
     @ApiOperation("Update of an existing Limit Order")
+	@Transactional
 	public void updateLimitOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder) {
     	// identify the existing limit order
-    	Optional<LimitOrder> oldLimitOrderManaged = limitOrderRepo.findLatestByOrderId(existingLimitOrder.id());
-    	
+    	Optional<LimitOrder> oldLimitOrderManaged = limitOrderRepo.findLatestByOrderId(existingLimitOrder.id());    	
     	if (oldLimitOrderManaged.isEmpty()) {
     		throw new UnknownEntityException (this.getClass(), "updateLimitOrder", "existingLimitOrder.id" , "Limit Order", "" + existingLimitOrder.id());
     	}
@@ -356,7 +367,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 
     	LimitOrder existingLimitOrderManaged = limitOrderConverter.toManagedEntity(existingLimitOrder);
     	existingLimitOrderManaged.setVersion(existingLimitOrderManaged.getVersion()+1);
-    	limitOrderRepo.save(existingLimitOrderManaged);
+    	limitOrderRepo.save(new LimitOrder(existingLimitOrderManaged));
     }
 	
 	@Override
@@ -507,12 +518,14 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	}
     
     @ApiOperation("Creation of a new Reference Order")
+	@Transactional
 	public long postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {
     	// validation checks
     	validator.validateReferenceOrderFields (this.getClass(), "postReferenceOrder", "newReferenceOrder", newReferenceOrder, true, null);
 	
 		ReferenceOrder managedEntity = referenceOrderConverter.toManagedEntity(newReferenceOrder);
 		managedEntity.setCreatedAt(new Date());
+		managedEntity.setOrderStatus(orderStatusRepo.findById(DefaultOrderStatus.REFERENCE_ORDER_PENDING.getEntity().id()).get());
 		managedEntity = referenceOrderRepo.save(managedEntity);
     	return managedEntity.getOrderId();
     }
@@ -581,6 +594,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     
     @ApiOperation("Update of an existing Reference Order Leg")
     @PutMapping("/referenceOrder/{referenceOrderId}/version/{version}/legs/{legId}")
+	@Transactional
 	public void updateReferenceOrderLeg (@ApiParam(value = "The ID of the reference order", example = "100005", required = true) @PathVariable(required=true) Long referenceOrderId,
 			@ApiParam(value = "The version of the reference order, has to be the latest version.", example = "1", required = true) @PathVariable(required=true) int version,
 			@ApiParam(value = "The ID of the reference order leg", example = "1000001", required = true) @PathVariable(required=true) int legId,
