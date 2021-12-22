@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -42,8 +43,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
   Set<Long> findTradeablePortfolioIdById (@Param("userId") long userId);
   
   @Query("SELECT u.tradeableParties  FROM User u WHERE u.id = :userId") 
+  @Cacheable({"UserFindTradeablePartiesById"})
   List<Party> findTradeablePartiesById (@Param("userId") long userId);
 
   @Query("SELECT u.tradeablePortfolios  FROM User u WHERE u.id = :userId") 
+  @Cacheable({"UserFindTradeablePortfoliosById"})
   List<Reference> findTradeablePortfolioById (@Param("userId") long userId);
 }

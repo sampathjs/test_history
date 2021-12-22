@@ -3,6 +3,8 @@ package com.matthey.pmm.toms.repository;
 import java.util.List;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -13,6 +15,7 @@ import com.matthey.pmm.toms.model.OrderVersionId;
 import com.matthey.pmm.toms.model.ReferenceOrder;
 
 @Repository
+@Transactional
 public interface ReferenceOrderRepository  extends PagingAndSortingRepository<ReferenceOrder, OrderVersionId>, JpaSpecificationExecutor<ReferenceOrder> {
    List<ReferenceOrder> findByOrderId(long orderId);
 

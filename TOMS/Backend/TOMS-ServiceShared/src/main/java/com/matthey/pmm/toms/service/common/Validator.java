@@ -42,6 +42,7 @@ import com.matthey.pmm.toms.repository.FillRepository;
 import com.matthey.pmm.toms.repository.IndexRepository;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
+import com.matthey.pmm.toms.repository.OrderStatusRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ProcessTransitionRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
@@ -108,6 +109,10 @@ public class Validator {
 
 	@Autowired
 	protected OrderCommentRepository orderCommentRepo;
+
+	@Autowired
+	protected OrderStatusRepository orderStatusRepo;
+
 	
 	@Autowired
 	protected ProcessTransitionConverter processTransitionConverter;
@@ -390,6 +395,14 @@ public class Validator {
 					if (!oldCollection.containsAll(newCollection) || !newCollection.containsAll(oldCollection)) {
 						throw new IllegalValueException (clazz, method, argument + "." + methodName, oldCollection.toString(), newCollection.toString());
 					}
+				} else if (returnValueOld instanceof String) {
+					String oldString = (String) returnValueOld;
+					String newString = (String) returnValueNew;
+					if ((oldString == null && newString != null)
+						|| (newString == null && oldString != null)
+						|| (!oldString.equals(newString))) {
+						throw new IllegalValueException (clazz, method, argument + "." + methodName, oldString, newString);
+					}
 				} else {
 					if (!returnValueOld.equals(returnValueNew)) {
 						throw new IllegalValueException (clazz, method, argument + "." + methodName, returnValueOld.toString(), returnValueNew.toString());						
@@ -624,8 +637,8 @@ public class Validator {
     			List<ProcessTransition> possibleTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(
         				DefaultReference.LIMIT_ORDER_TRANSITION.getEntity().id(),  oldLimitOrder.idOrderStatus());
     			
-    			Reference fromStatusName = refRepo.findById(oldLimitOrder.idOrderStatus()).get();    			
-    			Reference toStatusName =  refRepo.findById (order.idOrderStatus()).get();
+    			Reference fromStatusName = orderStatusRepo.findById(oldLimitOrder.idOrderStatus()).get().getOrderStatusName();    			
+    			Reference toStatusName =  orderStatusRepo.findById(order.idOrderStatus()).get().getOrderStatusName();
     			    			    			
         		List<String> possibleTransitionsText = possibleTransitions.stream()
         				.map(x -> x.getFromStatusId() + " -> " + 

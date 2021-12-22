@@ -123,6 +123,21 @@ public enum DefaultProcessTransition {
 					LimitOrderTo.UNCHANGEABLE_ATTRIBUTES_MATURED.stream())
 					.collect(Collectors.toList()),
 			17000l),
+	LIMIT_ORDER_REJECTED_TO_MATURED(22, DefaultReference.LIMIT_ORDER_TRANSITION, 
+			DefaultOrderStatus.LIMIT_ORDER_REJECTED, DefaultOrderStatus.LIMIT_ORDER_MATURED,
+			Stream.concat(
+					OrderTo.UNCHANGEABLE_ATTRIBUTES_MATURED.stream(),
+					LimitOrderTo.UNCHANGEABLE_ATTRIBUTES_MATURED.stream())
+					.collect(Collectors.toList()),
+			18000l),	
+	LIMIT_ORDER_PART_FILLED_TO_FILLED(23, DefaultReference.LIMIT_ORDER_TRANSITION, 
+			DefaultOrderStatus.LIMIT_ORDER_PART_FILLED, DefaultOrderStatus.LIMIT_ORDER_FILLED,
+			Stream.concat(
+					OrderTo.UNCHANGEABLE_ATTRIBUTES_FILLED.stream(),
+					LimitOrderTo.UNCHANGEABLE_ATTRIBUTES_FILLED.stream())
+					.collect(Collectors.toList()),
+			19000l),
+	
 
 	REFERENCE_ORDER_PENDING_TO_PENDING(100, DefaultReference.REFERENCE_ORDER_TRANSITION, 
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultOrderStatus.REFERENCE_ORDER_PENDING,  Arrays.asList(),

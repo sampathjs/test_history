@@ -57,6 +57,8 @@ import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
 import com.matthey.pmm.toms.service.exception.IllegalStateException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
+import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
+import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
 import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderLegTo;
@@ -365,9 +367,11 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     	validator.validateLimitOrderFields (this.getClass(), "updateLimitOrder", "existingLimitOrder", existingLimitOrder, false, 
     			limitOrderConverter.toTo(oldLimitOrderManaged.get()));
 
+    	existingLimitOrder = ImmutableLimitOrderTo.builder()
+    			.from(existingLimitOrder)
+    			.version(existingLimitOrder.version()+1)
+    			.build();
     	LimitOrder existingLimitOrderManaged = limitOrderConverter.toManagedEntity(existingLimitOrder);
-    	existingLimitOrderManaged.setVersion(existingLimitOrderManaged.getVersion()+1);
-    	limitOrderRepo.save(new LimitOrder(existingLimitOrderManaged));
     }
 	
 	@Override
@@ -531,6 +535,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     }
     
     @ApiOperation("Update of an existing Reference Order")
+    @Transactional
 	public void updateReferenceOrder (@ApiParam(value = "The Reference Order to update. Order ID has to denote an existing Reference Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder) {
     	Optional<ReferenceOrder> oldOrderManaged = referenceOrderRepo.findLatestByOrderId(existingReferenceOrder.id());
     	
@@ -539,10 +544,11 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     	}
     	validator.validateReferenceOrderFields (this.getClass(), "updateReferenceOrder", "existingReferenceOrder", existingReferenceOrder, false, 
     			referenceOrderConverter.toTo(oldOrderManaged.get()));
-
+    	existingReferenceOrder = ImmutableReferenceOrderTo.builder()
+    			.from(existingReferenceOrder)
+    			.version(existingReferenceOrder.version()+1)
+    			.build();
     	ReferenceOrder existingOrderManaged = referenceOrderConverter.toManagedEntity(existingReferenceOrder);
-    	existingOrderManaged.setVersion(existingOrderManaged.getVersion()+1);
-    	referenceOrderRepo.save(existingOrderManaged);
     }
     
     @Cacheable({"ReferenceOrderLeg"})

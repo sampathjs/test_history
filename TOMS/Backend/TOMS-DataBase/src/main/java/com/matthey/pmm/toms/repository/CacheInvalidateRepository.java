@@ -3,6 +3,8 @@ package com.matthey.pmm.toms.repository;
 import java.util.Date;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.matthey.pmm.toms.model.CacheInvalidate;
 
 @Repository
+@Transactional
 public interface CacheInvalidateRepository extends JpaRepository<CacheInvalidate, Long> {
 	public Set<CacheInvalidate> findByCutOffDateTimeAfter(Date cutOffDateTime);
 	

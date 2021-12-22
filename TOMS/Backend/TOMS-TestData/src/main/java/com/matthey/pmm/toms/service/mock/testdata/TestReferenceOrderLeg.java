@@ -27,6 +27,16 @@ public enum TestReferenceOrderLeg {
 			30.0d, DefaultReference.CCY_EUR, DefaultReference.REF_SOURCE_JM_HK_OPENING, DefaultReference.REF_SOURCE_BFIX_1400),
 	TEST_LEG_9(100008l, "2008-04-15 16:00:00", "2008-05-30 08:00:00", DefaultReference.SYMBOLIC_DATE_1D,
 			30.0d, DefaultReference.CCY_EUR, DefaultReference.REF_SOURCE_JM_HK_OPENING, DefaultReference.REF_SOURCE_BFIX_1400),
+	TEST_LEG_10(100009l, "2008-04-15 16:00:00", "2008-05-30 08:00:00", DefaultReference.SYMBOLIC_DATE_1D,
+			30.0d, DefaultReference.CCY_EUR, DefaultReference.REF_SOURCE_JM_HK_OPENING, DefaultReference.REF_SOURCE_BFIX_1400),
+	TEST_LEG_11(100010l, "2008-04-15 16:00:00", "2008-05-30 08:00:00", DefaultReference.SYMBOLIC_DATE_1D,
+			30.0d, DefaultReference.CCY_EUR, DefaultReference.REF_SOURCE_JM_HK_OPENING, DefaultReference.REF_SOURCE_BFIX_1400),
+	TEST_LEG_12(100011l, "2008-04-15 16:00:00", "2008-05-30 08:00:00", DefaultReference.SYMBOLIC_DATE_1D,
+			30.0d, DefaultReference.CCY_EUR, DefaultReference.REF_SOURCE_JM_HK_OPENING, DefaultReference.REF_SOURCE_BFIX_1400),
+	TEST_LEG_13(100012l, "2008-04-15 16:00:00", "2008-05-30 08:00:00", DefaultReference.SYMBOLIC_DATE_1D,
+			30.0d, DefaultReference.CCY_EUR, DefaultReference.REF_SOURCE_JM_HK_OPENING, DefaultReference.REF_SOURCE_BFIX_1400),
+	TEST_LEG_14(100013l, "2008-04-15 16:00:00", "2008-05-30 08:00:00", DefaultReference.SYMBOLIC_DATE_1D,
+			30.0d, DefaultReference.CCY_EUR, DefaultReference.REF_SOURCE_JM_HK_OPENING, DefaultReference.REF_SOURCE_BFIX_1400),
 	;
 	
 	private ReferenceOrderLegTo referenceOrderLeg;

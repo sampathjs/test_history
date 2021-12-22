@@ -27,42 +27,42 @@ public abstract class LimitOrderTo extends OrderTo {
 	 */
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_FILLED = Arrays.asList(
 			  "settleDate", "limitPrice", 
-			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
+			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood", "idPriceType"
 			);
 	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED = Arrays.asList(
 			  "settleDate", "limitPrice", 
-			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
+			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood", "idPriceType"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED = Arrays.asList(
 			  "settleDate", "limitPrice", 
-			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
+			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood", "idPriceType"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_EXPIRED = Arrays.asList(
 			  "settleDate", "limitPrice",
-			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
+			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood", "idPriceType"
 			);	
 	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED_TO_CANCELLED_EXPIRED = Arrays.asList(
 			  "settleDate", "limitPrice",
-			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
+			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood", "idPriceType"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_PULLED = Arrays.asList(
 			  "settleDate", "limitPrice",
-			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
+			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood", "idPriceType"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_REJECTED = Arrays.asList(
 			  "settleDate", "limitPrice",
-			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
+			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood", "idPriceType"
 			);
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_MATURED = Arrays.asList(
 			  "settleDate", "limitPrice",
-			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood"
+			  "idStopTriggerType", "idCurrencyCrossMetal", "executionLikelihood", "idPriceType"
 			);
 
 	

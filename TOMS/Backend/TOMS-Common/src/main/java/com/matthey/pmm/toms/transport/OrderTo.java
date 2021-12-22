@@ -26,14 +26,14 @@ public abstract class OrderTo {
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", "idPriceType",
+					"createdAt", "idCreatedByUser", 
 					"reference", "idMetalForm", "idMetalLocation");
 	
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_FILLED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", "idPriceType",
+					"createdAt", "idCreatedByUser", 
 					"reference", "idMetalForm", "idMetalLocation");
 
 	
@@ -41,7 +41,7 @@ public abstract class OrderTo {
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", "idPriceType",
+					"createdAt", "idCreatedByUser", 
 					"reference", "idMetalForm", "idMetalLocation");
 
 	
@@ -49,35 +49,35 @@ public abstract class OrderTo {
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", "idPriceType",
+					"createdAt", "idCreatedByUser", 
 					"reference", "idMetalForm", "idMetalLocation");
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_PULLED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", "idPriceType",
+					"createdAt", "idCreatedByUser", 
 					"reference", "idMetalForm", "idMetalLocation");
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_REJECTED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", "idPriceType",
+					"createdAt", "idCreatedByUser", 
 					"reference", "idMetalForm", "idMetalLocation");
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_MATURED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", "idPriceType",
+					"createdAt", "idCreatedByUser", 
 					"reference", "idMetalForm", "idMetalLocation");
 
 	public static final List<String> UNCHANGEABLE_ATTRIBUTES_EXPIRED = 
 			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
 					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
 					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", "idPriceType",
+					"createdAt", "idCreatedByUser", 
 					"reference", "idMetalForm", "idMetalLocation");
 	
 	/**

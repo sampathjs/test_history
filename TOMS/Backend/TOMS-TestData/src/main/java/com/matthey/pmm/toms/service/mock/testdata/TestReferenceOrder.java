@@ -66,6 +66,71 @@ public enum TestReferenceOrder {
 					TestReferenceOrderLeg.TEST_LEG_5, TestReferenceOrderLeg.TEST_LEG_6,
 					TestReferenceOrderLeg.TEST_LEG_7, TestReferenceOrderLeg.TEST_LEG_8)
 			),
+	TEST_IN_STATUS_PENDING(120003, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
+			DefaultReference.CCY_EUR, "TEST_IN_STATUS_PENDING", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
+			DefaultReference.TICKER_XRUUSD,
+			TestUser.ANDREW_BAYNES, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			Arrays.asList(), null, null,
+			 100d, 
+			// reference order fields
+			30d, null, 
+			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_10)
+			),	
+	TEST_IN_STATUS_CONFIRMED(120004, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
+			DefaultReference.CCY_EUR, "REFERENCE_ORDER_CONFIRMED", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.REFERENCE_ORDER_CONFIRMED, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
+			DefaultReference.TICKER_XRUUSD,
+			TestUser.ANDREW_BAYNES, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			Arrays.asList(), null, null,
+			 100d, 
+			// reference order fields
+			30d, null, 
+			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_11)
+			),	
+	TEST_IN_STATUS_FILLED(120005, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
+			DefaultReference.CCY_EUR, "TEST_IN_STATUS_FILLED", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.REFERENCE_ORDER_FILLED, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
+			DefaultReference.TICKER_XRUUSD,
+			TestUser.ANDREW_BAYNES, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			Arrays.asList(), null, null,
+			 100d, 
+			// reference order fields
+			30d, null, 
+			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_12)
+			),	
+	TEST_IN_STATUS_PULLED(120006, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
+			DefaultReference.CCY_EUR, "TEST_IN_STATUS_PULLED", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.REFERENCE_ORDER_PULLED, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
+			DefaultReference.TICKER_XRUUSD,
+			TestUser.ANDREW_BAYNES, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			Arrays.asList(), null, null,
+			 100d, 
+			// reference order fields
+			30d, null, 
+			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_13)
+			),			
+	TEST_IN_STATUS_REJECTED(120007, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
+			DefaultReference.CCY_EUR, "TEST_IN_STATUS_REJECTED", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.REFERENCE_ORDER_REJECTED, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
+			DefaultReference.TICKER_XRUUSD,
+			TestUser.ANDREW_BAYNES, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			Arrays.asList(), null, null,
+			 100d, 
+			// reference order fields
+			30d, null, 
+			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_14)
+			),				
 	;
 	
 	private ReferenceOrderTo referenceOrder;

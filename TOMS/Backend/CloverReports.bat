@@ -1,1 +1,2 @@
-mvn clean clover:setup test clover:aggregate clover:clover
+call mvn clean clover:setup test 
+call mvn clover:aggregate clover:clover

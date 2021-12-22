@@ -1,6 +1,5 @@
 package com.matthey.pmm.toms.service.mock;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -8,6 +7,8 @@ import java.util.Date;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,8 +21,6 @@ import com.matthey.pmm.toms.model.Fill;
 import com.matthey.pmm.toms.model.LimitOrder;
 import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.OrderComment;
-import com.matthey.pmm.toms.model.OrderStatus;
-import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.ReferenceOrderLeg;
@@ -48,7 +47,6 @@ import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet5
 import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet6;
 import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet7;
 import com.matthey.pmm.toms.service.mock.testdata.TestCounterPartyTickerRuleSet8;
-import com.matthey.pmm.toms.service.mock.testdata.TestLenit;
 import com.matthey.pmm.toms.service.mock.testdata.TestTickerFxRefSourceRule;
 import com.matthey.pmm.toms.service.mock.testdata.TestTickerPortfolioRule;
 import com.matthey.pmm.toms.service.mock.testdata.TestTickerRefSourceRule;
@@ -60,6 +58,7 @@ import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
 @Service
+@Transactional
 public class OrderTestDataGenerator {
 	private static final int MAX_CREDIT_LIMIT = 100000;
 
@@ -213,14 +212,26 @@ public class OrderTestDataGenerator {
 		newTestOrder.setBaseQuantityUnit(selectReferenceValue(DefaultReferenceType.QUANTITY_UNIT, false));
 		newTestOrder.setCreatedAt(randomDate(false));
 		newTestOrder.setCreditChecks(createCreditCheckList());
-		CounterPartyTickerRuleTo selectedCounterPartyTickerRule;
+		CounterPartyTickerRuleTo selectedCounterPartyTickerRule = null;
+		TickerPortfolioRuleTo selectedTickerPortfolioRule = null;
 		do {
 			newTestOrder.setExternalBu(selectOneOf(
 					newTestOrder.getCreatedByUser().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList()), false));
 			 selectedCounterPartyTickerRule = selectOneOf(
 					COUNTERPARTY_TICKER_RULES.stream().filter(x -> x.idCounterParty() == newTestOrder.getExternalBu().getId()).collect(Collectors.toList()), false);
-		} while (selectedCounterPartyTickerRule == null);
-		newTestOrder.setTicker(refRepo.findById(selectedCounterPartyTickerRule.idTicker()).get());
+			if (selectedCounterPartyTickerRule == null) {
+				continue;
+			}
+			newTestOrder.setTicker(refRepo.findById(selectedCounterPartyTickerRule.idTicker()).get());
+			newTestOrder.setInternalBu(selectOneOf(
+						newTestOrder.getCreatedByUser().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_INTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList()), false));
+			List<TickerPortfolioRuleTo> tickerPortfolioRules = TestTickerPortfolioRule.asList().stream()
+					.filter( x -> x.idParty() == newTestOrder.getInternalBu().getId() && 
+					              x.idTicker() == newTestOrder.getTicker().getId() &&
+					            newTestOrder.getCreatedByUser().getTradeablePortfolios().stream().map(y -> y.getId()).collect(Collectors.toSet()).contains(x.idPortfolio()))
+					.collect(Collectors.toList());
+			selectedTickerPortfolioRule = selectOneOf(tickerPortfolioRules, false);
+		} while (selectedCounterPartyTickerRule == null || selectedTickerPortfolioRule == null);
 		newTestOrder.setMetalForm(refRepo.findById(selectedCounterPartyTickerRule.idMetalForm()).get());
 		newTestOrder.setMetalLocation(refRepo.findById(selectedCounterPartyTickerRule.idMetalLocation()).get());
 		newTestOrder.setBaseCurrency(refRepo.findByValueAndTypeId(newTestOrder.getTicker().getValue().substring(4),DefaultReferenceType.CCY_CURRENCY.getEntity().id()).get());	
@@ -228,17 +239,6 @@ public class OrderTestDataGenerator {
 		newTestOrder.setExternalLe(newTestOrder.getExternalBu().getLegalEntity());
 		newTestOrder.setExtPortfolio(selectReferenceValue(DefaultReferenceType.PORTFOLIO, true));
 		newTestOrder.setFills(createFillList());
-		TickerPortfolioRuleTo selectedTickerPortfolioRule;
-		do {
-			newTestOrder.setInternalBu(selectOneOf(
-					newTestOrder.getCreatedByUser().getTradeableParties().stream().filter(x -> x.getType().getId() == DefaultReference.PARTY_TYPE_INTERNAL_BUNIT.getEntity().id()).collect(Collectors.toList()), false));
-			List<TickerPortfolioRuleTo> tickerPortfolioRules = TestTickerPortfolioRule.asList().stream()
-				.filter( x -> x.idParty() == newTestOrder.getInternalBu().getId() && 
-				              x.idTicker() == newTestOrder.getTicker().getId() &&
-				            newTestOrder.getCreatedByUser().getTradeablePortfolios().stream().map(y -> y.getId()).collect(Collectors.toSet()).contains(x.idPortfolio()))
-				.collect(Collectors.toList());
-			selectedTickerPortfolioRule = selectOneOf(tickerPortfolioRules, false);
-		} while (selectedTickerPortfolioRule == null);
 		newTestOrder.setIntPortfolio(refRepo.findById(selectedTickerPortfolioRule.idPortfolio()).get());		
 		
 		newTestOrder.setInternalLe(newTestOrder.getInternalBu().getLegalEntity());
@@ -322,21 +322,22 @@ public class OrderTestDataGenerator {
 			ReferenceOrderLeg newLeg = new ReferenceOrderLeg(null, null, null, null, null, null, null);
 			newLeg.setFixingEndDate(randomDate(true));
 			TickerRefSourceRuleTo selectedTickerRefSourceRule=null;
+			TickerFxRefSourceRuleTo selectedTickerFxRefSourceRule=null;
 			do {
 				List<TickerRefSourceRuleTo> selectableRules = TestTickerRefSourceRule.asList().stream()
 					.filter(x -> x.idTicker() == newTestOrder.getTicker().getId())
 					.collect(Collectors.toList());
 				selectedTickerRefSourceRule = selectOneOf(selectableRules, false);
-			} while (selectedTickerRefSourceRule == null);
-			newLeg.setRefSource(refRepo.findById(selectedTickerRefSourceRule.idRefSource()).get());
-			
-			TickerFxRefSourceRuleTo selectedTickerFxRefSourceRule=null;
-			do {
-				List<TickerFxRefSourceRuleTo> selectableRules = TestTickerFxRefSourceRule.asList().stream()
-					.filter(x -> x.idTicker() == newTestOrder.getTicker().getId())
-					.collect(Collectors.toList());
-				selectedTickerFxRefSourceRule = selectOneOf(selectableRules, false);
-			} while (selectedTickerFxRefSourceRule == null);
+				if (selectedTickerRefSourceRule == null) {
+					continue;
+				}
+				newLeg.setRefSource(refRepo.findById(selectedTickerRefSourceRule.idRefSource()).get());
+				List<TickerFxRefSourceRuleTo> selectableFxRefSourceRules = TestTickerFxRefSourceRule.asList().stream()
+						.filter(x -> x.idTicker() == newTestOrder.getTicker().getId())
+						.collect(Collectors.toList());
+					selectedTickerFxRefSourceRule = selectOneOf(selectableFxRefSourceRules, false);
+			} while (selectedTickerRefSourceRule == null || selectedTickerFxRefSourceRule == null);
+
 			newLeg.setFxIndexRefSource(refRepo.findById(selectedTickerFxRefSourceRule.idRefSource()).get());
 			newLeg.setFixingStartDate(randomDate(false));
 			newLeg.setNotional(Math.random()*MAX_REFERENCE_ORDER_LEG_NOTIONAL);
