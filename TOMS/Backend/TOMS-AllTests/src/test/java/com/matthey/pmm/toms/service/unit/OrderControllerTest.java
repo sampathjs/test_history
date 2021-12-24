@@ -1,11 +1,19 @@
 package com.matthey.pmm.toms.service.unit;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicLongArray;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.transaction.Transactional;
 
+import static org.assertj.core.api.Assertions.within;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -18,25 +26,44 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
+import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.LimitOrder;
 import com.matthey.pmm.toms.model.OrderVersionId;
 import com.matthey.pmm.toms.model.ReferenceOrder;
+import com.matthey.pmm.toms.model.ReferenceOrderLeg;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
+import com.matthey.pmm.toms.repository.OrderRepository;
+import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
+import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
+import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
+import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
+import com.matthey.pmm.toms.service.exception.IllegalLegRemovalException;
 import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
 import com.matthey.pmm.toms.service.mock.MockOrderController;
+import com.matthey.pmm.toms.service.mock.testdata.TestBunit;
 import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
+import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrderLeg;
+import com.matthey.pmm.toms.service.mock.testdata.TestUser;
 import com.matthey.pmm.toms.testall.TestServiceApplication;
 import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
+import com.matthey.pmm.toms.transport.ImmutableReferenceOrderLegTo;
 import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.OrderTo;
+import com.matthey.pmm.toms.transport.ReferenceOrderLegTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -51,20 +78,38 @@ public class OrderControllerTest {
 	
 	@Autowired 
 	protected LimitOrderRepository limitOrderRepo;
+	
+	@Autowired 
+	protected OrderRepository orderRepo;
 
 	@Autowired 
 	protected ReferenceOrderRepository referenceOrderRepo;
 
+	@Autowired 
+	protected ReferenceOrderLegRepository referenceOrderLegRepo;
+	
+	@Autowired
+	protected ReferenceOrderConverter refOrderConverter;
+
+	@Autowired
+	protected ReferenceOrderLegConverter refOrderLegConverter;
+	
+	@Autowired
+	protected LimitOrderConverter limitOrderConverter;
+
 	
 	protected List<LimitOrderTo> limitOrderToBeDeleted;
 	protected List<ReferenceOrderTo> referenceOrderToBeDeleted;
-
+	protected Map<ReferenceOrderTo, ReferenceOrderLegTo> referenceOrderLegToBeDeleted;
+	protected Map<ReferenceOrderTo, ReferenceOrderLegTo> referenceOrderLegToBeRestored;
 	
 	
 	@Before
 	public void initTest () {
 		limitOrderToBeDeleted = new ArrayList<>(5);
 		referenceOrderToBeDeleted = new ArrayList<>(5);
+		referenceOrderLegToBeDeleted = new HashMap<>();
+		referenceOrderLegToBeRestored = new HashMap<>();
 	}
 	
 	@After
@@ -75,6 +120,13 @@ public class OrderControllerTest {
 		for (ReferenceOrderTo order : referenceOrderToBeDeleted) {
 			referenceOrderRepo.deleteById(new OrderVersionId(order.id(), order.version()));
 		}
+		for (Map.Entry<ReferenceOrderTo, ReferenceOrderLegTo> entry : referenceOrderLegToBeDeleted.entrySet()) {
+			refOrderConverter.toManagedEntity(entry.getKey());
+			referenceOrderLegRepo.deleteById(entry.getValue().id());
+		}
+		for (Map.Entry<ReferenceOrderTo, ReferenceOrderLegTo> entry : 	referenceOrderLegToBeRestored.entrySet()) {
+			refOrderLegConverter.toManagedEntity(entry.getValue());
+		}		
 	}
 	
 	@Transactional
@@ -131,6 +183,34 @@ public class OrderControllerTest {
 				.build();
 		referenceOrderToBeDeleted.add(versionInc);
 		return versionInc;
+	}
+	
+	@Transactional
+	protected long submitNewReferenceOrderLeg (ReferenceOrderTo order, ReferenceOrderLegTo legTo) {
+		ReferenceOrderLegTo withResetOrderIdAndVersion = ImmutableReferenceOrderLegTo.builder()
+				.from(legTo)
+				.id(0l)
+				.build();
+		long ret = orderController.postReferenceOrderLeg(order.id(), order.version(), withResetOrderIdAndVersion);
+		ReferenceOrderLegTo withId = ImmutableReferenceOrderLegTo.builder()
+				.from(legTo)
+				.id(ret)
+				.build();
+		referenceOrderLegToBeDeleted.put(order, withId);
+		return ret;
+	}
+	
+	/**
+	 * Should be used for a single update only. Do not apply multiple updates on the same leg.
+	 * @param order
+	 * @param toBeSaved
+	 * @return
+	 */
+	@Transactional
+	protected void updateReferenceOrderLeg (ReferenceOrderTo order, ReferenceOrderLegTo newLegVersion) {
+		ReferenceOrderLegTo oldLegVersion = refOrderLegConverter.toTo(referenceOrderLegRepo.findById(newLegVersion.id()).get());
+		orderController.updateReferenceOrderLeg(order.id(), order.version(), newLegVersion.id(), newLegVersion);
+		referenceOrderLegToBeRestored.put(order, oldLegVersion);
 	}
 	
 	@Test
@@ -609,5 +689,175 @@ public class OrderControllerTest {
 		assertThat(newCountLimitOrder + newCountReferenceOrder - oldCountLimitOrder - oldCountReferenceOrder).isGreaterThanOrEqualTo(NUMBER_OF_ORDERS_TO_BOOK);
 	}
 
+	@Test
+	public void testGetAllOrders () {
+		List<OrderTo> allOrder = orderRepo.findLatest().stream()
+				.map(x -> (OrderTo)((x instanceof LimitOrder)?
+						limitOrderConverter.toTo((LimitOrder)x):
+						refOrderConverter.toTo((ReferenceOrder)x)))
+				.collect(Collectors.toList());
+		PageRequest page = PageRequest.of(0, 100000);
+		Page<OrderTo> pageOfOrders = orderController.getOrders(null, null, null, null, null, null, null, null, null, null, null, 
+				null, null, null, null, null, null, null, null, null, null, null, null, null, null, 
+				null, null, null, null, page, null);
+		assertThat(allOrder).containsAll(pageOfOrders.getContent());
+		assertThat(pageOfOrders.getContent()).containsAll(allOrder);		
+	}
 	
+	@Test
+	public void testGetOrdersWithFilter () {
+		// Please note this test case might fail in the future in case more test orders are added.
+		// The failure is going to look like some orders are not going to be in the expected result setl
+		// The reason it is going to fail is in the combination of sort by id, idMetalForm, idCreatedByUser
+		// idTicker and createdAt in combination with having the idFirstOrderIncluded search parameter set.
+		// In case of future failures it is suggested to adjust the test data or to remove the
+		// missing orders explicitly from the allOrder list created below.
+		
+		List<OrderTo> allOrder = orderRepo.findLatest().stream()
+				.map(x -> (OrderTo)((x instanceof LimitOrder)?
+						limitOrderConverter.toTo((LimitOrder)x):
+						refOrderConverter.toTo((ReferenceOrder)x)))
+				.collect(Collectors.toList());
+		PageRequest page = PageRequest.of(0, 100000, Sort.by(Order.desc("id"),
+				                                             Order.asc("idMetalForm"), 
+				                                             Order.asc("idCreatedByUser"), 
+				                                             Order.asc("idTicker"), 
+				                                             Order.asc("createdAt")
+				                                             ));
+		
+		List<Long> allOrderIds = TestLimitOrder.asListOfIds();
+		allOrderIds.addAll(TestReferenceOrder.asListOfIds());
+		List<Long> allContractTypeIds = DefaultReference.asListOfIdsByType(DefaultReferenceType.CONTRACT_TYPE_LIMIT_ORDER);
+		allContractTypeIds.addAll(DefaultReference.asListOfIdsByType(DefaultReferenceType.CONTRACT_TYPE_REFERENCE_ORDER));
+		
+		Page<OrderTo> pageOfOrders = orderController.getOrders(
+				DefaultReference.asListOfIdsByType(DefaultReferenceType.ORDER_TYPE_NAME), 
+				allOrderIds, 
+				null, // order versions
+				TestBunit.asListInternalBu().stream().map(x -> x.id()).collect(Collectors.toList()), 
+				TestBunit.asListBu().stream().map(x -> x.id()).collect(Collectors.toList()),
+				null, 
+				null, 
+				null, 
+				null, 
+				DefaultReference.asListOfIdsByType(DefaultReferenceType.BUY_SELL), 
+				DefaultReference.asListOfIdsByType(DefaultReferenceType.CCY_METAL),
+				0d, // min base quantity
+				Double.MAX_VALUE,  // max base quantity
+				DefaultReference.asListOfIdsByType(DefaultReferenceType.QUANTITY_UNIT), 
+				DefaultReference.asListOfIdsByType(DefaultReferenceType.CCY_CURRENCY), 
+				null, // reference
+				DefaultReference.asListOfIdsByType(DefaultReferenceType.METAL_FORM), 
+				DefaultReference.asListOfIdsByType(DefaultReferenceType.METAL_LOCATION),
+				DefaultOrderStatus.asListOfIds(), 
+				TestUser.asListOfIds(), // created by
+				"1995-10-31 01:30:00", // min creation date 
+				"2030-10-31 01:30:00", // max creation date
+				TestUser.asListOfIds(), // updated by
+				"1995-10-31 01:30:00", // min updated date 
+				"2030-10-31 01:30:00", // max updated date 
+				0d, // min fill percentage
+				Double.MAX_VALUE, // max fill percentage
+				allContractTypeIds, 
+				DefaultReference.asListOfIdsByType(DefaultReferenceType.TICKER), 
+				page, 
+				TestReferenceOrder.TEST_FOR_LEG_DELETION_ALL_LEGS.getEntity().id());
+		assertThat(allOrder).containsAll(pageOfOrders.getContent());
+		assertThat(pageOfOrders.getContent()).containsAll(allOrder);		
+	}
+	
+	
+	@Test
+	public void testGetAllLimitOrders () {
+		List<OrderTo> allOrder = limitOrderRepo.findLatest().stream()
+				.map(x -> limitOrderConverter.toTo(x))
+				.collect(Collectors.toList());
+		PageRequest page = PageRequest.of(0, 100000);
+		Page<OrderTo> pageOfOrders = orderController.getLimitOrders(null, null, null, null, null, null, null, null, null, null, null, 
+				null, null, null, null, null, null, null, null, null, null, null, null, null, null, 
+				null, null, null, null, null, null, null, null, null, null, null, null,
+				null, null, null, null, null, null, null, null, null, page);
+		assertThat(allOrder).containsAll(pageOfOrders.getContent());
+		assertThat(pageOfOrders.getContent()).containsAll(allOrder);		
+	}	
+	
+	@Test
+	public void testGetAllReferenceOrders () {
+		List<OrderTo> allOrder = referenceOrderRepo.findLatest().stream()
+				.map(x -> refOrderConverter.toTo(x))
+				.collect(Collectors.toList());
+		PageRequest page = PageRequest.of(0, 100000);
+		Page<OrderTo> pageOfOrders = orderController.getReferenceOrders(null, null, null, null, null, null, null, null, null, null, null, 
+				null, null, null, null, null, null, null, null, null, null, null, null, null, null, 
+				null, null, null, null, null, null, null, null, null, null, null, null,
+				null, null, null, null, null, null, null, null, null, null, page);
+		assertThat(allOrder).containsAll(pageOfOrders.getContent());
+		assertThat(pageOfOrders.getContent()).containsAll(allOrder);		
+	}
+	
+	@Test
+	public void testGetAllReferenceOrderLegs () {
+		Iterable<ReferenceOrder> allRefOrders = referenceOrderRepo.findLatest();
+		List<ReferenceOrderLegTo> allLegs = StreamSupport.stream(referenceOrderLegRepo.findAll().spliterator(),false)
+				.filter(x -> x.getId() != TestReferenceOrderLeg.TEST_LEG_NOT_IN_ANY_ORDER.getEntity().id())
+				.map(x -> refOrderLegConverter.toTo(x))
+				.collect(Collectors.toList());
+		List<ReferenceOrderLegTo> allLegsFromController = new ArrayList<>(allLegs.size());
+		for (ReferenceOrder refOrder : allRefOrders) {
+			Set<ReferenceOrderLegTo> legs = orderController.getReferenceOrderLegs(refOrder.getOrderId(), refOrder.getVersion());
+			allLegsFromController.addAll(legs);
+			assertThat(allLegs).containsAll(legs);
+		}
+		assertThat(allLegsFromController).containsAll(allLegs);
+	}
+	
+	@Test
+	public void testCreateSimpleReferenceOrderLeg () {
+		long newReferenceOrderLegId = submitNewReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_PENDING.getEntity(), 
+				TestReferenceOrderLeg.TEST_LEG_NOT_IN_ANY_ORDER.getEntity());
+		Optional<ReferenceOrderLeg> newleg = referenceOrderLegRepo.findById(newReferenceOrderLegId);
+		assertThat(newleg).isNotEmpty();
+		Optional<ReferenceOrder> updatedOrder = referenceOrderRepo.findById(
+				new OrderVersionId(TestReferenceOrder.TEST_IN_STATUS_PENDING.getEntity().id(),
+								   TestReferenceOrder.TEST_IN_STATUS_PENDING.getEntity().version()));
+		List<ReferenceOrderLeg> newLegOnOrder = updatedOrder.get().getLegs().stream()
+			.filter(x -> x.getId() == newReferenceOrderLegId)
+			.collect(Collectors.toList());
+		assertThat(newLegOnOrder).isNotEmpty();
+	}
+	
+	@Test
+	public void testUpdateSimpleReferenceOrderLeg () {
+		ReferenceOrderLegTo updatedLeg = ImmutableReferenceOrderLegTo.builder()
+				.from(TestReferenceOrderLeg.TEST_LEG_10.getEntity())
+				.notional(99d)
+				.build();
+		updateReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_PENDING.getEntity(), 
+				updatedLeg);
+		Optional<ReferenceOrderLeg> newleg = referenceOrderLegRepo.findById(TestReferenceOrderLeg.TEST_LEG_10.getEntity().id());
+		assertThat(newleg).isNotEmpty();
+		assertThat(newleg.get().getNotional()).isCloseTo(99d, within(0.00001d));
+	}
+	
+	@Test
+	public void testDeleteSimpleReferenceOrderLeg () {
+		orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_FOR_LEG_DELETION.getEntity().id(),
+				TestReferenceOrder.TEST_FOR_LEG_DELETION.getEntity().version(), TestReferenceOrderLeg.TEST_FOR_LEG_DELETION.getEntity().id());
+		Optional<ReferenceOrderLeg> deletedLeg = referenceOrderLegRepo.findById(TestReferenceOrderLeg.TEST_FOR_LEG_DELETION.getEntity().id());
+		assertThat(deletedLeg).isNotEmpty(); // the leg just removed from the order with the given version but not deleted itself
+		Optional<ReferenceOrder> updatedOrder = referenceOrderRepo.findLatestByOrderId(TestReferenceOrder.TEST_FOR_LEG_DELETION.getEntity().id());
+		assertThat(updatedOrder).isNotEmpty();
+		assertThat(updatedOrder.get().getLegs()).isNotEmpty();
+		assertThat(updatedOrder.get().getLegs().stream().map(x -> x.getId()).collect(Collectors.toList()))
+			.doesNotContain(TestReferenceOrderLeg.TEST_FOR_LEG_DELETION.getEntity().id());
+	}
+	
+	@Test
+	public void testDeleteAllReferenceOrderLegsIsImpossible() {
+		assertThatThrownBy(() -> {
+			orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_FOR_LEG_DELETION_ALL_LEGS.getEntity().id(),
+					TestReferenceOrder.TEST_FOR_LEG_DELETION_ALL_LEGS.getEntity().version(), 
+					TestReferenceOrderLeg.MAIN_LEG_FOR_LEG_DELETION_ALL_LEGS.getEntity().id());
+			}).isInstanceOf(IllegalLegRemovalException.class);
+	}
 }

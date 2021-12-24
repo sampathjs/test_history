@@ -448,6 +448,14 @@ public enum DefaultReference {
 				.filter(x -> x.refType.equals(type.getEntity()))
 				.map(DefaultReference::getEntity).collect(Collectors.toList());
 	}
+
+	public static List<Long> asListOfIdsByType (DefaultReferenceType type) {
+		return Arrays.asList(DefaultReference.values())
+				.stream()
+				.filter(x -> x.refType.equals(type.getEntity()))
+				.map(x -> x.getEntity().id()).collect(Collectors.toList());
+	}
+
 	
 	public static Optional<ReferenceTo> findById(long refId) {
 		List<ReferenceTo> filtered = asList().stream().filter(x -> x.id() == refId).collect(Collectors.toList());

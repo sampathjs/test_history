@@ -13,7 +13,7 @@ public enum TestLimitOrder {
 	TEST_ORDER_1A(100000, 1, TestBunit.JM_PMM_UK, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
 			DefaultReference.PORTFOLIO_UK_FX, null, DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XRU, 1000d, DefaultReference.QUANTITY_TOZ, 
-			DefaultReference.CCY_GBP, "TEST_ORDER_1A", DefaultReference.METAL_FORM_INGOT, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultReference.CCY_GBP, "TEST_ORDER_1A", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE, DefaultReference.TICKER_XRUUSD, 
 			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			DefaultReference.PRICE_TYPE_SPOT, null,
@@ -244,5 +244,10 @@ public enum TestLimitOrder {
 	public static List<TestLimitOrder> asEnumList () {
 		return Arrays.asList(TestLimitOrder.values())
 				.stream().collect(Collectors.toList());
+	}
+
+	public static List<Long> asListOfIds() {
+		return Arrays.asList(TestLimitOrder.values())
+				.stream().map(x -> x.getEntity().id()).collect(Collectors.toList());
 	}	
 }

@@ -68,6 +68,11 @@ public enum DefaultOrderStatus {
 				.stream().map(DefaultOrderStatus::getEntity).collect(Collectors.toList());
 	}
 	
+	public static List<Long> asListOfIds () {
+		return Arrays.asList(DefaultOrderStatus.values())
+				.stream().map(x -> x.getEntity().id()).collect(Collectors.toList());
+	}
+	
 	public static Optional<OrderStatusTo> findById(long orderStatusId) {
 		List<OrderStatusTo> filtered = asList().stream().filter(x -> x.id() == orderStatusId).collect(Collectors.toList());
 		if (filtered.size() == 0) {

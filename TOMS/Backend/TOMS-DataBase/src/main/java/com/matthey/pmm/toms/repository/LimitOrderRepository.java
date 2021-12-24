@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.matthey.pmm.toms.model.LimitOrder;
+import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.OrderVersionId;
 
 @Repository
@@ -21,4 +22,7 @@ public interface LimitOrderRepository extends PagingAndSortingRepository<LimitOr
    
    @Query("SELECT o FROM LimitOrder o WHERE o.orderId = :orderId AND o.version = (SELECT MAX(lo2.version) FROM LimitOrder lo2 WHERE lo2.orderId = :orderId)") 
    Optional<LimitOrder> findLatestByOrderId(@Param("orderId") Long orderId);
+   
+   @Query("SELECT o FROM LimitOrder o WHERE o.version = (SELECT MAX(lo2.version) FROM LimitOrder lo2 WHERE lo2.orderId = o.orderId)") 
+   List<LimitOrder> findLatest();
 }

@@ -15,6 +15,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -55,6 +56,7 @@ import com.matthey.pmm.toms.service.common.Validator;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
+import com.matthey.pmm.toms.service.exception.IllegalLegRemovalException;
 import com.matthey.pmm.toms.service.exception.IllegalStateException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
@@ -138,10 +140,10 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "List of Metal Location IDs, null = all orders, example 168, 169", example = "168, 169", required = false) @RequestParam(required=false) List<Long> idMetalLocation,
 			@ApiParam(value = "List of Order Status IDs, null = all orders, example 1, 2, 3", example = "1, 2, 3", required = false) @RequestParam(required=false) List<Long> idOrderStatus,
 			@ApiParam(value = "List of IDs for users who have created the order, null = all orders, example 20026", example = "1, 2, 3", required = false) @RequestParam(required=false) List<Long> idCreatedByUser,
-			@ApiParam(value = "Min creation date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
+			@ApiParam(value = "Min creation date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "1995-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
 			@ApiParam(value = "Max creation date, all orders returned have been created on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
 			@ApiParam(value = "List of IDs for users who have last updated the order, null = all orders, example 20026", example = "20026", required = false) @RequestParam(required=false) List<Long> idUpdatedByUser,
-			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
+			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "1995-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
 			@ApiParam(value = "Max last update date, all orders returned have been updated on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLastUpdateDate,
 			@ApiParam(value = "Min fill percentage, a real number between 0 and 1,  null for no restriction", example = "0.0", required = false) @RequestParam(required=false) Double minFillPercentage,
 			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,
@@ -231,19 +233,19 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "List of Metal Location IDs, null = all orders, example 168, 169", example = "168, 169", required = false) @RequestParam(required=false) List<Long> idMetalLocation,
 			@ApiParam(value = "List of Order Status IDs, null = all orders, example 1, 2, 3", example = "1, 2, 3", required = false) @RequestParam(required=false) List<Long> idOrderStatus,
 			@ApiParam(value = "List of IDs for users who have created the order, null = all orders, example 20026", example = "1, 2, 3", required = false) @RequestParam(required=false) List<Long> idCreatedByUser,
-			@ApiParam(value = "Min Creation Date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
+			@ApiParam(value = "Min Creation Date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "1995-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
 			@ApiParam(value = "Max Creation Date, all orders returned have been created on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
 			@ApiParam(value = "List of IDs for users who have last updated the order, null = all orders, example 20026", example = "20026", required = false) @RequestParam(required=false) List<Long> idUpdatedByUser,
-			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
+			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "1995-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
 			@ApiParam(value = "Max last update date, all orders returned have been updated on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLastUpdateDate,
 			@ApiParam(value = "Min fill percentage, a real number between 0 and 1,  null for no restriction", example = "0.0", required = false) @RequestParam(required=false) Double minFillPercentage,
 			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,
 			@ApiParam(value = "List of contract types, null = all orders, example 224, 225", example = "224, 225", required = false) @RequestParam(required=false) List<Long> idContractType,
 			@ApiParam(value = "List of ticker IDs, null = all orders, example 231, 271", example = "231, 271", required = false) @RequestParam(required=false) List<Long> idTicker,			
 			// all above: order fields, all below: limit order fields
-			@ApiParam(value = "Min Settle Date, all orders returned have been settled on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2000-10-31", required = false) @RequestParam(required=false) String minSettleDate,
+			@ApiParam(value = "Min Settle Date, all orders returned have been settled on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "1995-10-31", required = false) @RequestParam(required=false) String minSettleDate,
 			@ApiParam(value = "Max Settle Date, all orders returned have been settled on or before that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2030-10-31", required = false) @RequestParam(required=false) String maxSettleDate,
-			@ApiParam(value = "Min Start Date Concrete, all orders returned have a concrete start date  on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2000-10-31", required = false) @RequestParam(required=false) String minStartDateConcrete,
+			@ApiParam(value = "Min Start Date Concrete, all orders returned have a concrete start date  on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "1995-10-31", required = false) @RequestParam(required=false) String minStartDateConcrete,
 			@ApiParam(value = "Max Start Date Concrete, all orders returned have a concrete start date on or before that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2030-10-31", required = false) @RequestParam(required=false) String maxStartDateConcrete,
 			@ApiParam(value = "List of IDs of the symbolic start date, null = all orders, example 186, 187", example = "186, 187", required = false) @RequestParam(required=false) List<Long> idStartDateSymbolic,
 			@ApiParam(value = "List of IDs of the price type, null = all orders, example 105, 106", example = "105, 106", required = false) @RequestParam(required=false) List<Long> idPriceType,
@@ -251,7 +253,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "List of IDs of the stop trigger type, null = all orders, example 109, 110", example = "109, 110", required = false) @RequestParam(required=false) List<Long> idStopTriggerType,
 			@ApiParam(value = "List of IDs of the currency cross metal, null = all orders, example 34, 35, 36", example = "34, 35, 36", required = false) @RequestParam(required=false) List<Long> idCurrencyCrossMetal,
 			@ApiParam(value = "List of IDs of the validation type, null = all orders, example 184, 185", example = "184, 185", required = false) @RequestParam(required=false) List<Long> idValidationType,
-			@ApiParam(value = "Min Expiry Date, all orders returned have expired on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2000-10-31", required = false) @RequestParam(required=false) String minExpiryDate,
+			@ApiParam(value = "Min Expiry Date, all orders returned have expired on or after that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "1995-10-31", required = false) @RequestParam(required=false) String minExpiryDate,
 			@ApiParam(value = "Max Expiry Date, all orders returned have expired on or before that date. Format 'yyyy-MM-dd' (UTC), null for no restriction", example = "2030-10-31", required = false) @RequestParam(required=false) String maxExpiryDate,
 			@ApiParam(value = "Min Execution Likelihood, all orders returned have a at least the provided base quantity , Null = no restrictions", example = "0.00", required = false) @RequestParam(required=false) Double minExecutionLikelihood,
 			@ApiParam(value = "Max Execution Likelihood, all orders returned have a at max the provided base quantity , Null = no restrictions", example = "1.00", required = false) @RequestParam(required=false) Double maxExecutionLikelihood,
@@ -343,6 +345,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		return pageForTos;
 	}
 
+	@Override
 	@ApiOperation("Creation of a new Limit Order")
 	@Transactional
 	public long postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
@@ -356,6 +359,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     	return managedEntity.getOrderId();
     }
     
+	@Override
     @ApiOperation("Update of an existing Limit Order")
 	@Transactional
 	public void updateLimitOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder) {
@@ -408,10 +412,10 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "List of Metal Location IDs, null = all orders, example 168, 169", example = "168, 169", required = false) @RequestParam(required=false) List<Long> idMetalLocation,
 			@ApiParam(value = "List of Order Status IDs, null = all orders, example 1, 2, 3", example = "1, 2, 3", required = false) @RequestParam(required=false) List<Long> idOrderStatus,
 			@ApiParam(value = "List of IDs for users who have created the order, null = all orders, example 20026", example = "1, 2, 3", required = false) @RequestParam(required=false) List<Long> idCreatedByUser,
-			@ApiParam(value = "Min Creation Date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
+			@ApiParam(value = "Min Creation Date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "1995-10-31 01:30:00", required = false) @RequestParam(required=false) String minCreatedAtDate,
 			@ApiParam(value = "Max Creation Date, all orders returned have been created on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxCreatedAtDate,
 			@ApiParam(value = "List of IDs for users who have last updated the order, null = all orders, example 20026", example = "20026", required = false) @RequestParam(required=false) List<Long> idUpdatedByUser,			
-			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
+			@ApiParam(value = "Min last update date, all orders returned have been updated on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "1995-10-31 01:30:00", required = false) @RequestParam(required=false) String minLastUpdateDate,
 			@ApiParam(value = "Max last update date, all orders returned have been updated on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLastUpdateDate,
 			@ApiParam(value = "Min fill percentage, a real number between 0 and 1,  null for no restriction", example = "0.0", required = false) @RequestParam(required=false) Double minFillPercentage,
 			@ApiParam(value = "Max fill percentage, a real number between 0 and 1,  null for no restriction", example = "1.0", required = false) @RequestParam(required=false) Double maxFillPercentage,
@@ -427,9 +431,9 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			@ApiParam(value = "List of reference order leg ids, null = no restrictions", example = "", required = false) @RequestParam(required=false) List<Long> idLeg,
 			@ApiParam(value = "Min leg notional, Null = no restrictions", example = "1.00", required = false) @RequestParam(required=false) Double minLegNotonal,
 			@ApiParam(value = "Max leg notional, Null = no restrictions", example = "1000.00", required = false) @RequestParam(required=false) Double maxLegNotional,
-			@ApiParam(value = "Min leg fixing start date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLegFixingStartDate,
+			@ApiParam(value = "Min leg fixing start date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "1995-10-31 01:30:00", required = false) @RequestParam(required=false) String minLegFixingStartDate,
 			@ApiParam(value = "Max leg fixing start date, all orders returned have been created on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLegFixingStartDate,
-			@ApiParam(value = "Min leg fixing end date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2000-10-31 01:30:00", required = false) @RequestParam(required=false) String minLegFixingEndDate,
+			@ApiParam(value = "Min leg fixing end date, all orders returned have been created on or after that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "1995-10-31 01:30:00", required = false) @RequestParam(required=false) String minLegFixingEndDate,
 			@ApiParam(value = "Max leg fixing end date, all orders returned have been created on or before that date. Format 'yyyy-MM-dd hh:mm:ss' (UTC), null for no restriction", example = "2030-10-31 01:30:00", required = false) @RequestParam(required=false) String maxLegFixingEndDate,
 			@ApiParam(value = "List of leg payment offsets (symbolic date), null = no restriction, example 186, 187 ", example = "186, 187", required = false) @RequestParam(required=false) List<Long> idLegPaymentOffset,
 			@ApiParam(value = "List of leg settlement currencies, null = no restriction, example 34,35,36,42,43", example = "34,35,36,42,43", required = false) @RequestParam(required=false) List<Long> idLegSettleCurrency,
@@ -521,6 +525,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		return pageForTos;
 	}
     
+	@Override
     @ApiOperation("Creation of a new Reference Order")
 	@Transactional
 	public long postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {
@@ -534,6 +539,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     	return managedEntity.getOrderId();
     }
     
+	@Override
     @ApiOperation("Update of an existing Reference Order")
     @Transactional
 	public void updateReferenceOrder (@ApiParam(value = "The Reference Order to update. Order ID has to denote an existing Reference Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder) {
@@ -551,6 +557,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     	ReferenceOrder existingOrderManaged = referenceOrderConverter.toManagedEntity(existingReferenceOrder);
     }
     
+	@Override
     @Cacheable({"ReferenceOrderLeg"})
     @ApiOperation("Retrieval of all reference order legs for a single reference order.")
 	@GetMapping("/referenceOrder/{referenceOrderId}/version/{version}/legs")
@@ -562,7 +569,8 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     		.map(x -> referenceOrderLegConverter.toTo(x))
     		.collect(Collectors.toSet());
     }
-    
+	
+	@Override
     @ApiOperation("Creation of a new Reference Order Leg")
 	@PostMapping("/referenceOrder/{referenceOrderId}/version/{version}/legs")
 	public long postReferenceOrderLeg (@ApiParam(value = "The ID of the reference order", example = "1000001", required = true) @PathVariable(required=true) Long referenceOrderId,
@@ -581,11 +589,12 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     	return newLegManaged.getId();
     }
 
+	@Override
     @ApiOperation("Deletion of an existing Reference Order Leg")
 	@DeleteMapping("/referenceOrder/{referenceOrderId}/version/{version}/legs/{legId}")
 	public void deleteReferenceOrderLeg (@ApiParam(value = "The ID of the reference order", example = "1000001", required = true) @PathVariable(required=true) Long referenceOrderId,
 			@ApiParam(value = "The version of the reference order", example = "1", required = true) @PathVariable(required=true) int version,
-			@ApiParam(value = "The ID of the reference order leg", example = "1000001", required = true) @PathVariable(required=true) int legId) {
+			@ApiParam(value = "The ID of the reference order leg", example = "1000001", required = true) @PathVariable(required=true) long legId) {
     	Optional<ReferenceOrder> orderManaged = validator.verifyReferenceOrderId(referenceOrderId, this.getClass(), "deleteReferenceOrderLeg", "referenceOrderId", false);
     	if (orderManaged.get().getOrderStatus().getId() != DefaultOrderStatus.REFERENCE_ORDER_PENDING.getEntity().id()) {
     		throw new IllegalStateException(getClass(), "deleteReferenceOrderLeg", "referenceOrderId", 
@@ -593,7 +602,10 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     	}
     	validator.verifyReferenceOrderVersion (orderManaged.get(), version, this.getClass(), "deleteReferenceOrderLeg", "version");
     	orderManaged.get().getLegs().removeIf(x -> x.getId() == legId);
-    	referenceOrderRepo.save(orderManaged.get());
+    	if (orderManaged.get().getLegs().isEmpty()) {
+    		throw new IllegalLegRemovalException(getClass(), "deleteReferenceOrderLeg", "legId", orderManaged.get().toString(), "#" + legId, "Can not remove the last leg from a reference order");
+    	}
+     	referenceOrderRepo.save(orderManaged.get());
     	// remove leg from association with order/orderversion, but keep leg entity.
     	// reason: leg might be used in an older version of the order as well.
     }
@@ -601,9 +613,10 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     @ApiOperation("Update of an existing Reference Order Leg")
     @PutMapping("/referenceOrder/{referenceOrderId}/version/{version}/legs/{legId}")
 	@Transactional
+	@Override
 	public void updateReferenceOrderLeg (@ApiParam(value = "The ID of the reference order", example = "100005", required = true) @PathVariable(required=true) Long referenceOrderId,
 			@ApiParam(value = "The version of the reference order, has to be the latest version.", example = "1", required = true) @PathVariable(required=true) int version,
-			@ApiParam(value = "The ID of the reference order leg", example = "1000001", required = true) @PathVariable(required=true) int legId,
+			@ApiParam(value = "The ID of the reference order leg", example = "1000001", required = true) @PathVariable(required=true) long legId,
 			@ApiParam(value = "The new Reference Order Leg, ID has to be matching legId.", example = "", required = true) @RequestBody(required=true) ReferenceOrderLegTo existingReferenceOrderLeg) {
     	Optional<ReferenceOrder> orderManaged = validator.verifyReferenceOrderId(referenceOrderId, this.getClass(), "updateReferenceOrderLeg", "referenceOrderId", false);
     	if (orderManaged.get().getOrderStatus().getId() != DefaultOrderStatus.REFERENCE_ORDER_PENDING.getEntity().id()) {
@@ -618,13 +631,15 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     }
     
     @ApiOperation("Retrieve the value of an attribute of the provided Limit Order based on the other fields of the order")
+	@Override
     public String getAttributeValueLimitOrder (@ApiParam(value = "The name of the attribute value is supposed to be retrieved for", example = "settleDate", required = true) @RequestParam(required=false) String attributeName,
     		@ApiParam(value = "The current order those value should be retrieved", example = "") @RequestBody(required=true) LimitOrderTo orderTemplate) {
     	return TomsService.applyAttributeCalculation(orderTemplate, attributeName);
     }
 
 	@ApiOperation("Retrieve the value of an attribute of the provided Reference Order based on the other fields of the order")
-    public String getAttributeValueReferenceOrder (@ApiParam(value = "The name of the attribute value is supposed to be retrieved for", example = "settleDate", required = true) @RequestParam(required=false) String attributeName,
+	@Override
+	public String getAttributeValueReferenceOrder (@ApiParam(value = "The name of the attribute value is supposed to be retrieved for", example = "settleDate", required = true) @RequestParam(required=false) String attributeName,
     		@ApiParam(value = "The current order those value should be retrieved", example = "") @RequestBody(required=true) ReferenceOrderTo orderTemplate) {
     	return TomsService.applyAttributeCalculation(orderTemplate, attributeName);
     }
@@ -776,7 +791,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 			if (valueAttributeInChild != null) {
 				predicates.add(criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.get(orderAttribute).<Date>get(valueAttributeInChild), limit)));								
 			} else {
-				predicates.add(criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.<Date>get(orderAttribute), limit)));								
+				predicates.add(criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.<Date>get(orderAttribute), limit)));
 			}
 		}
 	}	
@@ -790,12 +805,5 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 				predicates.add(criteriaBuilder.and(criteriaBuilder.like(criteriaBuilder.upper(root.get(orderAttribute)), "%" + searchString.toUpperCase() + "%")));								
 			}
 		}
-	}		
-	
-    private <T> List<T> noEmptyList(List<T> list) {
-    	if (list != null && list.size() == 0) {
-    		return null;
-    	}
-    	return list;
 	}
 }

@@ -19,6 +19,10 @@ import com.matthey.pmm.toms.model.OrderVersionId;
 public interface OrderRepository extends PagingAndSortingRepository<Order, OrderVersionId>, JpaSpecificationExecutor<Order>{
    List<Order> findByOrderId(long orderId); 
    
-   @Query("SELECT o FROM Order o WHERE o.orderId = :orderId AND o.version = (SELECT MAX(lo2.version) FROM LimitOrder lo2 WHERE lo2.orderId = :orderId)") 
+   @Query("SELECT o FROM Order o WHERE o.orderId = :orderId AND o.version = (SELECT MAX(o2.version) FROM Order o2 WHERE o2.orderId = :orderId)") 
    Optional<Order> findLatestByOrderId(@Param("orderId") Long orderId);
+
+   @Query("SELECT o FROM Order o WHERE o.version = (SELECT MAX(o2.version) FROM Order o2 WHERE o2.orderId = o.orderId)") 
+   List<Order> findLatest();
+
 }

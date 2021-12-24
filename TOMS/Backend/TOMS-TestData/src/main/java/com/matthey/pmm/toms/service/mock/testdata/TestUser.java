@@ -123,6 +123,11 @@ public enum TestUser {
 				.stream().map(TestUser::getEntity).collect(Collectors.toList());
 	}
 	
+	public static List<Long> asListOfIds () {
+		return Arrays.asList(TestUser.values())
+				.stream().map(x -> x.getEntity().id()).collect(Collectors.toList());
+	}
+	
 	public static List<UserTo> asListByRole (DefaultReference userRole) {
 		return Arrays.asList(TestUser.values()).stream()
 				.map(TestUser::getEntity)

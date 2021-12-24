@@ -16,7 +16,7 @@ public enum TestReferenceOrder {
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, "TEST_ORDER_1A", DefaultReference.METAL_FORM_INGOT, DefaultReference.METAL_LOCATION_ROYSTON,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_REFERENCE_AVERAGE,
-			DefaultReference.TICKER_XAUUSD,
+			DefaultReference.TICKER_XRUUSD,
 			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8),
 			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1), Arrays.asList(TestOrderComment.TEST_COMMENT_4, TestOrderComment.TEST_COMMENT_5),
@@ -31,7 +31,7 @@ public enum TestReferenceOrder {
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_UMICORE_BELGIUM,
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_REFERENCE_AVERAGE,
-			DefaultReference.TICKER_XPTUSD,
+			DefaultReference.TICKER_XRUUSD,
 			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-12-23 12:00:00", TestUser.ANDREW_BAYNES,
 			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8), null, null,
 			// reference order fields
@@ -131,6 +131,33 @@ public enum TestReferenceOrder {
 			30d, null, 
 			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_14)
 			),				
+	TEST_FOR_LEG_DELETION(120008, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
+			DefaultReference.CCY_EUR, "TEST_IN_STATUS_REJECTED", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
+			DefaultReference.TICKER_XRUUSD,
+			TestUser.ANDREW_BAYNES, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			Arrays.asList(), null, null,
+			 100d, 
+			// reference order fields
+			30d, null, 
+			Arrays.asList(TestReferenceOrderLeg.TEST_FOR_LEG_DELETION, TestReferenceOrderLeg.MAIN_LEG_FOR_LEG_DELETION)
+			),			
+	
+	TEST_FOR_LEG_DELETION_ALL_LEGS(120009, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
+			DefaultReference.CCY_EUR, "TEST_IN_STATUS_REJECTED", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
+			DefaultReference.TICKER_XRUUSD,
+			TestUser.ANDREW_BAYNES, "1996-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			Arrays.asList(), null, null,
+			 100d, 
+			// reference order fields
+			30d, null, 
+			Arrays.asList(TestReferenceOrderLeg.MAIN_LEG_FOR_LEG_DELETION_ALL_LEGS)
+			),		
 	;
 	
 	private ReferenceOrderTo referenceOrder;
@@ -202,6 +229,12 @@ public enum TestReferenceOrder {
 		return Arrays.asList(TestReferenceOrder.values())
 				.stream().map(TestReferenceOrder::getEntity).collect(Collectors.toList());
 	}	
+
+	public static List<Long> asListOfIds () {
+		return Arrays.asList(TestReferenceOrder.values())
+				.stream().map(x -> x.getEntity().id()).collect(Collectors.toList());
+	}	
+
 	
 	public static List<TestReferenceOrder> asEnumList () {
 		return Arrays.asList(TestReferenceOrder.values())
