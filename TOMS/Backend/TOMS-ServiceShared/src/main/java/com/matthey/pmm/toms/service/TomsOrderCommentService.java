@@ -39,7 +39,7 @@ public interface TomsOrderCommentService {
 	@PostMapping("/limitOrder/{limitOrderId}/comments")    
     public long postLimitOrderComment (
     		@ApiParam(value = "The order ID of the limit order the comment is to be posted for", example = "1") @PathVariable long limitOrderId,
-    		@ApiParam(value = "The new comment. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCommentTo newComment);
+    		@ApiParam(value = "The new comment. ID has to be 0. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCommentTo newComment);
 
     @ApiOperation("Update of a comment for a Limit Order")
 	@PutMapping("/limitOrder/{limitOrderId}/comments/{commentId}")    
@@ -71,7 +71,7 @@ public interface TomsOrderCommentService {
 	@PostMapping("/referenceOrder/{referenceOrderId}/comments")    
     public long postReferenceOrderComment (
     		@ApiParam(value = "The order ID of the reference order the comment is to be posted for", example = "1001") @PathVariable long referenceOrderId,
-    		@ApiParam(value = "The new comment. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCommentTo newComment);
+    		@ApiParam(value = "The new comment. ID has to be 0. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCommentTo newComment);
 
     @ApiOperation("Update of a comment for a reference Order")
 	@PutMapping("/referenceOrder/{referenceOrderId}/comments/{commentId}")    

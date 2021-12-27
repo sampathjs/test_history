@@ -14,20 +14,19 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.CreditCheck;
 import com.matthey.pmm.toms.model.Fill;
-import com.matthey.pmm.toms.model.IndexEntity;
 import com.matthey.pmm.toms.model.LimitOrder;
 import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.model.OrderComment;
@@ -82,7 +81,8 @@ import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
 @Service
-public class Validator {
+@Transactional
+public class TomsValidator {
 	private static final double EPSILON = 0.00001d; 
 	
 	@Autowired
@@ -293,8 +293,8 @@ public class Validator {
 	
 	public void validateCreditCheckFields (Class clazz, String method, String argument, CreditCheckTo creditCheck, boolean isNew, CreditCheckTo oldCreditCheck) {
     	if (isNew) {
-    		if (creditCheck.id() != -1) {
-        		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + creditCheck.id());
+    		if (creditCheck.id() != 0) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "0", "" + creditCheck.id());
         	}
     	} else {
     		if (creditCheck.id() != oldCreditCheck.id()) {
@@ -438,7 +438,7 @@ public class Validator {
 				.collect(Collectors.toList());
 		if (fills.size() != 1) {
 			if (!isOptional) {
-				String listAllowedFills = order.getCreditChecks().stream()
+				String listAllowedFills = order.getFills().stream()
 						.map (x -> Long.toString(x.getId()))
 						.collect(Collectors.joining(","));
 				throw new IllegalIdException(clazz, methodName, argument, listAllowedFills, Long.toString(fillId));
@@ -452,8 +452,8 @@ public class Validator {
 	
 	public void validateFillFields (Class clazz, String method, String argument, FillTo orderFill, boolean isNew, FillTo oldOrderFillTo) {
     	if (isNew) {
-    		if (orderFill.id() != -1) {
-        		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + orderFill.id());
+    		if (orderFill.id() != 0) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "0", "" + orderFill.id());
         	}
     	}     	
     	
@@ -482,10 +482,13 @@ public class Validator {
 			throw new IllegalDateFormatException (clazz, method, argument + ".lastUpdateDateTime", TomsService.DATE_TIME_FORMAT, orderFill.lastUpdateDateTime());
 		}    	
 		
-    	Optional<Fill> fillForTradeId = fillRepo.findByTradeId(orderFill.idTrade());
-    	if (fillForTradeId.isPresent()) {
-    		throw new IllegalIdException (clazz, method, argument, "not equal to " + orderFill.idTrade() + " as there is already a fill for this trade ID ", Long.toString(orderFill.idTrade()));
-    	}
+		if (orderFill.idTrade() != null) {
+	    	Optional<Fill> fillForTradeId = fillRepo.findByTradeId(orderFill.idTrade());
+	    	if (fillForTradeId.isPresent() && fillForTradeId.get().getId() != orderFill.id()) {
+	    		throw new IllegalIdException (clazz, method, argument + ".idTrade", "not equal to " + orderFill.idTrade() 
+	    			+ " as there is already fill #" + fillForTradeId.get().getId() + " for this trade ID ", Long.toString(orderFill.idTrade()));
+	    	}			
+		}
     	
     	if (orderFill.idFillStatus() == DefaultReference.FILL_STATUS_FAILED.getEntity().id()) {
     		if (orderFill.errorMessage() == null) {
@@ -528,8 +531,8 @@ public class Validator {
 	public void validateCommentFields(Class clazz, String method,
 			String argument, OrderCommentTo newComment, boolean isNew, OrderComment oldComment) {
     	if (isNew) {
-    		if (newComment.id() != -1) {
-        		throw new IllegalIdException (clazz, method, argument  + ".id", "-1", "" + newComment.id());
+    		if (newComment.id() != 0) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "0", "" + newComment.id());
         	}
     	} else {
     		if (newComment.id() != oldComment.getId()) {
@@ -955,7 +958,7 @@ public class Validator {
 	public void verifyOrderCommentBelongsToOrder(OrderComment orderComment, Order order,
 			Class clazz, String methodName, String argumentNameManager, String argumentNameManaged) {
 		for (OrderComment fromOrder : order.getOrderComments()) {
-			if (fromOrder.getId() == orderComment.getId() && fromOrder.getLifecycleStatus().getId() != DefaultReference.LIFECYCLE_STATUS_DELETED.getEntity().id()) {
+			if (fromOrder.getId().longValue() == orderComment.getId().longValue() && fromOrder.getLifecycleStatus().getId() != DefaultReference.LIFECYCLE_STATUS_DELETED.getEntity().id()) {
 				return;
 			}
 		}

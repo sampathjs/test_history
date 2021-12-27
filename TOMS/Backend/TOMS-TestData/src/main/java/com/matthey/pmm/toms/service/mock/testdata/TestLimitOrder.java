@@ -16,7 +16,8 @@ public enum TestLimitOrder {
 			DefaultReference.CCY_GBP, "TEST_ORDER_1A", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE, DefaultReference.TICKER_XRUUSD, 
 			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2000-01-01 08:00:00", TestUser.ANDREW_BAYNES,
-			DefaultReference.PRICE_TYPE_SPOT, null,
+			DefaultReference.PRICE_TYPE_SPOT, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
+			// limit order fields
 			"2000-01-15", "2001-04-28", DefaultReference.SYMBOLIC_DATE_1D, 1200.00d,
 			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
 			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, "2010-01-31", 1.0d, null,
@@ -27,7 +28,8 @@ public enum TestLimitOrder {
 			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE, DefaultReference.TICKER_XRUUSD,
 			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-03-02 08:00:00", TestUser.ANDREW_BAYNES,
-			DefaultReference.PRICE_TYPE_SPOT, null,
+			DefaultReference.PRICE_TYPE_SPOT, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
+			// limit order fields
 			"2000-01-15", "2001-04-28", null, 1200.00d,
 			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
 			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, null, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_1, TestFill.TEST_LIMIT_ORDER_FILL_2),
@@ -38,7 +40,7 @@ public enum TestLimitOrder {
 			DefaultReference.CCY_EUR,"TEST_ORDER_2", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
 			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_FIXED, DefaultReference.TICKER_XRUUSD, 
 			TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
-			DefaultReference.PRICE_TYPE_FORWARD, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1), 
+			DefaultReference.PRICE_TYPE_FORWARD, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_2), 
 			"2000-02-15", null, DefaultReference.SYMBOLIC_DATE_1D, 400.00d,
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
 			DefaultReference.METAL_XRU, null, "2010-01-31", 1.0d, Arrays.asList(), Arrays.asList()
@@ -49,7 +51,7 @@ public enum TestLimitOrder {
 			DefaultReference.CCY_EUR,  "TEST_ORDER_3", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_ROYSTON,
 			DefaultOrderStatus.LIMIT_ORDER_FILLED, DefaultReference.CONTRACT_TYPE_LIMIT_FIXED, DefaultReference.TICKER_XRUUSD,
 			TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.ARINDAM_RAY,
-			DefaultReference.PRICE_TYPE_SPOT_PLUS, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_4, TestCreditCheck.TEST_CREDIT_CHECK_5), 
+			DefaultReference.PRICE_TYPE_SPOT_PLUS, null, 
 			"2000-02-15", null, null, 400.00d,
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
 			DefaultReference.METAL_XRU, null, null, 1.0d, null, null

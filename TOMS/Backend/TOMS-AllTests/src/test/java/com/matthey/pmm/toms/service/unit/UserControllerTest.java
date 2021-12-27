@@ -24,7 +24,7 @@ import com.matthey.pmm.toms.transport.UserTo;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @AutoConfigureTestDatabase(replace=Replace.NONE)
-@SpringBootTest(webEnvironment =  WebEnvironment.DEFINED_PORT, classes={TestServiceApplication.class})
+@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes={TestServiceApplication.class})
 @ContextConfiguration
 public class UserControllerTest {
 	@Autowired
@@ -60,6 +60,38 @@ public class UserControllerTest {
 	public void testQueryByRole() {
 		Set<UserTo> allUsers = userController.getUser(null, null, DefaultReference.USER_ROLE_SERVICE_USER.getEntity().id());
 		assertThat(allUsers.size()).isEqualTo(TestUser.asListByRole(DefaultReference.USER_ROLE_SERVICE_USER).size());
+		assertThat(allUsers).contains(TestUser.SERVICE_USER.getEntity());
+	}
+	
+	@Test
+	@Transactional
+	public void testQueryAll() {
+		Set<UserTo> allUsers = userController.getUser(TestUser.SERVICE_USER.getEntity().id(), TestUser.SERVICE_USER.getEntity().email(), DefaultReference.USER_ROLE_SERVICE_USER.getEntity().id());
+		assertThat(allUsers.size()).isEqualTo(TestUser.asListByRole(DefaultReference.USER_ROLE_SERVICE_USER).size());
+		assertThat(allUsers).contains(TestUser.SERVICE_USER.getEntity());
+	}
+	
+	@Test
+	@Transactional
+	public void testQueryByEmailAndRole() {
+		Set<UserTo> allUsers = userController.getUser(null, TestUser.SERVICE_USER.getEntity().email(), DefaultReference.USER_ROLE_SERVICE_USER.getEntity().id());
+		assertThat(allUsers.size()).isEqualTo(1);
+		assertThat(allUsers).contains(TestUser.SERVICE_USER.getEntity());
+	}
+	
+	@Test
+	@Transactional
+	public void testQueryBySingleUserIdAndRole() {
+		Set<UserTo> allUsers = userController.getUser(TestUser.SERVICE_USER.getEntity().id(), null, DefaultReference.USER_ROLE_SERVICE_USER.getEntity().id());
+		assertThat(allUsers.size()).isEqualTo(1);
+		assertThat(allUsers).contains(TestUser.SERVICE_USER.getEntity());
+	}
+	
+	@Test
+	@Transactional
+	public void testQueryBySingleUserIdAndEmail() {
+		Set<UserTo> allUsers = userController.getUser(TestUser.SERVICE_USER.getEntity().id(), TestUser.SERVICE_USER.getEntity().email(), null);
+		assertThat(allUsers.size()).isEqualTo(1);
 		assertThat(allUsers).contains(TestUser.SERVICE_USER.getEntity());
 	}
 }

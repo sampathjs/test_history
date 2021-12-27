@@ -64,6 +64,11 @@ public enum DefaultReferenceType {
 		return Arrays.asList(DefaultReferenceType.values())
 				.stream().map(DefaultReferenceType::getEntity).collect(Collectors.toList());
 	}
+
+	public static List<Long> asListOfIds () {
+		return Arrays.asList(DefaultReferenceType.values())
+				.stream().map(x -> x.getEntity().id()).collect(Collectors.toList());
+	}
 	
 	public static List<DefaultReferenceType> asListEnum () {
 		return Arrays.asList(DefaultReferenceType.values())

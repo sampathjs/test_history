@@ -2,6 +2,8 @@ package com.matthey.pmm.toms.service.conversion;
 
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,7 @@ import com.matthey.pmm.toms.transport.FillTo;
 import com.matthey.pmm.toms.transport.ImmutableFillTo;
 
 @Service
+@Transactional
 public class FillConverter extends EntityToConverter<Fill, FillTo>{
 	@Autowired
 	private UserRepository userRepo;
@@ -55,6 +58,7 @@ public class FillConverter extends EntityToConverter<Fill, FillTo>{
 	}
 	
 	@Override
+	@Transactional
 	public Fill toManagedEntity (FillTo to) {
 		User trader = loadUser(to, to.idTrader());
 		User updatedBy = loadUser(to, to.idUpdatedBy());

@@ -32,6 +32,6 @@ public class TomsService {
 
 		StandardEvaluationContext tomsContext = TomsSpelProvider.getTomsContextSingleton(order);
 		ExpressionParser parser = new SpelExpressionParser();
-		return (String)parser.parseExpression(calc.spelExpression()).getValue(tomsContext);
+		return parser.parseExpression(calc.spelExpression()).getValue(tomsContext).toString();
 	}
 }

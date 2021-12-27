@@ -18,7 +18,7 @@ import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.repository.AttributeCalculationRepository;
 import com.matthey.pmm.toms.repository.ProcessTransitionRepository;
 import com.matthey.pmm.toms.service.TomsMetadataService;
-import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.AttributeCalculationConverter;
 import com.matthey.pmm.toms.service.conversion.ProcessTransitionConverter;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
@@ -32,7 +32,7 @@ import io.swagger.annotations.ApiParam;
 @RestController
 public abstract class MetadataControllerImpl implements TomsMetadataService {
 	@Autowired
-	protected Validator validator;
+	protected TomsValidator validator;
 	
 	@Autowired
 	protected ProcessTransitionRepository processTransitionRepo;

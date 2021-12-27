@@ -72,6 +72,22 @@ public enum DefaultOrderStatus {
 		return Arrays.asList(DefaultOrderStatus.values())
 				.stream().map(x -> x.getEntity().id()).collect(Collectors.toList());
 	}
+
+	public static List<Long> asListOfIdsByType (DefaultReference orderTypeName) {
+		return Arrays.asList(DefaultOrderStatus.values())
+				.stream()
+				.filter(x -> x.getEntity().idOrderTypeName() == orderTypeName.getEntity().id())
+				.map(x -> x.getEntity().id())
+				.collect(Collectors.toList());
+	}
+
+	public static List<Long> asListOfIdsByName (DefaultReference orderStatusName) {
+		return Arrays.asList(DefaultOrderStatus.values())
+				.stream()
+				.filter(x -> x.getEntity().idOrderStatusName() == orderStatusName.getEntity().id())
+				.map(x -> x.getEntity().id())
+				.collect(Collectors.toList());
+	}
 	
 	public static Optional<OrderStatusTo> findById(long orderStatusId) {
 		List<OrderStatusTo> filtered = asList().stream().filter(x -> x.id() == orderStatusId).collect(Collectors.toList());

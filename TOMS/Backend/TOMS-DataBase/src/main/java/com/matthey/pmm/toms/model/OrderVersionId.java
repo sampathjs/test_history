@@ -2,6 +2,8 @@ package com.matthey.pmm.toms.model;
 
 import java.io.Serializable;
 
+import com.matthey.pmm.toms.transport.OrderTo;
+
 /**
  * Composite ID for orders consisting of uniquely incremented id
  * and version
@@ -25,6 +27,10 @@ public class OrderVersionId implements Serializable {
     public OrderVersionId (long orderId, int version) {
     	this.orderId = orderId;
     	this.version = version;
+    }
+    
+    public OrderVersionId (OrderTo order) {
+    	this(order.id(), order.version());
     }
     
 	public long getOrderId() {

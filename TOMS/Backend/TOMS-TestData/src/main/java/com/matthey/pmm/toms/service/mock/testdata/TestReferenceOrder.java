@@ -33,7 +33,8 @@ public enum TestReferenceOrder {
 			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_REFERENCE_AVERAGE,
 			DefaultReference.TICKER_XRUUSD,
 			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-12-23 12:00:00", TestUser.ANDREW_BAYNES,
-			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8), null, null,
+			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_8), 
+			Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_1), Arrays.asList(TestOrderComment.TEST_COMMENT_7, TestOrderComment.TEST_COMMENT_8),
 			// reference order fields
 			100d, 30d, 45d, 
 			Arrays.asList(TestReferenceOrderLeg.TEST_LEG_1, TestReferenceOrderLeg.TEST_LEG_2)
@@ -58,7 +59,7 @@ public enum TestReferenceOrder {
 			DefaultOrderStatus.REFERENCE_ORDER_FILLED, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
 			DefaultReference.TICKER_XRUUSD,
 			TestUser.ANDREW_BAYNES, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
-			Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_7), null, null,
+			null, null, null,
 			 100d, 
 			// reference order fields
 			30d, null, 

@@ -23,6 +23,13 @@ public enum TestOrderComment {
 				"2005-11-02 16:00:00", TestUser.DENNIS_WILDISH, "2012-03-23 09:31:45", TestUser.JENS_WAECHTER),
 		TEST_COMMENT_6 (100005, "Another Comment having ID 1000005 and enum name TEST_COMMENT_6",
 				"2005-11-02 16:00:00", TestUser.MURALI_KRISHNAN, "2012-03-23 09:31:45", TestUser.JENS_WAECHTER),
+		TEST_COMMENT_7 (100006, "Another Comment having ID 1000006 and enum name TEST_COMMENT_7",
+				"2005-11-02 16:00:00", TestUser.DENNIS_WILDISH, "2012-03-23 09:31:45", TestUser.JENS_WAECHTER),
+		TEST_COMMENT_8 (100007, "Another Comment having ID 1000007 and enum name TEST_COMMENT_8",
+				"2005-11-02 16:00:00", TestUser.MURALI_KRISHNAN, "2012-03-23 09:31:45", TestUser.JENS_WAECHTER),
+		TEST_COMMENT_FOR_INSERT (100008, "Another Comment having ID 1000008 and enum name TEST_COMMENT_FOR_INSERT",
+				"2005-11-02 16:00:00", TestUser.MURALI_KRISHNAN, "2012-03-23 09:31:45", TestUser.JENS_WAECHTER),
+		
 	;
 	
 	private OrderCommentTo comment;
@@ -47,7 +54,6 @@ public enum TestOrderComment {
 	public void setEntity (OrderCommentTo comment) {
 		this.comment = comment;
 	}
-	
 	
 	public static List<OrderCommentTo> asList () {
 		return Arrays.asList(TestOrderComment.values())

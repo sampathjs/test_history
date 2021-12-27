@@ -827,6 +827,30 @@ public class OrderControllerTest {
 	}
 	
 	@Test
+	public void testCreateSimpleReferenceOrderLegNotAllowedInStatusOtherThanPending () {
+		assertThatThrownBy(() -> {
+			orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().id(),
+					TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().version(), 
+					TestReferenceOrderLeg.TEST_LEG_11.getEntity().id());
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);
+		assertThatThrownBy(() -> {
+			orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_FILLED.getEntity().id(),
+					TestReferenceOrder.TEST_IN_STATUS_FILLED.getEntity().version(), 
+					TestReferenceOrderLeg.TEST_LEG_12.getEntity().id());
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);
+		assertThatThrownBy(() -> {
+			orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_PULLED.getEntity().id(),
+					TestReferenceOrder.TEST_IN_STATUS_PULLED.getEntity().version(), 
+					TestReferenceOrderLeg.TEST_LEG_13.getEntity().id());
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);
+		assertThatThrownBy(() -> {
+			orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_REJECTED.getEntity().id(),
+					TestReferenceOrder.TEST_IN_STATUS_REJECTED.getEntity().version(), 
+					TestReferenceOrderLeg.TEST_LEG_14.getEntity().id());
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);		
+	}
+	
+	@Test
 	public void testUpdateSimpleReferenceOrderLeg () {
 		ReferenceOrderLegTo updatedLeg = ImmutableReferenceOrderLegTo.builder()
 				.from(TestReferenceOrderLeg.TEST_LEG_10.getEntity())
@@ -837,6 +861,42 @@ public class OrderControllerTest {
 		Optional<ReferenceOrderLeg> newleg = referenceOrderLegRepo.findById(TestReferenceOrderLeg.TEST_LEG_10.getEntity().id());
 		assertThat(newleg).isNotEmpty();
 		assertThat(newleg.get().getNotional()).isCloseTo(99d, within(0.00001d));
+	}
+	
+	@Test
+	public void testUpdateReferenceOrderLegNotAllowedInStatusOtherThanPending () {
+		assertThatThrownBy(() -> {
+			ReferenceOrderLegTo updatedLeg = ImmutableReferenceOrderLegTo.builder()
+					.from(TestReferenceOrderLeg.TEST_LEG_11.getEntity())
+					.notional(99d)
+					.build();
+			updateReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity(), 
+					updatedLeg);
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);
+		assertThatThrownBy(() -> {
+			ReferenceOrderLegTo updatedLeg = ImmutableReferenceOrderLegTo.builder()
+					.from(TestReferenceOrderLeg.TEST_LEG_12.getEntity())
+					.notional(99d)
+					.build();
+			updateReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_FILLED.getEntity(), 
+					updatedLeg);
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);
+		assertThatThrownBy(() -> {
+			ReferenceOrderLegTo updatedLeg = ImmutableReferenceOrderLegTo.builder()
+					.from(TestReferenceOrderLeg.TEST_LEG_13.getEntity())
+					.notional(99d)
+					.build();
+			updateReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_PULLED.getEntity(), 
+					updatedLeg);
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);
+		assertThatThrownBy(() -> {
+			ReferenceOrderLegTo updatedLeg = ImmutableReferenceOrderLegTo.builder()
+					.from(TestReferenceOrderLeg.TEST_LEG_14.getEntity())
+					.notional(99d)
+					.build();
+			updateReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_REJECTED.getEntity(), 
+					updatedLeg);
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);		
 	}
 	
 	@Test
@@ -853,11 +913,43 @@ public class OrderControllerTest {
 	}
 	
 	@Test
+	public void testDeleteReferenceOrderLegNotAllowedInStatusOtherThanPending () {
+		assertThatThrownBy(() -> {
+			orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().id(),
+					TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().version(), TestReferenceOrderLeg.TEST_LEG_11.getEntity().id());
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);
+		assertThatThrownBy(() -> {
+			orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_FILLED.getEntity().id(),
+					TestReferenceOrder.TEST_IN_STATUS_FILLED.getEntity().version(), TestReferenceOrderLeg.TEST_LEG_12.getEntity().id());
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);
+		assertThatThrownBy(() -> {
+			orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_PULLED.getEntity().id(),
+					TestReferenceOrder.TEST_IN_STATUS_PULLED.getEntity().version(), TestReferenceOrderLeg.TEST_LEG_13.getEntity().id());
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);
+		assertThatThrownBy(() -> {
+			orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_IN_STATUS_REJECTED.getEntity().id(),
+					TestReferenceOrder.TEST_IN_STATUS_REJECTED.getEntity().version(), TestReferenceOrderLeg.TEST_LEG_14.getEntity().id());
+			}).isInstanceOf(com.matthey.pmm.toms.service.exception.IllegalStateException.class);		
+	}
+	
+	@Test
 	public void testDeleteAllReferenceOrderLegsIsImpossible() {
 		assertThatThrownBy(() -> {
 			orderController.deleteReferenceOrderLeg(TestReferenceOrder.TEST_FOR_LEG_DELETION_ALL_LEGS.getEntity().id(),
 					TestReferenceOrder.TEST_FOR_LEG_DELETION_ALL_LEGS.getEntity().version(), 
 					TestReferenceOrderLeg.MAIN_LEG_FOR_LEG_DELETION_ALL_LEGS.getEntity().id());
 			}).isInstanceOf(IllegalLegRemovalException.class);
+	}
+	
+	@Test
+	public void testGetAttributeValueLimitOrder () {
+		String ret = orderController.getAttributeValueLimitOrder("id", TestLimitOrder.TEST_ORDER_1A.getEntity());
+		assertThat(ret).isEqualTo("0");
+	}
+	
+	@Test
+	public void testGetAttributeValueReferenceOrder () {
+		String ret = orderController.getAttributeValueReferenceOrder("id", TestReferenceOrder.TEST_ORDER_1A.getEntity());
+		assertThat(ret).isEqualTo("0");
 	}
 }

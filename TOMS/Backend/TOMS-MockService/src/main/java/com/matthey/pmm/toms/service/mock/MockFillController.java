@@ -23,9 +23,9 @@ public class MockFillController extends FillControllerImpl {
 	// this simulates either a fail or a success on Endur side deal booking.
     @ApiOperation("Creation of a new fills for a Limit Order")
     @Override
-    public long postLimitOrderFill (
+    public long postLimitOrderFill(
     		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100000") @PathVariable long limitOrderId,
-    		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
+    		@ApiParam(value = "The new fill. ID has to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
     	long newFillId = super.postLimitOrderFill(limitOrderId, newOrderFill);
     	if (Math.random() >= 0.9d) {
     		newOrderFill = ImmutableFillTo.builder()
@@ -49,7 +49,7 @@ public class MockFillController extends FillControllerImpl {
     @Override
     public long postReferenceOrderFill (
     		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100003") @PathVariable long referenceOrderId,
-    		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
+    		@ApiParam(value = "The new fill. ID has to be 0. The actual assigned fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
     	long newFillId = super.postReferenceOrderFill(referenceOrderId, newOrderFill);
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "postReferenceOrderFill", "referenceOrderId", false);
     	if (Math.random() >= 0.9d) {
@@ -66,7 +66,7 @@ public class MockFillController extends FillControllerImpl {
     				.idFillStatus(DefaultReference.FILL_STATUS_COMPLETED.getEntity().id())
     				.build(); 
     	}
-    	updateLimitOrderFill(referenceOrderId, newFillId, newOrderFill);		
+    	updateReferenceOrderFill(referenceOrderId, newFillId, newOrderFill);		
 		return newFillId;
     }
 }

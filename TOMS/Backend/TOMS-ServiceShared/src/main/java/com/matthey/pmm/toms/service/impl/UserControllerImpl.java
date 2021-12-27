@@ -16,7 +16,7 @@ import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.UserRepository;
 import com.matthey.pmm.toms.service.TomsUserService;
-import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
 import com.matthey.pmm.toms.transport.UserTo;
 
@@ -26,7 +26,7 @@ import io.swagger.annotations.ApiParam;
 @RestController
 public abstract class UserControllerImpl implements TomsUserService {
 	@Autowired
-	protected Validator validator;
+	protected TomsValidator validator;
 	
 	@Autowired
 	protected UserRepository userRepo;

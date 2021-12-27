@@ -6,9 +6,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +21,7 @@ import com.matthey.pmm.toms.repository.FillRepository;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.service.TomsFillService;
-import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.FillConverter;
 import com.matthey.pmm.toms.service.conversion.OrderStatusConverter;
 import com.matthey.pmm.toms.transport.FillTo;
@@ -29,9 +30,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @RestController
+@Transactional
 public abstract class FillControllerImpl implements TomsFillService {	
 	@Autowired 
-	protected Validator validator;
+	protected TomsValidator validator;
 	
 	@Autowired
 	protected OrderStatusConverter orderStatusConverter;
@@ -80,7 +82,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     @ApiOperation("Creation of a new fills for a Limit Order")
     public long postLimitOrderFill (
     		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100000") @PathVariable long limitOrderId,
-    		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
+    		@ApiParam(value = "The new fill. ID has to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
     	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "postLimitOrderFill", "limitOrderId", false);
 
     	// validation checks
@@ -95,6 +97,7 @@ public abstract class FillControllerImpl implements TomsFillService {
    		} else if (limitOrder.get().getFillPercentage() >= 0.00d) {
     		limitOrder.get().setOrderStatus(orderStatusConverter.toManagedEntity(DefaultOrderStatus.LIMIT_ORDER_PART_FILLED.getEntity()));    			
    		}
+   		limitOrder.get().setVersion(limitOrder.get().getVersion()+1);
 		limitOrderRepo.save(limitOrder.get());		
 
 		return persisted.getId();
@@ -109,7 +112,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     	Optional<Fill> existingFill = validator.verifyFill(limitOrder.get(), limitOrderId, getClass(), "updateReferenceOrderFill", "fillId", false);
 
     	// validation checks
-    	validator.validateFillFields(this.getClass(), "updateLimitOrderFill", "newOrderFill", newOrderFill, true, fillConverter.toTo(existingFill.get()));
+    	validator.validateFillFields(this.getClass(), "updateLimitOrderFill", "newOrderFill", newOrderFill, false, fillConverter.toTo(existingFill.get()));
 
     	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
 		limitOrder.get().setLastUpdate(new Date());
@@ -119,6 +122,7 @@ public abstract class FillControllerImpl implements TomsFillService {
    		} else if (limitOrder.get().getFillPercentage() >= 0.00d) {
     		limitOrder.get().setOrderStatus(orderStatusConverter.toManagedEntity(DefaultOrderStatus.LIMIT_ORDER_PART_FILLED.getEntity()));    			
    		}
+   		limitOrder.get().setVersion(limitOrder.get().getVersion()+1);
 		limitOrderRepo.save(limitOrder.get());		
 
 		return persisted.getId();
@@ -129,7 +133,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100003") @PathVariable long referenceOrderId) {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "getReferenceOrderFills", "referenceOrderId", false);
     	
-    	if (referenceOrder.get().getCreditChecks() == null || referenceOrder.get().getCreditChecks().size() == 0) {
+    	if (referenceOrder.get().getFills() == null || referenceOrder.get().getFills().size() == 0) {
     		return null;
     	}
 	
@@ -142,7 +146,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     @ApiOperation("Creation of a new fills for a Limit Order")
     public long postReferenceOrderFill (
     		@ApiParam(value = "The order ID of the order the fill object is to be retrieved from", example = "100003") @PathVariable long referenceOrderId,
-    		@ApiParam(value = "The new fill. ID has to be -1. The actual assigned fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
+    		@ApiParam(value = "The new fill. ID has to be 0. The actual assigned fill ID is going to be returned", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "postReferenceOrderFill", "referenceOrderId", false);
 
     	// validation checks
@@ -152,6 +156,7 @@ public abstract class FillControllerImpl implements TomsFillService {
 		referenceOrder.get().getFills().add(persisted);
 		referenceOrder.get().setLastUpdate(new Date());
 		referenceOrder.get().onPreUpdate();
+		referenceOrder.get().setVersion(referenceOrder.get().getVersion()+1);
 		referenceOrderRepo.save(referenceOrder.get());
 		return persisted.getId();
     }
@@ -176,14 +181,15 @@ public abstract class FillControllerImpl implements TomsFillService {
     		@ApiParam(value = "The ID of the fill object to be updated", example = "1") @PathVariable long fillId,    		
     		@ApiParam(value = "The new fill. ID has to be matching fillId.", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) { 
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "updateReferenceOrderFill", "referenceOrderId", false);
-    	Optional<Fill> existingFill = validator.verifyFill(referenceOrder.get(), referenceOrderId, getClass(), "updateReferenceOrderFill", "fillId", false);
+    	Optional<Fill> existingFill = validator.verifyFill(referenceOrder.get(), fillId, getClass(), "updateReferenceOrderFill", "fillId", false);
     	    	
     	// validation checks
-    	validator.validateFillFields(this.getClass(), "updateReferenceOrderFill", "newOrderFill", newOrderFill, true, fillConverter.toTo(existingFill.get()));
+    	validator.validateFillFields(this.getClass(), "updateReferenceOrderFill", "newOrderFill", newOrderFill, false, fillConverter.toTo(existingFill.get()));
 
     	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
 		referenceOrder.get().setLastUpdate(new Date());
 		referenceOrder.get().onPreUpdate();
+		referenceOrder.get().setVersion(referenceOrder.get().getVersion()+1);
 		referenceOrderRepo.save(referenceOrder.get());
 		return persisted.getId();
     }

@@ -3,6 +3,8 @@ package com.matthey.pmm.toms.service.conversion;
 import java.util.Date;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +53,7 @@ public class CreditCheckConverter extends EntityToConverter<CreditCheck, CreditC
 				.idParty(entity.getParty().getId())
 				.runDateTime(super.formatDateTime(entity.getRunDateTime()))
 				.idCreditCheckRunStatus(entity.getCreditCheckRunStatus().getId())
-				.idCreditCheckOutcome(entity.getCreditCheckOutcome().getId())
+				.idCreditCheckOutcome(entity.getCreditCheckOutcome() != null?entity.getCreditCheckOutcome().getId():null)
 				.id(entity.getId())
 				.currentUtilization(entity.getCurrentUtilization())
 				.creditLimit(entity.getCreditLimit())
@@ -62,6 +64,7 @@ public class CreditCheckConverter extends EntityToConverter<CreditCheck, CreditC
 	}
 	
 	@Override
+	@Transactional
 	public CreditCheck toManagedEntity (CreditCheckTo to) {	
 		Date runDateTime = parseDateTime(to, to.runDateTime());
 		Party party = loadParty(to, to.idParty());

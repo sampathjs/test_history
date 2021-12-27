@@ -17,7 +17,7 @@ import com.matthey.pmm.toms.repository.OrderStatusRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.service.TomsStaticDataService;
-import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.OrderStatusConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceTypeConverter;
@@ -31,7 +31,7 @@ import io.swagger.annotations.ApiParam;
 @RestController
 public abstract class StaticDataControllerImpl implements TomsStaticDataService {
 	@Autowired 
-	protected Validator validator;
+	protected TomsValidator validator;
 	
 	@Autowired
 	protected ReferenceTypeRepository refTypeRepo;

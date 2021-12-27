@@ -2,6 +2,8 @@ package com.matthey.pmm.toms.service.conversion;
 
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +55,7 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 	}
 	
 	@Override
+	@Transactional
 	public OrderComment toManagedEntity (OrderCommentTo to) {		
 		User createdBy = loadUser(to, to.idCreatedByUser());
 		User updatedBy = loadUser(to, to.idUpdatedByUser());

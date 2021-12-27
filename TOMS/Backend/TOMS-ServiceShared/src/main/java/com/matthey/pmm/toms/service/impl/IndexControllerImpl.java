@@ -14,7 +14,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.repository.IndexRepository;
 import com.matthey.pmm.toms.service.TomsIndexService;
-import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.IndexConverter;
 import com.matthey.pmm.toms.transport.IndexTo;
 
@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiParam;
 @RestController
 public abstract class IndexControllerImpl implements TomsIndexService {
 	@Autowired
-	protected Validator validator;
+	protected TomsValidator validator;
 
 	@Autowired
 	protected IndexRepository indexRepo;

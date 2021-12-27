@@ -2,12 +2,11 @@ package com.matthey.pmm.toms.service.impl;
 
 
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,7 +20,7 @@ import com.matthey.pmm.toms.repository.CreditCheckRepository;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.service.TomsCreditCheckService;
-import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.CreditCheckConverter;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
 
@@ -29,9 +28,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @RestController
+@Transactional
 public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
 	@Autowired
-	protected Validator validator;
+	protected TomsValidator validator;
 	
 	@Autowired
 	protected LimitOrderRepository limitOrderRepo;
@@ -78,7 +78,7 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     @ApiOperation("Creation of a new Credit Check for a Limit Order")
     public long postLimitOrderCreditCheck (
     		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "100001") @PathVariable long limitOrderId,
-    		@ApiParam(value = "The new Credit Check. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck) {
+    		@ApiParam(value = "The new Credit Check. ID has to be 0. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck) {
     	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "postLimitOrderCreditCheck", "limitOrderId", false);
 
     	// validation checks
@@ -87,7 +87,8 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     	CreditCheck persisted = creditCheckConverter.toManagedEntity(newCreditCheck);		
 		limitOrder.get().getCreditChecks().add(persisted);
 		limitOrder.get().setLastUpdate(new Date());
-		limitOrderRepo.save(limitOrder.get());
+		limitOrder.get().setVersion(limitOrder.get().getVersion()+1);
+		limitOrderRepo.save(new LimitOrder(limitOrder.get()));
 		return persisted.getId();    	
     }
 
@@ -103,12 +104,15 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     	validator.validateCreditCheckFields(getClass(), "updateLimitOrderCreditCheck", "limitOrderId", existingCreditCheck, false,  creditCheckConverter.toTo(oldCreditCheck.get()));
     	CreditCheck needsToBePersisted = creditCheckConverter.toManagedEntity(existingCreditCheck);
     	creditCheckRepo.save(needsToBePersisted);
+		limitOrder.get().setLastUpdate(new Date());
+		limitOrder.get().setVersion(limitOrder.get().getVersion()+1);
+		limitOrderRepo.save(new LimitOrder(limitOrder.get()));    	
     }
     
     @ApiOperation("Creation of a new Credit Check for a Reference Order")
     public long postReferenceOrderCreditCheck (
     		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "100003") @PathVariable long referenceOrderId,
-    		@ApiParam(value = "The new Credit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck) {
+    		@ApiParam(value = "The new Credit Check . ID has to be 0. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck) {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "postReferenceOrderCreditCheck", "referenceOrderId", false);
 
     	// validation checks
@@ -117,7 +121,8 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     	CreditCheck persisted = creditCheckConverter.toManagedEntity(newCreditCheck);		
     	referenceOrder.get().getCreditChecks().add(persisted);
     	referenceOrder.get().setLastUpdate(new Date());
-		referenceOrderRepo.save(referenceOrder.get());
+    	referenceOrder.get().setVersion(referenceOrder.get().getVersion()+1);
+		referenceOrderRepo.save(new ReferenceOrder (referenceOrder.get()));
 		return persisted.getId();
     }
     
@@ -132,6 +137,9 @@ public abstract class CreditCheckServiceImpl implements TomsCreditCheckService {
     	validator.validateCreditCheckFields(getClass(), "updateReferenceOrderCreditCheck", "referenceOrderId", existingCreditCheck, false,  creditCheckConverter.toTo(oldCreditCheck.get()));
     	CreditCheck needsToBePersisted = creditCheckConverter.toManagedEntity(existingCreditCheck);
     	creditCheckRepo.save(needsToBePersisted);
+    	referenceOrder.get().setLastUpdate(new Date());
+    	referenceOrder.get().setVersion(referenceOrder.get().getVersion()+1);
+		referenceOrderRepo.save(new ReferenceOrder(referenceOrder.get()));
     }
 
     

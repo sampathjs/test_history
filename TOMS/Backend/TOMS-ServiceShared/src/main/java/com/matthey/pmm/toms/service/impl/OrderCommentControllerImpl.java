@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +22,7 @@ import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.service.TomsOrderCommentService;
-import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.OrderCommentConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceConverter;
 import com.matthey.pmm.toms.service.exception.IllegalIdException;
@@ -33,9 +35,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @RestController
+@Transactional
 public abstract class OrderCommentControllerImpl implements TomsOrderCommentService {
 	@Autowired
-	protected Validator validator;
+	protected TomsValidator validator;
 	
 	@Autowired
 	protected OrderCommentRepository orderCommentRepo;
@@ -61,7 +64,7 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     @ApiOperation("Creation of a new comment for a Limit Order")
     public long postLimitOrderComment (
     		@ApiParam(value = "The order ID of the limit order the comment is to be posted for", example = "100000") @PathVariable long limitOrderId,
-    		@ApiParam(value = "The new comment. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCommentTo newComment) {
+    		@ApiParam(value = "The new comment. ID has to be 0. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCommentTo newComment) {
     	return postOrderComment (limitOrderId, newComment, "postLimitOrderComment", LimitOrderTo.class);
     }
 
@@ -103,7 +106,7 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     @ApiOperation("Creation of a new comment for a reference Order")
     public long postReferenceOrderComment (
     		@ApiParam(value = "The order ID of the reference order the comment is to be posted for", example = "100003") @PathVariable long referenceOrderId,
-    		@ApiParam(value = "The new comment. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCommentTo newComment) {
+    		@ApiParam(value = "The new comment. ID has to be 0. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) OrderCommentTo newComment) {
     	return postOrderComment (referenceOrderId, newComment, "postReferenceOrderComment", ReferenceOrderTo.class);
     }
 
@@ -122,6 +125,7 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     	deleteOrderComment (referenceOrderId, commentId, "deleteReferenceOrderComment", ReferenceOrderTo.class);
     }
     
+	@Transactional
     private void deleteOrderComment (long orderId, long orderCommentId, String methodName, Class<? extends OrderTo> orderClass) {
     	Order order;
     	String orderIdArgumentName;
@@ -140,8 +144,16 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
 
     	existingOrderComment.get().setLifecycleStatus(referenceConverter.toManagedEntity(DefaultReference.LIFECYCLE_STATUS_DELETED.getEntity()));
     	orderCommentRepo.save(existingOrderComment.get());
+    	order.setVersion(order.getVersion() + 1);
+    	if (orderClass == LimitOrderTo.class) {
+    		limitOrderRepo.save((LimitOrder)order);
+    	} else {
+    		referenceOrderRepo.save((ReferenceOrder)order);    		
+    	}
+    	
     }
     
+	@Transactional
     private long postOrderComment (long orderId, OrderCommentTo newComment, String methodName, Class<? extends OrderTo> orderClass) {
     	Order order;
     	String orderIdArgumentName;
@@ -160,6 +172,7 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     	order.getOrderComments().add(mangedEntity);
     	order.setUpdatedByUser(mangedEntity.getUpdatedByUser());
     	order.setLastUpdate(new Date());
+    	order.setVersion(order.getVersion()+1);
 
     	if (orderClass == LimitOrderTo.class) {
     		limitOrderRepo.save((LimitOrder)order);
@@ -169,6 +182,7 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     	return mangedEntity.getId();
     }    
 
+	@Transactional
     private void updateOrderComment (long orderId, long commentId, OrderCommentTo existingComment, String methodName, Class<? extends OrderTo> orderClass) {
     	Order order;
     	String orderIdArgumentName;
@@ -187,8 +201,16 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
 
     	OrderComment updated = orderCommentConverter.toManagedEntity(existingComment);
     	orderCommentRepo.save(updated);
+    	if (orderClass == LimitOrderTo.class) {
+    		order.setVersion(order.getVersion()+1);
+    		limitOrderRepo.save((LimitOrder)order);
+    	} else {
+    		order.setVersion(order.getVersion()+1);
+    		referenceOrderRepo.save((ReferenceOrder)order);
+    	} 
     }
     
+	@Transactional
     private OrderCommentTo getOrderComment (long orderId, long commentId, String methodName, Class<? extends OrderTo> orderClass) {
     	Order order;
     	String orderIdArgumentName;
@@ -209,6 +231,7 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     	return orderCommentConverter.toTo(orderComment.get());
     }    
     
+	@Transactional
     private Set<OrderCommentTo> getOrderComments (long orderId, String methodName, Class<? extends OrderTo> orderClass) {
     	Order order;
     	String orderIdArgumentName;

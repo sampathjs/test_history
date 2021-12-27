@@ -25,7 +25,7 @@ import com.matthey.pmm.toms.repository.CacheInvalidateRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.service.TomsCacheService;
 import com.matthey.pmm.toms.service.TomsService;
-import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
 
 import io.swagger.annotations.ApiOperation;
@@ -40,7 +40,7 @@ public abstract class CacheServiceImpl implements TomsCacheService {
     protected ReferenceRepository refRepo;
     
     @Autowired
-    protected Validator validator;    
+    protected TomsValidator validator;    
     
 	@ApiOperation("Retrieval of cache categories that have been invalidated. Return value contains IDs of references of type CacheCategory")
 	public Set<Long> getInvalidatedCacheCategories (

@@ -38,7 +38,7 @@ public interface TomsCreditCheckService {
 	@PostMapping("/limitOrder/{limitOrderId}/creditCheck")
     public long postLimitOrderCreditCheck (
     		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1000001") @PathVariable long limitOrderId,
-    		@ApiParam(value = "The new Credit Check. ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck);
+    		@ApiParam(value = "The new Credit Check. ID has to be 0. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck);
 
     @ApiOperation("Update of the Credit Check for a Reference Order")
 	@PutMapping("/limitOrder/{limitOrderId}/creditCheck/{creditCheckId}")    
@@ -65,7 +65,7 @@ public interface TomsCreditCheckService {
 	@PostMapping("/referenceOrder/{referenceOrderId}/creditCheck")    
     public long postReferenceOrderCreditCheck (
     		@ApiParam(value = "The order ID of the reference order the Credit Check is to be posted for ", example = "1000003") @PathVariable long referenceOrderId,
-    		@ApiParam(value = "The new Credit Check . ID has to be -1. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck);
+    		@ApiParam(value = "The new Credit Check . ID has to be 0. The actual assigned ID is going to be returned", example = "", required = true) @RequestBody(required=true) CreditCheckTo newCreditCheck);
 
     @ApiOperation("Update of the Credit Check for a Reference Order")
 	@PutMapping("/referenceOrder/{referenceOrderId}/creditCheck/{creditCheckId}")

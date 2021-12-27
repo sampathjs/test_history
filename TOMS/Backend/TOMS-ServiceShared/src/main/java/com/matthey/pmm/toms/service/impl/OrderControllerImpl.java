@@ -52,7 +52,7 @@ import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.service.TomsOrderService;
 import com.matthey.pmm.toms.service.TomsService;
-import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
@@ -77,7 +77,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Transactional
 public abstract class OrderControllerImpl implements TomsOrderService {
 	@Autowired
-	protected Validator validator;
+	protected TomsValidator validator;
 	
 	@Autowired 
 	protected LimitOrderRepository limitOrderRepo;
@@ -160,7 +160,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		Map<String,String> allMappings = new HashMap<String, String> ();
 		allMappings.putAll(abstractOrderSearchMap);
 		
-		Pageable mappedPageable = Validator.verifySorts(pageable, getClass(), "getOrders", "sort", allMappings);
+		Pageable mappedPageable = TomsValidator.verifySorts(pageable, getClass(), "getOrders", "sort", allMappings);
 
 		Specification<Order> spec = new Specification<Order>() {
 			@Override
@@ -280,7 +280,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		allMappings.putAll(abstractOrderSearchMap);
 		allMappings.putAll(limitOrderSearchMap);
 				
-		Pageable mappedPageable = Validator.verifySorts(pageable, getClass(), "getLimitOrders", "sort", allMappings);
+		Pageable mappedPageable = TomsValidator.verifySorts(pageable, getClass(), "getLimitOrders", "sort", allMappings);
 
 		Specification<LimitOrder> spec = new Specification<LimitOrder>() {
 			@Override
@@ -459,7 +459,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 		allMappings.putAll(abstractOrderSearchMap);
 		allMappings.putAll(referenceOrderSearchMap);	
 		
-		Pageable mappedPageable = Validator.verifySorts(pageable,  getClass(), "getReferenceOrders", "sort", allMappings);
+		Pageable mappedPageable = TomsValidator.verifySorts(pageable,  getClass(), "getReferenceOrders", "sort", allMappings);
 		
 		Specification<ReferenceOrder> spec = new Specification<ReferenceOrder>() {
 			@Override

@@ -17,7 +17,7 @@ import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.service.TomsPartyDataService;
-import com.matthey.pmm.toms.service.common.Validator;
+import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.PartyConverter;
 import com.matthey.pmm.toms.transport.PartyTo;
 
@@ -25,15 +25,15 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
 @RestController
-public class PartyDataControllerImpl implements TomsPartyDataService {
+public abstract class PartyDataControllerImpl implements TomsPartyDataService {
 	@Autowired
-	protected Validator validator;
+	protected TomsValidator validator;
 
 	@Autowired 
 	protected PartyConverter partyConverter;
 	
 	@Autowired
-	protected PartyRepository partyRepo;	
+	protected PartyRepository partyRepo;
 	
 	@Override
 	@ApiOperation("Retrieval of Parties")
