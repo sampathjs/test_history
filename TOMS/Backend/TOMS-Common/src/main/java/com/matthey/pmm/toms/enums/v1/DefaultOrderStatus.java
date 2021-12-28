@@ -31,6 +31,8 @@ public enum DefaultOrderStatus {
 			DefaultReference.ORDER_TYPE_CATEGORY_CLOSED, 10000l),
 	LIMIT_ORDER_MATURED (11, DefaultReference.ORDER_TYPE_LIMIT_ORDER, DefaultReference.ORDER_STATUS_MATURED,
 			DefaultReference.ORDER_TYPE_CATEGORY_CLOSED, 11000l),
+	LIMIT_ORDER_IN_MEMORY (12, DefaultReference.ORDER_TYPE_LIMIT_ORDER, DefaultReference.ORDER_STATUS_IN_MEMORY, 
+			DefaultReference.ORDER_TYPE_CATEGORY_OPEN, 12000l),
 
 	REFERENCE_ORDER_PENDING (100, DefaultReference.ORDER_TYPE_REFERENCE_ORDER, DefaultReference.ORDER_STATUS_PENDING,
 			DefaultReference.ORDER_TYPE_CATEGORY_OPEN, 50000l),
@@ -44,6 +46,8 @@ public enum DefaultOrderStatus {
 			DefaultReference.ORDER_TYPE_CATEGORY_CLOSED, 54000l),
 	REFERENCE_ORDER_MATURED (105, DefaultReference.ORDER_TYPE_REFERENCE_ORDER, DefaultReference.ORDER_STATUS_MATURED,
 			DefaultReference.ORDER_TYPE_CATEGORY_CLOSED, 55000l),
+	REFERENCE_ORDER_IN_MEMORY (106, DefaultReference.ORDER_TYPE_REFERENCE_ORDER, DefaultReference.ORDER_STATUS_IN_MEMORY, 
+			DefaultReference.ORDER_TYPE_CATEGORY_OPEN, 56000l),
 	;
 	
 	private final OrderStatusTo orderStatus;

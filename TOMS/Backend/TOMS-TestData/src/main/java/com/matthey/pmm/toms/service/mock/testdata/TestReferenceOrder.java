@@ -56,7 +56,7 @@ public enum TestReferenceOrder {
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR, "TEST_ORDER_3", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
-			DefaultOrderStatus.REFERENCE_ORDER_FILLED, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
+			DefaultOrderStatus.REFERENCE_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
 			DefaultReference.TICKER_XRUUSD,
 			TestUser.ANDREW_BAYNES, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
 			null, null, null,
@@ -87,7 +87,7 @@ public enum TestReferenceOrder {
 			DefaultOrderStatus.REFERENCE_ORDER_CONFIRMED, DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING,
 			DefaultReference.TICKER_XRUUSD,
 			TestUser.ANDREW_BAYNES, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
-			Arrays.asList(), null, null,
+			Arrays.asList(), Arrays.asList(TestFill.TEST_REFERENCE_ORDER_FILL_4), null,
 			 100d, 
 			// reference order fields
 			30d, null, 

@@ -251,28 +251,28 @@ public class FillControllerTest {
 	@Test
 	@Transactional
 	public void testPostLimitOrderFill() {
-		long newFillId = submitNewFill (TestLimitOrder.TEST_ORDER_1B.getEntity(), TestFill.TEST_FILL_FOR_INSERT.getEntity());
+		long newFillId = submitNewFill (TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity(), TestFill.TEST_FILL_FOR_INSERT.getEntity());
 		Optional<Fill> newFill = fillRepo.findById(newFillId);
 		assertThat(newFill).isNotEmpty();
 		assertThat(newFill.get().getFillQuantity()).isEqualTo(TestFill.TEST_FILL_FOR_INSERT.getEntity().fillQuantity());
-		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_1B.getEntity().id());
+		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().id());
 		assertThat(order).isNotEmpty();
 		// + 2 because the mock controller is going to simulate the endur side backend directly, resulting in version incremented by 2		
-		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_1B.getEntity().version()+2);
+		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().version()+2);
 		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(newFillId);
 	}
 	
 	@Test
 	@Transactional
 	public void testPostReferenceOrderFill() {
-		long newFillId = submitNewFill (TestReferenceOrder.TEST_ORDER_1B.getEntity(), TestFill.TEST_FILL_FOR_INSERT.getEntity());
+		long newFillId = submitNewFill (TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity(), TestFill.TEST_FILL_FOR_INSERT.getEntity());
 		Optional<Fill> newFill = fillRepo.findById(newFillId);
 		assertThat(newFill).isNotEmpty();
 		assertThat(newFill.get().getFillQuantity()).isEqualTo(TestFill.TEST_FILL_FOR_INSERT.getEntity().fillQuantity());
-		Optional<ReferenceOrder> order = refOrderRepo.findLatestByOrderId(TestReferenceOrder.TEST_ORDER_1B.getEntity().id());
+		Optional<ReferenceOrder> order = refOrderRepo.findLatestByOrderId(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().id());
 		assertThat(order).isNotEmpty();
 		// + 2 because the mock controller is going to simulate the endur side backend directly, resulting in version incremented by 2
-		assertThat(order.get().getVersion()).isEqualTo(TestReferenceOrder.TEST_ORDER_1B.getEntity().version()+2);
+		assertThat(order.get().getVersion()).isEqualTo(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().version()+2);
 		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(newFillId);
 	}
 	
@@ -280,34 +280,34 @@ public class FillControllerTest {
 	@Transactional
 	public void testUpdateLimitOrderFill () {
 		FillTo newFillStatus = ImmutableFillTo.builder()
-				.from(TestFill.TEST_LIMIT_ORDER_FILL_1.getEntity())
+				.from(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity())
 				.idFillStatus(DefaultReference.FILL_STATUS_COMPLETED.getEntity().id())
 				.build();
-		updateFill(TestLimitOrder.TEST_ORDER_1B.getEntity(), TestFill.TEST_LIMIT_ORDER_FILL_1.getEntity(), newFillStatus);
-		Optional<Fill> updatedFill = fillRepo.findById(TestFill.TEST_LIMIT_ORDER_FILL_1.getEntity().id());
-		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_1B.getEntity().id());
+		updateFill(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity(), TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity(), newFillStatus);
+		Optional<Fill> updatedFill = fillRepo.findById(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity().id());
+		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().id());
 		assertThat(updatedFill).isNotEmpty();
 		assertThat(order).isNotEmpty();
-		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_1B.getEntity().version()+1);		
+		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().version()+1);		
 		assertThat(updatedFill.get().getFillStatus().getId()).isEqualTo(newFillStatus.idFillStatus());
-		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(TestFill.TEST_LIMIT_ORDER_FILL_1.getEntity().id());
+		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity().id());
 	}
 	
 	@Test
 	@Transactional
 	public void testUpdateReferenceOrderFill () {
 		FillTo newFillStatus = ImmutableFillTo.builder()
-				.from(TestFill.TEST_REFERENCE_ORDER_FILL_1.getEntity())
+				.from(TestFill.TEST_REFERENCE_ORDER_FILL_4.getEntity())
 				.idFillStatus(DefaultReference.FILL_STATUS_COMPLETED.getEntity().id())
 				.build();
-		updateFill(TestReferenceOrder.TEST_ORDER_1B.getEntity(), TestFill.TEST_REFERENCE_ORDER_FILL_1.getEntity(), newFillStatus);
-		Optional<Fill> updatedFill = fillRepo.findById(TestFill.TEST_REFERENCE_ORDER_FILL_1.getEntity().id());
-		Optional<ReferenceOrder> order = refOrderRepo.findLatestByOrderId(TestReferenceOrder.TEST_ORDER_1B.getEntity().id());
+		updateFill(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity(), TestFill.TEST_REFERENCE_ORDER_FILL_4.getEntity(), newFillStatus);
+		Optional<Fill> updatedFill = fillRepo.findById(TestFill.TEST_REFERENCE_ORDER_FILL_4.getEntity().id());
+		Optional<ReferenceOrder> order = refOrderRepo.findLatestByOrderId(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().id());
 		assertThat(updatedFill).isNotEmpty();
 		assertThat(order).isNotEmpty();
-		assertThat(order.get().getVersion()).isEqualTo(TestReferenceOrder.TEST_ORDER_1B.getEntity().version()+1);		
+		assertThat(order.get().getVersion()).isEqualTo(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().version()+1);		
 		assertThat(updatedFill.get().getFillStatus().getId()).isEqualTo(newFillStatus.idFillStatus());
-		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(TestFill.TEST_REFERENCE_ORDER_FILL_1.getEntity().id());
+		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(TestFill.TEST_REFERENCE_ORDER_FILL_4.getEntity().id());
 	}
 	
 }

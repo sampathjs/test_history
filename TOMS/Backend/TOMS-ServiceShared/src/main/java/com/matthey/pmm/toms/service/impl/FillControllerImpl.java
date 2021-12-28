@@ -86,7 +86,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "postLimitOrderFill", "limitOrderId", false);
 
     	// validation checks
-    	validator.validateFillFields(this.getClass(), "postLimitOrderFill", "newOrderFill", newOrderFill, true, null);
+    	validator.validateFillFields(this.getClass(), "postLimitOrderFill", "newOrderFill", newOrderFill, limitOrder.get(), true, null);
 
     	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
 		limitOrder.get().getFills().add(persisted);
@@ -109,10 +109,10 @@ public abstract class FillControllerImpl implements TomsFillService {
     		@ApiParam(value = "The ID of the fill object to be updated", example = "1") @PathVariable long fillId,
     		@ApiParam(value = "The new fill. ID has to be fillId.", example = "", required = true) @RequestBody(required=true) FillTo newOrderFill) {
     	Optional<LimitOrder> limitOrder = validator.verifyLimitOrderId(limitOrderId, getClass(), "updateLimitOrderFill", "limitOrderId", false);
-    	Optional<Fill> existingFill = validator.verifyFill(limitOrder.get(), limitOrderId, getClass(), "updateReferenceOrderFill", "fillId", false);
+    	Optional<Fill> existingFill = validator.verifyFill(limitOrder.get(), fillId, getClass(), "updateReferenceOrderFill", "fillId", false);
 
     	// validation checks
-    	validator.validateFillFields(this.getClass(), "updateLimitOrderFill", "newOrderFill", newOrderFill, false, fillConverter.toTo(existingFill.get()));
+    	validator.validateFillFields(this.getClass(), "updateLimitOrderFill", "newOrderFill", newOrderFill, limitOrder.get(), false, fillConverter.toTo(existingFill.get()));
 
     	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
 		limitOrder.get().setLastUpdate(new Date());
@@ -150,7 +150,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     	Optional<ReferenceOrder> referenceOrder = validator.verifyReferenceOrderId(referenceOrderId, getClass(), "postReferenceOrderFill", "referenceOrderId", false);
 
     	// validation checks
-    	validator.validateFillFields(this.getClass(), "postReferenceOrderFill", "newOrderFill", newOrderFill, true, null);
+    	validator.validateFillFields(this.getClass(), "postReferenceOrderFill", "newOrderFill", newOrderFill, referenceOrder.get(), true, null);
 
     	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
 		referenceOrder.get().getFills().add(persisted);
@@ -184,7 +184,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     	Optional<Fill> existingFill = validator.verifyFill(referenceOrder.get(), fillId, getClass(), "updateReferenceOrderFill", "fillId", false);
     	    	
     	// validation checks
-    	validator.validateFillFields(this.getClass(), "updateReferenceOrderFill", "newOrderFill", newOrderFill, false, fillConverter.toTo(existingFill.get()));
+    	validator.validateFillFields(this.getClass(), "updateReferenceOrderFill", "newOrderFill", newOrderFill, referenceOrder.get(), false, fillConverter.toTo(existingFill.get()));
 
     	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
 		referenceOrder.get().setLastUpdate(new Date());

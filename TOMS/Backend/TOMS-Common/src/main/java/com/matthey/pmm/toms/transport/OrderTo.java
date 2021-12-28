@@ -17,69 +17,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
   @JsonSubTypes.Type(value=LimitOrderTo.class, name = "LimitOrder"),
   @JsonSubTypes.Type(value=ReferenceOrderTo.class, name = "ReferenceOrder")
 })
-public abstract class OrderTo {
-	/*
-	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.
-	 * Remember to update the lists if the attribute names are refactored, attributes are getting added or removed.
-	 */
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CANCELLED = 
-			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
-					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
-					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", 
-					"reference", "idMetalForm", "idMetalLocation");
-	
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_FILLED = 
-			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
-					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
-					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", 
-					"reference", "idMetalForm", "idMetalLocation");
-
-	
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED = 
-			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
-					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
-					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", 
-					"reference", "idMetalForm", "idMetalLocation");
-
-	
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_CONFIRMED_TO_CANCELLED_EXPIRED = 
-			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
-					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
-					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", 
-					"reference", "idMetalForm", "idMetalLocation");
-
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_PULLED = 
-			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
-					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
-					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", 
-					"reference", "idMetalForm", "idMetalLocation");
-
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_REJECTED = 
-			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
-					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
-					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", 
-					"reference", "idMetalForm", "idMetalLocation");
-
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_MATURED = 
-			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
-					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
-					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", 
-					"reference", "idMetalForm", "idMetalLocation");
-
-	public static final List<String> UNCHANGEABLE_ATTRIBUTES_EXPIRED = 
-			Arrays.asList("idInternalBu", "idExternalBu","idInternalLe", "idExternalLe",
-					"idIntPortfolio", "idExtPortfolio", "idBuySell", "idBaseCurrency",
-					"baseQuantity", "idBaseQuantityUnit", "idTermCurrency", 
-					"createdAt", "idCreatedByUser", 
-					"reference", "idMetalForm", "idMetalLocation");
-	
+public abstract class OrderTo {	
 	/**
 	 * TOMS maintained ID 
 	 */	

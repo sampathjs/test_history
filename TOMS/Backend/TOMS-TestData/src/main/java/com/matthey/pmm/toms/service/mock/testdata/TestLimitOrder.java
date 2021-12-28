@@ -33,7 +33,7 @@ public enum TestLimitOrder {
 			"2000-01-15", "2001-04-28", null, 1200.00d,
 			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
 			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, null, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_1, TestFill.TEST_LIMIT_ORDER_FILL_2),
-			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
+			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),	
 	TEST_ORDER_2(100001, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, null, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
@@ -49,7 +49,7 @@ public enum TestLimitOrder {
 			DefaultReference.PORTFOLIO_US_RUTHENIUM, DefaultReference.PORTFOLIO_UK_RUTHENIUM, DefaultReference.BUY_SELL_SELL,
 			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
 			DefaultReference.CCY_EUR,  "TEST_ORDER_3", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_ROYSTON,
-			DefaultOrderStatus.LIMIT_ORDER_FILLED, DefaultReference.CONTRACT_TYPE_LIMIT_FIXED, DefaultReference.TICKER_XRUUSD,
+			DefaultOrderStatus.LIMIT_ORDER_PENDING, DefaultReference.CONTRACT_TYPE_LIMIT_FIXED, DefaultReference.TICKER_XRUUSD,
 			TestUser.PAT_MCCOURT, "2000-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.ARINDAM_RAY,
 			DefaultReference.PRICE_TYPE_SPOT_PLUS, null, 
 			"2000-02-15", null, null, 400.00d,
@@ -166,6 +166,18 @@ public enum TestLimitOrder {
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
 			DefaultReference.METAL_XRU, null, null, 1.0d, null, null
 			),			
+	TEST_ORDER_FOR_FILL_TEST(110013, 1, TestBunit.JM_PMM_UK, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+			DefaultReference.PORTFOLIO_UK_RUTHENIUM, null, DefaultReference.BUY_SELL_BUY,
+			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
+			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.LIMIT_ORDER_CONFIRMED, DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE, DefaultReference.TICKER_XRUUSD,
+			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-03-02 08:00:00", TestUser.ANDREW_BAYNES,
+			DefaultReference.PRICE_TYPE_SPOT, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
+			// limit order fields
+			"2000-01-15", "2001-04-28", null, 1200.00d,
+			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
+			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, null, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_3),
+			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
 	;
 	
 	private LimitOrderTo limitOrder;

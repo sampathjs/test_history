@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -58,6 +59,7 @@ import com.matthey.pmm.toms.service.exception.IllegalReferenceException;
 import com.matthey.pmm.toms.service.exception.IllegalReferenceTypeException;
 import com.matthey.pmm.toms.service.exception.IllegalSortColumnException;
 import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
+import com.matthey.pmm.toms.service.exception.IllegalStateException;
 import com.matthey.pmm.toms.service.exception.IllegalValueException;
 import com.matthey.pmm.toms.service.exception.IllegalVersionException;
 import com.matthey.pmm.toms.service.exception.InvalidBelongsToException;
@@ -102,7 +104,6 @@ public class TomsValidator {
 
 	@Autowired
 	protected ReferenceOrderLegRepository referenceOrderLegRepo;
-
 	
 	@Autowired
 	protected ProcessTransitionRepository processTransitionRepo;
@@ -369,8 +370,8 @@ public class TomsValidator {
 				Method m = oldEntity.getClass().getMethod(methodName);
 				Object returnValueOld = m.invoke(oldEntity);
 				Object returnValueNew = m.invoke(newEntity);
-				if (		(returnValueOld == null && returnValueNew != null)
-						||  (returnValueOld != null && returnValueNew == null)) {
+				if (		(returnValueOld == null && returnValueNew != null && !(returnValueNew instanceof Collection && ((Collection)returnValueNew).size() == 0))
+						||  (returnValueOld != null && returnValueNew == null && !(returnValueOld instanceof Collection && ((Collection)returnValueOld).size() == 0))) {
 					throw new IllegalValueException (clazz, method, argument + "." + methodName, "" + returnValueOld, "" + returnValueNew);
 				}
 				if (returnValueOld == null && returnValueNew == null ) {
@@ -392,6 +393,12 @@ public class TomsValidator {
 				} else if (returnValueOld instanceof Collection) {
 					Collection oldCollection = (Collection) returnValueOld;
 					Collection newCollection = (Collection) returnValueNew;
+					if (oldCollection == null) {
+						oldCollection = new ArrayList();
+					}
+					if (newCollection == null) {
+						newCollection = new ArrayList();
+					}
 					if (!oldCollection.containsAll(newCollection) || !newCollection.containsAll(oldCollection)) {
 						throw new IllegalValueException (clazz, method, argument + "." + methodName, oldCollection.toString(), newCollection.toString());
 					}
@@ -450,8 +457,15 @@ public class TomsValidator {
 
 	}
 	
-	public void validateFillFields (Class clazz, String method, String argument, FillTo orderFill, boolean isNew, FillTo oldOrderFillTo) {
-    	if (isNew) {
+	public void validateFillFields (Class clazz, String method, String argument, FillTo orderFill, Order order, boolean isNew, FillTo oldOrderFillTo) {
+		if (!Arrays.asList(DefaultOrderStatus.LIMIT_ORDER_CONFIRMED.getEntity().id(),
+				           DefaultOrderStatus.LIMIT_ORDER_PART_FILLED.getEntity().id(),
+				           DefaultOrderStatus.REFERENCE_ORDER_CONFIRMED.getEntity().id()).contains(order.getOrderStatus().getId())) {
+			throw  new IllegalStateException(clazz, method, argument, order.getOrderStatus().getOrderStatusName().getValue(), 
+					order.toString(), "confirmed or part filled (fills can be modified if and only if the order is in status confirmed or part filled)");
+		}
+    		
+		if (isNew) {
     		if (orderFill.id() != 0) {
         		throw new IllegalIdException (clazz, method, argument  + ".id", "0", "" + orderFill.id());
         	}
@@ -483,10 +497,10 @@ public class TomsValidator {
 		}    	
 		
 		if (orderFill.idTrade() != null) {
-	    	Optional<Fill> fillForTradeId = fillRepo.findByTradeId(orderFill.idTrade());
-	    	if (fillForTradeId.isPresent() && fillForTradeId.get().getId() != orderFill.id()) {
+	    	List<Fill> fillForTradeId = fillRepo.findByTradeId(orderFill.idTrade());
+	    	if (fillForTradeId.size() > 1 || (fillForTradeId.size() == 1 && fillForTradeId.get(0).getId() != orderFill.id())) {
 	    		throw new IllegalIdException (clazz, method, argument + ".idTrade", "not equal to " + orderFill.idTrade() 
-	    			+ " as there is already fill #" + fillForTradeId.get().getId() + " for this trade ID ", Long.toString(orderFill.idTrade()));
+	    			+ " as there is already fill #" + fillForTradeId.get(0).getId() + " for this trade ID ", Long.toString(orderFill.idTrade()));
 	    	}			
 		}
     	
@@ -529,7 +543,12 @@ public class TomsValidator {
 	}
 	
 	public void validateCommentFields(Class clazz, String method,
-			String argument, OrderCommentTo newComment, boolean isNew, OrderComment oldComment) {
+			String argument, OrderCommentTo newComment, Order order, boolean isNew, OrderComment oldComment) {
+		if (order.getOrderStatus().getId() != DefaultOrderStatus.LIMIT_ORDER_PENDING.getEntity().id() &&
+			order.getOrderStatus().getId() != DefaultOrderStatus.REFERENCE_ORDER_PENDING.getEntity().id()) {
+			throw  new IllegalStateException(clazz, method, argument, order.getOrderStatus().getOrderStatusName().getValue(), 
+					order.toString(), "pending (comments can be modified if and only if the order is in status pending)");
+		}
     	if (isNew) {
     		if (newComment.id() != 0) {
         		throw new IllegalIdException (clazz, method, argument  + ".id", "0", "" + newComment.id());
@@ -597,12 +616,9 @@ public class TomsValidator {
 				Arrays.asList(DefaultReferenceType.PRICE_TYPE),
 				clazz, method , argument + ".idPriceType", false);
 
-
     	verifyDefaultReference (order.idYesNoPartFillable(),
 				Arrays.asList(DefaultReferenceType.YES_NO),
 				clazz, method , argument + ".idYesNoPartFillable", false);
-
-
     	
     	verifyDefaultReference (order.idStopTriggerType(),
 				Arrays.asList(DefaultReferenceType.STOP_TRIGGER_TYPE),
@@ -642,7 +658,7 @@ public class TomsValidator {
     			
     			Reference fromStatusName = orderStatusRepo.findById(oldLimitOrder.idOrderStatus()).get().getOrderStatusName();    			
     			Reference toStatusName =  orderStatusRepo.findById(order.idOrderStatus()).get().getOrderStatusName();
-    			    			    			
+    			
         		List<String> possibleTransitionsText = possibleTransitions.stream()
         				.map(x -> x.getFromStatusId() + " -> " + 
         						x.getToStatusId())
@@ -652,6 +668,11 @@ public class TomsValidator {
     		} else {
     			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(availableTransitions.get(0)), oldLimitOrder, order);    			
     		}
+    	} else {
+			Reference toStatusName =  refRepo.findById (order.idOrderStatus()).get();
+			if (order.idOrderStatus() != DefaultOrderStatus.LIMIT_ORDER_PENDING.getEntity().id()) {
+				throw new IllegalStateChangeException(clazz, method, argument, "<not in database>", toStatusName.getValue(), "Pending");				
+			}
     	}
     	applyCounterPartyTickerRules(clazz, method, argument, order);
     	applyTickerPortfolioRules(clazz, method, argument, order);
@@ -674,10 +695,10 @@ public class TomsValidator {
 
     	if (order.fxRateSpread() != null && order.fxRateSpread() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".fxRateSpread", " > 0", "" + order.fxRateSpread());
-    	}    	
-    	
+    	}
+    	    	
     	// legs
-    	if (order.legIds() == null || order.legIds().size() == 0) {
+    	if (!isNew && (order.legIds() == null || order.legIds().size() == 0)) {
     		throw new MissingLegException(clazz, argument + ".legIds", 0, 1);
     	}
     	
@@ -707,6 +728,11 @@ public class TomsValidator {
     		} else {
     			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(availableTransitions.get(0)), oldReferenceOrder, order);    			
     		}
+    	} else {
+			Reference toStatusName =  refRepo.findById (order.idOrderStatus()).get();
+			if (order.idOrderStatus() != DefaultOrderStatus.REFERENCE_ORDER_PENDING.getEntity().id()) {
+				throw new IllegalStateChangeException(clazz, method, argument, "<not in database>", toStatusName.getValue(), "Pending");				
+			}
     	}
     	applyCounterPartyTickerRules(clazz, method, argument, order);
     	applyTickerPortfolioRules(clazz, method, argument, order);
@@ -837,7 +863,10 @@ public class TomsValidator {
 	
 	public void validateReferenceOrderLegFields (Class clazz, String method, String argument, ReferenceOrder referenceOrder, 
 			ReferenceOrderLegTo leg, boolean isNew, ReferenceOrderLeg oldLeg) {
-		leg.id();
+		if (referenceOrder.getOrderStatus().getId() != DefaultOrderStatus.REFERENCE_ORDER_PENDING.getEntity().id()) {
+			throw  new IllegalStateException(clazz, method, argument, referenceOrder.getOrderStatus().getOrderStatusName().getValue(), 
+					referenceOrder.toString(), "Pending (legs can be modified if and only if the reference order is in status pending)");
+		}
 	
     	verifyDefaultReference (leg.idSettleCurrency(),
 				Arrays.asList(DefaultReferenceType.CCY_CURRENCY, DefaultReferenceType.CCY_METAL),
@@ -877,7 +906,7 @@ public class TomsValidator {
 			
     		if (availableTransitions.size() == 0) {	
     			List<ProcessTransition> possibleTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(
-        				DefaultReference.REFERENCE_ORDER_TRANSITION.getEntity().id(), referenceOrder.getOrderStatus().getId());
+        				DefaultReference.REFERENCE_ORDER_LEG_TRANSITION.getEntity().id(), referenceOrder.getOrderStatus().getId());
     			
     			Reference statusName = referenceOrder.getOrderStatus().getOrderStatusName();
     			    			    			

@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -12,7 +13,7 @@ import com.matthey.pmm.toms.model.Fill;
 @Repository
 @Transactional
 public interface FillRepository extends JpaRepository<Fill, Long> {
-  Optional<Fill> findByTradeId(long tradeId);
+  List<Fill> findByTradeId(long tradeId);
   
   Optional<Fill> findTopByOrderByTradeIdDesc ();
 }

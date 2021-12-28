@@ -159,14 +159,12 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     	String orderIdArgumentName;
     	if (orderClass == LimitOrderTo.class) {
     		orderIdArgumentName = "limitOrderId";
-    		validator.verifyLimitOrderId(orderId, this.getClass(), methodName, orderIdArgumentName, false);
-    		order = limitOrderRepo.findLatestByOrderId(orderId).get();
+    		order = validator.verifyLimitOrderId(orderId, this.getClass(), methodName, orderIdArgumentName, false).get();
     	} else {
     		orderIdArgumentName = "referenceOrderId";
-    		validator.verifyReferenceOrderId(orderId, this.getClass(), methodName, orderIdArgumentName, false);
-    		order = referenceOrderRepo.findLatestByOrderId(orderId).get();   		
+    		order = validator.verifyReferenceOrderId(orderId, this.getClass(), methodName, orderIdArgumentName, false).get();
     	}   	
-    	validator.validateCommentFields(getClass(), methodName, orderIdArgumentName, newComment, true, null);
+    	validator.validateCommentFields(getClass(), methodName, orderIdArgumentName, newComment, order, true, null);
  
     	OrderComment mangedEntity = orderCommentConverter.toManagedEntity(newComment); // persists comment    	   	
     	order.getOrderComments().add(mangedEntity);
@@ -188,8 +186,7 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     	String orderIdArgumentName;
     	if (orderClass == LimitOrderTo.class) {
     		orderIdArgumentName = "limitOrderId";
-    		validator.verifyLimitOrderId(orderId, this.getClass(), methodName, orderIdArgumentName, false);
-    		order = limitOrderRepo.findLatestByOrderId(orderId).get();
+    		order = validator.verifyLimitOrderId(orderId, this.getClass(), methodName, orderIdArgumentName, false).get();
     	} else {
     		orderIdArgumentName = "referenceOrderId";
     		order = validator.verifyReferenceOrderId(orderId, this.getClass(), methodName, orderIdArgumentName, false).get();
@@ -197,7 +194,7 @@ public abstract class OrderCommentControllerImpl implements TomsOrderCommentServ
     	
     	Optional<OrderComment> oldOrderCommentedInDb = validator.verifyOrderCommentId(commentId, getClass(), methodName, "existingComment", false);
     	validator.verifyOrderCommentBelongsToOrder(oldOrderCommentedInDb.get(), order, getClass(), methodName, "Order", "Order Comment");
-    	validator.validateCommentFields(getClass(), methodName, "existingComment", existingComment, false, oldOrderCommentedInDb.get());
+    	validator.validateCommentFields(getClass(), methodName, "existingComment", existingComment, order, false, oldOrderCommentedInDb.get());
 
     	OrderComment updated = orderCommentConverter.toManagedEntity(existingComment);
     	orderCommentRepo.save(updated);

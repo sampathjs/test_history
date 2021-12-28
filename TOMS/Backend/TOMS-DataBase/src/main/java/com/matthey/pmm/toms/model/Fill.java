@@ -36,7 +36,7 @@ public class Fill {
 	@SequenceGenerator(name = "fill_id_seq", initialValue = 1000000, allocationSize = 1,
 	    sequenceName = "fill_id_seq", schema = DbConstants.SCHEMA_NAME)
 	@Column(name = "fill_id", updatable = false, nullable = false)
-	private Long id;
+	private long id;
 	
 	@Column(name = "fill_quantity", nullable = false)
 	private Double fillQuantity;
@@ -87,11 +87,11 @@ public class Fill {
 		this.errorMessage = errorMessage;
 	}
 
-	public Long getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
