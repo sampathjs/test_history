@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.matthey.pmm.toms.transport.ImmutableProcessTransitionTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.EmailTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
@@ -146,6 +147,23 @@ public enum DefaultProcessTransition {
 	FILL_STATUS_OPEN_TO_FAILED(402, DefaultReference.FILL_STATUS_TRANSITION,
 			DefaultReference.FILL_STATUS_OPEN, DefaultReference.FILL_STATUS_FAILED,  Arrays.asList(),
 			350000l),	
+	
+	EMAIL_STATUS_SUBMITTED_TO_SENDING(500, DefaultReference.EMAIL_STATUS_TRANSITION,
+			DefaultReference.EMAIL_STATUS_SUBMITTED, DefaultReference.EMAIL_STATUS_SENDING,  EmailTo.UNMODIFIABLE_ATTRBIUTES,
+			400000l)
+	,
+	EMAIL_STATUS_SENDING_TO_SENT_SUCCESS(501, DefaultReference.EMAIL_STATUS_TRANSITION,
+			DefaultReference.EMAIL_STATUS_SENDING, DefaultReference.EMAIL_STATUS_SENT_SUCCESS,  EmailTo.UNMODIFIABLE_ATTRBIUTES,
+			410000l)
+	,
+	EMAIL_STATUS_SENDING_TO_SENT_FAILED(502, DefaultReference.EMAIL_STATUS_TRANSITION,
+			DefaultReference.EMAIL_STATUS_SENDING, DefaultReference.EMAIL_STATUS_SENT_FAILED,  EmailTo.UNMODIFIABLE_ATTRBIUTES,
+			420000l)
+	,
+	EMAIL_STATUS_SENT_FAILED_TO_SENDING(503, DefaultReference.EMAIL_STATUS_TRANSITION,
+			DefaultReference.EMAIL_STATUS_SENT_FAILED, DefaultReference.EMAIL_STATUS_SENDING,  EmailTo.UNMODIFIABLE_ATTRBIUTES,
+			420000l)
+
 	;
 	
 	private final ProcessTransitionTo processStatus;

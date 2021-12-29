@@ -4,6 +4,8 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ import com.matthey.pmm.toms.transport.DatabaseFileTo;
 import com.matthey.pmm.toms.transport.ImmutableDatabaseFileTo;
 
 @Service
+@Transactional
 public class DatabaseFileConverter extends EntityToConverter<DatabaseFile, DatabaseFileTo>{
 	@Autowired
 	private UserRepository userRepo;

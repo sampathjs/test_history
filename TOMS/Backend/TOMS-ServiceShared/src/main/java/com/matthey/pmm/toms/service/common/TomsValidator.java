@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -27,6 +29,8 @@ import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.CreditCheck;
+import com.matthey.pmm.toms.model.DatabaseFile;
+import com.matthey.pmm.toms.model.Email;
 import com.matthey.pmm.toms.model.Fill;
 import com.matthey.pmm.toms.model.LimitOrder;
 import com.matthey.pmm.toms.model.Order;
@@ -38,10 +42,13 @@ import com.matthey.pmm.toms.model.ReferenceOrder;
 import com.matthey.pmm.toms.model.ReferenceOrderLeg;
 import com.matthey.pmm.toms.model.ReferenceType;
 import com.matthey.pmm.toms.model.User;
+import com.matthey.pmm.toms.repository.DatabaseFileRepository;
+import com.matthey.pmm.toms.repository.EmailRepository;
 import com.matthey.pmm.toms.repository.FillRepository;
 import com.matthey.pmm.toms.repository.IndexRepository;
 import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.OrderCommentRepository;
+import com.matthey.pmm.toms.repository.OrderRepository;
 import com.matthey.pmm.toms.repository.OrderStatusRepository;
 import com.matthey.pmm.toms.repository.PartyRepository;
 import com.matthey.pmm.toms.repository.ProcessTransitionRepository;
@@ -51,6 +58,7 @@ import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.repository.UserRepository;
 import com.matthey.pmm.toms.service.TomsService;
+import com.matthey.pmm.toms.service.conversion.EmailConverter;
 import com.matthey.pmm.toms.service.conversion.ProcessTransitionConverter;
 import com.matthey.pmm.toms.service.exception.CounterPartyTickerRuleCheckException;
 import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
@@ -71,6 +79,8 @@ import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.service.logic.ServiceConnector;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
+import com.matthey.pmm.toms.transport.DatabaseFileTo;
+import com.matthey.pmm.toms.transport.EmailTo;
 import com.matthey.pmm.toms.transport.FillTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
 import com.matthey.pmm.toms.transport.OrderCommentTo;
@@ -100,6 +110,9 @@ public class TomsValidator {
 	protected LimitOrderRepository limitOrderRepo;
 
 	@Autowired
+	protected OrderRepository orderRepo;
+	
+	@Autowired
 	protected ReferenceOrderRepository referenceOrderRepo;
 
 	@Autowired
@@ -114,9 +127,17 @@ public class TomsValidator {
 	@Autowired
 	protected OrderStatusRepository orderStatusRepo;
 
+	@Autowired
+	protected EmailRepository emailRepo;
+
+	@Autowired
+	protected DatabaseFileRepository dbFileRepo;
 	
 	@Autowired
 	protected ProcessTransitionConverter processTransitionConverter;
+	
+	@Autowired
+	protected EmailConverter emailConverter;
 	
 	@Autowired
 	protected UserRepository userRepo;
@@ -248,6 +269,14 @@ public class TomsValidator {
 		return referenceOrder;
 	}
 	
+	public Optional<Order> verifyOrderId(Long orderId, Class clazz, String method, String parameter, boolean isOptional) {
+		Optional<Order> order = orderRepo.findLatestByOrderId(orderId);
+		if (!order.isPresent() && !isOptional) {
+			throw new IllegalIdException(clazz, method, parameter, "(unknown)", Long.toString(orderId));
+		}
+		return order;
+	}
+	
 	public void verifyReferenceOrderVersion(ReferenceOrder referenceOrder, int providedVersion, 
 			Class clazz, String method, String parameter) {
 		if (referenceOrder.getVersion() != providedVersion) {
@@ -272,7 +301,23 @@ public class TomsValidator {
 		}
 		return orderComment;
 	}
-
+	
+	public Optional<DatabaseFile> verifyDatabaseFileId(Class clazz, String methodName,
+			String argumentName, Long databaseFileId, boolean isOptional) {
+		Optional<DatabaseFile> databaseFile = dbFileRepo.findById(databaseFileId);
+		if (databaseFile.isEmpty() && !isOptional) {
+    		throw new UnknownEntityException (this.getClass(), methodName, argumentName , "Database File", "" + databaseFile);
+		}
+		return databaseFile;
+	}
+	
+	public Optional<Email> validateEmailId(Class clazz, String method, String argument, long emailId, boolean isOptional) {
+		Optional<Email> email = emailRepo.findById(emailId);
+		if (email.isEmpty() && !isOptional) {
+    		throw new UnknownEntityException (this.getClass(), method, argument , "Email", "" + emailId);
+		}
+		return email;		
+	}
 
 	public Optional<CreditCheck> verifyCreditCheck(Order order, long creditCheckId,
 			Class clazz, String method, String parameter, boolean isOptional) {		
@@ -362,7 +407,7 @@ public class TomsValidator {
 		PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), mappedSort);
 		return pageRequest;
 	}
-	
+		
 	private <T> void verifyUnchangedStates (Class clazz, String method, String argument, ProcessTransitionTo transition, T oldEntity, T newEntity) {
 		for (String methodName : transition.unchangeableAttributes()) {
 			try {
@@ -454,7 +499,6 @@ public class TomsValidator {
 			}
 		}
 		return Optional.of(fills.get(0));
-
 	}
 	
 	public void validateFillFields (Class clazz, String method, String argument, FillTo orderFill, Order order, boolean isNew, FillTo oldOrderFillTo) {
@@ -583,7 +627,7 @@ public class TomsValidator {
 	
 	public void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, OrderTo oldLimitOrder) {
 		validateOrderFields (clazz, method, argument, order, isNew, oldLimitOrder);
-		// validate input data		
+		// validate input data
 		SimpleDateFormat sdfDate = new SimpleDateFormat (TomsService.DATE_FORMAT);
 		if (order.settleDate() != null) {
 			try {
@@ -920,7 +964,208 @@ public class TomsValidator {
     			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(availableTransitions.get(0)), oldLeg, leg);
     		}
     	}
+	}
+	
+
+    public void validateEmailFields(Class clazz, String method, String argument,
+    			Email oldEmail, EmailTo emailRequest, boolean isNew) {
+    	if (isNew) {
+    		if (emailRequest.id() > 0) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "0", "" + emailRequest.id());
+        	} 
+    	} else {
+    		if (emailRequest.id() != oldEmail.getId()) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "" + oldEmail.getId(), "" + emailRequest.id());
+        	}
+    	}
+    	
+    	Optional<User> createdBy = userRepo.findById(emailRequest.idCreatedByUser());    	
+    	if (createdBy.isEmpty()) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idCreatedByUser" , "User", "" + emailRequest.idCreatedByUser());
+    	}
+    	
+    	Optional<User> updatedBy = userRepo.findById(emailRequest.idUpdatedByUser());    	
+    	if (updatedBy.isEmpty()) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedByUser" , "User", "" + emailRequest.idUpdatedByUser());
+    	}
+    	
+    	Optional<User> sendAs = userRepo.findById(emailRequest.idSendAs());    	
+    	if (sendAs.isEmpty()) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idSendAs" , "User", "" + emailRequest.idSendAs());
+    	}
+    	
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			Date parsedTime = sdfDateTime.parse (emailRequest.createdAt());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".createdAt", TomsService.DATE_TIME_FORMAT, emailRequest.createdAt());
+		}
+
+		try {
+			Date parsedTime = sdfDateTime.parse (emailRequest.lastUpdate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".lastUpdate", TomsService.DATE_TIME_FORMAT, emailRequest.lastUpdate());
+		}		
+    	
+		verifyDefaultReference (emailRequest.idEmailStatus(),
+				Arrays.asList(DefaultReferenceType.EMAIL_STATUS),
+				clazz, method , argument + ".idEmailStatus", false);    
+    	
+    	if (emailRequest.retryCount() < 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".retryCount", " >= 0", "" + emailRequest.retryCount());
+    	}
+    	
+    	if (emailRequest.associatedOrderIds() !=  null) {
+        	for (long orderId : emailRequest.associatedOrderIds()) {
+        		verifyOrderId (orderId, clazz, method, argument + ".associatedOrderIds", false);
+        	}
+    	}
+    	
+    	if (emailRequest.attachments() !=  null) {
+        	for (long databaseFileId : emailRequest.attachments()) {
+        		verifyDatabaseFileId (clazz, method, argument + ".attachments", databaseFileId, false);
+        	}
+    	}
+    	
+    	// subject may not be empty
+    	if (emailRequest.subject() == null || emailRequest.subject().trim().length() == 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".subject", " not null and not empty", "" + emailRequest.subject());    		
+    	}
+    	
+    	if ((emailRequest.toList() == null || emailRequest.toList().isEmpty()) &&
+    		(emailRequest.ccList() == null || emailRequest.ccList().isEmpty()) &&
+    		(emailRequest.bccList() == null || emailRequest.bccList().isEmpty())) {
+    		throw new IllegalValueException(clazz, method, argument + ".toList/ccList/bccList", " one of the lists has to be not empty", "toList/ccList/bccList are all null or empty");
+    	}
+    	if (emailRequest.toList() !=  null) {
+        	for (String emailAdress : emailRequest.toList()) {
+        		verifyEmailAddress (clazz, method, argument + ".toList", emailAdress);
+        	}
+    	}
+    	if (emailRequest.ccList() !=  null) {
+        	for (String emailAdress : emailRequest.ccList()) {
+        		verifyEmailAddress (clazz, method, argument + ".ccList", emailAdress);
+        	}
+    	}
+    	if (emailRequest.bccList() !=  null) {
+        	for (String emailAdress : emailRequest.bccList()) {
+        		verifyEmailAddress (clazz, method, argument + ".bccList", emailAdress);
+        	}
+    	}
+    	
+      	if (!isNew) {
+        	// verify status change
+    		List<ProcessTransition> availableTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(DefaultReference.EMAIL_STATUS_TRANSITION.getEntity().id(), 
+    				oldEmail.getEmailStatus().getId());
+			availableTransitions.removeIf( x -> x.getToStatusId() != emailRequest.idEmailStatus());
+
+    		if (availableTransitions.size() == 0) {	
+    			List<ProcessTransition> possibleTransitions = processTransitionRepo.findByReferenceCategoryIdAndFromStatusId(
+        				DefaultReference.EMAIL_STATUS_TRANSITION.getEntity().id(),  oldEmail.getEmailStatus().getId());
+    			
+    			Reference fromStatusName = oldEmail.getEmailStatus();   			
+    			Reference toStatusName =  refRepo.findById (emailRequest.idEmailStatus()).get();
+        		List<String> possibleTransitionsText = possibleTransitions.stream()
+        				.map(x -> x.getFromStatusId() + " -> " + 
+        						x.getToStatusId())
+        				.collect(Collectors.toList());
+    			throw new IllegalStateChangeException (clazz, method,
+    					argument, fromStatusName.getValue(), toStatusName.getValue(), possibleTransitionsText.toString());
+    		} else {
+    			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(availableTransitions.get(0)), emailConverter.toTo(oldEmail), emailRequest);    			
+    		}
+    	} else {
+			Reference toStatusName =  refRepo.findById (emailRequest.idEmailStatus()).get();
+			if (emailRequest.idEmailStatus() != DefaultReference.EMAIL_STATUS_SUBMITTED.getEntity().id()) {
+				throw new IllegalStateChangeException(clazz, method, argument, "<not in database>", toStatusName.getValue(), 
+						DefaultReference.EMAIL_STATUS_SUBMITTED.getEntity().name());				
+			}
+    	}
+    }
     
+	public void validateDatabaseFileFields(Class clazz, String method, String argument,
+			DatabaseFile oldFile, DatabaseFileTo file, boolean isNew) {
+    	if (isNew) {
+    		if (file.id() > 0) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "0", "" + file.id());
+        	} 
+    	} else {
+    		if (file.id() != oldFile.getId()) {
+        		throw new IllegalIdException (clazz, method, argument  + ".id", "" + oldFile.getId(), "" + file.id());
+        	}
+    	}
+    	Optional<User> createdBy = userRepo.findById(file.idCreatedByUser());    	
+    	if (createdBy.isEmpty()) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idCreatedByUser" , "User", "" + file.idCreatedByUser());
+    	}
+    	
+    	Optional<User> updatedBy = userRepo.findById(file.idUpdatedByUser());    	
+    	if (updatedBy.isEmpty()) {
+    		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedByUser" , "User", "" + file.idUpdatedByUser());
+    	}
+    	
+		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);
+		try {
+			Date parsedTime = sdfDateTime.parse (file.createdAt());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".createdAt", TomsService.DATE_TIME_FORMAT, file.createdAt());
+		}
+
+		try {
+			Date parsedTime = sdfDateTime.parse (file.lastUpdate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".lastUpdate", TomsService.DATE_TIME_FORMAT, file.lastUpdate());
+		}
+		
+		verifyDefaultReference (file.idFileType(),
+				Arrays.asList(DefaultReferenceType.FILE_TYPE),
+				clazz, method , argument + ".idFileType", false);   
+
+		verifyDefaultReference (file.idLifecycle(),
+				Arrays.asList(DefaultReferenceType.LIFECYCLE_STATUS),
+				clazz, method , argument + ".idLifecycle", false);
+		
+		if (file.name() == null || file.name().trim().isEmpty()) {
+    		throw new IllegalValueException(clazz, method, argument + ".name", " not empty ", "" + file.name());
+		}
+
+		if (file.name().contains("/") || file.name().contains("\\")) {
+    		throw new IllegalValueException(clazz, method, argument + ".name", " does not contain '/' or '\\'", "" + file.name());
+		}
+		
+		if (file.path() == null || file.path().trim().isEmpty()) {
+    		throw new IllegalValueException(clazz, method, argument + ".path", " not empty ", "" + file.path());
+		}
+
+		if (!file.path().startsWith("/")) {
+    		throw new IllegalValueException(clazz, method, argument + ".path", " has to start with '/'", "" + file.path());
+		}
+
+		if (!file.path().endsWith("/")) {
+    		throw new IllegalValueException(clazz, method, argument + ".path", " has to end with '/'", "" + file.path());
+		}
+		
+		verifyStringIsBase64Encoded(file.fileContent(),
+				clazz, method , argument + ".fileContent", false);
+	}
+
+	private void verifyStringIsBase64Encoded(String text, Class clazz, String method, String argument, boolean isOptional) {
+		String regex = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(text);
+		if (!matcher.matches()) {
+    		throw new IllegalValueException(clazz, method, argument, " is not Base64 encoded", text);
+		}
+	}
+
+	private void verifyEmailAddress(Class clazz, String method, String argument, String emailAdress) {
+		// RFC 5322 email address pattern: https://datatracker.ietf.org/doc/html/rfc5322
+		String regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(emailAdress);
+		if (!matcher.matches()) {
+    		throw new IllegalValueException(clazz, method, argument, " email address has to follow pattern defined in RFC 5322", emailAdress);
+		}
 	}
 
 	private void applyCounterPartyTickerRules(Class clazz, String method, String argument, OrderTo order) {

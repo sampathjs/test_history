@@ -1,5 +1,7 @@
 package com.matthey.pmm.toms.transport;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.immutables.value.Value.Auxiliary;
@@ -21,6 +23,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonDeserialize(as = ImmutableEmailTo.class)
 @JsonRootName (value = "email")
 public abstract class EmailTo {  
+	public static final List<String> UNMODIFIABLE_ATTRBIUTES =
+		Arrays.asList("idSendAs", "subject", "body", "toList", "ccList", "bccList", "attachments", "createdAt", "idCreatedByUser", "associatedOrderIds");
+	
     public abstract long id();   
     
     @Auxiliary

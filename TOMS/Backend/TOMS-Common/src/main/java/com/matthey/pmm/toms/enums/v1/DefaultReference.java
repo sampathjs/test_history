@@ -377,6 +377,7 @@ public enum DefaultReference {
 	INDEX_NAME_XRU_USD (DefaultReferenceType.INDEX_NAME, 375, "XRU/USD",	20165, 0l),
 	INDEX_NAME_XRU_ZAR (DefaultReferenceType.INDEX_NAME, 376, "XRU/ZAR",	20231, 0l),
 	ORDER_STATUS_IN_MEMORY (DefaultReferenceType.ORDER_STATUS_NAME, 377, "In Memory", 0l),
+	EMAIL_STATUS_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 378, "Email Status Transition", 0l),
 	;
 	
 	private final ReferenceTo ref;

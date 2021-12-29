@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.service.conversion;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -68,6 +69,7 @@ public class EmailConverter extends EntityToConverter<Email, EmailTo>{
 				.ccList(entity.getCcSet())
 				.createdAt(formatDateTime(entity.getCreatedAt()))
 				.errorMessage(entity.getErrorMessage())
+				.lastUpdate(formatDateTime(entity.getLastUpdate()))
 				.id(entity.getId())
 				.idCreatedByUser(entity.getCreatedByUser().getId())
 				.idEmailStatus(entity.getEmailStatus().getId())
@@ -75,15 +77,16 @@ public class EmailConverter extends EntityToConverter<Email, EmailTo>{
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
 				.retryCount(entity.getRetryCount())
 				.subject(entity.getSubject())
+				.toList(entity.getToSet())
 				.build();
 	}
 	
 	@Override
 	public Email toManagedEntity (EmailTo to) {
 		Set<Order> associatedOrders = to.associatedOrderIds() != null?
-				to.associatedOrderIds().stream().map(x -> loadOrder(to, x)).collect(Collectors.toSet()):null;
+				new HashSet<>(to.associatedOrderIds().stream().map(x -> loadOrder(to, x)).collect(Collectors.toSet())):null;
 		Set<DatabaseFile> attachments = to.attachments() != null?
-				to.attachments().stream().map(x -> loadDatabaseFile(to, x)).collect(Collectors.toSet()):null;
+				new HashSet<>(to.attachments().stream().map(x -> loadDatabaseFile(to, x)).collect(Collectors.toSet())):null;
 		User createdBy = loadUser(to, to.idCreatedByUser());
 		Reference emailStatus = loadRef(to, to.idEmailStatus());
 		User sendAs = loadUser(to, to.idSendAs());
@@ -95,9 +98,9 @@ public class EmailConverter extends EntityToConverter<Email, EmailTo>{
 				existingEntity.get().setAssociatedOrders(associatedOrders);				
 			}
 			existingEntity.get().setAttachments(attachments);
-			existingEntity.get().setBccSet(to.bccList());
+			existingEntity.get().setBccSet(new HashSet<>(to.bccList()));
 			existingEntity.get().setBody(to.body());
-			existingEntity.get().setCcSet(to.ccList());
+			existingEntity.get().setCcSet(new HashSet<>(to.ccList()));
 			existingEntity.get().setCreatedAt(parseDateTime(to, to.createdAt()));
 			existingEntity.get().setCreatedByUser(createdBy);
 			existingEntity.get().setEmailStatus(emailStatus);
@@ -106,7 +109,7 @@ public class EmailConverter extends EntityToConverter<Email, EmailTo>{
 			existingEntity.get().setRetryCount(to.retryCount());
 			existingEntity.get().setSendAs(sendAs);
 			existingEntity.get().setSubject(to.subject());
-			existingEntity.get().setToSet(to.toList());
+			existingEntity.get().setToSet(new HashSet<>(to.toList()));
 			existingEntity.get().setUpdatedByUser(updatedBy);
 			return existingEntity.get();
 		}

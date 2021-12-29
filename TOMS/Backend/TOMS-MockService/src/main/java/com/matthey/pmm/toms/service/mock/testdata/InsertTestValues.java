@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -209,7 +210,7 @@ public class InsertTestValues implements CustomSqlChange {
 	private Collection<? extends SqlStatement> testEmailInsert(Database database) {
 		List<SqlStatement> results = new ArrayList<> (TestEmail.values().length*20);
 		String insertTemplate = 
-				"INSERT INTO dbo.email (email_id, subject, body, send_as_user_id, email_status_reference_id, error_message, retry_count, created_at, created_by, last_update, updated_by) VALUES (%s, '%s', '%s', %s, %s, '%s', %s, %s, %s, %s, %s)";
+				"INSERT INTO dbo.email (email_id, subject, body, send_as_user_id, email_status_reference_id, error_message, retry_count, created_at, created_by, last_update, updated_by) VALUES (%s, '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s)";
 		String insertTemplateTo = 
 				"INSERT INTO dbo.email_to (email_id, to) VALUES (%s, '%s')";
 		String insertTemplateCc = 
@@ -225,7 +226,7 @@ public class InsertTestValues implements CustomSqlChange {
 			Timestamp createdAt = convertDateTimeStringToTimestamp (email, email.createdAt()); 
 			Timestamp lastUpdated = convertDateTimeStringToTimestamp (email, email.lastUpdate()); 
 			results.add(new RawSqlStatement(String.format(insertTemplate, email.id(), email.subject(), email.body(), email.idSendAs(), email.idEmailStatus(),
-					email.errorMessage(), email.retryCount(), 
+					email.errorMessage()!=null?("'" + email.errorMessage() + "'"):"null", email.retryCount(), 
 					database.getDateTimeLiteral(createdAt), email.idCreatedByUser(),
 					database.getDateTimeLiteral(lastUpdated), email.idUpdatedByUser())));
 			for (String value : email.toList()) {
@@ -255,7 +256,7 @@ public class InsertTestValues implements CustomSqlChange {
 			Timestamp createdAt = convertDateTimeStringToTimestamp (file, file.createdAt()); 
 			Timestamp lastUpdated = convertDateTimeStringToTimestamp (file, file.lastUpdate()); 
 			results.add(new RawSqlStatement(String.format(insertTemplate, file.id(), file.name(), file.path(), file.idFileType(), file.idLifecycle(),
-					"'" + bytesToHex(file.fileContent().getBytes()) + "'",
+					"'" + bytesToHex(Base64.getDecoder().decode(file.fileContent())) + "'",
 					database.getDateTimeLiteral(createdAt), file.idCreatedByUser(),
 					database.getDateTimeLiteral(lastUpdated), file.idUpdatedByUser())));
 		}

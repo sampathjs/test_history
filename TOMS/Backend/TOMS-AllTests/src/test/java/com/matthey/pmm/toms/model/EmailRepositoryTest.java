@@ -1,13 +1,18 @@
 package com.matthey.pmm.toms.model;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -28,6 +33,7 @@ import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
 import com.matthey.pmm.toms.service.mock.testdata.TestDatabaseFile;
+import com.matthey.pmm.toms.service.mock.testdata.TestEmail;
 import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestUser;
@@ -77,6 +83,13 @@ public class EmailRepositoryTest extends AbstractRepositoryTestBase<Email, Long,
 		
 	}   
 	
+	@Test
+	public void testTindEmailsBelongingToOrderId () {
+		Collection<Email> emails = repo.findEmailsBelongingToOrderId(TestReferenceOrder.TEST_ORDER_1B.getEntity().id());
+		assertThat(emails).isNotEmpty();
+		assertThat(emails.stream().map(x -> x.getId()).collect(Collectors.toList())).contains(TestEmail.TEST_EMAIL1.getEntity().id());
+	}
+	
 	@Override
 	protected Supplier<List<Email>> listProvider() {		
 		return () -> {
@@ -98,7 +111,7 @@ public class EmailRepositoryTest extends AbstractRepositoryTestBase<Email, Long,
 					userConverter.toManagedEntity(TestUser.SERVICE_USER.getEntity()), // updatedByUser
 					new HashSet<>(Arrays.asList(limitOrderConverter.toManagedEntity(TestLimitOrder.TEST_ORDER_1B.getEntity()),
 							referenceOrderConverter.toManagedEntity(TestReferenceOrder.TEST_ORDER_1B.getEntity())))) // associatedOrders
-					);  // 
+					);  //
 			return users;
 		};
 	}

@@ -10,7 +10,7 @@ import com.matthey.pmm.toms.transport.ImmutableEmailTo;
 import com.matthey.pmm.toms.transport.OrderTo;
 
 public enum TestEmail {
-		TestEmail1(100000l, TestUser.JENS_WAECHTER, "Subject", "<HTML>Email Body Text</HTML>", // id, sendAs, Subject, Body 
+		TEST_EMAIL1(100000l, TestUser.JENS_WAECHTER, "Subject", "<HTML>Email Body Text</HTML>", // id, sendAs, Subject, Body 
 				Arrays.asList("jens.waetcher@matthey.com", "Murali.Krishnan@matthey.com"), // to
 				Arrays.asList("GRPEndurSupportTeam@matthey.com"), // cc
 				Arrays.asList("Nivedith.Sajja3@matthey.com"), //bcc
@@ -22,9 +22,9 @@ public enum TestEmail {
 				TestUser.JENS_WAECHTER, // created by
 				"2000-01-01 08:00:00",  // updated at
 				TestUser.JENS_WAECHTER, // updated by
-				Arrays.asList(TestLimitOrder.TEST_ORDER_1A.getEntity()/*, TestReferenceOrder.TEST_ORDER_1A.getEntity()*/)),				
-		TestEmail2(100001l, TestUser.JACOB_SMITH, "Order #12345", "Plain Text Body", // id, sendAs, Subject, Body 
-				Arrays.asList("\"Pat.McCourt@jmusa.com", "Andrew.Baynes@matthey.com"), // to
+				Arrays.asList(TestLimitOrder.TEST_ORDER_1B.getEntity(), TestReferenceOrder.TEST_ORDER_1B.getEntity())),				
+		TEST_EMAIL2(100001l, TestUser.JACOB_SMITH, "Order #12345", "Plain Text Body", // id, sendAs, Subject, Body 
+				Arrays.asList("Pat.McCourt@jmusa.com", "Andrew.Baynes@matthey.com"), // to
 				Arrays.asList("GRPEndurSupportTeam@matthey.com"), // cc
 				Arrays.asList(), //bcc
 				Arrays.asList(), // attachments
@@ -36,6 +36,58 @@ public enum TestEmail {
 				"2000-01-01 08:00:00",  // updated at
 				TestUser.SERVICE_USER, // updated by
 				Arrays.asList()),
+		TEST_EMAIL_SUBMITTED(100002l, TestUser.JACOB_SMITH, "Order #12345", "Plain Text Body", // id, sendAs, Subject, Body 
+				Arrays.asList("Pat.McCourt@jmusa.com", "Andrew.Baynes@matthey.com"), // to
+				Arrays.asList("GRPEndurSupportTeam@matthey.com"), // cc
+				Arrays.asList(), //bcc
+				Arrays.asList(), // attachments
+				DefaultReference.EMAIL_STATUS_SUBMITTED,  // email status
+				null, // error message
+				9, // retry count
+				"2000-01-01 08:00:00",  // created at
+				TestUser.JACOB_SMITH, // created by
+				"2000-01-01 08:00:00",  // updated at
+				TestUser.SERVICE_USER, // updated by
+				Arrays.asList()),		
+		TEST_EMAIL_SENDING(100003l, TestUser.JACOB_SMITH, "Order #12345", "Plain Text Body", // id, sendAs, Subject, Body 
+				Arrays.asList("Pat.McCourt@jmusa.com", "Andrew.Baynes@matthey.com"), // to
+				Arrays.asList("GRPEndurSupportTeam@matthey.com"), // cc
+				Arrays.asList(), //bcc
+				Arrays.asList(), // attachments
+				DefaultReference.EMAIL_STATUS_SENDING,  // email status
+				null, // error message
+				9, // retry count
+				"2000-01-01 08:00:00",  // created at
+				TestUser.JACOB_SMITH, // created by
+				"2000-01-01 08:00:00",  // updated at
+				TestUser.SERVICE_USER, // updated by
+				Arrays.asList()),			
+		TEST_EMAIL_SENT_SUCCESS(100004l, TestUser.JACOB_SMITH, "Order #12345", "Plain Text Body", // id, sendAs, Subject, Body 
+				Arrays.asList("Pat.McCourt@jmusa.com", "Andrew.Baynes@matthey.com"), // to
+				Arrays.asList("GRPEndurSupportTeam@matthey.com"), // cc
+				Arrays.asList(), //bcc
+				Arrays.asList(), // attachments
+				DefaultReference.EMAIL_STATUS_SENT_SUCCESS,  // email status
+				null, // error message
+				9, // retry count
+				"2000-01-01 08:00:00",  // created at
+				TestUser.JACOB_SMITH, // created by
+				"2000-01-01 08:00:00",  // updated at
+				TestUser.SERVICE_USER, // updated by
+				Arrays.asList()),		
+		TEST_EMAIL_SENT_FAILED(100005l, TestUser.JACOB_SMITH, "Order #12345", "Plain Text Body", // id, sendAs, Subject, Body 
+				Arrays.asList("Pat.McCourt@jmusa.com", "Andrew.Baynes@matthey.com"), // to
+				Arrays.asList("GRPEndurSupportTeam@matthey.com"), // cc
+				Arrays.asList(), //bcc
+				Arrays.asList(), // attachments
+				DefaultReference.EMAIL_STATUS_SENT_FAILED,  // email status
+				null, // error message
+				9, // retry count
+				"2000-01-01 08:00:00",  // created at
+				TestUser.JACOB_SMITH, // created by
+				"2000-01-01 08:00:00",  // updated at
+				TestUser.SERVICE_USER, // updated by
+				Arrays.asList()),				
 		;
 	
 	private final EmailTo email;
