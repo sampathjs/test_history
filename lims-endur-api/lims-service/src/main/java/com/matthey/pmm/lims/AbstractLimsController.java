@@ -37,7 +37,7 @@ public abstract class AbstractLimsController {
         switch (dataClass.getSimpleName()) {
             case "LimsResult":
             case "LimsSample":
-                return "Response";
+                return "ActionUpdate";
             default:
                 throw new RuntimeException("invalid data class: " + dataClass.getSimpleName());
         }

@@ -1,5 +1,7 @@
 package com.matthey.pmm.lims;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -15,22 +17,30 @@ import java.util.List;
 @Immutable
 @JsonSerialize(as = ImmutableLimsSample.class)
 @JsonDeserialize(as = ImmutableLimsSample.class)
-@JacksonXmlRootElement(localName = "Response")
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JacksonXmlRootElement(localName = "ActionUpdate")
 public abstract class LimsSample {
 
-    public abstract String jmBatchId();
+	@Nullable
+	public abstract String ProductID();
 
-    @Nullable
-    public abstract String sampleNumber();
+	@Nullable
+	@JsonProperty("LotID")
+	public abstract String jmBatchId();
 
-    @Nullable
-    public abstract String product();
-    
-    @Nullable
-    public abstract List<LimsResult> result();
+	@Nullable
+	public abstract String SampleID();
 
-    @Derived
-    String exists() {
-        return "True";
-    }
+	@Nullable
+	public abstract String testSequenceNumber();
+
+	@Nullable
+	public abstract String sampleInSpecIndicator();
+
+	@Nullable
+	public abstract String sampleInControlIndicator();
+
+	@Nullable
+	public abstract List<LimsTest> test();
+
 }

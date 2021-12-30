@@ -63,7 +63,7 @@ public class LimsService {
 
     @Bean
     public RestTemplate restTemplate() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-        TrustStrategy acceptingTrustStrategy = (cert, authType) -> false;
+        TrustStrategy acceptingTrustStrategy = (cert, authType) -> true;
         var sslContext = SSLContexts.custom().loadTrustMaterial(null, acceptingTrustStrategy).build();
         var socketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
         var httpClient = HttpClients.custom().setSSLSocketFactory(socketFactory).build();
@@ -97,9 +97,8 @@ public class LimsService {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder().title("LIMS Endur API")
-                .description("REST endpoints used by lims for retrieving data from Endur" +
-                             System.lineSeparator() +
-                             "Please retrieve the JWT from endpoint lims/login, and then click 'Authorize' below and enter 'Bearer [JWT]' ([JWT] is the token just retrieved) for authorization")
+                .description("REST endpoints used by lims to upload test results to Endur" +
+                             System.lineSeparator())
                 .license(null)
                 .licenseUrl(null)
                 .termsOfServiceUrl(null)

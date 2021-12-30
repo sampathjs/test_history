@@ -109,6 +109,12 @@
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
+            <artifactId>lims-endur-connector</artifactId>
+            <version>1.0.0</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.matthey.pmm</groupId>
             <artifactId>metal-rentals-endur-connector</artifactId>
             <version>1.0.0</version>
             <scope>runtime</scope>
@@ -208,6 +214,24 @@
                             <rules>
                                 <dependencyConvergence />
                             </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>source-jar</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <finalName>endur-connector</finalName>
+                            <attach>false</attach>
                         </configuration>
                     </execution>
                 </executions>

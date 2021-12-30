@@ -27,13 +27,24 @@ public class EndurConnector {
     }
 
     public <T> T get(String url, Class<T> responseType, Object... uriVariables) {
+    	logger.info("EndurConnector.get() for response type: {}", responseType.getName());
         var result = restTemplate.getForObject(baseUrl + url, responseType, uriVariables);
         checkNotNull(result);
         return result;
     }
     
     public <T> T post(String url, Class<T> responseType, Object... uriVariables) {
-        var result = restTemplate.postForObject(baseUrl + url, "", responseType, uriVariables);
+		logger.info("EndurConnector.post() for response type: {}, URL: {}", responseType.getName(), baseUrl + url);
+    	var result = restTemplate.postForObject(baseUrl + url, "", responseType, uriVariables);
+    	logger.info("EndurConnector.post() result: {}", result);
+        checkNotNull(result);
+        return result;
+    }
+    
+    public <T> T postBody(String url, Class<T> responseType, Object body, Object... uriVariables) {
+    	logger.info("EndurConnector.post() for response type: {}, URL: {}", responseType.getName(), baseUrl + url);
+    	var result = restTemplate.postForObject(baseUrl + url, body, responseType, uriVariables);
+    	logger.info("EndurConnector.post() result: {}", result);
         checkNotNull(result);
         return result;
     }

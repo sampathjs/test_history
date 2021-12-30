@@ -1,0 +1,11 @@
+<service>
+    <id>lims-service</id>
+    <name>Lims Service</name>
+    <description>This runs Lims Service which will import batch measure data into Endur.</description>
+    <env name="LIMS_LOG_DIR" value="\\Weazfil01\endur\DEV03\outdir\Logs\Lims" />
+    <env name="JAVA_11_HOME" value="jdk-11.0.6+10" />
+    <executable>%JAVA_11_HOME%\bin\java</executable>
+    <arguments>-jar lims-service-1.0.0-exec.jar</arguments>
+    <startmode>Manual</startmode>
+    <log mode="reset" />
+</service>
