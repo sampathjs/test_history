@@ -767,7 +767,7 @@ public class OrderControllerTest {
 	@Test
 	public void testGetOrdersWithFilter () {
 		// Please note this test case might fail in the future in case more test orders are added.
-		// The failure is going to look like some orders are not going to be in the expected result setl
+		// The failure is going to look like some orders are not going to be in the expected result set
 		// The reason it is going to fail is in the combination of sort by id, idMetalForm, idCreatedByUser
 		// idTicker and createdAt in combination with having the idFirstOrderIncluded search parameter set.
 		// In case of future failures it is suggested to adjust the test data or to remove the
@@ -778,6 +778,8 @@ public class OrderControllerTest {
 						limitOrderConverter.toTo((LimitOrder)x):
 						refOrderConverter.toTo((ReferenceOrder)x)))
 				.collect(Collectors.toList());
+		allOrder.removeIf(x -> x.id() == TestLimitOrder.TEST_FOR_CONVERSION_ALL_OPTIONAL_ATTRIBUTES_NULL.getEntity().id()
+				            || x.id() == TestReferenceOrder.TEST_FOR_CONVERSION_ALL_OPTIONAL_ATTRIBUTES_NULL.getEntity().id() );
 		PageRequest page = PageRequest.of(0, 100000, Sort.by(Order.desc("id"),
 				                                             Order.asc("idMetalForm"), 
 				                                             Order.asc("idCreatedByUser"), 
@@ -823,7 +825,7 @@ public class OrderControllerTest {
 				page, 
 				TestReferenceOrder.TEST_FOR_LEG_DELETION_ALL_LEGS.getEntity().id());
 		assertThat(allOrder).containsAll(pageOfOrders.getContent());
-		assertThat(pageOfOrders.getContent()).containsAll(allOrder);		
+		assertThat(pageOfOrders.getContent()).containsAll(allOrder);
 	}
 	
 	
