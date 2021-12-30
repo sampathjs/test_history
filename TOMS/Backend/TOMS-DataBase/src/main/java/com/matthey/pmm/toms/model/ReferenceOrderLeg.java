@@ -45,10 +45,9 @@ public class ReferenceOrderLeg {
 	@Temporal(TemporalType.DATE)
 	private Date fixingEndDate;
 	
-	@OneToOne(fetch=FetchType.EAGER)
-	@JoinColumn(name="payment_offset_reference_id", nullable = true)
-	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.SYMBOLIC_DATE)
-	private Reference paymentOffset;
+	@Column(name = "payment_date", nullable = false)
+	@Temporal(TemporalType.DATE)
+	private Date paymentDate;
 
 	@Column(name = "notional", nullable=false)
 	private Double notional;
@@ -75,12 +74,12 @@ public class ReferenceOrderLeg {
 	protected ReferenceOrderLeg() {
 	}
 
-	public ReferenceOrderLeg(final Date fixingStartDate, final Date fixingEndDate, final Reference paymentOffset,
+	public ReferenceOrderLeg(final Date fixingStartDate, final Date fixingEndDate, final Date paymentDate,
 			final Double notional, final Reference settleCurrency, final Reference refSource, 
 			final Reference fxIndexRefSource) {
 		this.fixingStartDate = fixingStartDate;
 		this.fixingEndDate = fixingEndDate;
-		this.paymentOffset = paymentOffset;
+		this.paymentDate = paymentDate;
 		this.notional = notional;
 		this.settleCurrency = settleCurrency;
 		this.refSource = refSource;
@@ -111,12 +110,12 @@ public class ReferenceOrderLeg {
 		this.fixingEndDate = fixingEndDate;
 	}
 
-	public Reference getPaymentOffset() {
-		return paymentOffset;
+	public Date getPaymentDate() {
+		return paymentDate;
 	}
 
-	public void setPaymentOffset(Reference paymentOffset) {
-		this.paymentOffset = paymentOffset;
+	public void setPaymentDate(Date paymentDate) {
+		this.paymentDate = paymentDate;
 	}
 
 	public Double getNotional() {
@@ -179,7 +178,7 @@ public class ReferenceOrderLeg {
 	@Override
 	public String toString() {
 		return "ReferenceOrderLeg [id=" + id + ", fixingStartDate=" + fixingStartDate + ", fixingEndDate="
-				+ fixingEndDate + ", paymentOffset=" + paymentOffset + ", notional=" + notional + ", settleCurrency="
+				+ fixingEndDate + ", paymentDate=" + paymentDate + ", notional=" + notional + ", settleCurrency="
 				+ settleCurrency + ", refSource=" + refSource + ", fxIndexRefSource=" + fxIndexRefSource + "]";
 	}
 }

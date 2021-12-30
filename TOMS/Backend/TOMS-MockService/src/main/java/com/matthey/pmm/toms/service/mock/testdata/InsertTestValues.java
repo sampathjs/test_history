@@ -159,11 +159,11 @@ public class InsertTestValues implements CustomSqlChange {
 	private Collection<? extends SqlStatement> testReferenceOrderLegInsert(Database database) {
 		List<SqlStatement> results = new ArrayList<> (TestReferenceOrderLeg.values().length);
 		String insertTemplate = 
-				"INSERT INTO dbo.reference_order_leg (leg_id, fixing_start_date, fixing_end_date, payment_offset_reference_id, notional, settle_currency_reference_id, ref_source_reference_id, fx_index_ref_source_reference_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)";
+				"INSERT INTO dbo.reference_order_leg (leg_id, fixing_start_date, fixing_end_date, payment_date, notional, settle_currency_reference_id, ref_source_reference_id, fx_index_ref_source_reference_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)";
 		for (ReferenceOrderLegTo leg : TestReferenceOrderLeg.asList()) {
-			results.add(new RawSqlStatement(String.format(insertTemplate, leg.id(), leg.fixingStartDate() != null?database.getDateLiteral(leg.fixingStartDate()):null,
+			results.add(new RawSqlStatement(String.format(insertTemplate, leg.id(), database.getDateLiteral(leg.fixingStartDate()),
 					leg.fixingEndDate() != null?database.getDateLiteral(leg.fixingEndDate()):null,
-					leg.idPaymentOffset(), leg.notional(), leg.idSettleCurrency(), leg.idRefSource(), leg.idFxIndexRefSource())));
+						database.getDateLiteral(leg.paymentDate()), leg.notional(), leg.idSettleCurrency(), leg.idRefSource(), leg.idFxIndexRefSource())));
 		}
 		return results;		
 	}

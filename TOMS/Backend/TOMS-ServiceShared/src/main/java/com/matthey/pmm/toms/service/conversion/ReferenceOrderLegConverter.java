@@ -33,14 +33,13 @@ public class ReferenceOrderLegConverter extends EntityToConverter<ReferenceOrder
 		return ImmutableReferenceOrderLegTo.builder()
 				.id(entity.getId())
 				.idFxIndexRefSource(entity.getFxIndexRefSource() != null?entity.getFxIndexRefSource().getId():null)
-				.idPaymentOffset(entity.getPaymentOffset() != null?entity.getPaymentOffset().getId():null)
+				.paymentDate(formatDate(entity.getPaymentDate()))
 				.idRefSource(entity.getRefSource() != null?entity.getRefSource().getId():null)
 				.idSettleCurrency(entity.getSettleCurrency() != null?entity.getSettleCurrency().getId():null)
 				.fixingEndDate(entity.getFixingEndDate() != null?formatDate(entity.getFixingEndDate()):null)
 				.fixingStartDate(entity.getFixingStartDate() != null?formatDate(entity.getFixingStartDate()):null)
 				.notional(entity.getNotional())
 				.displayStringFxIndexRefSource(entity.getFxIndexRefSource() != null?entity.getFxIndexRefSource().getValue():null)
-				.displayStringPaymentOffset(entity.getPaymentOffset() != null?entity.getPaymentOffset().getValue():null)
 				.displayStringRefSource(entity.getRefSource() != null?entity.getRefSource().getValue():null)
 				.displayStringSettleCurrency(entity.getSettleCurrency() != null?entity.getSettleCurrency().getValue():null)
 				.build();
@@ -50,7 +49,7 @@ public class ReferenceOrderLegConverter extends EntityToConverter<ReferenceOrder
 	@Transactional
 	public ReferenceOrderLeg toManagedEntity (ReferenceOrderLegTo to) {
 		Reference fxIndexRefSource = to.idFxIndexRefSource() != null?loadRef(to, to.idFxIndexRefSource()):null;
-		Reference paymentOffset = to.idPaymentOffset() != null?loadRef (to, to.idPaymentOffset()):null;
+		Date paymentDate = parseDate(to, to.paymentDate());
 		Reference refSource = loadRef (to, to.idRefSource());
 		Reference settleCurrency = to.idSettleCurrency() != null?loadRef(to, to.idSettleCurrency()):null;
 		Date fixingEndDate = to.fixingEndDate() != null?parseDate(to, to.fixingEndDate()):null;
@@ -62,12 +61,12 @@ public class ReferenceOrderLegConverter extends EntityToConverter<ReferenceOrder
 			entity.get().setFixingStartDate(fixingStartDate);
 			entity.get().setFxIndexRefSource(fxIndexRefSource);
 			entity.get().setNotional(to.notional());
-			entity.get().setPaymentOffset(paymentOffset);
+			entity.get().setPaymentDate(paymentDate);
 			entity.get().setRefSource(refSource);
 			entity.get().setSettleCurrency(settleCurrency);
 			return entity.get();
 		}
-		ReferenceOrderLeg newEntity = new ReferenceOrderLeg (fixingStartDate, fixingEndDate, paymentOffset, to.notional(), settleCurrency, refSource, fxIndexRefSource);
+		ReferenceOrderLeg newEntity = new ReferenceOrderLeg (fixingStartDate, fixingEndDate, paymentDate, to.notional(), settleCurrency, refSource, fxIndexRefSource);
 		newEntity.setId(to.id());
 		newEntity = entityRepo.save(newEntity);
 		return newEntity;

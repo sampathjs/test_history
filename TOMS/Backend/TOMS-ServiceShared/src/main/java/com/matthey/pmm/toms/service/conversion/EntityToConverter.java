@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,6 +212,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param refTypeId
 	 * @return
 	 */
+	@Transactional
 	protected ReferenceType loadRefType(TO to, long refTypeId) {
 		Optional<ReferenceType> type = refTypeRepo().findById(refTypeId);
 		if (!type.isPresent()) {
@@ -227,7 +230,8 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param to
 	 * @param refId
 	 * @return
-	 */
+	 */	
+	@Transactional
 	protected Reference loadRef(TO to, long refId) {
 		Optional<Reference> ref = refRepo().findById(refId);
 		if (!ref.isPresent()) {
@@ -245,7 +249,8 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param to
 	 * @param refId
 	 * @return
-	 */
+	 */	
+	@Transactional
 	protected Party loadParty(TO to, long partyId) {
 		Optional<Party> party = partyRepo().findById(partyId);
 		if (!party.isPresent()) {
@@ -264,6 +269,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param refId
 	 * @return
 	 */
+	@Transactional	
 	protected User loadUser(TO to, long userId) {
 		Optional<User> user = userRepo().findById(userId);
 		if (!user.isPresent()) {
@@ -282,6 +288,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param refId
 	 * @return
 	 */
+	@Transactional	
 	protected Fill loadFill(TO to, long fillId) {
 		Optional<Fill> fill = fillRepo().findById(fillId);
 		if (!fill.isPresent()) {
@@ -300,6 +307,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param refId
 	 * @return
 	 */
+	@Transactional	
 	protected OrderComment loadOrderComment(TO to, long orderCommentId) {
 		Optional<OrderComment> orderComment = orderCommentRepo().findById(orderCommentId);
 		if (!orderComment.isPresent()) {
@@ -318,6 +326,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param refId
 	 * @return
 	 */
+	@Transactional	
 	protected CreditCheck loadCreditCheck(TO to, long creditCheckId) {
 		Optional<CreditCheck> creditCheck = creditCheckRepo().findById(creditCheckId);
 		if (!creditCheck.isPresent()) {
@@ -336,6 +345,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param refId
 	 * @return
 	 */
+	@Transactional	
 	protected OrderStatus loadOrderStatus(TO to, long orderStatusId) {
 		Optional<OrderStatus> orderStatus = orderStatusRepo().findById(orderStatusId);
 		if (!orderStatus.isPresent()) {
@@ -354,6 +364,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param indexId
 	 * @return
 	 */
+	@Transactional	
 	protected IndexEntity loadIndex(TO to, long indexId) {
 		Optional<IndexEntity> index = indexRepo().findById(indexId);
 		if (!index.isPresent()) {
@@ -372,6 +383,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param legId
 	 * @return
 	 */
+	@Transactional	
 	protected ReferenceOrderLeg loadReferenceOrderLeg(TO to, long legId) {
 		Optional<ReferenceOrderLeg> leg = referenceOrderLegRepo().findById(legId);
 		if (!leg.isPresent()) {
@@ -390,6 +402,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param databaseFileId
 	 * @return 
 	 */
+	@Transactional	
 	protected DatabaseFile loadDatabaseFile(TO to, long databaseFileId) {
 		Optional<DatabaseFile> file = databaseFileRepo().findById(databaseFileId);
 		if (!file.isPresent()) {
@@ -408,6 +421,7 @@ public abstract class EntityToConverter <Entity, TO> {
 	 * @param databaseFileId
 	 * @return 
 	 */
+	@Transactional	
 	protected Order loadOrder(TO to, long orderId) {
 		Optional<Order> file = orderRepo().findLatestByOrderId(orderId);
 		if (!file.isPresent()) {

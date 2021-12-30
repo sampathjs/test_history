@@ -2,6 +2,8 @@ package com.matthey.pmm.toms.service.conversion;
 
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,6 +55,7 @@ public class ReferenceTypeConverter extends EntityToConverter<ReferenceType, Ref
 	 * @return
 	 */
 	@Override
+	@Transactional
 	public ReferenceType toManagedEntity (ReferenceTypeTo to) {		
 		Optional<ReferenceType> entity = refTypeRepo.findById(to.id());
 		if (entity.isPresent()) {

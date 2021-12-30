@@ -57,6 +57,7 @@ public class DatabaseFileConverter extends EntityToConverter<DatabaseFile, Datab
 	}
 	
 	@Override
+	@Transactional
 	public DatabaseFile toManagedEntity (DatabaseFileTo to) {
 		Date createdAt = parseDateTime(to, to.createdAt());
 		Date lastUpdate = parseDateTime(to, to.lastUpdate());

@@ -2,6 +2,8 @@ package com.matthey.pmm.toms.service.conversion;
 
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,7 @@ public class IndexConverter extends EntityToConverter<IndexEntity, IndexTo>{
 	}
 	
 	@Override
+	@Transactional
 	public IndexEntity toManagedEntity (IndexTo to) {		
 		Optional<IndexEntity> existingEntity  = entityRepo.findById(to.id());
 		Reference indexName  = loadRef(to, to.idIndexName());

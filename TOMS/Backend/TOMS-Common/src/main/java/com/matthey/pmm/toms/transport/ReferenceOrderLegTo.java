@@ -35,14 +35,9 @@ public abstract class ReferenceOrderLegTo {
     @Nullable
     public abstract String fixingEndDate();
     
-    @Nullable
     @Auxiliary
-	public abstract Long idPaymentOffset();
+	public abstract String paymentDate();
     
-	@Auxiliary
-    @Nullable
-	public abstract String displayStringPaymentOffset();
-	
     @Nullable
     @Auxiliary
 	public abstract Long idSettleCurrency();

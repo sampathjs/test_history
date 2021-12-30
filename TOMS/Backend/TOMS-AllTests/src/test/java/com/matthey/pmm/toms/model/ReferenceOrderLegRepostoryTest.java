@@ -36,13 +36,13 @@ public class ReferenceOrderLegRepostoryTest extends AbstractRepositoryTestBase<R
 	protected Supplier<List<ReferenceOrderLeg>> listProvider() {		
 		return () -> {
 			final List<ReferenceOrderLeg> legs = Arrays.asList(new ReferenceOrderLeg (new Date(), new Date(), 
-					referenceCon.toManagedEntity(DefaultReference.SYMBOLIC_DATE_EOM.getEntity()),
+					new Date(),
 					30d, 
 					referenceCon.toManagedEntity(DefaultReference.CCY_GBP.getEntity()),
 					referenceCon.toManagedEntity(DefaultReference.REF_SOURCE_JM_HK_CLOSING.getEntity()),
 					referenceCon.toManagedEntity(DefaultReference.REF_SOURCE_BLOOMBERG.getEntity()))
 					, new ReferenceOrderLeg (new Date(), null, 
-							null,
+							new Date(),
 							30d, 
 							referenceCon.toManagedEntity(DefaultReference.CCY_GBP.getEntity()),
 							referenceCon.toManagedEntity(DefaultReference.REF_SOURCE_JM_HK_CLOSING.getEntity()),

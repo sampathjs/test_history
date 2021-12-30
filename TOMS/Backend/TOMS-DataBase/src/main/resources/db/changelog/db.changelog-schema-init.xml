@@ -976,8 +976,8 @@
 			<column name="fixing_end_date" type="timestamp">
 				<constraints nullable="true" />
 			</column>
-			<column name="payment_offset_reference_id" type="int">
-				<constraints nullable="true" />
+			<column name="payment_date" type="timestamp">
+				<constraints nullable="false" />
 			</column>
 			<column name="notional" type="double">
 				<constraints nullable="true" />
@@ -993,14 +993,6 @@
 			</column>
 		</createTable>
 		
-		<addForeignKeyConstraint
-			baseColumnNames="payment_offset_reference_id"
-			baseTableName="reference_order_leg"
-			constraintName="fk_reference_order_payment_offset_reference_id"
-			onDelete="NO ACTION" onUpdate="NO ACTION"
-			referencedColumnNames="reference_id" referencedTableName="reference"
-			validate="true" schemaName="dbo"/>
-
 		<addForeignKeyConstraint
 			baseColumnNames="settle_currency_reference_id"
 			baseTableName="reference_order_leg"

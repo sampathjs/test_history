@@ -341,7 +341,7 @@ public class OrderTestDataGenerator {
 			newLeg.setFxIndexRefSource(refRepo.findById(selectedTickerFxRefSourceRule.idRefSource()).get());
 			newLeg.setFixingStartDate(randomDate(false));
 			newLeg.setNotional(Math.random()*MAX_REFERENCE_ORDER_LEG_NOTIONAL);
-			newLeg.setPaymentOffset(selectReferenceValue(DefaultReferenceType.SYMBOLIC_DATE, true));
+			newLeg.setPaymentDate(randomDate(false));
 			newLeg.setSettleCurrency(refRepo.findById(selectedTickerFxRefSourceRule.idTermCurrency()).get());
 			newLeg = referenceOrderLegRepository.save(newLeg);
 			newLegs.add(newLeg);

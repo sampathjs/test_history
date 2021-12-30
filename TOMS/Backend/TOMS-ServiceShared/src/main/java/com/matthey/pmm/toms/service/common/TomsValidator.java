@@ -920,10 +920,6 @@ public class TomsValidator {
 				Arrays.asList(DefaultReferenceType.REF_SOURCE),
 				clazz, method , argument + ".idRefSource", true);
 
-    	verifyDefaultReference (leg.idPaymentOffset(),
-				Arrays.asList(DefaultReferenceType.SYMBOLIC_DATE),
-				clazz, method , argument + ".idPaymentOffset", true);
-
     	verifyDefaultReference (leg.idFxIndexRefSource(),
 				Arrays.asList(DefaultReferenceType.REF_SOURCE),
 				clazz, method , argument + ".idFxIndexRefSource", true);
@@ -932,6 +928,12 @@ public class TomsValidator {
     	
 		try {
 			Date parsedTime = sdfDate.parse (leg.fixingEndDate());
+		} catch (ParseException pe) {
+			throw new IllegalDateFormatException (clazz, method, argument + ".fixingEndDate", TomsService.DATE_FORMAT, leg.fixingEndDate());
+		}
+
+		try {
+			Date parsedTime = sdfDate.parse (leg.paymentDate());
 		} catch (ParseException pe) {
 			throw new IllegalDateFormatException (clazz, method, argument + ".fixingEndDate", TomsService.DATE_FORMAT, leg.fixingEndDate());
 		}

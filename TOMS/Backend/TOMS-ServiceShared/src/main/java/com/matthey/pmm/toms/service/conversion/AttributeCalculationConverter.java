@@ -3,6 +3,8 @@ package com.matthey.pmm.toms.service.conversion;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,7 @@ public class AttributeCalculationConverter extends EntityToConverter<AttributeCa
 	}
 
 	@Override
+	@Transactional
 	public AttributeCalculation toManagedEntity(AttributeCalculationTo to) {
 		Optional<AttributeCalculation> existingEntity = entityRepo.findById(to.id());
 		if (existingEntity.isPresent()) {

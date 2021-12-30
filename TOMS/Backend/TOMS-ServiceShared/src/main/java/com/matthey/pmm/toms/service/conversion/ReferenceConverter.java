@@ -47,6 +47,7 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 	}
 	
 	@Override
+	@Transactional
 	public Reference toManagedEntity (ReferenceTo to) {		
 		ReferenceType type = loadRefType(to, to.idType());
 		Reference lifecycleStatus = to.idLifecycle() != null?loadRef (to, to.idLifecycle()):null;

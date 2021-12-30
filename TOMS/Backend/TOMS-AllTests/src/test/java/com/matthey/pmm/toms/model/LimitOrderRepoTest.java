@@ -64,7 +64,7 @@ public class LimitOrderRepoTest extends AbstractRepositoryTestBase<LimitOrder, O
 	protected CreditCheckConverter creditCheckConverter;
 
 	@Autowired
-	protected FillRepository fillRepo;;
+	protected FillRepository fillRepo;
 
 	
 	@Before

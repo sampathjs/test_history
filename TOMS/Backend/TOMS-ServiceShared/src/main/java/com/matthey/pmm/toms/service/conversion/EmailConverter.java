@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -82,6 +84,7 @@ public class EmailConverter extends EntityToConverter<Email, EmailTo>{
 	}
 	
 	@Override
+	@Transactional
 	public Email toManagedEntity (EmailTo to) {
 		Set<Order> associatedOrders = to.associatedOrderIds() != null?
 				new HashSet<>(to.associatedOrderIds().stream().map(x -> loadOrder(to, x)).collect(Collectors.toSet())):null;

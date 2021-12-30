@@ -3,6 +3,8 @@ package com.matthey.pmm.toms.service.conversion;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +51,7 @@ public class ProcessTransitionConverter extends EntityToConverter<ProcessTransit
 	}
 
 	@Override
+	@Transactional
 	public ProcessTransition toManagedEntity(ProcessTransitionTo to) {
 		Reference referenceCategory = loadRef(to, to.id());		
 		Optional<ProcessTransition> existingEntity = entityRepo.findById(to.id());
