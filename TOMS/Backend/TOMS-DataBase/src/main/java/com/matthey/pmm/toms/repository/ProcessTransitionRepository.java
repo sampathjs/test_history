@@ -16,6 +16,8 @@ import com.matthey.pmm.toms.model.Reference;
 public interface ProcessTransitionRepository extends JpaRepository<ProcessTransition, Long> {
   List<ProcessTransition> findByReferenceCategory(Reference referenceCategory);
 
+  List<ProcessTransition> findByReferenceCategoryId(long referenceCategoryId);
+
   List<ProcessTransition> findByReferenceCategoryIdAndFromStatusId(long referenceCategoryId, long fromStatusId);   
   
   Optional<ProcessTransition> findByReferenceCategoryIdAndFromStatusIdAndToStatusId(long referenceCategoryId, long fromStatusId, long toStatusId);    

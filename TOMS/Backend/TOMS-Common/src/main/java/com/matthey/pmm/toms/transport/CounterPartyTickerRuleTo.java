@@ -26,7 +26,7 @@ public abstract class CounterPartyTickerRuleTo {
     @Auxiliary
     @Nullable
     @JsonInclude(value = Include.NON_NULL, content = Include.NON_NULL)
-    public abstract String counterPartyDisplayName();
+    public abstract String counterPartyDisplayString();
     
     public abstract long idTicker();
 

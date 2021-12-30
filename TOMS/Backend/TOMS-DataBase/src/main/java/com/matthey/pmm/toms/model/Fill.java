@@ -158,12 +158,12 @@ public class Fill {
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (int) (tradeId ^ (tradeId >>> 32));
+		result = prime * result + (int) (id ^ (id >>> 32));
 		return result;
 	}
 
@@ -176,7 +176,7 @@ public class Fill {
 		if (getClass() != obj.getClass())
 			return false;
 		Fill other = (Fill) obj;
-		if (tradeId != other.tradeId)
+		if (id != other.id)
 			return false;
 		return true;
 	}

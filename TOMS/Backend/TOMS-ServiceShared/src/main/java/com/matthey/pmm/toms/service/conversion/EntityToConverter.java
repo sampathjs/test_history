@@ -35,6 +35,7 @@ import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.repository.ReferenceTypeRepository;
 import com.matthey.pmm.toms.repository.UserRepository;
 import com.matthey.pmm.toms.service.TomsService;
+import com.matthey.pmm.toms.service.exception.ConversionException;
 
 public abstract class EntityToConverter <Entity, TO> {
     protected static final Logger logger = LoggerFactory.getLogger(EntityToConverter.class);
@@ -184,7 +185,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			try {
 				return sdfDateTime.parse(dateTime);
 			} catch (ParseException e) {
-				throw new RuntimeException ("Error while converting entity '" 
+				throw new ConversionException("Error while converting entity '" 
 						+ to + "', DateTime: '" + dateTime + "'. Expected Date format is "
 						 + TomsService.DATE_TIME_FORMAT);
 			}			
@@ -198,7 +199,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			try {
 				return sdfDateTime.parse(date);
 			} catch (ParseException e) {
-				throw new RuntimeException ("Error while converting entity '" 
+				throw new ConversionException ("Error while converting entity '" 
 						+ to + "', Date: '" + date + "'. Expected Date format is "
 						 + TomsService.DATE_FORMAT);
 			}			
@@ -220,7 +221,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the reference type having ID #" + refTypeId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return type.get();
 	}
@@ -239,7 +240,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the reference having ID #" + refId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return ref.get();
 	}
@@ -258,7 +259,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the party having ID #" + partyId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return party.get();
 	}	
@@ -277,7 +278,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the user having ID #" + userId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return user.get();
 	}
@@ -296,7 +297,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the fill having ID #" + fillId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return fill.get();
 	}
@@ -315,7 +316,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the order comment having ID #" + orderCommentId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return orderComment.get();
 	}
@@ -334,7 +335,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the credit check having ID #" + creditCheckId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return creditCheck.get();
 	}
@@ -353,7 +354,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the order status having ID #" + orderStatusId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return orderStatus.get();
 	}
@@ -372,7 +373,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the index having ID #" + indexId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return index.get();
 	}
@@ -391,7 +392,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the Reference Order Leg having ID #" + legId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return leg.get();
 	}
@@ -410,7 +411,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the Database File having ID #" + databaseFileId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return file.get();
 	}
@@ -429,7 +430,7 @@ public abstract class EntityToConverter <Entity, TO> {
 					+ " can't find the Order having ID #" + orderId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
 			logger.error(msg);
-			throw new RuntimeException (msg);
+			throw new ConversionException (msg);
 		}
 		return file.get();
 	}

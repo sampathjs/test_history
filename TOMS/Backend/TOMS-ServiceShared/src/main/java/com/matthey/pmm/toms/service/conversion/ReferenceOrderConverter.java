@@ -152,7 +152,7 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.displayStringExternalBu(entity.getExternalBu() != null?entity.getExternalBu().getName():null)
 				.displayStringExternalLe(entity.getExternalLe() != null?entity.getExternalLe().getName():null)
 				.displayStringExtPortfolio(entity.getExtPortfolio() != null?entity.getExtPortfolio().getValue():null)
-				.displayStringInternalBu(entity.getInternalBu() != null?entity.getInternalBu().getName():null)
+				.displayStringInternalBu(entity.getInternalBu().getName())
 				.displayStringInternalLe(entity.getInternalLe() != null?entity.getInternalLe().getName():null)
 				.displayStringIntPortfolio(entity.getIntPortfolio() != null?entity.getIntPortfolio().getValue():null)
 				.displayStringMetalForm(entity.getMetalForm() != null?entity.getMetalForm().getValue():null)
@@ -168,7 +168,6 @@ public class ReferenceOrderConverter extends EntityToConverter<ReferenceOrder, R
 				.fxRateSpread(entity.getFxRateSpread())
 				.metalPriceSpread(entity.getMetalPriceSpread())
 				.legIds(entity.getLegs().stream().map(x -> x.getId()).collect(Collectors.toList()))
-				.displayStringContractType(entity.getContractType() != null?entity.getContractType().getValue():null)
 				.build();
 	}
 	

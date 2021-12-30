@@ -121,7 +121,7 @@ public class LimitOrderConverter extends EntityToConverter<LimitOrder, LimitOrde
 				.lastUpdate(formatDateTime(entity.getLastUpdate()))
 				.idUpdatedByUser(entity.getUpdatedByUser().getId())
 				.fillPercentage(entity.getFillPercentage())
-				.idContractType(entity.getContractType().getId())
+				.idContractType(entity.getContractType() != null?entity.getContractType().getId():null)
 				.idTicker(entity.getTicker() != null?entity.getTicker().getId():null)
 				.idMetalForm(entity.getMetalForm() != null?entity.getMetalForm().getId():null)
 				.idMetalLocation(entity.getMetalLocation() != null?entity.getMetalLocation().getId():null)

@@ -17,26 +17,6 @@ public class ReferenceTypeConverter extends EntityToConverter<ReferenceType, Ref
 	@Autowired
 	private ReferenceTypeRepository refTypeRepo;
 
-	
-	@Override
-	public ReferenceTypeRepository refTypeRepo() {
-		return refTypeRepo;
-	}
-	
-	/**
-	 * This method is supposed to be used for simple conversion of existing in memory instances
-	 * of ReferenceType. It does not use the database to ensure to retrieve a 
-	 * JPA managed entity.
-	 * It takes over the ID provided in the TO.
-	 * @param to
-	 * @return
-	 */
-	public ReferenceType toEntity (ReferenceTypeTo to) {		
-		ReferenceType entity = new ReferenceType (to.name(), to.sortColumn());
-		entity.setId(to.id());
-		return entity;
-	}
-	
 	@Override
 	public ReferenceTypeTo toTo (ReferenceType entity) {
 		return ImmutableReferenceTypeTo.builder()

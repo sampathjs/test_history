@@ -34,7 +34,7 @@ public class IndexConverter extends EntityToConverter<IndexEntity, IndexTo>{
 				.idCurrencyTwoName(entity.getCurrencyTwoName().getId())
 				.idCurrencyOneName(entity.getCurrencyOneName().getId())
 				.id(entity.getId())
-				.idLifecycle(entity.getLifecycleStatus().getEndurId())
+				.idLifecycle(entity.getLifecycleStatus().getId())
 				.sortColumn(entity.getSortColumn())
 				.build();
 	}

@@ -4,8 +4,10 @@ package com.matthey.pmm.toms.model;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -43,6 +45,12 @@ public abstract class AbstractRepositoryTestBase <E, ID, R extends CrudRepositor
 	   for (E pesistedEntity : persistedEntities) {
 		   repo.delete(pesistedEntity);
 	   }
+   }
+   
+   @Test
+   public void hashCodeAndEqualsTest() {
+	   Set<E> setFromListProvider = new HashSet<>(listProvider().get());
+	   assertThat(setFromListProvider).containsAll(listProvider().get());
    }
    
    @Test

@@ -621,7 +621,7 @@
 				<constraints nullable="false" />
 			</column>
 			<column name="contract_type_reference_id" type="int">
-				<constraints nullable="false" />
+				<constraints nullable="true" />
 			</column>
 			<column name="ticker_reference_id" type="int">
 				<constraints nullable="true" />

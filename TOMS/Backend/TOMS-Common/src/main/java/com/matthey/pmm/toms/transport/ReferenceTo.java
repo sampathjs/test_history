@@ -39,8 +39,7 @@ public abstract class ReferenceTo {
     public abstract Long endurId();
     
     @Auxiliary
-    @Nullable
-    public abstract Long idLifecycle();
+    public abstract long idLifecycle();
     
     @Auxiliary
     @Nullable

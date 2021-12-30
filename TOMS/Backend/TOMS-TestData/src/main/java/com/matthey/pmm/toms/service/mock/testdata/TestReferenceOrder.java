@@ -158,7 +158,20 @@ public enum TestReferenceOrder {
 			// reference order fields
 			30d, null, 
 			Arrays.asList(TestReferenceOrderLeg.MAIN_LEG_FOR_LEG_DELETION_ALL_LEGS)
-			),		
+			),
+	TEST_FOR_CONVERSION_ALL_OPTIONAL_ATTRIBUTES_NULL(120010, 1, TestBunit.JM_PMM_US, TestBunit.ANGLO_PLATINUM_MARKETING___BU,
+			null, null, DefaultReference.BUY_SELL_SELL,
+			DefaultReference.METAL_XRU, 1d, DefaultReference.QUANTITY_MT, 
+			DefaultReference.CCY_EUR, "TEST_IN_STATUS_REJECTED", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.REFERENCE_ORDER_PENDING, null, null,
+			TestUser.ANDREW_BAYNES, "1996-01-02 16:00:00", "2000-01-02 16:00:00", TestUser.PAT_MCCOURT,
+			Arrays.asList(), null, null,
+			 100d, 
+			// reference order fields
+			30d, null, 
+			Arrays.asList(TestReferenceOrderLeg.MAIN_LEG_FOR_LEG_DELETION_ALL_LEGS)
+			),
+
 	;
 	
 	private ReferenceOrderTo referenceOrder;
@@ -203,13 +216,12 @@ public enum TestReferenceOrder {
 				.idCreatedByUser(createdBy.getEntity().id())
 				.lastUpdate(lastUpdate)
 				.idUpdatedByUser(updatedByUser.getEntity().id()) 
-				.idContractType(contractType.getEntity().id())
-				.idTicker(ticker.getEntity().id())
+				.idContractType(contractType != null?contractType.getEntity().id():null)
+				.idTicker(ticker != null?ticker.getEntity().id():null)
 				.fillIds (fills!=null?fills.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.creditChecksIds((creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null))
 				.orderCommentIds((orderComments!=null?orderComments.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null))
 				 // << order fields
-				.idContractType(contractType.getEntity().id())
 				.contangoBackwardation(contangoBackwardation)
 				.fxRateSpread(fxRateSpread)
 				.metalPriceSpread(metalPriceSpread)

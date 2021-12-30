@@ -45,8 +45,11 @@ import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
+import com.matthey.pmm.toms.service.exception.IllegalIdException;
 import com.matthey.pmm.toms.service.exception.IllegalLegRemovalException;
 import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
+import com.matthey.pmm.toms.service.exception.IllegalValueException;
+import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.service.mock.MockOrderController;
 import com.matthey.pmm.toms.service.mock.testdata.TestBunit;
 import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
@@ -287,6 +290,54 @@ public class OrderControllerTest {
 	}
 	
 	@Test
+	public void testUpdateLimitOrderForIllegalOrderIdFails() {
+		LimitOrderTo withUpdatedReference = ImmutableLimitOrderTo.builder()
+				.from(TestLimitOrder.TEST_IN_STATUS_PENDING.getEntity())
+				.id(TestReferenceOrder.TEST_ORDER_1A.getEntity().id())
+				.idOrderStatus(DefaultOrderStatus.LIMIT_ORDER_CONFIRMED.getEntity().id())
+				.build();
+		assertThatThrownBy ( () -> { orderController.updateLimitOrder(withUpdatedReference); })
+			.isInstanceOf(UnknownEntityException.class);
+	}
+	
+	@Test
+	public void testUpdateReferenceOrderForIllegalOrderIdFails() {
+		ReferenceOrderTo withUpdatedReference = ImmutableReferenceOrderTo.builder()
+				.from(TestReferenceOrder.TEST_IN_STATUS_PENDING.getEntity())
+				.id(TestLimitOrder.TEST_ORDER_1A.getEntity().id())
+				.idOrderStatus(DefaultOrderStatus.REFERENCE_ORDER_CONFIRMED.getEntity().id())
+				.build();
+		assertThatThrownBy ( () -> { orderController.updateReferenceOrder(withUpdatedReference); })
+			.isInstanceOf(UnknownEntityException.class);
+	}
+	
+	@Test
+	@Transactional
+	public void testUpdateLimitOrderPendingToConfirmedNotAllowedWithChangedCreatedBy () {
+		// positive test case, as pending to confirmed is allowed. No attributes except order status are changed.
+		LimitOrderTo withUpdatedReference = ImmutableLimitOrderTo.builder()
+				.from(TestLimitOrder.TEST_IN_STATUS_PENDING.getEntity())
+				.idOrderStatus(DefaultOrderStatus.LIMIT_ORDER_CONFIRMED.getEntity().id())
+				.idCreatedByUser(TestUser.ARINDAM_RAY.getEntity().id())
+				.build();
+		assertThatThrownBy(() -> { updateLimitOrder(withUpdatedReference); } )
+			.isInstanceOf(IllegalValueException.class);
+	}
+
+	@Test
+	@Transactional
+	public void testUpdateLimitOrderPendingToConfirmedNotAllowedWithChangedCreatedAt () {
+		// positive test case, as pending to confirmed is allowed. No attributes except order status are changed.
+		LimitOrderTo withUpdatedReference = ImmutableLimitOrderTo.builder()
+				.from(TestLimitOrder.TEST_IN_STATUS_PENDING.getEntity())
+				.idOrderStatus(DefaultOrderStatus.LIMIT_ORDER_CONFIRMED.getEntity().id())
+				.createdAt("2020-11-23 15:00:00")
+				.build();
+		assertThatThrownBy(() -> { updateLimitOrder(withUpdatedReference); } )
+			.isInstanceOf(IllegalValueException.class);
+	}
+	
+	@Test
 	@Transactional
 	public void testUpdateLimitOrderPendingToPulled () {
 		// positive test case, as pending to pulled is allowed. No attributes except order status are changed.
@@ -319,7 +370,20 @@ public class OrderControllerTest {
 		assertThat(fromDb.get().getVersion()).isEqualTo(updatedOrder.version());
 		assertThat(fromDb.get().getReference()).isEqualTo(withUpdatedReference.reference());
 	}
-
+	
+	@Test
+	@Transactional
+	public void testUpdateLimitOrderPendingToRejectedBlockedForChangedReference () {
+		// positive test case, as pending to pulled is allowed. No attributes except order status are changed.
+		LimitOrderTo withUpdatedReference = ImmutableLimitOrderTo.builder()
+				.from(TestLimitOrder.TEST_IN_STATUS_PENDING.getEntity())
+				.idOrderStatus(DefaultOrderStatus.LIMIT_ORDER_REJECTED.getEntity().id())
+				.reference("New Reference that should trigger exception")
+				.build();
+		assertThatThrownBy(() -> { updateLimitOrder(withUpdatedReference); } )
+			.isInstanceOf(IllegalValueException.class);
+	}
+	
 	@Test
 	@Transactional
 	public void testUpdateLimitOrderPendingToCancelled () {
@@ -805,6 +869,12 @@ public class OrderControllerTest {
 			assertThat(allLegs).containsAll(legs);
 		}
 		assertThat(allLegsFromController).containsAll(allLegs);
+	}
+	
+	@Test
+	public void testGetAllReferenceOrderLegFailsOnIllegalOrderId () {
+		assertThatThrownBy(() -> { orderController.getReferenceOrderLegs(TestLimitOrder.TEST_IN_STATUS_CANCELLED.getEntity().id(), 1); })
+			.isInstanceOf(IllegalIdException.class);
 	}
 	
 	@Test

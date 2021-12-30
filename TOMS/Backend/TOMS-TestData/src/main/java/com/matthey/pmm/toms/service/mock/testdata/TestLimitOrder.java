@@ -178,6 +178,18 @@ public enum TestLimitOrder {
 			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
 			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, null, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_3),
 			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
+	TEST_FOR_CONVERSION_ALL_OPTIONAL_ATTRIBUTES_NULL(110014, 1, TestBunit.JM_PMM_UK, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+			null, null, DefaultReference.BUY_SELL_BUY,
+			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
+			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.LIMIT_ORDER_CONFIRMED, null, null,
+			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-03-02 08:00:00", TestUser.ANDREW_BAYNES,
+			DefaultReference.PRICE_TYPE_SPOT, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
+			// limit order fields
+			"2000-01-15", null, null, 1200.00d,
+			null, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
+			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, null, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_3),
+			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),	
 	;
 	
 	private LimitOrderTo limitOrder;
@@ -226,7 +238,7 @@ public enum TestLimitOrder {
 				.startDateConcrete(startDateConcrete)
 				.idStartDateSymbolic(startDateSymbolic != null?startDateSymbolic.getEntity().id():null)
 				.limitPrice(limitPrice)
-				.idYesNoPartFillable(yesNoPartFillable.getEntity().id())
+				.idYesNoPartFillable(yesNoPartFillable != null?yesNoPartFillable.getEntity().id():null)
 				.idStopTriggerType(stopTriggerType.getEntity().id())
 				.idCurrencyCrossMetal(currencyCrossMetal.getEntity().id())
 				.expiryDate(expiryDate)
@@ -236,8 +248,8 @@ public enum TestLimitOrder {
 				.creditChecksIds(creditChecks!=null?creditChecks.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.orderCommentIds(comments!=null?comments.stream().map(x -> x.getEntity().id()).collect(Collectors.toList()):null)
 				.fillPercentage(0.0d)
-				.idContractType(contractType.getEntity().id())
-				.idTicker(ticker.getEntity().id())
+				.idContractType(contractType != null?contractType.getEntity().id():null)
+				.idTicker(ticker != null?ticker.getEntity().id():null)
 				.build();
 	}
 

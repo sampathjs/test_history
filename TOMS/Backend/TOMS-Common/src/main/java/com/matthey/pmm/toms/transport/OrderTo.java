@@ -170,9 +170,10 @@ public abstract class OrderTo {
 	public abstract String displayStringTicker();
 	
 	@Auxiliary
+    @Nullable
 	public abstract Long idContractType();
-	@Auxiliary
 	
+	@Auxiliary
 	@Nullable
 	public abstract String displayStringContractType();
 

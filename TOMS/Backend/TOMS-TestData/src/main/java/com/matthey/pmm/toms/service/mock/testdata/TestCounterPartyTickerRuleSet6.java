@@ -1032,7 +1032,7 @@ public enum TestCounterPartyTickerRuleSet6 implements CounterPartyTickerRuleProv
 			DefaultReference metalForm,	String accountName) {
 		this.ruleTo = ImmutableCounterPartyTickerRuleTo.builder()
 				.idCounterParty(party.getEntity().id())
-				.counterPartyDisplayName(party.getEntity().name())
+				.counterPartyDisplayString(party.getEntity().name())
 				.idTicker(ticker.getEntity().id())
 				.tickerDisplayName(ticker.getEntity().name())
 				.idMetalLocation(metalLocation.getEntity().id())

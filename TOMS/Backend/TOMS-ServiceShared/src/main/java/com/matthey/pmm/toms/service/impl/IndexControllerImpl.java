@@ -35,7 +35,7 @@ public abstract class IndexControllerImpl implements TomsIndexService {
 	
     @ApiOperation("Retrieval of Index Data")
 	public Set<IndexTo> getIndexes (
-			@ApiParam(value = "One of the currencies of the indexes must have the provided ID. Null or 0 = all indexes", example = "42", required = false) @RequestParam(required=false) Long currencyRefId) {
+			@ApiParam(value = "One of the currencies IDs the indexes must have. Null or 0 = all indexes", example = "42", required = false) @RequestParam(required=false) Long currencyRefId) {
 		Optional<Reference> currencyRef =  
 				validator.verifyDefaultReference(currencyRefId, Arrays.asList(DefaultReferenceType.CCY_METAL, DefaultReferenceType.CCY_CURRENCY), this.getClass(), "getIndexes", "currencyRefId", true);
     	if (currencyRef.isPresent()) {

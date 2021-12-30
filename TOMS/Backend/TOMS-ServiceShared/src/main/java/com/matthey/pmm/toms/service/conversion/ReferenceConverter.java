@@ -41,7 +41,7 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 				.endurId(entity.getEndurId())
 				.displayName(entity.getDisplayName())
 				.idType(entity.getType().getId())
-				.idLifecycle(entity.getLifecycleStatus() != null?entity.getLifecycleStatus().getId():null)
+				.idLifecycle(entity.getLifecycleStatus().getId())
 				.sortColumn(entity.getSortColumn())
 				.build();
 	}
@@ -50,7 +50,7 @@ public class ReferenceConverter extends EntityToConverter<Reference, ReferenceTo
 	@Transactional
 	public Reference toManagedEntity (ReferenceTo to) {		
 		ReferenceType type = loadRefType(to, to.idType());
-		Reference lifecycleStatus = to.idLifecycle() != null?loadRef (to, to.idLifecycle()):null;
+		Reference lifecycleStatus = loadRef (to, to.idLifecycle());
 		Optional<Reference> entity = entityRepo.findById(to.id());
 		if (entity.isPresent()) {
 			entity.get().setEndurId(to.endurId());

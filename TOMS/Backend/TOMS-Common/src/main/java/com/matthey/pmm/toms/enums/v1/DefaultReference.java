@@ -10,6 +10,10 @@ import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 
 public enum DefaultReference {
+	LIFECYCLE_STATUS_AUTHORISED_ACTIVE(DefaultReferenceType.LIFECYCLE_STATUS, 291, "Authorised and Active", 241000l),
+	LIFECYCLE_STATUS_PENDING_AUTHORISATION(DefaultReferenceType.LIFECYCLE_STATUS, 290, "Authorisation Pending", 240000l),
+	LIFECYCLE_STATUS_AUTHORISED_INACTIVE(DefaultReferenceType.LIFECYCLE_STATUS, 292, "Authorised and Inactive", 242000l),
+	LIFECYCLE_STATUS_DELETED(DefaultReferenceType.LIFECYCLE_STATUS, 293, "Deleted", 243000l),	
 	PARTY_TYPE_INTERNAL_BUNIT(DefaultReferenceType.PARTY_TYPE, 1, "Internal Business Unit", 1000l),
 	PARTY_TYPE_EXTERNAL_BUNIT(DefaultReferenceType.PARTY_TYPE, 2, "External Business Unit", 2000l),
 	USER_ROLE_PMM_FO (DefaultReferenceType.USER_ROLE, 3, "PMM Front Office User", 10000l),
@@ -29,12 +33,12 @@ public enum DefaultReference {
 	EXPIRATION_STATUS_EXPIRED (DefaultReferenceType.EXPIRATION_STATUS, 18, "Expired", 50000l),
 	PARTY_TYPE_INTERNAL_LE(DefaultReferenceType.PARTY_TYPE, 19, "Internal Legal Entity", 3000l),
 	PARTY_TYPE_EXTERNAL_LE(DefaultReferenceType.PARTY_TYPE, 20, "External Legal Entity", 4000l),
-	CACHE_TYPE_PARTY_TYPE (DefaultReferenceType.CACHE_TYPE, 21, "Party Cache", null),
-	CACHE_TYPE_USER_ROLE (DefaultReferenceType.CACHE_TYPE, 22, "User Role Cache", null),
-	CACHE_TYPE_ORDER_STATUS (DefaultReferenceType.CACHE_TYPE, 23, "Order Status Cache", null),
-	CACHE_TYPE_ORDER_TYPE (DefaultReferenceType.CACHE_TYPE, 24, "Order Type Cache", null),
-	CACHE_TYPE_BUY_SELL (DefaultReferenceType.CACHE_TYPE, 25, "Buy/Sell Cache", null),
-	CACHE_TYPE_USER (DefaultReferenceType.CACHE_TYPE, 26, "User Cache", null),
+	CACHE_TYPE_PARTY_TYPE (DefaultReferenceType.CACHE_TYPE, 21, "Party Cache", 0l),
+	CACHE_TYPE_USER_ROLE (DefaultReferenceType.CACHE_TYPE, 22, "User Role Cache", 0l),
+	CACHE_TYPE_ORDER_STATUS (DefaultReferenceType.CACHE_TYPE, 23, "Order Status Cache", 0l),
+	CACHE_TYPE_ORDER_TYPE (DefaultReferenceType.CACHE_TYPE, 24, "Order Type Cache", 0l),
+	CACHE_TYPE_BUY_SELL (DefaultReferenceType.CACHE_TYPE, 25, "Buy/Sell Cache", 0l),
+	CACHE_TYPE_USER (DefaultReferenceType.CACHE_TYPE, 26, "User Cache", 0l),
 	QUANTITY_TOZ (DefaultReferenceType.QUANTITY_UNIT, 28, "TOz", 55, 60000l),
 	QUANTITY_MT (DefaultReferenceType.QUANTITY_UNIT, 29, "MT", 13, 61000l),
 	QUANTITY_GMS (DefaultReferenceType.QUANTITY_UNIT, 30, "gms", 51, 62000l),
@@ -162,10 +166,10 @@ public enum DefaultReference {
 	ORDER_STATUS_PART_EXPIRED (DefaultReferenceType.ORDER_STATUS_NAME, 155, "Part Expired", 243000l),
 	ORDER_STATUS_EXPIRED (DefaultReferenceType.ORDER_STATUS_NAME, 156, "Expired", 243000l),
 	ORDER_STATUS_MATURED (DefaultReferenceType.ORDER_STATUS_NAME, 157, "Matured", 244000l),
-	PRICE_TYPE_SPOT_PLUS (DefaultReferenceType.PRICE_TYPE, 159, "Spot+ Market Swap Rate", null),
-	CACHE_EXPIRATION_STATUS (DefaultReferenceType.CACHE_TYPE, 160, "Expiration Status Cache", null),	
-	DELETION_FLAG_NOT_DELETED (DefaultReferenceType.DELETION_FLAG, 161, "Not Deleted", null),	
-	DELETION_FLAG_DELETED (DefaultReferenceType.DELETION_FLAG, 162, "Deleted", 300000l),	
+	PRICE_TYPE_SPOT_PLUS (DefaultReferenceType.PRICE_TYPE, 159, "Spot+ Market Swap Rate", 202000l),
+	CACHE_EXPIRATION_STATUS (DefaultReferenceType.CACHE_TYPE, 160, "Expiration Status Cache", 0l),	
+	DELETION_FLAG_NOT_DELETED (DefaultReferenceType.DELETION_FLAG, 161, "Not Deleted", 0l),	
+	DELETION_FLAG_DELETED (DefaultReferenceType.DELETION_FLAG, 162, "Deleted", 0l),	
 	ORDER_STATUS_PULLED (DefaultReferenceType.ORDER_STATUS_NAME, 163, "Pulled", 245000l),
 	METAL_FORM_INGOT (DefaultReferenceType.METAL_FORM , 164, "Ingot", 310000l),
 	METAL_FORM_SPONGE (DefaultReferenceType.METAL_FORM , 165, "Sponge", 311000l),
@@ -289,10 +293,6 @@ public enum DefaultReference {
 	FILL_STATUS_COMPLETED (DefaultReferenceType.FILL_STATUS, 287, "Completed", 910000l),
 	FILL_STATUS_FAILED (DefaultReferenceType.FILL_STATUS, 288, "Failed", 920000l),
 	FILL_STATUS_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 289, "Transition for Fill Status", 233000l),
-	LIFECYCLE_STATUS_PENDING_AUTHORISATION(DefaultReferenceType.LIFECYCLE_STATUS, 290, "Authorisation Pending", 240000l),
-	LIFECYCLE_STATUS_AUTHORISED_ACTIVE(DefaultReferenceType.LIFECYCLE_STATUS, 291, "Authorised and Active", 241000l),
-	LIFECYCLE_STATUS_AUTHORISED_INACTIVE(DefaultReferenceType.LIFECYCLE_STATUS, 292, "Authorised and Inactive", 242000l),
-	LIFECYCLE_STATUS_DELETED(DefaultReferenceType.LIFECYCLE_STATUS, 293, "Deleted", 243000l),
 	USER_ROLE_PMM_SUPPORT (DefaultReferenceType.USER_ROLE, 294, "PMM Support", 14000l),
 	USER_ROLE_EXTERNAL (DefaultReferenceType.USER_ROLE, 295, "External User", 15000l),
 	PORTFOLIO_CN_FX (DefaultReferenceType.PORTFOLIO, 296, "CN FX", 20068, 292000l), 
@@ -391,6 +391,7 @@ public enum DefaultReference {
 				.endurId(null)
 				.idType(type.getEntity().id())
 				.sortColumn(sortColumn)
+				.idLifecycle(291l) // id of LIFECYCLE_STATUS_AUTHORISED_ACTIVE
 				.build();
 	}
 	
@@ -414,6 +415,7 @@ public enum DefaultReference {
 				.name(name)
 				.endurId(endurId)
 				.idType(type.getEntity().id())
+				.idLifecycle(291l) // id of LIFECYCLE_STATUS_AUTHORISED_ACTIVE
 				.sortColumn(sortColumn)
 				.build();
 	}

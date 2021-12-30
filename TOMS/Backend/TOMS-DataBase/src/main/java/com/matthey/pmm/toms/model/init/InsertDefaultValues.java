@@ -126,11 +126,13 @@ public class InsertDefaultValues implements CustomSqlChange {
 	private List<SqlStatement> referenceDataInsert(Database database) {
 		List<SqlStatement> results = new ArrayList<> (DefaultReference.values().length);
 		String insertTemplate = 
-				"INSERT INTO dbo.reference (reference_id, value, display_name, reference_type_id, endur_id, sort_column) VALUES (%s, '%s', %s, %s, %s, %s)";
+				"INSERT INTO dbo.reference (reference_id, value, display_name, reference_type_id, endur_id, sort_column, reference_lifecycle_status_id) VALUES (%s, '%s', %s, %s, %s, %s, %s)";
 		for (ReferenceTo ref : DefaultReference.asList()) {
 			results.add(new RawSqlStatement(String.format(insertTemplate, 
 					ref.id(), ref.name(), ref.displayName()!=null?ref.displayName():"NULL",
-							ref.idType(), ref.endurId() != null?ref.endurId():"NULL", ref.sortColumn() != null?ref.sortColumn():"NULL")));
+							ref.idType(), ref.endurId() != null?ref.endurId():"NULL", 
+							ref.sortColumn() != null?ref.sortColumn():"NULL",
+							ref.idLifecycle())));
 			List<ReferenceTo> duplicates = 
 					DefaultReference.asList()
 					   .stream()

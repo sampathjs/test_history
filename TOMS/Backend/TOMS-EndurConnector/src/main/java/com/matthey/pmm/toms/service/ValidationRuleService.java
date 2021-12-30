@@ -53,7 +53,7 @@ public class ValidationRuleService {
 			
 			CounterPartyTickerRuleTo rule = ImmutableCounterPartyTickerRuleTo.builder()
 					.accountName(reportData.getString("account_name", row))
-					.counterPartyDisplayName(reportData.getDisplayString(reportData.getColumnId("party_id"), row))
+					.counterPartyDisplayString(reportData.getDisplayString(reportData.getColumnId("party_id"), row))
 					.idCounterParty(reportData.getInt("party_id", row))
 					.idMetalForm(metalFormReferenceId)
 					.idMetalLocation(metalLocationId)

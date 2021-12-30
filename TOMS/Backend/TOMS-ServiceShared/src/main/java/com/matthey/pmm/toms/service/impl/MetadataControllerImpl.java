@@ -88,7 +88,7 @@ public abstract class MetadataControllerImpl implements TomsMetadataService {
     		rules = rules.stream()
     				.map(x -> ImmutableCounterPartyTickerRuleTo.builder()
     						.from(x)
-    						.counterPartyDisplayName(null)
+    						.counterPartyDisplayString(null)
     						.metalFormDisplayString(null)
     						.metalLocationDisplayString(null)
     						.tickerDisplayName(null)
