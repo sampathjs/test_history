@@ -351,11 +351,11 @@ public class TomsValidator {
     	Optional<Party> party = verifyParty(creditCheck.idParty(), Arrays.asList(DefaultReference.PARTY_TYPE_EXTERNAL_LE, DefaultReference.PARTY_TYPE_INTERNAL_LE), 
     			clazz, method, argument, false);
 
-    	if (creditCheck.creditLimit() <= 0) {
-    		throw new IllegalValueException(clazz, method, argument + ".fillQuantity", " > 0", "" + creditCheck.creditLimit());
+    	if (creditCheck.creditLimit() < 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".fillQuantity", " >= 0", "" + creditCheck.creditLimit());
     	}
-    	if (creditCheck.currentUtilization() <= 0) {
-    		throw new IllegalValueException(clazz, method, argument + ".currentUtilization", " > 0", "" + creditCheck.currentUtilization());
+    	if (creditCheck.currentUtilization() < 0) {
+    		throw new IllegalValueException(clazz, method, argument + ".currentUtilization", " >= 0", "" + creditCheck.currentUtilization());
     	}
 
 		SimpleDateFormat sdfDateTime = new SimpleDateFormat (TomsService.DATE_TIME_FORMAT);

@@ -27,7 +27,48 @@ import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
 import com.matthey.pmm.toms.service.conversion.UserConverter;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
+import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
+import com.matthey.pmm.toms.transport.CreditCheckTo;
+import com.matthey.pmm.toms.transport.DatabaseFileTo;
+import com.matthey.pmm.toms.transport.EmailTo;
+import com.matthey.pmm.toms.transport.FillTo;
 import com.matthey.pmm.toms.transport.ImmutableAttributeCalculationTo;
+import com.matthey.pmm.toms.transport.ImmutableCounterPartyTickerRuleTo;
+import com.matthey.pmm.toms.transport.ImmutableCreditCheckTo;
+import com.matthey.pmm.toms.transport.ImmutableDatabaseFileTo;
+import com.matthey.pmm.toms.transport.ImmutableEmailTo;
+import com.matthey.pmm.toms.transport.ImmutableFillTo;
+import com.matthey.pmm.toms.transport.ImmutableIndexTo;
+import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
+import com.matthey.pmm.toms.transport.ImmutableOrderCommentTo;
+import com.matthey.pmm.toms.transport.ImmutableOrderStatusTo;
+import com.matthey.pmm.toms.transport.ImmutablePartyTo;
+import com.matthey.pmm.toms.transport.ImmutableProcessTransitionTo;
+import com.matthey.pmm.toms.transport.ImmutableReferenceOrderLegTo;
+import com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo;
+import com.matthey.pmm.toms.transport.ImmutableReferenceTo;
+import com.matthey.pmm.toms.transport.ImmutableReferenceTypeTo;
+import com.matthey.pmm.toms.transport.ImmutableTickerFxRefSourceRuleTo;
+import com.matthey.pmm.toms.transport.ImmutableTickerPortfolioRuleTo;
+import com.matthey.pmm.toms.transport.ImmutableTickerRefSourceRuleTo;
+import com.matthey.pmm.toms.transport.ImmutableTwoListsTo;
+import com.matthey.pmm.toms.transport.ImmutableUserTo;
+import com.matthey.pmm.toms.transport.IndexTo;
+import com.matthey.pmm.toms.transport.LimitOrderTo;
+import com.matthey.pmm.toms.transport.OrderCommentTo;
+import com.matthey.pmm.toms.transport.OrderStatusTo;
+import com.matthey.pmm.toms.transport.OrderTo;
+import com.matthey.pmm.toms.transport.PartyTo;
+import com.matthey.pmm.toms.transport.ProcessTransitionTo;
+import com.matthey.pmm.toms.transport.ReferenceOrderLegTo;
+import com.matthey.pmm.toms.transport.ReferenceOrderTo;
+import com.matthey.pmm.toms.transport.ReferenceTo;
+import com.matthey.pmm.toms.transport.ReferenceTypeTo;
+import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
+import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
+import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
+import com.matthey.pmm.toms.transport.TwoListsTo;
+import com.matthey.pmm.toms.transport.UserTo;
 
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -71,7 +112,29 @@ public class MockApplication implements WebMvcConfigurer {
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build()
-                .alternateTypeRules(AlternateTypeRules.newRule(AttributeCalculationTo.class, ImmutableAttributeCalculationTo.class));
+                .alternateTypeRules(
+                		AlternateTypeRules.newRule(AttributeCalculationTo.class, ImmutableAttributeCalculationTo.class),
+                		AlternateTypeRules.newRule(CounterPartyTickerRuleTo.class, ImmutableCounterPartyTickerRuleTo.class),
+                		AlternateTypeRules.newRule(CreditCheckTo.class, ImmutableCreditCheckTo.class),
+                		AlternateTypeRules.newRule(DatabaseFileTo.class, ImmutableDatabaseFileTo.class),
+                		AlternateTypeRules.newRule(EmailTo.class, ImmutableEmailTo.class),
+                		AlternateTypeRules.newRule(FillTo.class, ImmutableFillTo.class),
+                		AlternateTypeRules.newRule(IndexTo.class, ImmutableIndexTo.class),
+                		AlternateTypeRules.newRule(LimitOrderTo.class, ImmutableLimitOrderTo.class),                		
+                		AlternateTypeRules.newRule(OrderCommentTo.class, ImmutableOrderCommentTo.class),
+                		AlternateTypeRules.newRule(OrderStatusTo.class, ImmutableOrderStatusTo.class),
+                		AlternateTypeRules.newRule(PartyTo.class, ImmutablePartyTo.class),
+                		AlternateTypeRules.newRule(ProcessTransitionTo.class, ImmutableProcessTransitionTo.class),                		
+                		AlternateTypeRules.newRule(ReferenceOrderLegTo.class, ImmutableReferenceOrderLegTo.class),  
+                		AlternateTypeRules.newRule(ReferenceOrderTo.class, ImmutableReferenceOrderTo.class),
+                		AlternateTypeRules.newRule(ReferenceTo.class, ImmutableReferenceTo.class),
+                		AlternateTypeRules.newRule(ReferenceTypeTo.class, ImmutableReferenceTypeTo.class),
+                		AlternateTypeRules.newRule(TickerFxRefSourceRuleTo.class, ImmutableTickerFxRefSourceRuleTo.class),
+                		AlternateTypeRules.newRule(TickerPortfolioRuleTo.class, ImmutableTickerPortfolioRuleTo.class),
+                		AlternateTypeRules.newRule(TickerRefSourceRuleTo.class, ImmutableTickerRefSourceRuleTo.class),
+                		AlternateTypeRules.newRule(TwoListsTo.class, ImmutableTwoListsTo.class),
+                		AlternateTypeRules.newRule(UserTo.class, ImmutableUserTo.class)
+                );
     }
                  
     @Bean

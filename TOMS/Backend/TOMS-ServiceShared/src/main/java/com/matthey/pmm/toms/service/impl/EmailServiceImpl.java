@@ -71,7 +71,7 @@ public abstract class EmailServiceImpl implements TomsEmailService {
 
     @ApiOperation("Retrieval of a single database file")
 	public DatabaseFileTo getDatabaseFile (
-			@ApiParam(value = "Mandatory ID of the database file", example = "100000l", required = true) @PathVariable(name="databaseFileId", required=true) Long databaseFileId) {
+			@ApiParam(value = "Mandatory ID of the database file", example = "100000", required = true) @PathVariable(name="databaseFileId", required=true) Long databaseFileId) {
     	Optional<DatabaseFile> databaseFile = validator.verifyDatabaseFileId (this.getClass(), "getDatabaseFile", "databaseFileId", databaseFileId, false);
    		return dbFileConverter.toTo(databaseFile.get());
     }
@@ -93,13 +93,13 @@ public abstract class EmailServiceImpl implements TomsEmailService {
     }
     
     @ApiOperation("Retrieval of a single email request")
-    public EmailTo getEmailRequest(@ApiParam(value = "Mandatory ID of the email request", example = "100000l", required = true)	@PathVariable(name="emailId", required=true) Long emailId) {
+    public EmailTo getEmailRequest(@ApiParam(value = "Mandatory ID of the email request", example = "100000", required = true)	@PathVariable(name="emailId", required=true) Long emailId) {
     	Optional<Email> email = validator.validateEmailId (this.getClass(), "getEmailRequest", "emailId", emailId, false);
     	return emailConverter.toTo(email.get());
     }
     
     @ApiOperation("Retrieval of a all email request for a specified order")
-    public Collection<EmailTo> getEmailRequestForOrder(@ApiParam(value = "Mandatory ID of the order the email request has been created for", example = "100000l", required = true) @RequestParam(name="orderId", required=true) Long orderId) {
+    public Collection<EmailTo> getEmailRequestForOrder(@ApiParam(value = "Mandatory ID of the order the email request has been created for", example = "100000", required = true) @RequestParam(name="orderId", required=true) Long orderId) {
     	Collection<Email> emails = emailRepo.findEmailsBelongingToOrderId(orderId);
     	Collection<EmailTo> asTos = emails.stream()
     			.map(x -> emailConverter.toTo(x))
@@ -125,7 +125,7 @@ public abstract class EmailServiceImpl implements TomsEmailService {
     }
 
     @ApiOperation("Update of a new email request")
-    public void updateEmailRequest(@ApiParam(value = "Mandatory ID of the email request, has to match the ID of the email request in the body", example = "100000l", required = true) @PathVariable(name="emailId", required=true) long emailId,
+    public void updateEmailRequest(@ApiParam(value = "Mandatory ID of the email request, has to match the ID of the email request in the body", example = "100000", required = true) @PathVariable(name="emailId", required=true) long emailId,
     		@ApiParam(value = "Updated existing email request", required = true) @RequestBody(required=true) EmailTo emailRequest) {
     	Email oldEmail = validator.validateEmailId (this.getClass(), "getEmailRequest", "emailId", emailId, false).get();
     	

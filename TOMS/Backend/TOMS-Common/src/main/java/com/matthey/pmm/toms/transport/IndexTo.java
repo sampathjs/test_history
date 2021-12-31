@@ -8,6 +8,9 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * Index setup for two currencies (either metal or normal currency).
  * The index consists of a reference to the index name and
@@ -19,26 +22,42 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(as = ImmutableIndexTo.class)
 @JsonDeserialize(as = ImmutableIndexTo.class)
 @JsonRootName (value = "index")
+@ApiModel(value = "Index", description = "An Index consisting of a name and two currencies.")
 public abstract class IndexTo {
-	/**
-	 * Endur ID
-	 * @return
-	 */
+	@ApiModelProperty(value = "The Endur unique ID for an index.",
+			allowEmptyValue = false,
+			required = true)
 	public abstract long id();
    
     @Auxiliary
+	@ApiModelProperty(value = "The ID of the name of the index. The ID is instance of a Reference having ReferenceType #11 (Index Name)",
+			allowEmptyValue = false,
+			required = true)
     public abstract long idIndexName();
 
     @Auxiliary
+	@ApiModelProperty(value = "The ID of the name of the index. The ID is instance of a Reference having ReferenceType #9 (Metal) or ReferenceRype #10 (Currency)",
+		allowEmptyValue = false,
+		required = true)    
     public abstract long idCurrencyOneName();
     
     @Auxiliary
+	@ApiModelProperty(value = "The ID of the name of the index. The ID is instance of a Reference having ReferenceType #9 (Metal) or ReferenceRype #10 (Currency)",
+		allowEmptyValue = false,
+		required = true)    
     public abstract long idCurrencyTwoName();
 
     @Auxiliary
+	@ApiModelProperty(value = "The status of the file (deleted, or valid). Allowed values are of reference type #35 (Lifecycle Status): 290(Authorisation Pending), 291(Authorised and Active), 292 (Authorised and Inactive), 293(Deleted)",
+		allowEmptyValue = false,
+		required = true,
+		allowableValues = "290, 291, 292, 293")
     public abstract long idLifecycle();
     
     @Auxiliary
     @Nullable
+	@ApiModelProperty(value = "Optional value to designate a display order between the different instances of Index",
+		allowEmptyValue = false,
+		required = true)
     public abstract Long sortColumn();
 }

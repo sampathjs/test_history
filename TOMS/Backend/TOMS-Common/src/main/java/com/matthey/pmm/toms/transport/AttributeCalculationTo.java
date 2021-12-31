@@ -28,7 +28,7 @@ public abstract class AttributeCalculationTo {
 	@ApiModelProperty(value = "The class for which the attribute calculated belongs to",
 		allowEmptyValue = false,
 		required = true,
-		allowableValues = "[com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo, com.matthey.pmm.toms.transport.ImmutableLimitOrderOrderTo]")    
+		allowableValues = "com.matthey.pmm.toms.transport.ImmutableReferenceOrderTo, com.matthey.pmm.toms.transport.ImmutableLimitOrderOrderTo")    
     public abstract String className();
 
     @Auxiliary
