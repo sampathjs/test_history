@@ -11,7 +11,7 @@ import com.matthey.pmm.toms.transport.ReferenceTypeTo;
 public enum DefaultReferenceType {
 	PARTY_TYPE(1, "Party Type", 100l),
 	ORDER_TYPE_NAME(2, "Order Type", 200l),
-	USER_ROLE(3, "User Role ID", 300l),
+	USER_ROLE(3, "User Role", 300l),
 	ORDER_STATUS_NAME(4, "Order Status", 400l),
 	BUY_SELL (5, "Buy/Sell", 500l),
 	EXPIRATION_STATUS (6, "Expiration Status", 600l),

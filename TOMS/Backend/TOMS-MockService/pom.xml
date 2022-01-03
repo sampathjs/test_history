@@ -146,6 +146,13 @@
             <artifactId>jakarta.transaction-api</artifactId>
 			<scope>compile</scope>
 		</dependency>		
+        <dependency>
+            <groupId>com.fasterxml</groupId>
+            <artifactId>classmate</artifactId>
+			<version>1.5.1</version>
+			<scope>compile</scope>
+			<type>jar</type>
+		</dependency>				
     </dependencies>    
     <build>
         <plugins>

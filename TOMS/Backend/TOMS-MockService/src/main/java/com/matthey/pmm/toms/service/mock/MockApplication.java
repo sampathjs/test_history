@@ -5,15 +5,19 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.matthey.pmm.toms.model.AttributeCalculation;
+import com.fasterxml.classmate.TypeResolver;
 import com.matthey.pmm.toms.model.DbConstants;
 import com.matthey.pmm.toms.service.conversion.CreditCheckConverter;
 import com.matthey.pmm.toms.service.conversion.DatabaseFileConverter;
@@ -57,7 +61,6 @@ import com.matthey.pmm.toms.transport.IndexTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
 import com.matthey.pmm.toms.transport.OrderCommentTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
-import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderLegTo;
@@ -108,10 +111,12 @@ public class MockApplication implements WebMvcConfigurer {
     @Bean
     public Docket api() {
     	String s = DbConstants.SCHEMA_NAME;
+    	TypeResolver typeResolver = new TypeResolver();
         return new Docket(DocumentationType.SWAGGER_2).select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build()
+                .ignoredParameterTypes(Pageable.class, ModelAndView.class, Page.class, Sort.class, View.class, ModelAndView.class)
                 .alternateTypeRules(
                 		AlternateTypeRules.newRule(AttributeCalculationTo.class, ImmutableAttributeCalculationTo.class),
                 		AlternateTypeRules.newRule(CounterPartyTickerRuleTo.class, ImmutableCounterPartyTickerRuleTo.class),
@@ -124,7 +129,7 @@ public class MockApplication implements WebMvcConfigurer {
                 		AlternateTypeRules.newRule(OrderCommentTo.class, ImmutableOrderCommentTo.class),
                 		AlternateTypeRules.newRule(OrderStatusTo.class, ImmutableOrderStatusTo.class),
                 		AlternateTypeRules.newRule(PartyTo.class, ImmutablePartyTo.class),
-                		AlternateTypeRules.newRule(ProcessTransitionTo.class, ImmutableProcessTransitionTo.class),                		
+                		AlternateTypeRules.newRule(ProcessTransitionTo.class, ImmutableProcessTransitionTo.class),    
                 		AlternateTypeRules.newRule(ReferenceOrderLegTo.class, ImmutableReferenceOrderLegTo.class),  
                 		AlternateTypeRules.newRule(ReferenceOrderTo.class, ImmutableReferenceOrderTo.class),
                 		AlternateTypeRules.newRule(ReferenceTo.class, ImmutableReferenceTo.class),
@@ -134,7 +139,9 @@ public class MockApplication implements WebMvcConfigurer {
                 		AlternateTypeRules.newRule(TickerRefSourceRuleTo.class, ImmutableTickerRefSourceRuleTo.class),
                 		AlternateTypeRules.newRule(TwoListsTo.class, ImmutableTwoListsTo.class),
                 		AlternateTypeRules.newRule(UserTo.class, ImmutableUserTo.class)
-                );
+                )
+//                .additionalModels(typeResolver.resolve(OrderTo.class, LimitOrderTo.class, ReferenceOrderTo.class))
+                ;
     }
                  
     @Bean

@@ -11,6 +11,9 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * A Reference Order for TOMS.
  * @author jwaechter
@@ -20,6 +23,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @JsonSerialize(as = ImmutableReferenceOrderTo.class)
 @JsonDeserialize(as = ImmutableReferenceOrderTo.class)
 @JsonRootName (value = "referenceOrder")
+@ApiModel(value = "ReferenceOrder", description = "The TO representation of a ReferenceOrder.",
+	parent = OrderTo.class)
 public abstract class ReferenceOrderTo extends OrderTo {  
 	/*
 	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.
@@ -51,17 +56,29 @@ public abstract class ReferenceOrderTo extends OrderTo {
 	
 	@Auxiliary
 	@Nullable
+	@ApiModelProperty(value = "The metal price spread",
+		allowEmptyValue = true,
+		required = false)	
 	public abstract Double metalPriceSpread();
 	
 	@Auxiliary
 	@Nullable
+	@ApiModelProperty(value = "The FX price spread",
+		allowEmptyValue = true,
+		required = false)	
 	public abstract Double fxRateSpread();
 
 	@Auxiliary
 	@Nullable
+	@ApiModelProperty(value = "The Contango Backwardation",
+		allowEmptyValue = true,
+		required = false)	
 	public abstract Double contangoBackwardation();
 		
     @Auxiliary
     @Nullable
+	@ApiModelProperty(value = "The list of IDs of legs of this order.",
+		allowEmptyValue = true,
+		required = false)	
     public abstract List<Long> legIds();
 }

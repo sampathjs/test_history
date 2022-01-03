@@ -23,7 +23,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonSerialize(as = ImmutableLimitOrderTo.class)
 @JsonDeserialize(as = ImmutableLimitOrderTo.class)
 @JsonRootName (value = "limitOrder")
-@ApiModel(value = "LimitOrder", description = "The TO representation of a LimitOrder.")
+@ApiModel(value = "LimitOrder", description = "The TO representation of a LimitOrder.",
+	parent = OrderTo.class)
 public abstract class LimitOrderTo extends OrderTo {  
 	/*
 	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.
