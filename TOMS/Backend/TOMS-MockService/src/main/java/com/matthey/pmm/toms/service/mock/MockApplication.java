@@ -46,6 +46,7 @@ import com.matthey.pmm.toms.transport.ImmutableIndexTo;
 import com.matthey.pmm.toms.transport.ImmutableLimitOrderTo;
 import com.matthey.pmm.toms.transport.ImmutableOrderCommentTo;
 import com.matthey.pmm.toms.transport.ImmutableOrderStatusTo;
+import com.matthey.pmm.toms.transport.ImmutableOrderTo;
 import com.matthey.pmm.toms.transport.ImmutablePartyTo;
 import com.matthey.pmm.toms.transport.ImmutableProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ImmutableReferenceOrderLegTo;
@@ -61,6 +62,7 @@ import com.matthey.pmm.toms.transport.IndexTo;
 import com.matthey.pmm.toms.transport.LimitOrderTo;
 import com.matthey.pmm.toms.transport.OrderCommentTo;
 import com.matthey.pmm.toms.transport.OrderStatusTo;
+import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderLegTo;
@@ -126,6 +128,7 @@ public class MockApplication implements WebMvcConfigurer {
                 		AlternateTypeRules.newRule(FillTo.class, ImmutableFillTo.class),
                 		AlternateTypeRules.newRule(IndexTo.class, ImmutableIndexTo.class),
                 		AlternateTypeRules.newRule(LimitOrderTo.class, ImmutableLimitOrderTo.class),                		
+                		AlternateTypeRules.newRule(OrderTo.class, ImmutableOrderTo.class),
                 		AlternateTypeRules.newRule(OrderCommentTo.class, ImmutableOrderCommentTo.class),
                 		AlternateTypeRules.newRule(OrderStatusTo.class, ImmutableOrderStatusTo.class),
                 		AlternateTypeRules.newRule(PartyTo.class, ImmutablePartyTo.class),

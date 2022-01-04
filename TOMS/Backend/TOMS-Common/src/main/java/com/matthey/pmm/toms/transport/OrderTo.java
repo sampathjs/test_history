@@ -3,9 +3,12 @@ package com.matthey.pmm.toms.transport;
 import java.util.List;
 
 import org.immutables.value.Value.Auxiliary;
+import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,6 +24,9 @@ import io.swagger.annotations.ApiModelProperty;
 })
 @ApiModel(value = "Order", description = "The abtract TO representation of an Order Object (The attributes are shared both on Limit and Reference Order).",
 	subTypes = {LimitOrderTo.class, ReferenceOrderTo.class}, discriminator = "idOrderType")
+@Immutable
+@JsonSerialize(as = ImmutableOrderTo.class)
+@JsonDeserialize(as = ImmutableOrderTo.class)
 public abstract class OrderTo {	
 	/**
 	 * TOMS maintained ID 
