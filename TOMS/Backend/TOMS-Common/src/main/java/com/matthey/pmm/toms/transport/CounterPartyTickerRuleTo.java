@@ -1,5 +1,6 @@
 package 	com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +25,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableCounterPartyTickerRuleTo.class)
 @JsonRootName (value = "counterparty_ticker_rule")
 @ApiModel(value = "Counter Party Ticker Rule", description = "Input validation rule that maps a counter party to the allowed tickers, metal locations, metal forms and Endur side accounts")
+@Value.Style (jdkOnly = true)
 public abstract class CounterPartyTickerRuleTo {  
 	@ApiModelProperty(value = "The ID of the counterparty (business unit) of this validation rule. The counterparty can both be internal or external.",
 			allowEmptyValue = false,

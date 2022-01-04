@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 
@@ -20,6 +21,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableDatabaseFileTo.class)
 @JsonRootName (value = "file")
 @ApiModel(value = "DatabaseFile", description = "Object containing file on the database, emulating a file directory to some degree. Wraps around a BLOB. ")
+@Value.Style (jdkOnly = true)
 public abstract class DatabaseFileTo {
 	/**
 	 * TOMS side ID.

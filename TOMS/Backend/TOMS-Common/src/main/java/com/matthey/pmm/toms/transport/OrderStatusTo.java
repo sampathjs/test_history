@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableOrderStatusTo.class)
 @JsonRootName (value = "orderStatus")
 @ApiModel(value = "OrderStatus", description = "The TO representation of an Order Status")
+@Value.Style (jdkOnly = true)
 public abstract class OrderStatusTo {
 	@ApiModelProperty(value = "The order management system internal unique ID for the order status",
 			allowEmptyValue = false,

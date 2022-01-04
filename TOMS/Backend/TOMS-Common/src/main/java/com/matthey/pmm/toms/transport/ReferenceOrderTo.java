@@ -3,6 +3,7 @@ package com.matthey.pmm.toms.transport;
 import java.util.Arrays;
 import java.util.List;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -25,6 +26,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonRootName (value = "referenceOrder")
 @ApiModel(value = "ReferenceOrder", description = "The TO representation of a ReferenceOrder.",
 	parent = OrderTo.class)
+@Value.Style (jdkOnly = true)
 public abstract class ReferenceOrderTo extends OrderTo {  
 	/*
 	 * The following lists contain the attributes that are not allowed to get changed for certain status transitions.

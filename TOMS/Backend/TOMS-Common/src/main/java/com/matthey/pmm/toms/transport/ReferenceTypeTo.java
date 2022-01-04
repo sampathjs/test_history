@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableReferenceTypeTo.class)
 @JsonRootName (value = "referenceType")
 @ApiModel(value = "ReferenceType", description = "The TO representation of the type of a reference")
+@Value.Style (jdkOnly = true)
 public abstract class ReferenceTypeTo {
 	@ApiModelProperty(value = "The order management system internal unique ID for the reference type",
 			allowEmptyValue = false,

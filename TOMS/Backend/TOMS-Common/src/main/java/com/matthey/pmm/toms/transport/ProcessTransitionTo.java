@@ -2,6 +2,7 @@ package com.matthey.pmm.toms.transport;
 
 import java.util.List;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableProcessTransitionTo.class)
 @JsonRootName (value = "processTransition")
 @ApiModel(value = "ProcessTransition", description = "The TO representation an abstract transition between two status. As in terms of graphs it can be considered an edge.")
+@Value.Style (jdkOnly = true)
 public abstract class ProcessTransitionTo {
 	@ApiModelProperty(value = "The order management system internal unique ID for the process transition",
 			allowEmptyValue = false,

@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableFillTo.class)
 @JsonRootName (value = "orderFill")
 @ApiModel(value = "Fill", description = "Request to fill an order. The requests includes a deal to be booked on Endur side. The request is processed over several status to cover the risk the Endur side deal booking is going to fail.")
+@Value.Style (jdkOnly = true)
 public abstract class FillTo {
 	@ApiModelProperty(value = "The order management system internal unique ID for the request to fill an order.",
 			allowEmptyValue = false,

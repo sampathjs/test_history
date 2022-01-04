@@ -2,6 +2,7 @@ package com.matthey.pmm.toms.transport;
 
 import java.util.List;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Immutable;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -21,6 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableTwoListsTo.class)
 @JsonRootName (value = "twoLists")
 @ApiModel(value = "Two Lists", description = "The TO representation of a pair of lists of arbitrary types. Currently used for Backend internal communication only.")
+@Value.Style (jdkOnly = true)
 public abstract class TwoListsTo <T1, T2> {
 	@ApiModelProperty(value = "The first list",
 			allowEmptyValue = false,

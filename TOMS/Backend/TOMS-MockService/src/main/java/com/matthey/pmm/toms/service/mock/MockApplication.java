@@ -4,7 +4,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -143,7 +145,6 @@ public class MockApplication implements WebMvcConfigurer {
                 		AlternateTypeRules.newRule(TwoListsTo.class, ImmutableTwoListsTo.class),
                 		AlternateTypeRules.newRule(UserTo.class, ImmutableUserTo.class)
                 )
-//                .additionalModels(typeResolver.resolve(OrderTo.class, LimitOrderTo.class, ReferenceOrderTo.class))
                 ;
     }
                  
@@ -165,4 +166,16 @@ public class MockApplication implements WebMvcConfigurer {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+    
+//    @Bean
+//    @Primary
+//    public ObjectMapper objectMapper() {
+//        return new ObjectMapper()
+//          .registerModule(new GuavaModule());
+//    }
+//    
+//    @Bean
+//    public Module guavaModule() {
+//        return new GuavaModule();
+//    }
 }

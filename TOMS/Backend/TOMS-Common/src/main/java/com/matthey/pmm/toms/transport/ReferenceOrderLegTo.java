@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableReferenceOrderLegTo.class)
 @JsonRootName (value = "referenceOrderLeg")
 @ApiModel(value = "ReferenceOrderLeg", description = "The TO representation of the leg of a reference order.")
+@Value.Style (jdkOnly = true)
 public abstract class ReferenceOrderLegTo {
 	/**
 	 * TOMS maintained ID 

@@ -72,7 +72,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
-@RestController
+@RestController()
 @PropertySource("classpath:mapping/Order.properties")
 @Transactional
 public abstract class OrderControllerImpl implements TomsOrderService {

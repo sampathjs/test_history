@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableIndexTo.class)
 @JsonRootName (value = "index")
 @ApiModel(value = "Index", description = "An Index consisting of a name and two currencies.")
+@Value.Style (jdkOnly = true)
 public abstract class IndexTo {
 	@ApiModelProperty(value = "The Endur unique ID for an index.",
 			allowEmptyValue = false,

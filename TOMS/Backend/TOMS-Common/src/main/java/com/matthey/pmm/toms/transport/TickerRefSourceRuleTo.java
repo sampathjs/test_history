@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableTickerRefSourceRuleTo.class)
 @JsonRootName (value = "ticker_ref_source_rule")
 @ApiModel(value = "Ticker <-> Ref Source Rule", description = "The TO representation of the type of Validation rule from ticker to Reference Source")
+@Value.Style (jdkOnly = true)
 public abstract class TickerRefSourceRuleTo {
 	@ApiModelProperty(value = "The ID of the ticker. The IDs are Reference IDs of ReferenceType #30 (Ticker):"
 			+  " 234 (XAG/CNY), 235 (XAG/EUR), 236 (XAG/GBP), 237 (XAG/USD), 238 (XAU/CNY), 239 (XAU/EUR)"

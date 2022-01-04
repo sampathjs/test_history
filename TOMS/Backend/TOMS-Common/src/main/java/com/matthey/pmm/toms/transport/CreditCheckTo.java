@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableCreditCheckTo.class)
 @JsonRootName(value = "orderCreditCheck")
 @ApiModel(value = "CreditCheck", description = "Object containing the data for a single request to retrieve a credit check from Endur and the credit check outcome")
+@Value.Style (jdkOnly = true)
 public abstract class CreditCheckTo {
 	@ApiModelProperty(value = "The order management system internal unique ID for a single credit check request.",
 			allowEmptyValue = false,

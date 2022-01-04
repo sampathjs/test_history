@@ -2,6 +2,7 @@ package com.matthey.pmm.toms.transport;
 
 import java.util.List;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +28,7 @@ import io.swagger.annotations.ApiModelProperty;
 @Immutable
 @JsonSerialize(as = ImmutableOrderTo.class)
 @JsonDeserialize(as = ImmutableOrderTo.class)
+@Value.Style (jdkOnly = true)
 public abstract class OrderTo {	
 	/**
 	 * TOMS maintained ID 

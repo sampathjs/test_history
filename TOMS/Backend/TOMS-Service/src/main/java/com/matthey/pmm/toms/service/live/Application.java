@@ -12,6 +12,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+//import com.fasterxml.jackson.databind.Module;
+//import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.matthey.pmm.toms.model.DbConstants;
 import com.matthey.pmm.toms.service.live.logic.MasterDataSynchronisation;
 
@@ -65,6 +67,11 @@ public class Application implements WebMvcConfigurer {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
+    
+//    @Bean
+//    public Module guavaModule() {
+//        return new GuavaModule();
+//    }
 }
 
 

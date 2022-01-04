@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableOrderCommentTo.class)
 @JsonRootName(value = "orderComment")
 @ApiModel(value = "OrderComment", description = "The TO representation of a comment for both Limit and Reference Orders.")
+@Value.Style (jdkOnly = true)
 public abstract class OrderCommentTo {	
 	/**
 	 * TOMS maintained ID 

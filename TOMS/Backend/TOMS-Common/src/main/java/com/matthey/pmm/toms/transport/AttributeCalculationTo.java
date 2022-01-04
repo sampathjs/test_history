@@ -2,6 +2,7 @@ package com.matthey.pmm.toms.transport;
 
 import java.util.List;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +19,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableAttributeCalculationTo.class)
 @JsonRootName (value = "attributeCalculation")
 @ApiModel(value = "AttributeCalculation", description = "Metadata to calculate the (default or derived) value of an attribute of an order")
+@Value.Style (jdkOnly = true)
 public abstract class AttributeCalculationTo {
 	@ApiModelProperty(value = "The identifier for the calculation of a single attribute",
 			allowEmptyValue = false,

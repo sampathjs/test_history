@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -26,6 +27,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutableEmailTo.class)
 @JsonRootName (value = "email")
 @ApiModel(value = "Email", description = "A request to send out an email.")
+@Value.Style (jdkOnly = true)
 public abstract class EmailTo {  
 	public static final List<String> UNMODIFIABLE_ATTRBIUTES =
 		Arrays.asList("idSendAs", "subject", "body", "toList", "ccList", "bccList", "attachments", "createdAt", "idCreatedByUser", "associatedOrderIds");

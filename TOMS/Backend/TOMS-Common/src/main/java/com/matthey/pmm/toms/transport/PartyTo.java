@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.transport;
 
+import org.immutables.value.Value;
 import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonDeserialize(as = ImmutablePartyTo.class)
 @JsonRootName (value = "party")
 @ApiModel(value = "Party", description = "The TO representation of a Party (Internal and External Business Units and Legal Entities)")
+@Value.Style (jdkOnly = true)
 public abstract class PartyTo {
 	/**
 	 * Endur side ID

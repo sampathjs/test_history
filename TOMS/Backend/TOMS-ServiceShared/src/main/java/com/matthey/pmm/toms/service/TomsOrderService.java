@@ -8,6 +8,7 @@ import java.util.Set;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,7 +31,7 @@ import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
 @Api(tags = {"Reference and Limit Orders"}, description = "APIs for relevant Order operations")
-@RequestMapping(API_PREFIX)
+@RequestMapping(path = API_PREFIX, consumes = MediaType.ALL_VALUE)
 public interface TomsOrderService {
 	
 	// all order types
@@ -146,7 +147,7 @@ public interface TomsOrderService {
     		@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable);
 
     @ApiOperation("Creation of a new Limit Order")
-	@PostMapping("/limitOrder")
+	@PostMapping(path = "/limitOrder", consumes=MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public long postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID has to be -1. The actual assigned Order ID is going to be returned. Version ID has to be 0", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder);
     
     @ApiOperation("Update of an existing Limit Order")
@@ -219,7 +220,7 @@ public interface TomsOrderService {
 			@ApiIgnore("Ignored because swagger ui shows the wrong params, instead they are explained in the implicit params") Pageable pageable);
         
     @ApiOperation("Creation of a new Reference Order")
-	@PostMapping("/referenceOrder")
+	@PostMapping(path = "/referenceOrder" , consumes=MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public long postReferenceOrder (@ApiParam(value = "The new Reference Order, ID has to be -1. The actual assigned ID is going to be returned. Version ID has to be 0", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder);
     
     @ApiOperation("Update of an existing Reference Order")
