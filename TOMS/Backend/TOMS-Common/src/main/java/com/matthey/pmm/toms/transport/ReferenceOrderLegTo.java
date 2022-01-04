@@ -83,7 +83,7 @@ public abstract class ReferenceOrderLegTo {
 			+ " 218(BFIX 1500), 219(BFIX Forward), 220(BFIX 1400), 221(BOC), 222(JMLO BFIX 1400), 223(JMLO BFIX 1500)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[190, 223]")
+			allowableValues = "range[190, 223]")
 	public abstract long idRefSource();
 
     @Nullable
@@ -104,7 +104,7 @@ public abstract class ReferenceOrderLegTo {
 			+ " 218(BFIX 1500), 219(BFIX Forward), 220(BFIX 1400), 221(BOC), 222(JMLO BFIX 1400), 223(JMLO BFIX 1500)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[190, 223]")
+			allowableValues = "range[190, 223]")
 	public abstract Long idFxIndexRefSource();
     
     @Nullable

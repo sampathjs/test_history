@@ -34,7 +34,7 @@ public abstract class ReferenceTo {
 	@ApiModelProperty(value = "The ID of the type of the reference. The IDs link to ReferenceType.",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[1,35]")		
+			allowableValues = "range[1,35]")		
 	public abstract long idType();
 	
     @Auxiliary

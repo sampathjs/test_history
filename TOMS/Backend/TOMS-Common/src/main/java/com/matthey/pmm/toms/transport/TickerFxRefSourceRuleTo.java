@@ -31,7 +31,7 @@ public abstract class TickerFxRefSourceRuleTo {
 			+  ", 264 (XRH/USD), 265(XRH/ZAR), 266(XRU/CNY), 267 (XRU/EUR), 268 (XRU/GBP), 269 (XRU/USD), 270 (XRU/ZAR)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[234, 270]")
+			allowableValues = "range[234, 270]")
 	public abstract long idTicker();
 
 	@Auxiliary
@@ -44,7 +44,7 @@ public abstract class TickerFxRefSourceRuleTo {
 	@ApiModelProperty(value = "The ID of the index. The IDs are Reference IDs of ReferenceType #11 (Index Name)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[49, 96], [340, 376]")
+			allowableValues = "range[49, 96], range[340, 376]")
 	public abstract long idIndex();
 
 	@Auxiliary
@@ -58,7 +58,7 @@ public abstract class TickerFxRefSourceRuleTo {
 			+ " or of ReferenceType #10 (Currency): 42(USD), 43(EUR), 44(CNY), 45(ZAR), 46(GBP)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[34, 46]")
+			allowableValues = "range[34, 46]")
 	public abstract long idTermCurrency();
 
 	@Auxiliary
@@ -77,7 +77,7 @@ public abstract class TickerFxRefSourceRuleTo {
 			+ " 218(BFIX 1500), 219(BFIX Forward), 220(BFIX 1400), 221(BOC), 222(JMLO BFIX 1400), 223(JMLO BFIX 1500)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[190, 223]")
+			allowableValues = "range[190, 223]")
 	public abstract long idRefSource();
 
 	@Auxiliary

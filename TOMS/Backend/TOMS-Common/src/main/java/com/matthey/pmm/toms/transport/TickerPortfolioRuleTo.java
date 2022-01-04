@@ -57,7 +57,7 @@ public abstract class TickerPortfolioRuleTo {
 			+  ", 264 (XRH/USD), 265(XRH/ZAR), 266(XRU/CNY), 267 (XRU/EUR), 268 (XRU/GBP), 269 (XRU/USD), 270 (XRU/ZAR)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[234, 270]")
+			allowableValues = "range[234, 270]")
 	public abstract long idTicker();
 
 	@Auxiliary
@@ -70,7 +70,7 @@ public abstract class TickerPortfolioRuleTo {
 	@ApiModelProperty(value = "The ID of the index. The IDs are Reference IDs of ReferenceType #11 (Index Name)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[49, 96], [340, 376]")
+			allowableValues = "range[49, 96], range[340, 376]")
 	public abstract long idIndex();
 
 	@Auxiliary

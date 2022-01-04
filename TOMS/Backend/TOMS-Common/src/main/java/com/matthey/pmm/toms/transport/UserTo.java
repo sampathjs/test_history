@@ -67,7 +67,7 @@ public abstract class UserTo {
 		+ "294 (PMM Support), 295 (External User)",
 		allowEmptyValue = false,
 		required = true,
-		allowableValues = "[3,6], 294, 295")
+		allowableValues = "range[3,6], 294, 295")
     public abstract long roleId();
     
     @Auxiliary
@@ -89,7 +89,7 @@ public abstract class UserTo {
 			+ "The portfolio list has to match the selected internal party list.",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[118,152], [296,339]")    
+			allowableValues = "range[118,152], range[296,339]")    
     public abstract List<Long> tradeablePortfolioIds();
     
     @Auxiliary
@@ -107,6 +107,6 @@ public abstract class UserTo {
 			+ "The portfolio has to match the selected idDefaultInternalBu and must be element of tradeablePortfolioIds.",
 			allowEmptyValue = true,
 			required = false,
-			allowableValues = "[118,152], [296,339]")    
+			allowableValues = "range[118,152], range[296,339]")    
     public abstract Long idDefaultInternalPortfolio();
 }

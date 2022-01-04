@@ -110,7 +110,7 @@ public abstract class OrderTo {
 		+ "The portfolio has to match the selected internal party.",
 		allowEmptyValue = false,
 		required = true,
-		allowableValues = "[118,152], [296,339]")
+		allowableValues = "range[118,152], range[296,339]")
     public abstract Long idIntPortfolio();
 	
 	@Auxiliary
@@ -127,7 +127,7 @@ public abstract class OrderTo {
 		+ " The portfolio has to match the selected external party",
 		allowEmptyValue = false,
 		required = true,
-		allowableValues = "[118,152], [296,339]")	
+		allowableValues = "range[118,152], range[296,339]")	
     public abstract Long idExtPortfolio();
 
 	@Auxiliary
@@ -156,7 +156,7 @@ public abstract class OrderTo {
 		+ " or of ReferenceType #10 (Currency): 42(USD), 43(EUR), 44(CNY), 45(ZAR), 46(GBP)",
 		allowEmptyValue = false,
 		required = true,
-		allowableValues = "[34, 46]")
+		allowableValues = "range[34, 46]")
     public abstract long idBaseCurrency();
     
 	@Auxiliary
@@ -179,7 +179,7 @@ public abstract class OrderTo {
 			+ " 28(TOz), 29(MT), 30(gms), 31(kgs), 32(lbs), 33(mgs)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[28, 33]")    
+			allowableValues = "range[28, 33]")    
     public abstract Long idBaseQuantityUnit();
 
 	@Auxiliary
@@ -194,7 +194,7 @@ public abstract class OrderTo {
 			+ " or of ReferenceType #10 (Currency): 42(USD), 43(EUR), 44(CNY), 45(ZAR), 46(GBP)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[34, 46]")
+			allowableValues = "range[34, 46]")
     public abstract Long idTermCurrency();
     
 	@Auxiliary
@@ -217,7 +217,7 @@ public abstract class OrderTo {
 	+ 		" 164(Ingot), 165(Sponge), 166(Grain), 167(None)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[164, 167]")
+			allowableValues = "range[164, 167]")
     public abstract Long idMetalForm();
 
 	@Auxiliary
@@ -235,7 +235,7 @@ public abstract class OrderTo {
 		+  ", 180(LME), 181(Brinks), 182(CNT), 183 (Umicore Germany)",
 		allowEmptyValue = false,
 		required = true,
-		allowableValues = "[168, 183]")
+		allowableValues = "range[168, 183]")
     public abstract Long idMetalLocation();
 
 	@Auxiliary
@@ -321,7 +321,7 @@ public abstract class OrderTo {
 			+  ", 264 (XRH/USD), 265(XRH/ZAR), 266(XRU/CNY), 267 (XRU/EUR), 268 (XRU/GBP), 269 (XRU/USD), 270 (XRU/ZAR)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[234, 270]")
+			allowableValues = "range[234, 270]")
 	public abstract Long idTicker(); 
 
 	@Auxiliary
@@ -339,7 +339,7 @@ public abstract class OrderTo {
 			+  " 226(Relative), 227(Fixed)",
 			allowEmptyValue = false,
 			required = true,
-			allowableValues = "[224, 227]")    
+			allowableValues = "range[224, 227]")    
 	public abstract Long idContractType();
 	
 	@Auxiliary
