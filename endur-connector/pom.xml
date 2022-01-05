@@ -115,17 +115,16 @@
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
-            <artifactId>TOMS-EndurConnector</artifactId>
+            <artifactId>endur-connector-shared</artifactId>
             <version>1.0.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
-            <artifactId>endur-connector-shared</artifactId>
+            <artifactId>TOMS-EndurConnector</artifactId>
             <version>1.0.0</version>
             <scope>runtime</scope>
-        </dependency>
-        
+        </dependency>        
     </dependencies>
     <build>
         <plugins>
