@@ -67,7 +67,7 @@
                 <version>2.10.3</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
+            </dependency>      
         </dependencies>
     </dependencyManagement>
     <build>

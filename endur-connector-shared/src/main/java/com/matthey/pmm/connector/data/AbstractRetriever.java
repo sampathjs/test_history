@@ -1,4 +1,4 @@
-package com.matthey.pmm.ejm.data;
+package com.matthey.pmm.connector.data;
 
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.staticdata.StaticDataFactory;
@@ -10,15 +10,13 @@ import org.joda.time.LocalDate;
 public abstract class AbstractRetriever {
 
     final Session session;
-    final SqlGenerator sqlGenerator;
 
     AbstractRetriever(Session session) {
         this.session = session;
-        sqlGenerator = new SqlGenerator(session);
     }
 
     Table runSql(String sqlTemplate) {
-        return session.getIOFactory().runSQL(sqlGenerator.genSql(sqlTemplate));
+        return session.getIOFactory().runSQL(sqlTemplate);
     }
 
     String formatDateColumn(TableRow row, String col) {
