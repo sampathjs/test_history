@@ -28,6 +28,8 @@ import  com.olf.jm.logging.Logging;
 
 public class Utils
 {
+	public static List<Parameters> parameters = new ArrayList<>(0);
+	
 	static public void removeTable(Table data) throws OException 
 	{
 		if (Table.isTableValid(data) == 1){
@@ -84,6 +86,44 @@ public class Utils
 		return value == null ? "" : value.trim();
     }
     
+    public static void setDefaultParams(String name, String value) throws OException
+    {
+    	parameters.add(new Parameters(Const.REGION_COL_NAME, COL_TYPE_ENUM.COL_STRING, value));
+		String qryRegion = value.length() > 0 ? value + "_" : "";
+		parameters.add( new Parameters(Const.QUERY_COL_NAME, COL_TYPE_ENUM.COL_STRING, String.format(name, qryRegion)));
+		parameters.add( new Parameters(Const.QUERY_DATE, COL_TYPE_ENUM.COL_STRING, OCalendar.formatJdForDbAccess(OCalendar.today()-1)));
+		parameters.add( new Parameters(Const.QUERY_REPORT, COL_TYPE_ENUM.COL_STRING, "Missed_Resets.eod"));
+    }
+    
+    public static void setParams(String name, String value) throws OException
+    {
+    	parameters.add(new Parameters(name, COL_TYPE_ENUM.COL_STRING, value));
+    }
+    
+    public static void addParams(Table argt) throws OException {
+    	
+    	if (argt== null)
+    		throw new OException("Parameter table invalid");
+    	
+    	int row = argt.getNumRows();
+    	for (Parameters parameter : parameters) {
+    		if (argt!= null && argt.getColNum(parameter.getName())<1) {
+    			argt.addCol(parameter.getName(), parameter.getType());
+    		} else {
+    			if (argt.getColType(parameter.getName()) != parameter.getType().toInt())
+    				throw new OException(String.format("Attempt to change parameter(%s) type: %s", parameter.getName(), parameter.getType().toString()));
+    		}
+		}
+    	
+    	if (row<1) {
+    		argt.addRow();
+    		row++;
+    	}
+    	for (Parameters parameter : parameters) {
+    		argt.setString(parameter.getName(), row, parameter.getValue());
+		}
+    	
+    }
     public static void setParams(Table params, String qryFmt, String regionCode) throws OException
     {
     	List<Parameters> parameters = new ArrayList<>(0);
@@ -103,31 +143,29 @@ public class Utils
 		
 		addParams(params, parameters);
     }
-    
-    public static void addParams(Table params, List<Parameters> parameters) throws OException {
+    public static void addParams(Table argt, List<Parameters> parameters) throws OException {
     	
-    	if (params== null)
+    	if (argt== null)
     		throw new OException("Parameter table invalid");
     	
-    	int row = params.getNumRows();
+    	int row = argt.getNumRows();
     	for (Parameters parameter : parameters) {
-    		if (params!= null && params.getColNum(parameter.getName())<1) {
-    			params.addCol(parameter.getName(), parameter.getType());
+    		if (argt!= null && argt.getColNum(parameter.getName())<1) {
+    			argt.addCol(parameter.getName(), parameter.getType());
     		} else {
-    			if (params.getColType(parameter.getName()) != parameter.getType().toInt())
+    			if (argt.getColType(parameter.getName()) != parameter.getType().toInt())
     				throw new OException(String.format("Attempt to change parameter(%s) type: %s", parameter.getName(), parameter.getType().toString()));
     		}
 		}
     	
     	if (row<1) {
-    		params.addRow();
+    		argt.addRow();
     		row++;
     	}
     	for (Parameters parameter : parameters) {
-    		params.setString(parameter.getName(), row, parameter.getValue());
+    		argt.setString(parameter.getName(), row, parameter.getValue());
 		}
     	
     }
-    
     
 }

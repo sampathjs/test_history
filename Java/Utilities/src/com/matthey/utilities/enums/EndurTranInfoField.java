@@ -7,7 +7,7 @@ import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.enums.SEARCH_CASE_ENUM;
-import  com.olf.jm.logging.Logging;
+import com.olf.jm.logging.Logging;
 
 /**
  *  Custom tran info fields in Endur
@@ -16,6 +16,7 @@ import  com.olf.jm.logging.Logging;
  *  Revision History:
  *  03.01.2020	 		GuptaN02		Initial Version (Moved to Utilities from EndurAccountingFeedInterface)
  *  30.06.2020          GuptaN02        Added new enums STRATEGY_NUM,FROM_ACC,TO_ACC
+ *  20.08.2021			TomarR01		Added METAL & UNIT and removed @deprecated API
  */
 public enum EndurTranInfoField
 {
@@ -31,7 +32,9 @@ public enum EndurTranInfoField
     IS_FUNDING_TRADE("Is Funding Trade"),
     STRATEGY_NUM("Strategy Num"),
     FROM_ACC("From A/C"),
-    TO_ACC("To A/C");
+    TO_ACC("To A/C"),
+    METAL("Metal"),
+    UNIT("Unit");
     
 	private int id;
 	private String typeName;
@@ -60,7 +63,7 @@ public enum EndurTranInfoField
 			} 
 			catch (Exception e) 
 			{
-				Logging.warn(e.getMessage() + " while searching through enums");				
+				Logging.warn(e.getMessage() + " while searching through enums");	
 			}
 			
 			i++;
@@ -87,7 +90,7 @@ public enum EndurTranInfoField
                     
                     if (retVal != OLF_RETURN_SUCCEED.toInt()) 
                     {
-                        Logging.error("Error Failed to execute:\n" + sqlQuery.toString());
+                    	Logging.error("Error Failed to execute:\n" + sqlQuery.toString());
                         String error = DBUserTable.dbRetrieveErrorInfo(retVal, "");
                         throw new RuntimeException(error);
                     }
@@ -100,7 +103,7 @@ public enum EndurTranInfoField
                 
                 if (row <= 0) 
                 {
-                    Logging.info("No enum has been defined for the name " + this.typeName);
+                	Logging.info("No enum has been defined for the name " + this.typeName);
                     
                     this.id = 0;    
                 }

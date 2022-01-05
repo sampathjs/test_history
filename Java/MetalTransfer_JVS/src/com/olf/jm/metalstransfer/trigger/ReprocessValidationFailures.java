@@ -28,6 +28,15 @@ import com.olf.jm.logging.Logging;
  * and all strategy where expected cash deals are not generated.
  * Functionality: scripts pulls all the strategy and mark the status as "Pending" in User table. 
  */
+
+/*
+ * History:
+ * 2020-03-25	V1.1	AgrawA01	- memory leaks, remove console print & formatting changes
+ * 2021-06-02   V1.2    Prashanth   - WO0000000006472 - Include scenario where strategy is moved directly to Vlaidated
+ *                                    Merging the missing code implemented in Mar-Jun-2020
+ */
+
+
 public class ReprocessValidationFailures implements IScript {
 	private static int qid = 0;
 	private static final String status = "Pending";
@@ -38,14 +47,22 @@ public class ReprocessValidationFailures implements IScript {
 	String timeWindow;
 
 	public void execute(IContainerContext context) throws OException {
+		
+		Table endurExtract = null;
+		Table finalDataToProcess = null;
 		try {
 			init();
 			Logging.info("Inserting deals to be processed in query_result");
 			qid = getQueryID();
 			if (qid > 0) {
-				Table endurExtract = fetchDataForAllStrategies(qid);
-				filterValidationErrors(endurExtract);
-				endurExtract = TableUtilities.destroy(endurExtract);
+				endurExtract = fetchDataForAllStrategies(qid);
+				finalDataToProcess = filterValidationErrors(endurExtract);
+				if (finalDataToProcess.getNumRows() > 0) {
+					processReporting(finalDataToProcess);
+//					processStamping(finalDataToProcess);
+				} else {
+					Logging.info("Nothing to be processed...");
+				}
 			}
 
 		} catch (Exception e) {
@@ -56,6 +73,8 @@ public class ReprocessValidationFailures implements IScript {
 			Util.exitFail();
 		} finally {
 			Query.clear(qid);
+			endurExtract = TableUtilities.destroy(endurExtract);
+			finalDataToProcess = TableUtilities.destroy(finalDataToProcess);
 			Logging.close();
 		}
 
@@ -63,17 +82,18 @@ public class ReprocessValidationFailures implements IScript {
 
 	// takes qid as input and fetches all data from Endur for processing
 	private Table fetchDataForAllStrategies(int qid) throws OException {
-		Table endurExtract = null;
+		Table strategyData = null;
+		Table cashData = null;
 		String sql = null;
 		try {
-			sql = TransfersValidationSql.fetchDataForAllStrategies(qid);
-			endurExtract = getData(sql);
+			sql = TransfersValidationSql.fetchDataForAllStrategies(qid, retry_limit);
+			strategyData = getData(sql);
 		} catch (Exception e) {
 			String errMsg = "Unable to execute Sql. \n" + sql + "\n" + e.getMessage();
 			Logging.error(errMsg);
 			throw new OException(errMsg);
 		}
-		return endurExtract;
+		return strategyData;
 
 	}
 
@@ -143,8 +163,7 @@ public class ReprocessValidationFailures implements IScript {
 		Table reportData = null;
 		try {
 			reportData = Table.tableNew("Report Data");
-			// reportData.select(finalDataToProcess, "*", "retry_count GE "+
-			// retry_limit);
+			reportData.select(finalDataToProcess, "*", "retry_count GE "+ retry_limit);
 			if (reportData.getNumRows() <= 0) {
 				Logging.info("No issues were found for email reporting");
 			} else {
@@ -191,19 +210,19 @@ public class ReprocessValidationFailures implements IScript {
 		return qid;
 	}
 
+
 	/*
 	 * Function checks data for validation issues as per defined conditions
-	 * below and returns the table having error to be processed. 1. When
-	 * strategy is DELETED and Cash Deal is in validated state. 2. When strategy
-	 * is Cancelled and Cash Deal is in validated state. 3. When strategy is in
-	 * validated and Cash deal count is not less than 2 for validated deals. 4.
-	 * When strategy is in New and Cash deal is available. 5. When strategy is
-	 * in New and No cash deal is created but the user_strategy_deals is updated
-	 * with Succeeded status. 6. When generated cash deals are less than
-	 * expected, either the cash deals are not generated or Tax deals are not
-	 * generated.
+	 * below and returns the table having error to be processed. 
+	 * 1. When strategy is DELETED and Cash Deal is in validated status. 
+	 * 2. When strategy is Cancelled and Cash Deal is in validated status.
+	 * 3. When strategy is Validated or Matured and and cash deal count is 0 That is when stratedy is directly booked to Validated.
+	 * 4. When strategy is in validated and Cash deal count is not less than 2 for validated deals. 
+	 * 5. When strategy is in New and Cash deal is available.
+	 * 6. When strategy is in New and No cash deal is created but the user_strategy_deals is updated with Succeeded status.
+	 * 7. When generated cash deals are less than expected, either the cash deals are not generated or Tax deals are not generated.
 	 */
-	private void filterValidationErrors(Table reportData) throws OException {
+	private Table filterValidationErrors(Table reportData) throws OException {
 		Table validationForTaxData = null;
 		Table filterValidationIssues = null;
 
@@ -229,12 +248,16 @@ public class ReprocessValidationFailures implements IScript {
 							&& TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() == cashTranStatus) {
 						reason = "Strategies found where deal is in cancelled state and relevant cash deal is in Validate state";
 
+					} else if ((TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() == strategyStatus
+							|| TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt() == strategyStatus) && cashDealCount < 2) {
+						reason = "Strategy is in validated or Matured status and Cash deal count is less than 2";
+						
 					} else if (TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() == strategyStatus
 							&& (TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() == cashTranStatus
 									|| TRAN_STATUS_ENUM.TRAN_STATUS_MATURED.toInt() == cashTranStatus)
 							&& cashDealCount < 2) {
-						reason = "When strategy is in validated or Matured and Cash deal count is not less than 2 for validated deals";
-
+						reason = "Strategy is in validated status and Cash deal count is not less than 2 for validated deals";
+						
 					} else if (TRAN_STATUS_ENUM.TRAN_STATUS_NEW.toInt() == strategyStatus
 							&& TRAN_STATUS_ENUM.TRAN_STATUS_VALIDATED.toInt() == cashTranStatus) {
 						reason = "When strategy is in New and Cash deal is available";
@@ -258,9 +281,8 @@ public class ReprocessValidationFailures implements IScript {
 				filterValidationIssues.delCol("StrategyTranStatus");
 				filterValidationIssues.delCol("CountOfCashDeal");
 				filterValidationIssues.delCol("CashTranStatus");
-				processReporting(filterValidationIssues);
 			}
-			// Case 6: When generated cash deals are less than expected, either
+			// Case 7: When generated cash deals are less than expected, either
 			// the cash deals are not generated or Tax deals are not generated
 
 			String validationForTax = TransfersValidationSql.checkForTaxDeals(qid, bufferTime);
@@ -269,16 +291,21 @@ public class ReprocessValidationFailures implements IScript {
 			if (taxIssuesCount > 0) {
 				String reason = "Expected and Actual cash deals count is not matching";
 				Logging.info(taxIssuesCount + " " + reason);
-				emailToUser(validationForTaxData);
+				validationForTaxData.delCol("expected_cash_deal_count");
+				validationForTaxData.delCol("actual_cash_deal_count");
+				int retval = validationForTaxData.copyRowAddAll(filterValidationIssues);
+				if (retval != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
+					Logging.error("Failed to merge table validationForTaxData in final data to be processed.");
+				}
 			}
 			Logging.info(taxIssuesCount + " tax issues were found for reporting and reprocessing.");
+			return filterValidationIssues;
 		} catch (Exception e) {
 			String errMsg = "Unable to process data and report for invalid strategy \n" + e.getMessage();
 			Logging.error(errMsg);
 			throw new OException(errMsg);
 		} finally {
 			validationForTaxData = TableUtilities.destroy(validationForTaxData);
-			filterValidationIssues = TableUtilities.destroy(filterValidationIssues);
 		}
 
 	}

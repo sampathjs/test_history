@@ -3,7 +3,8 @@ package com.openlink.sc.bo.docproc;
 Status:         testing
 
 Revision History:
-1.00 - 2016-02-03 - jwaechter - Initial version based on Version 1.11 of SC plugin "OLI_DL_Netting"
+1.00   2016-02-03  jwaechter                Initial version based on Version 1.11 of SC plugin "OLI_DL_Netting"
+1.01   2021-06-24  Prashanth     EPI-1687   additional fields for Payments and Statements Automation project
 
 Description:
  DataLoad script to populate a Settlement Desktop view.
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import com.olf.openjvs.*;
 import com.olf.openjvs.enums.*;
 import com.openlink.util.constrepository.ConstRepository;
+import com.jm.sc.bo.util.BODataLoadUtil;
 import com.olf.jm.logging.Logging;
 
 @com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_DATALOAD)
@@ -355,8 +357,27 @@ public class JM_DL_Netting implements IScript {
 
 			Query.clear(intQueryId);
 			
-					
-			
+		}
+		
+		int qid = Query.tableQueryInsert(argt, "tran_num");
+		String qtbl = Query.getResultTableForId(qid);
+		
+		BODataLoadUtil boDataLodUtil = new BODataLoadUtil(argt, qid, qtbl, false);
+		
+		boDataLodUtil.addColums();
+		
+		boDataLodUtil.populatePastReceivables();
+		
+		boDataLodUtil.populateConfirmStatus();
+		
+		boDataLodUtil.populateDealMetalBalance();
+		
+		boDataLodUtil.populateAnyOtherBalance();
+		
+		boDataLodUtil.populateStpStatus();
+		
+		if (qid > -1) {
+			Query.clear(qid);
 		}
 
 		if (_viewTables){

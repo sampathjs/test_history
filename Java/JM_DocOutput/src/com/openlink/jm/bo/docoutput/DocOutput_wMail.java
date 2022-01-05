@@ -1,22 +1,30 @@
 package com.openlink.jm.bo.docoutput;
 
 import java.util.ArrayList;
-
+import com.olf.jm.logging.Logging;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBaseTable;
+import com.olf.openjvs.EmailMessage;
+import com.olf.openjvs.FileUtil;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Util;
-import com.olf.jm.logging.Logging;
-import com.openlink.util.mail.Mail;
+import com.olf.openjvs.enums.EMAIL_MESSAGE_TYPE;
+import com.olf.openjvs.enums.SEARCH_ENUM;
 import com.openlink.util.misc.TableUtilities;
 
 /*
  * History:
 *
-* 2020-01-10	V1.1	-	Pramod Garg - Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
+* 2020-01-10	V1.1	Pramod Garg 	- Insert the erroneous entry in USER_jm_auto_doc_email_errors table 
 * 										   if failed to make connection to mail server
-* 2020-03-25	V1.2	YadavP03	- memory leaks, remove console print & formatting changes
+* 2020-03-25	V1.2	YadavP03		- memory leaks, remove console print & formatting changes
+* 2021-06-02	V1.3	jwaechter		- Changed to use HTML email.
+* 2021-06-07	V1.4	jwaechter		- Now offering the option to load email body context from
+* 										  Endur DB file system.
+* 2021-07-01	V1.5	jwaechter       - Hiding links for next doc status 3 Fixed and Sent
+* 2021-09-08	V1.6	ganapP02        - EPI-1718 - instead on hiding the link, removing the whole tag from the email template.
+* 2021-11-16	V1.7	SalviK01        - EPI-1939 - Change message type to HTML.
 **/
 
 class DocOutput_wMail extends DocOutput
@@ -53,7 +61,32 @@ class DocOutput_wMail extends DocOutput
 
 			TokenHandler token = new TokenHandler();
 			token.createDateTimeMap();
-
+			
+			if (message.trim().startsWith("/User")) {
+				if (FileUtil.userFileExists(message) == 1) {
+					message = com.olf.openjvs.FileUtil.userFileLoadTextFromDB(message);
+				} else {
+					String errorMessage = "Could not find file '" + message + "' in Endurs DB file system"
+						+	" taken from BO Document Output Form Value List for 'OpenLink Doc Mail Message'";
+					Logging.error (errorMessage);
+					throw new RuntimeException(errorMessage);
+				}
+			}
+			// for email confirmation link logic: ensure for legacy documents no links are sent out and no links for cancellations
+			int rowDisplayStyle = argt.getTable("process_data", 1).getTable("user_data", 1).findString("col_name", "jmActionUrlDisplayStyle", SEARCH_ENUM.FIRST_IN_GROUP);
+			String displayStyle = rowDisplayStyle <= 0 ? "" : argt.getTable("process_data", 1).getTable("user_data", 1).getString("col_data", rowDisplayStyle);
+			int nextStatusId = argt.getTable(PROCESS_DATA, 1).getInt("next_doc_status", 1);
+			int docType = argt.getTable(PROCESS_DATA, 1).getInt("doc_type", 1);
+			
+			String intBU = token.getUserData(argt.getTable("process_data", 1).getTable("user_data", 1), "olfIntBUShortName");
+			// doc status 19 = 3 Fixed and Sent
+			if (docType == 2 && (isCancellationDoc() || nextStatusId == 19 || rowDisplayStyle < 1
+							|| (("JM PMM UK".equals(intBU) || "JM PMM US".equals(intBU)) && "None".equalsIgnoreCase(displayStyle)))) {
+				message = message.replace("%jmActionUrlDisplayStyle%", "None");
+				if(message.indexOf("<p style") >0 ){
+					message = message.replace(message.substring(message.indexOf("<p style"), message.lastIndexOf("</p>") + 5), "");	
+				}
+			}
 			recipients = token.replaceTokens(recipients, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Recipients");
 			subject    = token.replaceTokens(subject, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Subject");
 			message    = token.replaceTokens(message, argt.getTable("process_data", 1).getTable("user_data", 1), token.getDateTimeTokenMap(), "Message");
@@ -70,7 +103,7 @@ class DocOutput_wMail extends DocOutput
 			if (sender.contains("%"))
 				sender = tryRetrieveSettingFromConstRepo("[EnhanceVars]", sender, true);
 
-			String intBU = token.getUserData(argt.getTable("process_data", 1).getTable("user_data", 1), "olfIntBUShortName");
+//			String intBU = token.getUserData(argt.getTable("process_data", 1).getTable("user_data", 1), "olfIntBUShortName");
 			if ("JM PMM US".equals(intBU)) {
 				String doNotReplyText = tryRetrieveSettingFromConstRepo("Do_Not_Reply_Email_Message_Text_US", "", false);
 				message = (message.indexOf("<DoNotReplyText>") > -1) ? message.replace("<DoNotReplyText>", doNotReplyText) : message;
@@ -85,19 +118,26 @@ class DocOutput_wMail extends DocOutput
 			recipientsArr = new String[list.size()];
 			for (int i = list.size(); --i >= 0;)
 				recipientsArr[i] = list.get(i);
-
-			Mail mail = new Mail(mailParams.smtpServer);
-			/*
-			mail.send(mailParams.recipients, 
-					  mailParams.subject, 
-					  mailParams.message, 
-					  mailParams.sender, 
-					  output.documentExportPath);
-			 */
+			// the old email sending mechanism used , for separation, the new ;
+			// ensure backward compatibility to avoid touching the recipients lists.
+			// The , syntax is also enforced in class JM_OUT_DocOutput_wMail.
+			recipients = recipients.replaceAll(",", ";");
+//			EMAIL_MESSAGE_TYPE messageType = (message.contains("<HTML>"))?
+//					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML:
+//					EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_PLAIN_TEXT
+//				;
+			EMAIL_MESSAGE_TYPE messageType = EMAIL_MESSAGE_TYPE.EMAIL_MESSAGE_TYPE_HTML;
+			
+			EmailMessage emailMessage = EmailMessage.create();
+			emailMessage.addBodyText(message, messageType);
+			emailMessage.addRecipients(recipients);
+			emailMessage.addSubject(subject);
+			emailMessage.addAttachments(output.documentExportPath, 0, "");
+			emailMessage.setSendDate();
 			
 			while (retryTimeoutCount<retryCount) {
 				try {
-					mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
+					emailMessage.sendAs(sender);
 					success = true;
 					break;
 				}
@@ -119,9 +159,7 @@ class DocOutput_wMail extends DocOutput
 				Logging.error(erroMessage);
 				throw new OException (erroMessage);
 				
-			}
-			
-			//mail.send(recipientsArr, subject, message, sender, output.documentExportPath);
+			}			
 		}
 		catch (Throwable t)
 		{

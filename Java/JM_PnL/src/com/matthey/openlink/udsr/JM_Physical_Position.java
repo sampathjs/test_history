@@ -1,5 +1,6 @@
 package com.matthey.openlink.udsr;
 
+import com.matthey.openlink.generic.ConstRepoRetrieval;
 import com.matthey.openlink.pnl.ConfigurationItemPnl;
 import com.matthey.openlink.pnl.MTL_Position_Enums;
 import com.matthey.openlink.pnl.MTL_Position_Utilities;
@@ -133,7 +134,7 @@ public class JM_Physical_Position implements IScript {
 		// USD cash transfers: there is no FX index for USD, so set as LIBOR.USD
 		boolean isUSDTransfer = false;
 		if (ccy == Ref.getValue(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, "USD")) {
-			projIdx = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "LIBOR.USD");
+			projIdx = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, ConstRepoRetrieval.getLiborIndexName());
 			isUSDTransfer = true;
 		}
 		

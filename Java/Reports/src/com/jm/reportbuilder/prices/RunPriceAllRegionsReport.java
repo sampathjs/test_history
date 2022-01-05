@@ -27,6 +27,8 @@ import com.openlink.util.misc.TableUtilities;
 
 public class RunPriceAllRegionsReport implements IScript{
 
+	ConstRepository constRepo = null;
+
 	@Override
 	public void execute(IContainerContext context) throws OException {
 
@@ -187,6 +189,7 @@ public class RunPriceAllRegionsReport implements IScript{
 		try
 		{
 			EmailMessage mymessage = null;
+			String senderEmail = constRepo.getStringValue("senderEmail", "endur@matthey.com");
 			
 			if (new File(strFilePath).exists())
 			{
@@ -232,7 +235,8 @@ public class RunPriceAllRegionsReport implements IScript{
 				Logging.info("File attachmenent not found: " + strFilePath );
 			}
 			
-			mymessage.send("Mail");
+			//mymessage.send("Mail");
+			mymessage.sendAs(senderEmail, "Mail");
 			mymessage.dispose();
 			
 			Logging.info("Email sent to: " + strRecipients.toString());
@@ -298,7 +302,7 @@ public class RunPriceAllRegionsReport implements IScript{
 		String abOutDir = SystemUtil.getEnvVariable("AB_OUTDIR") + "\\error_logs";
 		String logDir = abOutDir;
 
-		ConstRepository constRepo = new ConstRepository("Reports", "");
+		constRepo = new ConstRepository("Reports", "RunPriceAllRegionsReport");
 		String logLevel = constRepo.getStringValue("logLevel");
 
 		try
@@ -309,7 +313,7 @@ public class RunPriceAllRegionsReport implements IScript{
 				logLevel = "DEBUG";
 			}
 			String logFile = "RunAllRegionJMBasePriceReport.log";
-			Logging.init(this.getClass(), "Reports", "");
+			Logging.init(this.getClass(), "Reports", "RunPriceAllRegionsReport");
 
 		}
 

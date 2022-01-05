@@ -15,6 +15,7 @@
     </modules>
     <properties>
         <io.springfox.version>2.9.2</io.springfox.version>
+        <log4j2.version>2.16.0</log4j2.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencyManagement>
@@ -71,6 +72,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-bom</artifactId>
+                <version>2.16.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -121,6 +129,9 @@
                         </execution>
                     </executions>
                 </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
      	        <plugin>
          	       <groupId>com.github.ekryd.sortpom</groupId>
            	       <artifactId>sortpom-maven-plugin</artifactId>
@@ -147,8 +158,5 @@
         	        <version>2.22.2</version>
             	</plugin>
             </plugins>
-        </pluginManagement>
-        <plugins>
-        </plugins>
     </build>
 </project>

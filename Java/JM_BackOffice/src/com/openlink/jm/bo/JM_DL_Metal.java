@@ -15,12 +15,15 @@ package com.openlink.jm.bo;
  *  06.01.20  GuptaN02	Added functionality to report invoices in local currency
  *  12.02.20  kumarh02	Added logging for time taken by various queries and Formating the queries.
  *  25.03.20  YadavP03  memory leaks, remove console prints & formatting changes
+ *  09.04.21  DNagy     additional fields for Payments and Statements Automation project
+ *  24.06.21  Prashanth EPI-1687	additional fields for Payments and Statements Automation project
  */
 
 
 import java.util.HashMap;
 import java.util.HashSet;
 
+import com.jm.sc.bo.util.BODataLoadUtil;
 import com.matthey.utilities.enums.EndurTranInfoField;
 import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
@@ -45,15 +48,15 @@ import com.olf.jm.logging.Logging;
 @com.olf.openjvs.ScriptAttributes(allowNativeExceptions=false)
 public class JM_DL_Metal implements IScript {
 	
-	final String ACCT_CLASS_METAL = "Metal Account"; // TODO ask ConstRepo
+	final String ACCT_CLASS_METAL = "Metal Account";
 	final String ACCT_CLASS_CASH  = "Cash Account";
 	final String ACCT_TYPE_NOSTRO = "Nostro";
 	protected final static int OLF_RETURN_SUCCEED = OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt();
 
 	// default log level - optionally overridden by ContRepo value
-	private final String defaultLogLevel = "warn";
+	private static final String defaultLogLevel = "warn";
 
-	private final String
+	private static final String
 	  CONST_REPO_CONTEXT        = "BackOffice"
 	, CONST_REPO_SUBCONTEXT     = "Dataload Metal"
 	, CONST_REPO_VAR_LOGLEVEL   = "logLevel"
@@ -74,9 +77,9 @@ public class JM_DL_Metal implements IScript {
 	, ARGT_COL_NAME_FX_RATE       = "event_info_type_20005"
 	, ARGT_COL_NAME_APPLY_EXT_FX_RATE = "stldoc_info_type_20002"
 	, TRAN_INFO_JM_FX_RATE_NAME       = "JM FX Rate"
-	,ARGT_COL_NAME_PYMT_CURRENCY ="Local Currency"
-	,ARGT_COL_NAME_PYMT_AMOUNT="Local Currency Amount"
-	,ARGT_COL_NAME_PYMT_ACCOUNT="Local Currency Account";
+	, ARGT_COL_NAME_PYMT_CURRENCY ="Local Currency"
+	, ARGT_COL_NAME_PYMT_AMOUNT="Local Currency Amount"
+	, ARGT_COL_NAME_PYMT_ACCOUNT="Local Currency Account";
 
 	// frequently used constants:
 	ConstRepository _constRepo = null;
@@ -148,7 +151,7 @@ public class JM_DL_Metal implements IScript {
 		argt.addCol(ARGT_COL_NAME_PYMT_CURRENCY, COL_TYPE_ENUM.COL_STRING, ARGT_COL_NAME_PYMT_CURRENCY);
 		argt.addCol(ARGT_COL_NAME_PYMT_AMOUNT, COL_TYPE_ENUM.COL_INT, ARGT_COL_NAME_PYMT_AMOUNT);
 		argt.addCol(ARGT_COL_NAME_PYMT_ACCOUNT, COL_TYPE_ENUM.COL_STRING, ARGT_COL_NAME_PYMT_ACCOUNT);
-
+		
 		int numRowsArgt = argt.getNumRows();
 		HashSet<Integer> uniqueBUSet= new HashSet<>();
 		HashMap<Integer, String> buToLocalCurrencyReportingMap= new HashMap<>();
@@ -182,23 +185,24 @@ public class JM_DL_Metal implements IScript {
 			
 			try {
 				int acm = Ref.getValue(SHM_USR_TABLES_ENUM.ACCOUNT_CLASS_TABLE, ACCT_CLASS_METAL);
+								
+				sql = "SELECT distinct ate.tran_num, ates.event_num "
+						+ ", acc1.account_number "+ARGT_COL_NAME_INT_METAL_ACCOUNT
+						+ ", acc2.account_number "+ARGT_COL_NAME_EXT_METAL_ACCOUNT
+						+ " FROM ab_tran_event ate"
+						+ " JOIN "+qtbl+" qr ON ate.tran_num=qr.query_result AND qr.unique_id="+qid
+						+ " JOIN ab_tran_event_settle ates ON ate.event_num=ates.event_num"
+						+ " LEFT join account acc1 ON acc1.account_id=ates.int_account_id AND acc1.account_status=1 and acc1.account_class="+acm
+						+ " LEFT join account acc2 ON acc2.account_id=ates.ext_account_id AND acc2.account_status=1 and acc2.account_class="+acm
+						+ " JOIN parameter p_same ON p_same.ins_num = ate.ins_num AND ate.ins_para_seq_num = p_same.param_seq_num"
+						+ " JOIN parameter p_all ON p_all.ins_num = ate.ins_num AND p_all.param_group = p_same.param_group"
+						+ " WHERE ate.event_type in (14,98)"
+						+ " AND ate.unit<>0";
 				
-				sql = "SELECT distinct ate.tran_num"
-					+ ", acc1.account_number "+ARGT_COL_NAME_INT_METAL_ACCOUNT
-					+ ", acc2.account_number "+ARGT_COL_NAME_EXT_METAL_ACCOUNT
-					+ " FROM ab_tran_event ate"
-					+ " JOIN "+qtbl+" qr ON ate.tran_num=qr.query_result AND qr.unique_id="+qid
-					+ " JOIN ab_tran_event_settle ates ON ate.event_num=ates.event_num"
-					+ " LEFT join account acc1 ON acc1.account_id=ates.int_account_id AND acc1.account_status=1 and acc1.account_class="+acm
-					+ " LEFT join account acc2 ON acc2.account_id=ates.ext_account_id AND acc2.account_status=1 and acc2.account_class="+acm
-					+ " JOIN parameter p_same ON p_same.ins_num = ate.ins_num AND ate.ins_para_seq_num = p_same.param_seq_num"
-					+ " JOIN parameter p_all ON p_all.ins_num = ate.ins_num AND p_all.param_group = p_same.param_group"
-					+ " WHERE ate.event_type in (14,98)"
-					+ " AND ate.unit<>0"
-					;
 				tbl = Table.tableNew("queried");
 				long currentTime = System.currentTimeMillis();
 				DBaseTable.execISql(tbl, sql);
+				
 				Logging.info("Query(for Our and CP Metal\nAccount)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
 				if (tbl.getNumRows() > 0) {
 					//For metal account remove ins_para_seq_num from where match criteria 
@@ -315,11 +319,43 @@ public class JM_DL_Metal implements IScript {
 				}
 			}
 			
+			BODataLoadUtil boDataLodUtil = new BODataLoadUtil(argt, qid, qtbl, false);
+			
+			boDataLodUtil.addColums();
+			
+			boDataLodUtil.populatePastReceivables();
+			
+			boDataLodUtil.populateConfirmStatus();
+			
+			boDataLodUtil.populateDealMetalBalance();
+			
+			boDataLodUtil.populateAnyOtherBalance();
+			
+			boDataLodUtil.populateStpStatus();
+					
+			int rowCount = argt.getNumRows();
+			argt.addCol("no_invoice", COL_TYPE_ENUM.COL_INT);
+			
+			for(int i = 1; i <= rowCount; i++){
+				
+				String invoiceNum = argt.getString("stldoc_info_type_20003", i);
+				
+				if(invoiceNum != null && !invoiceNum.isEmpty()){
+					argt.setInt("no_invoice", i, 1);
+				}
+			}
+			
+			argt.addFormulaColumn("iif(COL('no_invoice') == 0 && COL('curr_settle_amount') == 0.0, 0, 1)", COL_TYPE_ENUM.COL_INT.toInt(), "delete", "delete");
+			argt.deleteWhereValue("delete", 0);
+			argt.deleteFormulaColumn("delete");
+			argt.delCol("no_invoice");
+						
 			if (qid > -1) {
 				Query.clear(qid);
 			}
 		}
 	}
+
 	
 	/**
 	 * @param argt

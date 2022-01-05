@@ -18,15 +18,32 @@
 
 package com.jm.eod.reports;
 
-import com.olf.openjvs.*;
-import com.olf.openjvs.enums.*;
-import  com.olf.jm.logging.Logging;
-import com.openlink.util.constrepository.*;
-import standard.include.JVS_INC_Standard;
-
 import java.io.File;
 
-import com.jm.eod.common.*;
+import com.jm.eod.common.Const;
+import com.jm.eod.common.Utils;
+import  com.olf.jm.logging.Logging;
+import com.olf.openjvs.IContainerContext;
+import com.olf.openjvs.IScript;
+import com.olf.openjvs.OCalendar;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.PluginCategory;
+import com.olf.openjvs.Query;
+import com.olf.openjvs.Report;
+import com.olf.openjvs.ScriptAttributes;
+import com.olf.openjvs.Table;
+import com.olf.openjvs.Util;
+import com.olf.openjvs.enums.COL_FORMAT_BASE_ENUM;
+import com.olf.openjvs.enums.COL_TYPE_ENUM;
+import com.olf.openjvs.enums.DATE_FORMAT;
+import com.olf.openjvs.enums.REPORT_ADD_ENUM;
+import com.olf.openjvs.enums.ROW_POSITION_ENUM;
+import com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM;
+import com.olf.openjvs.enums.SHM_USR_TABLES_ENUM;
+import com.olf.openjvs.enums.TABLE_SORT_DIR_ENUM;
+import com.openlink.util.constrepository.ConstRepository;
+
+import standard.include.JVS_INC_Standard;
 
 @ScriptAttributes(allowNativeExceptions=false)
 @PluginCategory(SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_GENERIC)
@@ -59,11 +76,12 @@ public class EOD_JM_MissingValidations implements IScript
     		
     		Table params = context.getArgumentsTable();
     		String qryName = Utils.getParam(params, Const.QUERY_COL_NAME);
+    		String fileName = Utils.getParam(params, Const.FILE_COL_NAME);
             deals  = getDeals(qryName);
-            rptData = createReport(deals, Utils.getParam(params, Const.REGION_COL_NAME).trim());
+            rptData = createReport(deals, Utils.getParam(params, Const.REGION_COL_NAME).trim(), fileName.trim());
             if (Table.isTableValid(rptData) == 1 && rptData.getNumRows() > 0) 
             {
-        		Logging.error("Some deals have not been validated - please check EOD report.");
+        		Logging.debug("Some deals have not been validated - please check EOD report.");
         		Util.scriptPostStatus(rptData.getNumRows() + " missing validation(s).");
         		//1.1 To save the report output in CSV format
         		String strFilename = getFileName();        		
@@ -168,6 +186,16 @@ public class EOD_JM_MissingValidations implements IScript
      */
     private Table createReport(Table deals, String regionCode) throws OException
     {
+		String filename = "Missed_Validations.eod"; 
+    	return createReport(deals, regionCode, filename);
+    }
+    
+    /**
+     * Generate report showing missing validations
+     * @param 
+     */
+    private Table createReport(Table deals, String regionCode, String filename) throws OException
+    {
 		Table output = createContainer();
 		output.select(deals, "*", "tran_num GT 0");
 
@@ -181,7 +209,6 @@ public class EOD_JM_MissingValidations implements IScript
 		output.showTitleBreaks();
 		output.colHide( "internal_bunit");
 		
-		String filename = "Missed_Validations.eod"; 
 		String title = "Missed Validations Report for "
 				     + OCalendar.formatJd(OCalendar.today(), DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH);
         if (regionCode.length() > 0) 

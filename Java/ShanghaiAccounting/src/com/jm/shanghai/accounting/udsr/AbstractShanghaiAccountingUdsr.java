@@ -98,7 +98,13 @@ import com.olf.jm.logging.Logging;
  *                                                getting saved with all info field values for each doc 
  *                                                version, the SQL has been modified to lookup
  *                                                stldoc_info as well in case there are now results 
- *                                                in stldoc_info_h                                      
+ *                                                in stldoc_info_h   
+ * 2021-06-21		V1.16		jwaechter		- More functions for output processing logic:
+ * 												- Added ternary operator condition?valueIfTrue:valueIfFalse
+ * 												- condition can compare string literals and / or string columns values:
+ *                                                %col_name%==string_literal or %col_name1% == %col_name2%
+ *                                              - values can now contain multiplications of numbers as well
+ *                                                %col1%*%col2% or %col1%*constant
  */
 
 /**
@@ -389,7 +395,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		if (typePrefix.getValue().equalsIgnoreCase("SL")) {
 			ConstTable documentInfoTable = createDocumentInfoTable (session, runtimeTable);
 			runtimeTable.select(documentInfoTable, "endur_doc_num, endur_doc_status, jde_doc_num, jde_cancel_doc_num, vat_invoice_doc_num, jde_cancel_vat_doc_num, doc_issue_date", 
-					"[In.deal_tracking_num] == [Out.deal_tracking_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num] AND [In.pymt_type] == [Out.pymt_type] AND [In.event_num] == [Out.event_num]");
+					"[In.tran_num] == [Out.tran_num] AND [In.ins_para_seq_num] == [Out.ins_para_seq_num] AND [In.pymt_type] == [Out.pymt_type] AND [In.event_num] == [Out.event_num]");
 
 			joinDocumentEventPresence(session, runtimeTable);			
 		}
@@ -470,7 +476,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 
 	private void addCountryCodeExternalBu(Session session,
 			Table runtimeTable, Transactions transactions) {
-		StringBuilder allTranNums = createTranNumList(runtimeTable, "tran_num");
+		StringBuilder allTranNums = createIDList(runtimeTable, "tran_num");
 		// Retrieves the country code of the main address of the external business
 		// unit as designated in the transactions being processed.
 		String sql = 
@@ -508,7 +514,7 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	 */
 	private ConstTable createSwapInfoTable(Session session, Table runtimeTable,
 			Transactions transactions) {
-		StringBuilder allTranNums = createTranNumList(runtimeTable, "tran_num");
+		StringBuilder allTranNums = createIDList(runtimeTable, "tran_num");
 		// assumption: there is only one invoice per deal
 		String sql = 
 				"\nSELECT DISTINCT ab.tran_num"
@@ -708,23 +714,26 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	
 	/**
 	 * Queries the USER_jm_jde_extract_data to retrieve data for the 
-	 * deals identified by column "deal_tracking_num".
+	 * deals identified by column "tran_num".
 	 * @param session the session to use to query the user table.
 	 * @param revalResult The reval result containing the runtime table.
 	 */
 	private void addSpotEquivValueForContangoBackwardation(Session session,
 			RevalResult revalResult) {
 		Table runtimeTable = revalResult.getTable(); 
-		StringBuilder allDealNums = createTranNumList(runtimeTable, "deal_tracking_num");
-		StringBuilder sql = new StringBuilder();
-		sql.append("\nSELECT settlement_value AS contango_settlement_value")
-		   .append("\n ,deal_num AS deal_tracking_num")
-		   .append("\n ,spot_equiv_value AS contango_spot_equiv_value")
-		   .append("\nFROM USER_jm_jde_extract_data")
-		   .append("\nWHERE deal_num IN (" + allDealNums.toString() + ")")
-		   ;
-		Table rateTable = session.getIOFactory().runSQL(sql.toString());
-		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.deal_tracking_num] == [Out.deal_tracking_num]");	
+		StringBuilder allTranNums = createIDList(runtimeTable, "deal_tracking_num");
+		String sql = "\nSELECT settlement_value AS contango_settlement_value" +
+					 "\n ,deal_num" +
+					 "\n ,tran_num" +
+					 "\n ,spot_equiv_value AS contango_spot_equiv_value" +
+					 "\nFROM USER_jm_jde_extract_data" +
+					 "\nWHERE deal_num IN (" +
+					 allTranNums.toString() +
+					 ")";
+		Table rateTable = session.getIOFactory().runSQL(sql);
+		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.tran_num] == [Out.tran_num]");
+		// before the work of JDE corrections, there is no tran_num in USER_jm_jde_extract_data so has to join by deal_num for old data
+		runtimeTable.select(rateTable, "contango_settlement_value, contango_spot_equiv_value", "[In.tran_num] == 0 AND [In.deal_num] == [Out.deal_tracking_num]");
 	}
 	
 	/**
@@ -777,16 +786,15 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	}
 	
 	private ConstTable createDocumentInfoTable(Session session, Table runtimeTable) {
-		StringBuilder allDealTrackingNums = createTranNumList(runtimeTable, "deal_tracking_num");
+		StringBuilder allTranNums = createIDList(runtimeTable, "tran_num");
 		// assumption: there is only one invoice per deal
 		int docTypeInvoiceId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentType, "Invoice");
 		int docStatusSentToCpId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Sent to CP");
 		int docStatusReceivedId = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "2 Received");
-		int docStatusCancelled = session.getStaticDataFactory().getId(EnumReferenceTable.StldocDocumentStatus, "Cancelled");
 		String sql = 
 				"\nSELECT DISTINCT h.document_num AS endur_doc_num"
 			+ 	"\n	, h.doc_status AS endur_doc_status"
-			+   "\n	, d.deal_tracking_num"
+			+   "\n	, d.tran_num"
 			+ 	"\n	, d.ins_para_seq_num"
 			+   "\n , d.cflow_type AS pymt_type"
 			+   "\n , d.event_num"
@@ -812,12 +820,11 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 			+   "\nLEFT OUTER JOIN stldoc_info_h m "
 			+ 	"\n	ON m.document_num = d.document_num AND m.type_id = 20008" // VAT Cancel Doc Num
 			+   "\n   AND m.last_update = (SELECT MAX (m2.last_update) FROM stldoc_info_h m2 WHERE m2.document_num = d.document_num AND m2.type_id = 20008)"
-			+	"\nWHERE d.deal_tracking_num IN (" + allDealTrackingNums.toString() + ")"
+			+	"\nWHERE d.tran_num IN (" + allTranNums.toString() + ")"
 			+	"\n AND h.doc_type = " + docTypeInvoiceId 
-			+   "\n AND h.doc_status IN (" + docStatusCancelled + ", " + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
+			+   "\n AND h.doc_status IN (" + docStatusReceivedId + ", " + docStatusSentToCpId + ")"
 			;
-		Table docData = session.getIOFactory().runSQL(sql);
-		return docData;
+		return session.getIOFactory().runSQL(sql);
 	}
 	
 	/**
@@ -850,10 +857,9 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 	 * @param colName the column name containing the tran num. Has to be of type Int
 	 * @return
 	 */
-	private StringBuilder createTranNumList(Table runtimeTable, 
-			String colName) {
-		Set<Integer> tranNums = new HashSet<Integer>(runtimeTable.getRowCount());
-		for (int tranNum : runtimeTable.getColumnValuesAsInt(colName)) {
+	private StringBuilder createIDList(Table runtimeTable, String column) {
+		Set<Integer> tranNums = new HashSet<>(runtimeTable.getRowCount());
+		for (int tranNum : runtimeTable.getColumnValuesAsInt(column)) {
 			tranNums.add(tranNum);
 		}
 		StringBuilder allTranNums = new StringBuilder();
@@ -1113,19 +1119,21 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 		for (Entry<String, MappingTableColumnConfiguration>  mtcc : mappingTableColConfig.entrySet()) {
 			Object value = mappingTable.getValue(mtcc.getKey(), rowNumMappingTable);
 			if (mtcc.getValue().getMappingColType() == MappingConfigurationColType.OUTPUT) {
+				StringBuilder sb=null;
 				if (mtcc.getValue().getColType() == EnumColType.String) {
 					String stringValue = (String) value;
-					String[] tokens = stringValue.split("\\+");
-					StringBuilder sb = new StringBuilder();
-					for (String token : tokens) {
-						token = token.trim();
-						if (token.startsWith("%") &&
-								token.endsWith("%")) {
-								String srcColName = token.substring(1, token.length()-1);
-								sb.append(runtimeTable.getDisplayString(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable));
+					if (stringValue.contains("?") && stringValue.contains(":")) {
+						String condition = stringValue.substring(0, stringValue.indexOf("?"));
+						String assignmentIfTrue = stringValue.substring(stringValue.indexOf("?")+1,
+								stringValue.indexOf(":"));
+						String assignmentIfFalse = stringValue.substring(stringValue.indexOf(":")+1);
+						if (processCondition(runtimeTable, rowNumRuntimeTable, condition)) {
+							sb = processAssignment(runtimeTable, rowNumRuntimeTable, assignmentIfTrue);
 						} else {
-							sb.append(token);
+							sb = processAssignment(runtimeTable, rowNumRuntimeTable, assignmentIfFalse);							
 						}
+					} else {
+						 sb = processAssignment(runtimeTable, rowNumRuntimeTable, stringValue);						
 					}
 					value = sb.toString();
 				}
@@ -1133,6 +1141,63 @@ public abstract class AbstractShanghaiAccountingUdsr extends AbstractSimulationR
 					rowNumRuntimeTable, value);
 			}
 		}
+	}
+
+	private boolean processCondition(Table runtimeTable, int rowNumRuntimeTable, String condition) {
+		if (!condition.contains("==")) {
+			throw new RuntimeException ("Condition '" + condition + "' does not contain the comparison operator ==");
+		}
+		String left = condition.substring(0, condition.indexOf("=="));
+		String right = condition.substring(condition.indexOf("==")+2);
+
+		left = left.trim();
+		if (left.startsWith("%") && left.endsWith("%")) {
+			String srcColName = left.substring(1, left.length()-1);
+			left = runtimeTable.getDisplayString(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable);
+		}
+
+		right = right.trim();
+		if (right.startsWith("%") && right.endsWith("%")) {
+			String srcColName = right.substring(1, right.length()-1);
+			right = runtimeTable.getDisplayString(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable);
+		}
+		return left.equalsIgnoreCase(right);
+	}
+
+	public StringBuilder processAssignment(Table runtimeTable, int rowNumRuntimeTable, String stringValue) {
+		StringBuilder sb = new StringBuilder();
+		if (!stringValue.contains("*")) {
+			String[] tokens = stringValue.split("\\+");
+			for (String token : tokens) {
+				token = token.trim();
+				if (token.startsWith("%") &&
+						token.endsWith("%")) {
+						String srcColName = token.substring(1, token.length()-1);
+						sb.append(runtimeTable.getDisplayString(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable));
+				} else {
+					sb.append(token);
+				}
+			}
+		}  else {
+			double currentValue = 1.0d;
+			String[] tokens = stringValue.split("\\*");
+			if (tokens.length < 2) {
+				sb.append(stringValue);
+			} else {
+				for (String token : tokens) {
+					token = token.trim();
+					if (token.startsWith("%") &&
+							token.endsWith("%")) {
+							String srcColName = token.substring(1, token.length()-1);
+							currentValue *= runtimeTable.getValueAsDouble(runtimeTable.getColumnId(srcColName), rowNumRuntimeTable);
+					} else {
+						currentValue *= Double.parseDouble(token);
+					}
+				}
+				sb.append(currentValue);
+			}
+		}
+		return sb;
 	}
 
 

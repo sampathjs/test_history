@@ -3,6 +3,7 @@ package com.matthey.openlink.pnl;
 
 import java.util.Vector;
 
+import com.matthey.openlink.generic.ConstRepoRetrieval;
 import com.matthey.openlink.jde_extract.IJdeDataManager;
 import com.olf.openjvs.DBUserTable;
 import com.olf.openjvs.DBase;
@@ -327,7 +328,7 @@ public abstract class PNLMarketDataRecorderBase implements IScript {
     	Vector<PNL_MarketDataEntry> dataEntries = new Vector<PNL_MarketDataEntry>();
     	
     	int today = OCalendar.today();
-    	int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, "LIBOR.USD");    	
+    	int liborIndex = Ref.getValue(SHM_USR_TABLES_ENUM.INDEX_TABLE, ConstRepoRetrieval.getLiborIndexName());    	
     	
     	// Add data entries for leg one and leg zero
     	dataEntries.add(new PNL_MarketDataEntry());
