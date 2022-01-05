@@ -124,7 +124,7 @@
             <artifactId>TOMS-EndurConnector</artifactId>
             <version>1.0.0</version>
             <scope>runtime</scope>
-        </dependency>        
+        </dependency>
     </dependencies>
     <build>
         <plugins>
