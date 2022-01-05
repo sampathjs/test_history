@@ -2,6 +2,14 @@ package com.matthey.pmm.tradebooking.app;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import javax.swing.JFrame;
 import javax.swing.JRootPane;
@@ -36,16 +44,44 @@ public class TradeBookingParam extends AbstractGenericScript {
         paramTaskReturn.setTable("Files", 0, fileList);
         
         // ask user to select a file.
-        String selectedFile = displayDialog(context);
-        if (selectedFile != null) {
-        	fileList.addRow();
-        	fileList.setString(0, 0, selectedFile);
+        String[] selectedFiles = displayDialog(context);
+        if (selectedFiles != null && selectedFiles.length > 0) {
+        	for (String selectedFile : selectedFiles) {
+            	Path path = Paths.get(selectedFile);
+            	if (!path.toFile().isDirectory()) {
+                	fileList.addRow();
+                	fileList.setString(0, 0, selectedFile);
+            	} else {
+            		addDirectoryStructure (fileList, path);
+            	}        		
+        	}
         	paramTaskReturn.setValue("Succeeded", 0, 1);
-        }        
+        }
     	return paramTaskReturn;
     }
     
-	protected String displayDialog (Context context) {
+	protected void addDirectoryStructure(Table fileList, Path path) {
+	    FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
+	        @Override
+	        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+	            throws IOException {
+	        	int newRow = fileList.addRow().getNumber();
+	        	if (!attrs.isDirectory()) {
+		        	fileList.setString (0, newRow, file.toFile().getAbsolutePath());	        		
+	        	} else {
+	        		addDirectoryStructure (fileList, file);
+	        	}
+	          return FileVisitResult.CONTINUE;
+	        }
+	      };
+	      try {
+	          Files.walkFileTree(path, fv);
+	        } catch (IOException e) {
+	        	throw new RuntimeException ("IO Error while loading directory structure: " + e.toString());
+	    }
+	}
+
+	protected String[] displayDialog (Context context) {
 		final Display display = context.getDisplay();
 		String abOutdir = context.getSystemSetting("AB_OUTDIR");
 		FileSelection dialog = new FileSelection("Select Input File for Trade Booking", abOutdir, display);

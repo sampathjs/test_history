@@ -81,6 +81,28 @@ public class FileSelection extends JDialog implements ActionListener {
 		fileChooserOpener.setVerticalAlignment(SwingConstants.TOP);
 		fileChooserOpener.addActionListener(x -> {
 			JFileChooser fc = new JFileChooser(selectedFile.getText());
+			fc.setMultiSelectionEnabled(true);
+			int returnVal = fc.showOpenDialog(this);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+	            File[] files = fc.getSelectedFiles();
+	            StringBuilder allFiles = new StringBuilder();
+	            for (int i=0; i < files.length; i++) {
+	            	if (i > 0) {
+		            	allFiles.append(", ");	            		
+	            	}
+	            	allFiles.append(files[i].getPath());
+	            }
+	            selectedFile.setText(allFiles.toString());
+	        } else {
+	        	// cancelled
+	        }
+		});
+		JButton directoryChooserOpener = new JButton ("Select Directory Structure");
+		fileChooserOpener.setBounds(10, 40, size.width-20, 20);
+		fileChooserOpener.setVerticalAlignment(SwingConstants.TOP);
+		fileChooserOpener.addActionListener(x -> {
+			JFileChooser fc = new JFileChooser(selectedFile.getText());
+			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			int returnVal = fc.showOpenDialog(this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 	            File file = fc.getSelectedFile();
@@ -89,7 +111,9 @@ public class FileSelection extends JDialog implements ActionListener {
 	        	// cancelled
 	        }
 		});
+		
 		contentPanel.add(fileChooserOpener);
+		contentPanel.add(directoryChooserOpener);
 		contentPanel.add(selectedFile);
 
 		JLabel filler = new JLabel("<html><body></body></html>");
@@ -152,8 +176,8 @@ public class FileSelection extends JDialog implements ActionListener {
 		this.cancel = cancel;
 	}
 	
-	public synchronized String getSelectedFile () {
-		return selectedFile.getText();
+	public synchronized String[] getSelectedFile () {
+		return selectedFile.getText().split(", ");
 	}
 
 	public Dimension getSize() {
