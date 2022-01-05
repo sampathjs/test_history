@@ -1,0 +1,28 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 http://maven.apache.org/xsd/assembly-2.1.0.xsd">
+    <id>endur-project</id>
+    <formats>
+        <format>dir</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <files>
+        <file>
+            <source>deployment/jproject.classpath</source>
+            <outputDirectory>/trade-booking</outputDirectory>
+        </file>
+        <file>
+            <source>deployment/trade-booking.out</source>
+        </file>
+    </files>
+    <fileSets>
+        <fileSet>
+            <directory>src/main/java/com/matthey/pmm/tradebooking/scripts</directory>
+            <outputDirectory>/trade-booking</outputDirectory>
+        </fileSet>
+    </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/dependencies</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+</assembly>
