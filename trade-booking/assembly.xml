@@ -8,16 +8,16 @@
     <files>
         <file>
             <source>deployment/jproject.classpath</source>
-            <outputDirectory>/trade-booking</outputDirectory>
+            <outputDirectory>/trade_booking</outputDirectory>
         </file>
         <file>
-            <source>deployment/trade-booking.out</source>
+            <source>deployment/trade_booking.out</source>
         </file>
     </files>
     <fileSets>
         <fileSet>
             <directory>src/main/java/com/matthey/pmm/tradebooking/scripts</directory>
-            <outputDirectory>/trade-booking</outputDirectory>
+            <outputDirectory>/trade_booking</outputDirectory>
         </fileSet>
     </fileSets>
     <dependencySets>
