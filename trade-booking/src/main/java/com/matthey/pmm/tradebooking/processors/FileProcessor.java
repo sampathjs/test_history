@@ -5,12 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 
-import com.matthey.pmm.EndurLoggerFactory;
-import com.matthey.pmm.tradebooking.app.TradeBookingMain;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
-import com.olf.openrisk.table.EnumColType;
-import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
@@ -27,16 +23,22 @@ public class FileProcessor {
 
 	private boolean firstLine=true;
 	private Transaction newDeal= null;
+	
+	private final int runId;
+	private final int dealCounter;
 
 	private final ConstRepository constRepo;
 	private boolean executeDebugCommands;
 	private LogTable logTable;
 	private int currentLine;
 
-	public FileProcessor(final Session session, ConstRepository constRepo, Logger logger) {
+	public FileProcessor(final Session session, final ConstRepository constRepo, final Logger logger,
+			final int runId, final int dealCounter) {
 		this.logger = logger;
 		this.session = session;
 		this.constRepo = constRepo;
+		this.runId = runId;
+		this.dealCounter = dealCounter;
 		try {
 			executeDebugCommands = Boolean.parseBoolean(constRepo.getStringValue("executeDebugCommands", "false"));			
 		} catch (Exception ex) {			
@@ -46,23 +48,37 @@ public class FileProcessor {
 			executeDebugCommands = false;
 		}
 	}
+	
+	public int getLatestDealTrackingNum () {
+		return newDeal != null? newDeal.getDealTrackingId():-1;		
+	}
 
-	public void processFile (String fullPath) {
-		logTable = new LogTable(session, fullPath);
+	public boolean processFile (String fullPath) {
+		logTable = new LogTable(session, logger, fullPath, runId, dealCounter);
 		firstLine = true;
 		newDeal = null;
 		currentLine = 0;
 		try (Stream<String> stream = Files.lines(Paths.get(fullPath))) {
-			stream.forEachOrdered(this::processLine);
+			try {
+				stream.forEachOrdered(this::processLine);
+			} catch (Exception ex) {
+				logger.error("Error while processing file '" + fullPath + "': " + ex.toString());
+				for (StackTraceElement ste : ex.getStackTrace()) {
+					logger.error(ste.toString());
+				}
+				return false;
+			}
 		} catch (IOException e) {
 			logger.error("Error while reading file '" + fullPath + "': " + e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
 				logger.error(ste.toString());
-			} 
+			}
 		}
+		logTable.persistToDatabase();
 		if (executeDebugCommands) {
 			logTable.showLogTableToUser();
 		}
+		return true;
 	}
 
 	private void processLine (String line) {

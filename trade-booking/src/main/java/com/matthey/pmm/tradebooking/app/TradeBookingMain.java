@@ -1,5 +1,8 @@
 package com.matthey.pmm.tradebooking.app;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -7,7 +10,7 @@ import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
 import com.matthey.pmm.EndurLoggerFactory;
-import com.matthey.pmm.tradebooking.processors.FileProcessor;
+import com.matthey.pmm.tradebooking.processors.RunProcessor;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.ConstTable;
@@ -31,25 +34,21 @@ public class TradeBookingMain extends AbstractGenericScript {
     /**
      * @param context
      *            the current script context
-     * @param table
+     * @param params
      *            the input parameters
      * @return a <code>Table</code> or null
      */
 	@Override
-    public Table execute(final Session session, final ConstTable table) {
+    public Table execute(final Session session, final ConstTable params) {
     	init(session);
     	try {
-        	if (!checkParamTable(table)) {
+        	if (!checkParamTable(params)) {
         		return null;
         	}
-        	FileProcessor fileProcessor = new FileProcessor(session, constRepo, logger);
-        	Table fileTable = table.getTable("Files", 0);
-        	for (int row = 0; row < table.getRowCount(); row++) {
-        		String fileNameToProces = fileTable.getString("filename", row);
-        		logger.info("Now processing file' " + fileNameToProces + "'");
-        		fileProcessor.processFile(fileNameToProces);
-        		logger.info("Processing of ' " + fileNameToProces + "' finished successfully");
-        	}
+        	List<String> files = params.getTable("Files", 1).getRows().stream().map(x -> x.getString("filename")).collect(Collectors.toList());
+        	
+        	RunProcessor runProcessor = new RunProcessor(session, logger, constRepo, params.getString("Client", 0), files);
+        	runProcessor.processRun();
         	return null;    		
     	} catch (Exception ex) {
     		logger.error("Deal Booking Process Failed: " + ex.toString() + "\n " + ex.getMessage());
@@ -65,8 +64,8 @@ public class TradeBookingMain extends AbstractGenericScript {
 			logger.error("Row count on parameter table is " + table.getRowCount() + " expected is exactly 1");
 			return false;
 		}
-		if (table.getColumnCount() != 2) {
-			logger.error("Column count on parameter table is " + table.getColumnCount() + " expected is exactly 2");
+		if (table.getColumnCount() != 3) {
+			logger.error("Column count on parameter table is " + table.getColumnCount() + " expected is exactly 3");
 			return false;
 		}
 		if (!table.isValidColumn("Succeeded")) {
@@ -76,6 +75,11 @@ public class TradeBookingMain extends AbstractGenericScript {
 		
 		if (!table.isValidColumn("Files")) {
 			logger.error("Column 'Files' on parameter table is not valid");
+			return false;
+		}
+
+		if (!table.isValidColumn("Client")) {
+			logger.error("Column 'Client' on parameter table is not valid");
 			return false;
 		}
 		
@@ -88,7 +92,12 @@ public class TradeBookingMain extends AbstractGenericScript {
 			logger.error("Column 'Files' on parameter table is not of type Table");			
 			return false;
 		}
-		
+
+		if (table.getColumn("Client").getType() != EnumColType.String) {
+			logger.error("Column 'Client' on parameter table is not of type String");			
+			return false;
+		}
+
 		if (table.getInt("Succeeded", 0) != 1) {
 			logger.info("Nothing to process as param script did not succeed or was cancelled");
 			return false;
@@ -137,6 +146,4 @@ public class TradeBookingMain extends AbstractGenericScript {
 			throw new RuntimeException (e);
 		}
 	}
-    
-
 }
