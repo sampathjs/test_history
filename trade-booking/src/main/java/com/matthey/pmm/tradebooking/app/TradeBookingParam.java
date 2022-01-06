@@ -38,15 +38,16 @@ public class TradeBookingParam extends AbstractGenericScript {
     	Table paramTaskReturn = context.getTableFactory().createTable("Trade Booking Param Return Table");
         paramTaskReturn.addColumn("Succeeded", EnumColType.Int);
         paramTaskReturn.addColumn("Files", EnumColType.Table);
+        paramTaskReturn.addColumn("Client", EnumColType.String);
         paramTaskReturn.addRow();
         Table fileList = context.getTableFactory().createTable("File List");
         fileList.addColumn("filename", EnumColType.String);        
         paramTaskReturn.setTable("Files", 0, fileList);
         
         // ask user to select a file.
-        String[] selectedFiles = displayDialog(context);
-        if (selectedFiles != null && selectedFiles.length > 0) {
-        	for (String selectedFile : selectedFiles) {
+        DialogReturn dr = displayDialog(context);
+        if (dr.selectedFiles != null && dr.selectedFiles.length > 0) {
+        	for (String selectedFile : dr.selectedFiles) {
             	Path path = Paths.get(selectedFile);
             	if (!path.toFile().isDirectory()) {
                 	fileList.addRow();
@@ -55,6 +56,7 @@ public class TradeBookingParam extends AbstractGenericScript {
             		addDirectoryStructure (fileList, path);
             	}        		
         	}
+        	paramTaskReturn.setValue("Client", 0, dr.client);
         	paramTaskReturn.setValue("Succeeded", 0, 1);
         }
     	return paramTaskReturn;
@@ -81,7 +83,7 @@ public class TradeBookingParam extends AbstractGenericScript {
 	    }
 	}
 
-	protected String[] displayDialog (Context context) {
+	protected DialogReturn displayDialog (Context context) {
 		final Display display = context.getDisplay();
 		String abOutdir = context.getSystemSetting("AB_OUTDIR");
 		FileSelection dialog = new FileSelection("Select Input File for Trade Booking", abOutdir, display);
@@ -110,8 +112,18 @@ public class TradeBookingParam extends AbstractGenericScript {
 			throw t;
 		}
 		if (dialog.isOk()) {
-			return dialog.getSelectedFile();
+			return new DialogReturn (dialog.getSelectedFile(), dialog.getClient());
 		} 
 		return null;
+	}
+	
+	private static class DialogReturn {
+		final String[] selectedFiles;
+		final String client;
+		
+		private DialogReturn (final String[] selectedFiles, final String client) {
+			this.selectedFiles = selectedFiles;
+			this.client = client;
+		}		
 	}
 }
