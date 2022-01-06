@@ -48,24 +48,37 @@ public class FileProcessor {
 			executeDebugCommands = false;
 		}
 	}
+	
+	public int getLatestDealTrackingNum () {
+		return newDeal != null? newDeal.getDealTrackingId():-1;		
+	}
 
-	public void processFile (String fullPath) {
-		logTable = new LogTable(session, fullPath, runId, dealCounter);
+	public boolean processFile (String fullPath) {
+		logTable = new LogTable(session, logger, fullPath, runId, dealCounter);
 		firstLine = true;
 		newDeal = null;
 		currentLine = 0;
 		try (Stream<String> stream = Files.lines(Paths.get(fullPath))) {
-			stream.forEachOrdered(this::processLine);
+			try {
+				stream.forEachOrdered(this::processLine);
+			} catch (Exception ex) {
+				logger.error("Error while processing file '" + fullPath + "': " + ex.toString());
+				for (StackTraceElement ste : ex.getStackTrace()) {
+					logger.error(ste.toString());
+				}
+				return false;
+			}
 		} catch (IOException e) {
 			logger.error("Error while reading file '" + fullPath + "': " + e.toString());
 			for (StackTraceElement ste : e.getStackTrace()) {
 				logger.error(ste.toString());
-			} 
+			}
 		}
 		logTable.persistToDatabase();
 		if (executeDebugCommands) {
 			logTable.showLogTableToUser();
 		}
+		return true;
 	}
 
 	private void processLine (String line) {

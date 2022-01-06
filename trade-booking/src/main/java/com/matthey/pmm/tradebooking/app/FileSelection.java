@@ -55,6 +55,12 @@ public class FileSelection extends JDialog implements ActionListener {
 	private JTextField selectedFile;
 
 	/**
+	 * Textfield containing the Client to be recorded in the auditing table.
+	 */
+	private JTextField clientTextField;
+
+	
+	/**
 	 * Creates the dialog. 
 	 * @param message the message shown to the user
 	 * @param display the display object from the context.
@@ -116,6 +122,15 @@ public class FileSelection extends JDialog implements ActionListener {
 		contentPanel.add(directoryChooserOpener);
 		contentPanel.add(selectedFile);
 
+		JLabel clientLabel = new JLabel ("Client");
+		clientLabel.setBounds(10, 40, size.width-20, 20);
+		clientLabel.setVerticalAlignment(SwingConstants.TOP);
+		contentPanel.add(clientLabel);
+		
+		clientTextField = new JTextField ("Manual User Run");
+		clientTextField.setBounds(10, 40, size.width-20, 20);
+		contentPanel.add(clientLabel);		
+		
 		JLabel filler = new JLabel("<html><body></body></html>");
 		filler.setBounds(10, 120, size.width-80, 20);
 		filler.setVerticalAlignment(SwingConstants.TOP);
@@ -174,6 +189,10 @@ public class FileSelection extends JDialog implements ActionListener {
 	
 	public synchronized void setCancel(boolean cancel) {
 		this.cancel = cancel;
+	}
+	
+	public synchronized String getClient () {
+		return clientTextField.getText();
 	}
 	
 	public synchronized String[] getSelectedFile () {
