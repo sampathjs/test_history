@@ -42,14 +42,7 @@ public class TradeBookingMain extends AbstractGenericScript {
         	if (!checkParamTable(table)) {
         		return null;
         	}
-        	FileProcessor fileProcessor = new FileProcessor(session, constRepo, logger);
-        	Table fileTable = table.getTable("Files", 0);
-        	for (int row = 0; row < table.getRowCount(); row++) {
-        		String fileNameToProces = fileTable.getString("filename", row);
-        		logger.info("Now processing file' " + fileNameToProces + "'");
-        		fileProcessor.processFile(fileNameToProces);
-        		logger.info("Processing of ' " + fileNameToProces + "' finished successfully");
-        	}
+        	
         	return null;    		
     	} catch (Exception ex) {
     		logger.error("Deal Booking Process Failed: " + ex.toString() + "\n " + ex.getMessage());
