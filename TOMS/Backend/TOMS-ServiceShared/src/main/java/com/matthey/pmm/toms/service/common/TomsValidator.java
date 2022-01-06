@@ -623,6 +623,15 @@ public class TomsValidator {
     	if (updatedBy.isEmpty() ) {
     		throw new UnknownEntityException (clazz, method, argument + ".idUpdatedByUser" , "User", "" + newComment.idUpdatedByUser());
     	}
+    	
+    	verifyDefaultReference (newComment.idLifeCycle(),
+				Arrays.asList(DefaultReferenceType.LIFECYCLE_STATUS),
+				clazz, method , argument + ".idLifecycle", false);
+    	
+    	verifyDefaultReference (newComment.idAssociatedAction(),
+				Arrays.asList(DefaultReferenceType.ACTION),
+				clazz, method , argument + ".idAssociatedAction", true);
+    	
 	}
 	
 	public void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, OrderTo oldLimitOrder) {
