@@ -43,7 +43,8 @@ public enum DefaultReferenceType {
 	EMAIL_STATUS(32, "Email Status", 3200l),
 	EMAIL_CATEGORY(33, "Email Category", 3300l),
 	FILL_STATUS(34, "Fill Status", 3400l),
-	LIFECYCLE_STATUS(35, "Lifecycle Status", 3500l)
+	LIFECYCLE_STATUS(35, "Lifecycle Status", 3500l),
+	ACTION(36, "Action", 3600l)
 	;
 	
 	private final ReferenceTypeTo refType;

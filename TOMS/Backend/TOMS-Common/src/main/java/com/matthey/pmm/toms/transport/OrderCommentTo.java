@@ -29,7 +29,7 @@ public abstract class OrderCommentTo {
 	 */	
 	@ApiModelProperty(value = "The order management system internal unique ID for this comment",
 			allowEmptyValue = false,
-			required = true)	
+			required = true)
 	public abstract long id();
 
     @Auxiliary
@@ -82,4 +82,19 @@ public abstract class OrderCommentTo {
 		required = true,
 	allowableValues = "290, 291, 292, 293")
     public abstract long idLifeCycle();
+    
+    @Auxiliary
+    @Nullable
+	@ApiModelProperty(value = "The action that is commented by this comment. Allowed values are of reference type #36 (Action): 379 (Order Rejection), 380 (Order Pull), 381 (Order Cancel)",
+		allowEmptyValue = true,
+		required = false,
+	allowableValues = "379, 380, 381")
+    public abstract Long idAssociatedAction();
+    
+    @Auxiliary
+    @Nullable
+	@ApiModelProperty(value = "The desctiption of the action associated with this comment. Provided by the backend, but it is not consumed by the backend.",
+		allowEmptyValue = true,
+		required = false)
+    public abstract String displayStringAssociatedAction();
 }

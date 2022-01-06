@@ -51,6 +51,7 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 				.displayStringCreatedByUser(entity.getCreatedByUser() != null?entity.getCreatedByUser().getLastName():null)
 				.displayStringUpdatedByUser(entity.getUpdatedByUser() != null?entity.getUpdatedByUser().getLastName():null)
 				.idLifeCycle(entity.getLifecycleStatus().getId())
+				.idAssociatedAction(entity.getAssociatedAction() != null?entity.getAssociatedAction().getId():null)
 				.build();
 	}
 	
@@ -60,6 +61,7 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 		User createdBy = loadUser(to, to.idCreatedByUser());
 		User updatedBy = loadUser(to, to.idUpdatedByUser());
 		Reference lifeCycleStatus = loadRef(to, to.idLifeCycle());
+		Reference associatedAction = to.idAssociatedAction() != null?loadRef(to, to.idAssociatedAction()):null;
 		Optional<OrderComment> existingOrderComment = entityRepo.findById(to.id());
 		
 		if (existingOrderComment.isPresent()) {
@@ -69,10 +71,11 @@ public class OrderCommentConverter extends EntityToConverter<OrderComment, Order
 			existingOrderComment.get().setCreatedByUser(createdBy);
 			existingOrderComment.get().setUpdatedByUser(updatedBy);
 			existingOrderComment.get().setLifecycleStatus(lifeCycleStatus);
+			existingOrderComment.get().setAssociatedAction(associatedAction);		
 			return existingOrderComment.get();
 		}
 		OrderComment newOrderComment =  new OrderComment(to.commentText(), parseDateTime(to, to.createdAt()), 
-				createdBy, parseDateTime(to, to.lastUpdate()), updatedBy, lifeCycleStatus);
+				createdBy, parseDateTime(to, to.lastUpdate()), updatedBy, lifeCycleStatus, associatedAction);
 		newOrderComment = entityRepo.save(newOrderComment);
 		return newOrderComment;
 	}

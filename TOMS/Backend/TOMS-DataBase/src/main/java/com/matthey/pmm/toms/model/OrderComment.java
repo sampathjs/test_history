@@ -58,6 +58,11 @@ public class OrderComment {
 	@JoinColumn(name="lifecycle_status_reference_id", nullable = false)
 	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.LIFECYCLE_STATUS)
 	private Reference lifecycleStatus;
+
+	@OneToOne(fetch=FetchType.EAGER)
+	@JoinColumn(name="associated_action_reference_id", nullable = true)
+	@ReferenceTypeDesignator(referenceTypes = DefaultReferenceType.ACTION)
+	private Reference associatedAction;
 	
 	/**
 	 * For JPA purposes only. Do not use.
@@ -67,13 +72,15 @@ public class OrderComment {
 	}
 
 	public OrderComment(final String commentText, final Date createdAt, final User createdByUser,
-			final Date lastUpdate, final User updatedByUser, final Reference lifecycleStatus) {
+			final Date lastUpdate, final User updatedByUser, final Reference lifecycleStatus,
+			final Reference associatedAction) {
 		this.commentText = commentText;
 		this.createdAt = createdAt;
 		this.createdByUser = createdByUser;
 		this.lastUpdate = lastUpdate;
 		this.updatedByUser = updatedByUser;
-		this.lifecycleStatus = lifecycleStatus;		
+		this.lifecycleStatus = lifecycleStatus;
+		this.associatedAction = associatedAction;
 	}
 
 	public Long getId() {
@@ -130,6 +137,14 @@ public class OrderComment {
 
 	public void setLifecycleStatus(Reference lifecycleStatus) {
 		this.lifecycleStatus = lifecycleStatus;
+	}
+
+	public Reference getAssociatedAction() {
+		return associatedAction;
+	}
+
+	public void setAssociatedAction(Reference associatedAction) {
+		this.associatedAction = associatedAction;
 	}
 
 	@Override

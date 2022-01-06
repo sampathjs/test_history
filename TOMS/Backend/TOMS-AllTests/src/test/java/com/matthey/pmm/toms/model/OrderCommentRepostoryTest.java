@@ -52,11 +52,13 @@ public class OrderCommentRepostoryTest extends AbstractRepositoryTestBase<OrderC
 			final List<OrderComment> comments = Arrays.asList(new OrderComment("Comment",
 						new Date(), userConv.toManagedEntity(TestUser.JACOB_SMITH.getEntity()), 
 						new Date(), userConv.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),
-						referenceCon.toManagedEntity(DefaultReference.DELETION_FLAG_NOT_DELETED.getEntity())),
+						referenceCon.toManagedEntity(DefaultReference.DELETION_FLAG_NOT_DELETED.getEntity()),
+						referenceCon.toManagedEntity(DefaultReference.ACTION_CANCEL.getEntity())),
 					new OrderComment("Comment 2",
 						new Date(), userConv.toManagedEntity(TestUser.JACOB_SMITH.getEntity()), 
 						new Date(), userConv.toManagedEntity(TestUser.ANDREW_BAYNES.getEntity()),
-						referenceCon.toManagedEntity(DefaultReference.DELETION_FLAG_NOT_DELETED.getEntity()))	
+						referenceCon.toManagedEntity(DefaultReference.DELETION_FLAG_NOT_DELETED.getEntity()),
+						null)	
 					);
 			return comments;
 		};

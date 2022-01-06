@@ -9,10 +9,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.matthey.pmm.toms.model.LimitOrder;
-import com.matthey.pmm.toms.model.Order;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
 import com.matthey.pmm.toms.transport.DatabaseFileTo;
@@ -171,14 +168,16 @@ public class InsertTestValues implements CustomSqlChange {
 	private Collection<? extends SqlStatement> testOrderCommentInsert(Database database) {
 		List<SqlStatement> results = new ArrayList<> (TestCreditCheck.values().length);
 		String insertTemplate = 
-				"INSERT INTO dbo.order_comment (order_comment_id, comment_text, created_at, created_by_user_id, last_update, updated_by_user_id, lifecycle_status_reference_id) VALUES (%s, '%s', %s, %s, %s, %s, %s)";
+				"INSERT INTO dbo.order_comment (order_comment_id, comment_text, created_at, created_by_user_id, last_update, updated_by_user_id, lifecycle_status_reference_id, associated_action_reference_id) "
+				+ "VALUES (%s, '%s', %s, %s, %s, %s, %s, %s)";
 		for (OrderCommentTo comment : TestOrderComment.asList()) {
 			Timestamp createdAt = convertDateTimeStringToTimestamp (comment, comment.createdAt()); 
 			Timestamp lastUpdate = convertDateTimeStringToTimestamp (comment, comment.lastUpdate()); 
 			results.add(new RawSqlStatement(String.format(insertTemplate, comment.id(), comment.commentText(), 
 					database.getDateTimeLiteral(createdAt), comment.idCreatedByUser(),
 					database.getDateTimeLiteral(lastUpdate), comment.idCreatedByUser(),
-					comment.idLifeCycle())));
+					comment.idLifeCycle(),
+					comment.idAssociatedAction())));
 		}
 		return results;		
 	}

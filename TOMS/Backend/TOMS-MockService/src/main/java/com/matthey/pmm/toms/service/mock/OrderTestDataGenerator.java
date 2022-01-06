@@ -302,11 +302,12 @@ public class OrderTestDataGenerator {
 		int orderCommentCount = (int)(Math.random()*(MAX_ORDER_COMMENT_COUNT+1));
 		List<OrderComment> newOrderComments = new ArrayList<>(orderCommentCount);
 		for (int i=0; i < orderCommentCount; i++) {
-			OrderComment newOrderComment = new OrderComment(null, null,  null,  null,  null,  null);
+			OrderComment newOrderComment = new OrderComment(null, null,  null,  null,  null,  null, null);
 			newOrderComment.setCommentText(selectOneOf(Arrays.asList("Example Comment", "Another Example Comment", "More comments", "Even more comments"), false));
 			newOrderComment.setCreatedAt(randomDate(false));
 			newOrderComment.setCreatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
 			newOrderComment.setLifecycleStatus(selectReferenceValue(DefaultReferenceType.LIFECYCLE_STATUS, false));
+			newOrderComment.setAssociatedAction(selectReferenceValue(DefaultReferenceType.ACTION, false));
 			newOrderComment.setLastUpdate(randomDate(false));
 			newOrderComment.setUpdatedByUser(userConverter.toManagedEntity(selectOneOf(TestUser.asList(), false)));
 			newOrderComment = orderCommentRepo.save(newOrderComment);

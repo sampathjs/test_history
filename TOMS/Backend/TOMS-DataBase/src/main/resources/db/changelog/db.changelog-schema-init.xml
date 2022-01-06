@@ -421,6 +421,9 @@
 			<column name="lifecycle_status_reference_id" type="int">
 				<constraints nullable="false" />
 			</column>
+			<column name="associated_action_reference_id" type="int">
+				<constraints nullable="true" />
+			</column>
 		</createTable>
 
 		<createSequence sequenceName="order_comment_id_seq"
@@ -442,6 +445,13 @@
 			baseColumnNames="lifecycle_status_reference_id"
 			baseTableName="order_comment"
 			constraintName="fk_lifecycle_status_reference_id" onDelete="NO ACTION"
+			onUpdate="NO ACTION" referencedColumnNames="reference_id"
+			referencedTableName="reference" validate="true" schemaName="dbo" />
+
+		<addForeignKeyConstraint
+			baseColumnNames="associated_action_reference_id"
+			baseTableName="order_comment"
+			constraintName="fk_associated_action_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
 			referencedTableName="reference" validate="true" schemaName="dbo" />
 
