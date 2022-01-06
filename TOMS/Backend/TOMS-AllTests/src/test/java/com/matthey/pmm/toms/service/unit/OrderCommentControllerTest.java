@@ -228,6 +228,18 @@ public class OrderCommentControllerTest {
 	}
 
 	@Test
+	public void testPostLimitOrderCommentForCancellation () {
+		long newCommentId = submitNewOrderComment (TestLimitOrder.TEST_IN_STATUS_CONFIRMED.getEntity(), TestOrderComment.TEST_COMMENT_FOR_INSERT_ACTION_CANCEL.getEntity());
+		Optional<OrderComment> newComment = commentRepo.findById(newCommentId);
+		assertThat(newComment).isNotEmpty();
+		assertThat(newComment.get().getCommentText()).isEqualTo(TestOrderComment.TEST_COMMENT_FOR_INSERT_ACTION_CANCEL.getEntity().commentText());
+		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_IN_STATUS_CONFIRMED.getEntity().id());
+		assertThat(order).isNotEmpty();
+		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_IN_STATUS_CONFIRMED.getEntity().version()+1);
+		assertThat(order.get().getOrderComments().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(newCommentId);
+	}
+	
+	@Test
 	public void testPostReferenceOrderComment () {
 		long newCommentId = submitNewOrderComment (TestReferenceOrder.TEST_ORDER_1B.getEntity(), TestOrderComment.TEST_COMMENT_FOR_INSERT.getEntity());
 		Optional<OrderComment> newComment = commentRepo.findById(newCommentId);

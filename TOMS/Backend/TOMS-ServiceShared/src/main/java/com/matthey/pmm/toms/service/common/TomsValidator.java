@@ -588,11 +588,11 @@ public class TomsValidator {
 	
 	public void validateCommentFields(Class clazz, String method,
 			String argument, OrderCommentTo newComment, Order order, boolean isNew, OrderComment oldComment) {
-		if (order.getOrderStatus().getId() != DefaultOrderStatus.LIMIT_ORDER_PENDING.getEntity().id() &&
-			order.getOrderStatus().getId() != DefaultOrderStatus.REFERENCE_ORDER_PENDING.getEntity().id()) {
-			throw  new IllegalStateException(clazz, method, argument, order.getOrderStatus().getOrderStatusName().getValue(), 
-					order.toString(), "pending (comments can be modified if and only if the order is in status pending)");
-		}
+//		if (order.getOrderStatus().getId() != DefaultOrderStatus.LIMIT_ORDER_PENDING.getEntity().id() &&
+//			order.getOrderStatus().getId() != DefaultOrderStatus.REFERENCE_ORDER_PENDING.getEntity().id()) {
+//			throw  new IllegalStateException(clazz, method, argument, order.getOrderStatus().getOrderStatusName().getValue(), 
+//					order.toString(), "pending (comments can be modified if and only if the order is in status pending)");
+//		}
     	if (isNew) {
     		if (newComment.id() != 0) {
         		throw new IllegalIdException (clazz, method, argument  + ".id", "0", "" + newComment.id());
