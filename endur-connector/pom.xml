@@ -128,6 +128,12 @@
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
+            <artifactId>lims-endur-connector</artifactId>
+            <version>1.0.0</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.matthey.pmm</groupId>
             <artifactId>metal-rentals-endur-connector</artifactId>
             <version>1.0.0</version>
             <scope>runtime</scope>

@@ -66,9 +66,9 @@ public class LimsController extends AbstractLimsController {
 	@Cacheable({ "/SampleResults" })
 	@ApiOperation("Update Lims SampleResult")
 	@PostMapping("/SampleResults")
-	public String postLimsSampleResult1(
+	public String postLimsSampleResult(
 		@ApiParam(value = "sample Result XML", example = "<XML>", required = true) @RequestBody String sampleResultXML) {
-		logger.info("lims-service.LimsController.postLimsSampleResult1() started");
+		logger.info("lims-service.LimsController.postLimsSampleResult() started");
 		var sampleResult = endurConnector.postBody("/SampleResults", String.class, sampleResultXML);
 		logger.info("Post method postLimsResults completed return status :" + sampleResult);
 		return sampleResult;
