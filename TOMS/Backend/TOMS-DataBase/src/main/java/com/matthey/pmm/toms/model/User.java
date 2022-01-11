@@ -30,7 +30,7 @@ import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
  * @version 1.0
  */
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "user", 
+@Table(schema = DbConstants.SCHEMA_NAME, name = "user_entity", 
     indexes = { @Index(name = "i_user_id", columnList = "user_id", unique = true),
         @Index(name = "i_user_reference_lifecycle_status", columnList = "reference_lifecycle_status_id", unique = false),
         @Index(name = "i_user_role_id", columnList = "role_id", unique = false)})

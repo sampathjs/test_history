@@ -142,15 +142,15 @@
          validate="true" schemaName="dbo"/>
          
     <!-- User -->
-    <createIndex indexName="i_user_id" tableName="user" unique="true" schemaName="dbo">
+    <createIndex indexName="i_user_id" tableName="user_entity" unique="true" schemaName="dbo">
       <column name="user_id"/>
     </createIndex>  
     
-    <createIndex indexName="i_user_reference_lifecycle_status" tableName="user" unique="false" schemaName="dbo">
+    <createIndex indexName="i_user_reference_lifecycle_status" tableName="user_entity" unique="false" schemaName="dbo">
       <column name="reference_lifecycle_status_id"/>
     </createIndex>  
 
-    <createIndex indexName="i_user_role_id" tableName="user" unique="false" schemaName="dbo">
+    <createIndex indexName="i_user_role_id" tableName="user_entity" unique="false" schemaName="dbo">
       <column name="role_id"/>
     </createIndex>
 	

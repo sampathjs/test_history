@@ -24,5 +24,9 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Order
 
    @Query("SELECT o FROM Order o WHERE o.version = (SELECT MAX(o2.version) FROM Order o2 WHERE o2.orderId = o.orderId)") 
    List<Order> findLatest();
-
+   
+   @Query( "SELECT o FROM Order o JOIN FETCH o.fills AS f "
+		+ "\n  WHERE o.version = (SELECT MAX(o2.version) FROM LimitOrder o2 WHERE o2.orderId = o.orderId)"
+		+ "\n    AND f.fillStatus.id IN :allowedfillStatusIds")
+   List<Order> findAllLatestOrdersWithFillStatusIn (@Param("allowedfillStatusIds") List<Long> allowedfillStatusIds);
 }

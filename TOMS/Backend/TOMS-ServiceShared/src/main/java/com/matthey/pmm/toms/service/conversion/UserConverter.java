@@ -66,12 +66,20 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 						|| x.getType().getId() == DefaultReference.PARTY_TYPE_INTERNAL_LE.getEntity().id())
 				.map(x -> x.getId())
 				.collect(Collectors.toList());
+
+		List<Long> tradeablePortfolioIds = 
+				entity.getTradeablePortfolios()
+				.stream()
+				.map(x -> x.getId())
+				.collect(Collectors.toList());
+
 		
 		return ImmutableUserTo.builder()
 				.id(entity.getId())
 				.idLifecycleStatus(entity.getLifecycleStatus().getId())
 				.addAllTradeableCounterPartyIds(tradeableCounterPartyIds)
 				.addAllTradeableInternalPartyIds(tradeableInternalPartyIds)
+				.addAllTradeablePortfolioIds(tradeablePortfolioIds)
 				.email(entity.getEmail())
 				.firstName(entity.getFirstName())
 				.lastName(entity.getLastName())

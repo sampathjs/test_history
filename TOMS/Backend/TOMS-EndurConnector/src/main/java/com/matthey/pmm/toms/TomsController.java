@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.time.LocalDate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,9 +51,12 @@ import com.olf.openrisk.table.Table;
 @RestController
 @RequestMapping("/toms/endur/")
 public class TomsController {
-    private final Session session;
+    private static final Logger logger = LogManager.getLogger(TomsController.class);
 
+    private final Session session;
+    
     public TomsController(Session session) {
+    	logger.info("TomsController constructor started");
         this.session = session;
     }
     
@@ -62,6 +67,7 @@ public class TomsController {
      */
     @PostMapping("parties")
     public List<PartyTo> retrieveEndurPartyList (@RequestBody List<PartyTo> knownParties) {
+    	logger.info("Parties Endpoint Called");
     	PartyService service = new PartyService (session);
     	return service.createToListDifference(knownParties);
     }
@@ -74,50 +80,67 @@ public class TomsController {
      */
     @PostMapping("users")
     public List<UserTo> retrieveEndurUserList (@RequestBody TwoListsTo<UserTo, ReferenceTo> knownUsersAndPortfolios) {
+    	logger.info("Users Endpoint Called");
     	UserService service = new UserService(session, knownUsersAndPortfolios.listTwo());
     	return service.createToListDifference(knownUsersAndPortfolios.listOne());
     }
     
     @PostMapping("references")
     public List<ReferenceTo> retrieveReferences (@RequestBody List<ReferenceTo> knownReferenceData) {
+    	logger.info("References Endpoint Called");
     	// we are receiving a list with all references (of all reference types) so we split them up by type 
     	// and process each type separately and then merge back all sublists for the return value;
     	List<ReferenceTo> globalDiffList = new ArrayList<>(knownReferenceData.size()+10);
     	
+    	logger.info("Starting Buy/Sell Retrieval");
     	addReferenceDataDiff(knownReferenceData, globalDiffList, new BuySellService(session), Arrays.asList(DefaultReferenceType.BUY_SELL));
+    	logger.info("Starting Currency Retrieval");
     	addReferenceDataDiff(knownReferenceData, globalDiffList, new CurrenciesService(session), Arrays.asList(DefaultReferenceType.CCY_CURRENCY));
+    	logger.info("Starting Index Retrieval");
     	addReferenceDataDiff(knownReferenceData, globalDiffList, new IndexService(session), Arrays.asList(DefaultReferenceType.INDEX_NAME));
+    	logger.info("Starting Metal Form Retrieval");
     	addReferenceDataDiff(knownReferenceData, globalDiffList, new MetalFormService(session), Arrays.asList(DefaultReferenceType.METAL_FORM));
+    	logger.info("Starting Metal Location Retrieval");
     	addReferenceDataDiff(knownReferenceData, globalDiffList, new MetalLocationService(session), Arrays.asList(DefaultReferenceType.METAL_LOCATION));
+    	logger.info("Starting Portfolio Retrieval");
     	addReferenceDataDiff(knownReferenceData, globalDiffList, new PortfolioService(session), Arrays.asList(DefaultReferenceType.PORTFOLIO));
+    	logger.info("Starting Quantity Unit Retrieval");
     	addReferenceDataDiff(knownReferenceData, globalDiffList, new QuantityUnitService(session), Arrays.asList(DefaultReferenceType.QUANTITY_UNIT));
+    	logger.info("Starting Reference Source Retrieval");
     	addReferenceDataDiff(knownReferenceData, globalDiffList, new RefSourceService(session), Arrays.asList(DefaultReferenceType.REF_SOURCE));
+    	logger.info("Starting Ticker Retrieval");
     	addReferenceDataDiff(knownReferenceData, globalDiffList, new TickerService(session), Arrays.asList(DefaultReferenceType.TICKER));
+    	logger.info("Starting Yes/No Retrieval");
     	addReferenceDataDiff(knownReferenceData, globalDiffList, new YesNoService(session), Arrays.asList(DefaultReferenceType.YES_NO));
+    	logger.info("Finished all Retrievals");
     	
     	return globalDiffList;    	
     }
     
     @PostMapping("counterPartyTickerRule")
     public List<CounterPartyTickerRuleTo> retrieveCounterPartyTickerRules (List<ReferenceTo> references) {
+    	logger.info("Counter Party Ticker Rule Endpoint Called");
     	ValidationRuleService validationRuleService = new ValidationRuleService(session);
     	return validationRuleService.getCounterPartyTickerRules(references);
     }
 
     @PostMapping("tickerPortfolioRule")
     public List<TickerPortfolioRuleTo> retrieveTickerPortfolioRules (List<ReferenceTo> references) {
+    	logger.info("Ticker Portfolio Rule Endpoint Called");
     	ValidationRuleService validationRuleService = new ValidationRuleService(session);
     	return validationRuleService.getTickerPortfolioRules(references);
     }
 
     @PostMapping("tickerRefSourceRule")
     public List<TickerRefSourceRuleTo> retrieveTickerRefSourceRules (List<ReferenceTo> references) {
+    	logger.info("Ticker Reference Source Rule Endpoint Called");
     	ValidationRuleService validationRuleService = new ValidationRuleService(session);
     	return validationRuleService.getTickerRefSourceRules(references);
     }    
 
     @PostMapping("tickerFxRefSourceRule")
     public List<TickerFxRefSourceRuleTo> retrieveTickerFxRefSourceRules (List<ReferenceTo> references) {
+    	logger.info("Ticker FX Reference Source Rule Endpoint Called");
     	ValidationRuleService validationRuleService = new ValidationRuleService(session);
     	return validationRuleService.getTickerFxRefSourceRules(references);
     }    
@@ -125,9 +148,18 @@ public class TomsController {
     
 	private void addReferenceDataDiff(List<ReferenceTo> knownReferenceData, List<ReferenceTo> globalDiffList,
 			AbstractReferenceService service, List<DefaultReferenceType> expectedTypes) {
-		globalDiffList.addAll(service.createToListDifference(knownReferenceData.stream()
-    			.filter(x -> expectedTypes.stream().map( y -> y.getEntity().id()).collect(Collectors.toList()).contains(x.idType()))
-    			.collect(Collectors.toList())));
+		try {
+			globalDiffList.addAll(service.createToListDifference(knownReferenceData.stream()
+	    			.filter(x -> expectedTypes.stream().map( y -> y.getEntity().id()).collect(Collectors.toList()).contains(x.idType()))
+	    			.collect(Collectors.toList())));			
+		} catch (Exception ex) {
+			logger.error("Exception while calculating reference data diff for " + service.getClass().getName() + ": " + ex.toString());
+			StringBuilder sb = new StringBuilder();
+			for (StackTraceElement ste : ex.getStackTrace()) {
+				sb.append("\n").append(ste.toString());
+			}
+			logger.error(sb.toString());
+		}
 	}
     
     public String getCurrentDate() {

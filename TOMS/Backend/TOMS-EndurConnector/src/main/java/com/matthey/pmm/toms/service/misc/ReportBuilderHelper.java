@@ -1,8 +1,9 @@
 package com.matthey.pmm.toms.service.misc;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.matthey.pmm.toms.TomsController;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.ReportBuilder;
 import com.olf.openrisk.io.IOFactory;
@@ -10,8 +11,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 
 public class ReportBuilderHelper {
-	
-    private static final Logger logger = LogManager.getLogger(ReportBuilderHelper.class);
+	private static final Logger logger = LoggerFactory.getLogger(TomsController.class);
 	private static final String SYNC_TABLE_NAME = "USER_jm_toms_sync";
 
 	public static Table runReport (TableFactory tf, String reportName) {

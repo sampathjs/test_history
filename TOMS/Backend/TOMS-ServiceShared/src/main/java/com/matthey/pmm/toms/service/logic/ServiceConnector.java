@@ -13,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ServiceConnector {
-
     private static final Logger logger = LoggerFactory.getLogger(ServiceConnector.class);
 
     private final RestTemplate restTemplate;

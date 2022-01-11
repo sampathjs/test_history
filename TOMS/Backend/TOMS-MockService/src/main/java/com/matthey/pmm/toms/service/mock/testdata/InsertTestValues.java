@@ -265,7 +265,7 @@ public class InsertTestValues implements CustomSqlChange {
 	private List<SqlStatement> testUserInsert(Database database) {
 		List<SqlStatement> results = new ArrayList<> (TestUser.values().length*100);
 		String insertTemplate = 
-				"INSERT INTO dbo.user (user_id, email, first_name, last_name, role_id, reference_lifecycle_status_id, default_internal_bunit_id, default_internal_portfolio_reference_id) VALUES (%s, '%s', '%s', '%s', %s, %s, %s, %s)";
+				"INSERT INTO dbo.user_entity (user_id, email, first_name, last_name, role_id, reference_lifecycle_status_id, default_internal_bunit_id, default_internal_portfolio_reference_id) VALUES (%s, '%s', '%s', '%s', %s, %s, %s, %s)";
 		String insertTemplateTradeableParties = 
 				"INSERT INTO dbo.user_tradeable_parties (user_id, party_id) VALUES (%s, %s)";
 		String insertTemplateTradeablePortfolios = 

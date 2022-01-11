@@ -254,7 +254,7 @@
 
 
 		<!-- User -->
-		<createTable tableName="user" schemaName="dbo">
+		<createTable tableName="user_entity" schemaName="dbo">
 			<column name="user_id" type="int">
 				<constraints nullable="false" primaryKey="true" />
 			</column>
@@ -282,25 +282,25 @@
 		</createTable>
 
 		<addForeignKeyConstraint
-			baseColumnNames="role_id" baseTableName="user"
+			baseColumnNames="role_id" baseTableName="user_entity"
 			constraintName="fk_user_role_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
 			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
-			baseColumnNames="default_internal_portfolio_reference_id" baseTableName="user"
+			baseColumnNames="default_internal_portfolio_reference_id" baseTableName="user_entity"
 			constraintName="fk_user_default_internal_portfolio_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
 			referencedTableName="reference" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
-			baseColumnNames="default_internal_bunit_id" baseTableName="user"
+			baseColumnNames="default_internal_bunit_id" baseTableName="user_entity"
 			constraintName="fk_user_default_internal_bunit_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="party_id"
 			referencedTableName="party" validate="true" schemaName="dbo"/>
 		
 		<addForeignKeyConstraint
-			baseColumnNames="reference_lifecycle_status_id" baseTableName="user"
+			baseColumnNames="reference_lifecycle_status_id" baseTableName="user_entity"
 			constraintName="fk_user_lifecycle_status_reference_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="reference_id"
 			referencedTableName="reference" validate="true" schemaName="dbo"/>
@@ -327,7 +327,7 @@
 			baseColumnNames="user_id" baseTableName="user_tradeable_parties"
 			constraintName="fk_user_parties_user_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="party_id" baseTableName="user_tradeable_parties"
@@ -339,7 +339,7 @@
 			baseColumnNames="user_id" baseTableName="user_tradeable_portfolios"
 			constraintName="fk_user_portfolios_user_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="reference_portfolio_id"
@@ -433,13 +433,13 @@
 			baseColumnNames="created_by_user_id" baseTableName="order_comment"
 			constraintName="fk_order_comment_created_by_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="updated_by_user_id" baseTableName="order_comment"
 			constraintName="fk_order_comment_updated_by_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="lifecycle_status_reference_id"
@@ -550,13 +550,13 @@
 			baseColumnNames="trader_user_id" baseTableName="fill"
 			constraintName="fk_fill_trader_user_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo" />
+			referencedTableName="user_entity" validate="true" schemaName="dbo" />
 
 		<addForeignKeyConstraint
 			baseColumnNames="updated_by_user_id" baseTableName="fill"
 			constraintName="fk_fill_updated_by_user_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 
 		<!-- Order -->
@@ -747,13 +747,13 @@
 			baseColumnNames="created_by" baseTableName="abstract_order"
 			constraintName="fk_order_created_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="updated_by" baseTableName="abstract_order"
 			constraintName="fk_order_updated_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="contract_type_reference_id"
@@ -1133,13 +1133,13 @@
 			baseColumnNames="created_by" baseTableName="database_file"
 			constraintName="fk_database_file_created_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="updated_by" baseTableName="database_file"
 			constraintName="fk_database_file_updated_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<createSequence sequenceName="database_file_id_seq"
 			incrementBy="1" startValue="1000000" schemaName="dbo"/>
@@ -1185,7 +1185,7 @@
 			baseColumnNames="send_as_user_id" baseTableName="email"
 			constraintName="fk_email_send_as_user_id" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="email_status_reference_id" baseTableName="email"
@@ -1198,13 +1198,13 @@
 			baseColumnNames="created_by" baseTableName="email"
 			constraintName="fk_email_created_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<addForeignKeyConstraint
 			baseColumnNames="updated_by" baseTableName="email"
 			constraintName="fk_email_updated_by" onDelete="NO ACTION"
 			onUpdate="NO ACTION" referencedColumnNames="user_id"
-			referencedTableName="user" validate="true" schemaName="dbo"/>
+			referencedTableName="user_entity" validate="true" schemaName="dbo"/>
 
 		<createSequence sequenceName="email_id_seq"
 			incrementBy="1" startValue="1000000" schemaName="dbo"/>

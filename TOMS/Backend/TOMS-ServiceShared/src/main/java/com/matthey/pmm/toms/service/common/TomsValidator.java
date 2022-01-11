@@ -147,9 +147,9 @@ public class TomsValidator {
 
 	@Autowired 
 	protected IndexRepository indexRepo;
-	
-	@Autowired
-	protected ServiceConnector serviceConnector;
+		
+	@Autowired 
+	protected DerivedDataService derivedDataService;
 		
 	/**
 	 * Verifies a provided reference is present in the database and has the type of one of the provided
@@ -1180,9 +1180,7 @@ public class TomsValidator {
 	}
 
 	private void applyCounterPartyTickerRules(Class clazz, String method, String argument, OrderTo order) {
-		List<CounterPartyTickerRuleTo> rules = Arrays.asList(
-    		serviceConnector.get(API_PREFIX + "/counterPartyTickerRules?idCounterparty={idCounterparty}", CounterPartyTickerRuleTo[].class, 
-    				order.idExternalBu()));
+		List<CounterPartyTickerRuleTo> rules = derivedDataService.getCounterPartyTickerRules(order.idExternalBu());
     	List<CounterPartyTickerRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idMetalForm() == (order.idMetalForm()!=null?order.idMetalForm():0l)
     			&&	     x.idMetalLocation() == (order.idMetalLocation() != null?order.idMetalLocation():0l) 
@@ -1194,8 +1192,7 @@ public class TomsValidator {
 	}
 	
 	private void applyTickerPortfolioRules(Class clazz, String method, String argument, OrderTo order) {
-		List<TickerPortfolioRuleTo> rules = Arrays.asList(
-    		serviceConnector.get(API_PREFIX + "/tickerPortfolioRules", TickerPortfolioRuleTo[].class));
+		List<TickerPortfolioRuleTo> rules = derivedDataService.getTickerPortfolioRules();
     	List<TickerPortfolioRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idParty() == order.idInternalBu()
     			&&	     x.idPortfolio() == (order.idIntPortfolio() != null?order.idIntPortfolio():0l) 
@@ -1207,8 +1204,7 @@ public class TomsValidator {
 	}
 	
 	private void applyTickerRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg) {
-		List<TickerRefSourceRuleTo> rules = Arrays.asList(
-    		serviceConnector.get(API_PREFIX + "/tickerRefSourceRules", TickerRefSourceRuleTo[].class));
+		List<TickerRefSourceRuleTo> rules =  derivedDataService.getTickerRefSourceRules();
     	List<TickerRefSourceRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idRefSource() == (leg.getRefSource() != null?leg.getRefSource().getId():0)
     			&&       x.idTicker() == (order.idTicker() != null?order.idTicker():0l))
@@ -1228,8 +1224,8 @@ public class TomsValidator {
 		if (fxCurrency.getId() == leg.getSettleCurrency().getId() ) {
 			return;
 		}
-		List<TickerFxRefSourceRuleTo> rules = Arrays.asList(
-    		serviceConnector.get(API_PREFIX + "/tickerFxRefSourceRules", TickerFxRefSourceRuleTo[].class));
+		List<TickerFxRefSourceRuleTo> rules = derivedDataService.getTickerFxRefSourceRules();
+
     	List<TickerFxRefSourceRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idRefSource() == (leg.getFxIndexRefSource() != null?leg.getFxIndexRefSource().getId():0l)
     			&&       x.idTicker() == (order.idTicker() != null?order.idTicker():0l)
