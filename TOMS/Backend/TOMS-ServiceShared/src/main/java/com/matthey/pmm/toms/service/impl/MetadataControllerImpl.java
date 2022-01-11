@@ -24,7 +24,9 @@ import com.matthey.pmm.toms.service.conversion.ProcessTransitionConverter;
 import com.matthey.pmm.toms.transport.AttributeCalculationTo;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.ImmutableCounterPartyTickerRuleTo;
+import com.matthey.pmm.toms.transport.ImmutableTickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.ProcessTransitionTo;
+import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -92,6 +94,21 @@ public abstract class MetadataControllerImpl implements TomsMetadataService {
     						.metalFormDisplayString(null)
     						.metalLocationDisplayString(null)
     						.tickerDisplayName(null)
+    						.build())
+    				.collect(Collectors.toSet());
+    	}
+    	return rules;
+    }
+    
+    protected Set<TickerPortfolioRuleTo> filterTickerPortfolioRuleToRules(Set<TickerPortfolioRuleTo> rules, Boolean includeDisplayStrings) {
+    	if (includeDisplayStrings != null && includeDisplayStrings == Boolean.FALSE) {
+    		rules = rules.stream()
+    				.map(x -> ImmutableTickerPortfolioRuleTo.builder()
+    						.from(x)
+    						.displayStringIndex(null)
+    						.displayStringParty(null)
+    						.displayStringPortfolio(null)
+    						.displayStringTicker(null)
     						.build())
     				.collect(Collectors.toSet());
     	}

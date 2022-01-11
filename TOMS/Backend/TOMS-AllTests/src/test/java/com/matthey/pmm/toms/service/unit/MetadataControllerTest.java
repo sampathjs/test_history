@@ -159,12 +159,33 @@ public class MetadataControllerTest {
 	}
 	
 	@Test 
-	public void testGetTickerPortfolioRules() {
-		Set<TickerPortfolioRuleTo> rules = metadataController.getTickerPortfolioRules();
+	public void testGetTickerPortfolioRulesWithExplicitParameterToIncludeDisplayStrings() {
+		Set<TickerPortfolioRuleTo> rules = metadataController.getTickerPortfolioRules(true);
 		assertThat(rules).isNotNull();
 		assertThat(rules).isNotEmpty();
 		assertThat(rules).hasSameElementsAs(TestTickerPortfolioRule.asList());
+		rules.forEach(x -> { assertThat(x.displayStringIndex()).isNotNull(); });
 	}	
+
+	@Test 
+	public void testGetTickerPortfolioRulesWithoutExplicitParameterToIncludeDisplayStrings() {
+		Set<TickerPortfolioRuleTo> rules = metadataController.getTickerPortfolioRules(null);
+		assertThat(rules).isNotNull();
+		assertThat(rules).isNotEmpty();
+		assertThat(rules).hasSameElementsAs(TestTickerPortfolioRule.asList());
+		rules.forEach(x -> { assertThat(x.displayStringIndex()).isNotNull(); });
+	}	
+
+	
+	@Test 
+	public void testGetTickerPortfolioRulesWithoutDisplayStrings() {
+		Set<TickerPortfolioRuleTo> rules = metadataController.getTickerPortfolioRules(false);
+		assertThat(rules).isNotNull();
+		assertThat(rules).isNotEmpty();
+		assertThat(rules).hasSameElementsAs(TestTickerPortfolioRule.asList());
+		rules.forEach(x -> { assertThat(x.displayStringIndex()).isNull(); });
+	}	
+
 	
 	@Test 
 	public void testGetTickerRefSourceRules() {

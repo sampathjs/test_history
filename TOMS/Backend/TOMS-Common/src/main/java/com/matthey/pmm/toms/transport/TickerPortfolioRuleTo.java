@@ -5,7 +5,9 @@ import org.immutables.value.Value.Auxiliary;
 import org.immutables.value.Value.Immutable;
 import org.jetbrains.annotations.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -32,6 +34,7 @@ public abstract class TickerPortfolioRuleTo {
 	
 	@Auxiliary
 	@Nullable
+    @JsonInclude(value = Include.NON_NULL, content = Include.NON_NULL)
 	@ApiModelProperty(value = "The name of the portfolio as provided in idPortfolio. Provided by the backend, but it is not consumed by the backend.",
 		allowEmptyValue = true,
 		required = false)	
@@ -45,6 +48,7 @@ public abstract class TickerPortfolioRuleTo {
 
 	@Auxiliary
 	@Nullable
+    @JsonInclude(value = Include.NON_NULL, content = Include.NON_NULL)
 	@ApiModelProperty(value = "The name of the party as provided in idParty. Provided by the backend, but it is not consumed by the backend.",
 		allowEmptyValue = true,
 		required = false)	
@@ -64,9 +68,10 @@ public abstract class TickerPortfolioRuleTo {
 
 	@Auxiliary
 	@Nullable
+    @JsonInclude(value = Include.NON_NULL, content = Include.NON_NULL)	
 	@ApiModelProperty(value = "The name of the ticker as provided in idTicker. Provided by the backend, but it is not consumed by the backend.",
 		allowEmptyValue = true,
-		required = false)		
+		required = false)
 	public abstract String displayStringTicker();
 
 	@ApiModelProperty(value = "The ID of the index. The IDs are Reference IDs of ReferenceType #11 (Index Name)",
@@ -77,6 +82,7 @@ public abstract class TickerPortfolioRuleTo {
 
 	@Auxiliary
 	@Nullable
+    @JsonInclude(value = Include.NON_NULL, content = Include.NON_NULL)
 	@ApiModelProperty(value = "The name of the index as provided in idIndex. Provided by the backend, but it is not consumed by the backend.",
 		allowEmptyValue = true,
 		required = false)

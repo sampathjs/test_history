@@ -35,8 +35,11 @@ public class MetadataController extends MetadataControllerImpl {
     }
     
     @ApiOperation("Retrieval of the mapping between portfolio, party, ticker and index")
-	public Set<TickerPortfolioRuleTo> getTickerPortfolioRules () {
-    	return new HashSet<>(validationRuleRetriever.retrieveTickerPortfolioRules());    	
+	public Set<TickerPortfolioRuleTo> getTickerPortfolioRules (
+			@ApiParam(value = "Optional retriction to not populate the display string attributes, default= with display string", example = "true", required = false) @RequestParam(required=false) Boolean includeDisplayStrings) {
+    	Set<TickerPortfolioRuleTo> rules = new HashSet<>(validationRuleRetriever.retrieveTickerPortfolioRules());
+    	rules = filterTickerPortfolioRuleToRules(rules, includeDisplayStrings);
+    	return rules;
     }
     
     @ApiOperation("Retrieval of the mapping between ticker, index and reference sources")

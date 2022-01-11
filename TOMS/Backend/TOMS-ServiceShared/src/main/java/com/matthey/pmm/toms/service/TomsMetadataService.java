@@ -45,7 +45,8 @@ public interface TomsMetadataService {
     @Cacheable({"TickerPortfolioRules"})
     @ApiOperation("Retrieval of the mapping between portfolio, party, ticker and index")
 	@GetMapping("/tickerPortfolioRules")
-	public Set<TickerPortfolioRuleTo> getTickerPortfolioRules ();
+	public Set<TickerPortfolioRuleTo> getTickerPortfolioRules (
+			@ApiParam(value = "Optional retriction to not populate the display string attributes, default= with display string", example = "true", required = false) @RequestParam(required=false) Boolean includeDisplayStrings);
     
     @Cacheable({"TickerRefSourceRules"})
     @ApiOperation("Retrieval of the mapping between ticker, index and reference sources")
