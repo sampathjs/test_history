@@ -293,7 +293,7 @@ public class FillControllerTest {
 		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().version()+1);		
 		assertThat(updatedFill.get().getFillStatus().getId()).isEqualTo(newFillStatus.idFillStatus());
 		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity().id());
-		assertThat(order.get().getFillPercentage()).isEqualTo(100);
+		assertThat(order.get().getFillPercentage()).isGreaterThan(0);
 	}
 	
 	@Test
