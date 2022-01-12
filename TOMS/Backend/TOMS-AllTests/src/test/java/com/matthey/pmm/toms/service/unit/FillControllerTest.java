@@ -169,7 +169,7 @@ public class FillControllerTest {
 					.version(order.version() + 1)
 					.build();
 			fillsToRestore.put(orderVersionInc, oldComment);
-			fillController.updateReferenceOrderFill(order.id(), newFill.id(), newFill);			
+			fillController.updateReferenceOrderFill(order.id(), newFill.id(), newFill);
 		}
 	}
 	
@@ -279,35 +279,41 @@ public class FillControllerTest {
 	@Test
 	@Transactional
 	public void testUpdateLimitOrderFill () {
+		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().id());
+		assertThat(order.get().getFillPercentage()).isEqualTo(0);		
 		FillTo newFillStatus = ImmutableFillTo.builder()
 				.from(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity())
 				.idFillStatus(DefaultReference.FILL_STATUS_COMPLETED.getEntity().id())
 				.build();
 		updateFill(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity(), TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity(), newFillStatus);
 		Optional<Fill> updatedFill = fillRepo.findById(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity().id());
-		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().id());
+		order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().id());
 		assertThat(updatedFill).isNotEmpty();
 		assertThat(order).isNotEmpty();
 		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().version()+1);		
 		assertThat(updatedFill.get().getFillStatus().getId()).isEqualTo(newFillStatus.idFillStatus());
 		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity().id());
+		assertThat(order.get().getFillPercentage()).isEqualTo(100);
 	}
 	
 	@Test
 	@Transactional
 	public void testUpdateReferenceOrderFill () {
+		Optional<ReferenceOrder> order = refOrderRepo.findLatestByOrderId(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().id());
+		assertThat(order.get().getFillPercentage()).isEqualTo(0);
 		FillTo newFillStatus = ImmutableFillTo.builder()
 				.from(TestFill.TEST_REFERENCE_ORDER_FILL_4.getEntity())
 				.idFillStatus(DefaultReference.FILL_STATUS_COMPLETED.getEntity().id())
 				.build();
 		updateFill(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity(), TestFill.TEST_REFERENCE_ORDER_FILL_4.getEntity(), newFillStatus);
 		Optional<Fill> updatedFill = fillRepo.findById(TestFill.TEST_REFERENCE_ORDER_FILL_4.getEntity().id());
-		Optional<ReferenceOrder> order = refOrderRepo.findLatestByOrderId(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().id());
+		order = refOrderRepo.findLatestByOrderId(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().id());
 		assertThat(updatedFill).isNotEmpty();
 		assertThat(order).isNotEmpty();
 		assertThat(order.get().getVersion()).isEqualTo(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().version()+1);		
 		assertThat(updatedFill.get().getFillStatus().getId()).isEqualTo(newFillStatus.idFillStatus());
 		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(TestFill.TEST_REFERENCE_ORDER_FILL_4.getEntity().id());
+		assertThat(order.get().getFillPercentage()).isEqualTo(100);
 	}
 	
 }
