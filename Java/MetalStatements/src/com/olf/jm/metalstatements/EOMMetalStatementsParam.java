@@ -55,6 +55,8 @@ import com.olf.jm.logging.Logging;
  *                                    metal statement
  * 2016-11-09	jwaechter	V1.2    - added error check for legal entity of
  *                                    external business unit
+ *                                    
+ * 2022-01-12	AzmatA		V1.3	- Block counterparty email functionality                                   
  * 
  */
 
@@ -72,6 +74,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
     private JComboBox<String> extBUList;
     private JButton button;
 	private ConstRepository constRep = null;
+	private String excludeExtBU; 
 	private static Map<String, Set<String>> allowedLocationsForInternalBu = null;
     
 	@Override
@@ -81,6 +84,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 		
 		try {
 			constRep = new ConstRepository(EOMMetalStatementsShared.CONTEXT, EOMMetalStatementsShared.SUBCONTEXT);
+			excludeExtBU = constRep.getStringValue("exclude_ExtBU");
 			String abOutDir = context.getSystemSetting("AB_OUTDIR") + "\\error_logs";
 			EOMMetalStatementsShared.init (constRep, abOutDir);
 			secondsPastMidnight = Util.timeGetServerTime();
@@ -148,7 +152,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
         extBUList.addItem("");
 		for (TableRow row : partyList.getRows()){			
 			String party = row.getString("short_name");
-			if (row.getInt("int_ext") == 1){
+			if (row.getInt("int_ext") == 1 && !excludeExtBU.contains(party)){
 				extBUList.addItem(party);
 			} 
 		}
@@ -184,7 +188,7 @@ public class EOMMetalStatementsParam extends AbstractGenericScript {
 		    	parties.sort("short_name");
 				for (TableRow row : parties.getRows()){			
 					String party = row.getString("short_name");
-					if (row.getInt("int_ext") == 0){
+					if (row.getInt("int_ext") == 0 || excludeExtBU.contains(party)){
 					} else {
 						extBUList.addItem(party);
 					}
