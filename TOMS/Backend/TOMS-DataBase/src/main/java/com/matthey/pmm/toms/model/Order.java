@@ -271,18 +271,18 @@ public abstract class Order {
 		if (fills != null) {
     		double fp = 0.0d;
     		for (Fill f : fills) {
-    			if (f.getFillStatus().getId() == DefaultReference.FILL_STATUS_COMPLETED.getEntity().id()) {
+    			if ((long)f.getFillStatus().getId() == DefaultReference.FILL_STATUS_COMPLETED.getEntity().id()) {
         			fp += f.getFillQuantity();    				
     			}
     		}
-    		if (baseQuantity != 0.0d) {
+    		if ((double)baseQuantity != 0.0d) {
 				fp = fp / baseQuantity;    			
     		} else {
     			fp = 1.0;
     		}
     		fillPercentage = fp;
     	} else {
-    		fillPercentage = baseQuantity == 0.0d ? 0.0d : 1.0d;
+    		fillPercentage = (double)baseQuantity == 0.0d ? 0.0d : 1.0d;
     	}
 	}
 	
