@@ -1,0 +1,41 @@
+@font-face {
+  font-family: 'HK Grotesk';
+  src: url(./fonts/HK_Grotesk/HKGrotesk-Regular.woff2) format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HK Grotesk';
+  src: url(./fonts/HK_Grotesk/HKGrotesk-Medium.woff2) format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HK Grotesk';
+  src: url(./fonts/HK_Grotesk/HKGrotesk-SemiBold.woff2) format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HK Grotesk';
+  src: url(./fonts/HK_Grotesk/HKGrotesk-Bold.woff2) format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'HK Grotesk';
+  src: url(./fonts/HK_Grotesk/HKGrotesk-ExtraBold.woff2) format('woff2');
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Kanit';
+  src: url(./fonts/Kanit/Kanit-Medium.woff2) format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
