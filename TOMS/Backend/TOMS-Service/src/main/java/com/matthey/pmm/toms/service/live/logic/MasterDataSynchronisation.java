@@ -1,11 +1,14 @@
 package com.matthey.pmm.toms.service.live.logic;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +30,7 @@ import com.matthey.pmm.toms.transport.UserTo;
 
 @Component
 public class MasterDataSynchronisation {
-    private static final Logger logger = LoggerFactory.getLogger(MasterDataSynchronisation.class);
+    private static final Logger logger = LogManager.getLogger(MasterDataSynchronisation.class);
 	
 	@Autowired
 	private EndurConnector endurConnector;
@@ -52,9 +55,9 @@ public class MasterDataSynchronisation {
 	
 	public void syncMasterdataWithEndur () {
 		logger.info("Starting Master Data Synchronisation with Endur");
+		boolean refDataSyncSuccess = syncRefData();
 		boolean partyDataSyncSuccess = syncPartyData();
 		boolean userDataSyncSuccess = syncUserData();
-		boolean refDataSyncSuccess = syncRefData();
 		logger.info("Synchronisation status: Party Data: " + partyDataSyncSuccess 
 				+ ", User Data: " + userDataSyncSuccess+ "  Reference Data: " + refDataSyncSuccess);		
 		logger.info("Finished Master Data Synchronisation with Endur");
@@ -82,13 +85,20 @@ public class MasterDataSynchronisation {
 			List<ReferenceTo> referenceDiff = Arrays.asList(endurConnector.postWithResponse("/toms/endur/references", ReferenceTo[].class, allReferences));
 			logger.info ("Successfully retrieved a difference list of " + referenceDiff.size() + " elements from Endur Connector");
 			logger.debug ("List of all Reference Diff as returned by Endur Connector: " + referenceDiff);
-			referenceDiff.forEach(x -> refConverter.toManagedEntity(x));
+			referenceDiff.forEach(x -> {logger.info("Serialising " + x); refConverter.toManagedEntity(x);});
 			logger.info("Successfully finished reference data synchronisation");			
 		} catch (Exception ex) {
-			logger.error("Exception while synchronising reference data: " + ex.getMessage());
-			for (StackTraceElement ste : ex.getStackTrace()) {
-				logger.error(ste.toString());
+			logger.error("Exception while syncing ref data: " + ex.toString());
+			StringWriter sw = new StringWriter(4000);
+			PrintWriter pw = new PrintWriter(sw);
+			ex.printStackTrace(pw);
+			Throwable temp = ex;
+			while (temp.getCause() != null) {
+				temp = temp.getCause();
+				pw.append("\nCaused By :" + temp);
+				ex.printStackTrace(pw);
 			}
+			logger.error(sw.toString());
 			// consume exception as we do want to avoid blocking the synchronisation of other master data elemenents
 			return false;
 		}
@@ -106,13 +116,25 @@ public class MasterDataSynchronisation {
 			List<PartyTo> partyDiff = Arrays.asList(endurConnector.postWithResponse("/toms/endur/parties", PartyTo[].class, allPartyTos));
 			logger.info ("Successfully retrieved a difference list of " + partyDiff.size() + " elements from Endur Connector");
 			logger.debug ("List of all Party Diff as returned by Endur Connector: " + partyDiff);
-			partyDiff.forEach(x -> partyConverter.toManagedEntity(x));
+			partyDiff.stream() // legal entities first
+				.filter(x -> x.idLegalEntity() == null)
+				.forEach(x -> partyConverter.toManagedEntity(x));
+			partyDiff.stream() // then BUs that might reference LEs
+				.filter(x -> x.idLegalEntity() != null)
+				.forEach(x -> partyConverter.toManagedEntity(x));
 			logger.info("Successfully finished party data synchronisation");			
 		} catch (Exception ex) {
 			logger.error("Exception while synchronising party data: " + ex.getMessage());
-			for (StackTraceElement ste : ex.getStackTrace()) {
-				logger.error(ste.toString());
+			StringWriter sw = new StringWriter(4000);
+			PrintWriter pw = new PrintWriter(sw);
+			ex.printStackTrace(pw);
+			Throwable temp = ex;
+			while (temp.getCause() != null) {
+				temp = temp.getCause();
+				pw.append("\nCaused By :" + temp);
+				ex.printStackTrace(pw);
 			}
+			logger.error(sw.toString());
 			// consume exception as we do want to avoid blocking the synchronisation of other master data elemenents
 			return false;
 		}
@@ -145,10 +167,17 @@ public class MasterDataSynchronisation {
 			userDiff.forEach(x -> userConverter.toManagedEntity(x));
 			logger.info("Successfully finished user data synchronisation");			
 		} catch (Exception ex) {
-			logger.error("Exception while synchronising user data: " + ex.getMessage());
-			for (StackTraceElement ste : ex.getStackTrace()) {
-				logger.error(ste.toString());
+			logger.error("Exception while syncing user data: " + ex.toString());
+			StringWriter sw = new StringWriter(4000);
+			PrintWriter pw = new PrintWriter(sw);
+			ex.printStackTrace(pw);
+			Throwable temp = ex;
+			while (temp.getCause() != null) {
+				temp = temp.getCause();
+				pw.append("\nCaused By :" + temp);
+				ex.printStackTrace(pw);
 			}
+			logger.error(sw.toString());
 			// consume exception as we do want to avoid blocking the synchronisation of other master data elemenents
 			return false;
 		}

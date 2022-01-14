@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
 @Component
 public class ValidationRuleRetrieval {
-    private static final Logger logger = LoggerFactory.getLogger(ValidationRuleRetrieval.class);
+    private static final Logger logger = LogManager.getLogger(ValidationRuleRetrieval.class);
 	
 	@Autowired
 	private EndurConnector endurConnector;

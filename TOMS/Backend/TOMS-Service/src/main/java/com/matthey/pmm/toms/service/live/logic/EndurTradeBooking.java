@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ import com.matthey.pmm.toms.service.logic.ServiceConnector;
 
 @Component
 public class EndurTradeBooking {
-    private static final Logger logger = LoggerFactory.getLogger(EndurTradeBooking.class);
+	private final static Logger logger = LogManager.getLogger(EndurTradeBooking.class);
 	
     @Autowired 
     private OrderRepository orderRepo;

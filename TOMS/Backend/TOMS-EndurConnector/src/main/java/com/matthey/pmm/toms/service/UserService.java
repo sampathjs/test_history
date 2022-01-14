@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.service.misc.ReportBuilderHelper;
 import com.matthey.pmm.toms.transport.ImmutableUserTo;
@@ -14,6 +17,9 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 
 public class UserService extends AbstractToDiffService<UserTo> {
+    private static final Logger logger = LogManager.getLogger(UserService.class);
+	
+	
 	protected final Map<Long, Long> endurPortfolioIdToReferenceId;
 	
 	public UserService (final Session session, List<ReferenceTo> portfolioList) {
@@ -29,18 +35,29 @@ public class UserService extends AbstractToDiffService<UserTo> {
 
 	@Override
 	protected void syncEndurSideIds(List<UserTo> knownTos, List<UserTo> endurSideTos) {		
-		// nothing to do for UserTo
+		// nothing to do for UserTo as IDs of users are Endur IDs directly
 	}
 
 	@Override
 	protected List<UserTo> convertReportToTransferObjects(Table endurSideData) {
-		try (Table tradeableParties = ReportBuilderHelper.runReport(session.getTableFactory(), "UserDataTradeableParties");
-			Table tradeablePortfolios = ReportBuilderHelper.runReport(session.getTableFactory(), "UserDataTradeablePortfolios")) {
+		logger.info("Converting user objects from report builder definitions to TOs");
+		String tradeablePartiesReport = ReportBuilderHelper.retrieveReportBuilderNameForSyncCategory (session.getIOFactory(), "UserDataTradeableParties");
+		logger.info("Retrieving tradeable parties for user from ReportBuilder report '" + tradeablePartiesReport + "'");
+		String tradeablePortfoliosReport = ReportBuilderHelper.retrieveReportBuilderNameForSyncCategory (session.getIOFactory(), "UserDataTradeablePortfolios");
+		logger.info("Retrieving tradeable portfolios for user from ReportBuilder report '" + tradeablePortfoliosReport + "'");
+		
+		try (Table tradeableParties = ReportBuilderHelper.runReport(session.getTableFactory(), tradeablePartiesReport);
+			Table tradeablePortfolios = ReportBuilderHelper.runReport(session.getTableFactory(), tradeablePortfoliosReport)) {
+			logger.info("Successfully executed the two additional report builder definitions '" + tradeablePartiesReport + "' and '" + tradeablePortfoliosReport + "'");
+			
 			List<UserTo> convertedEntities = new ArrayList<>(endurSideData.getRowCount());
 			for (int row=endurSideData.getRowCount()-1; row >= 0; row--) {
 				List<Long> tradeableInternalPartiesForRow = getTradeablePartiesFor (endurSideData.getInt("id_number", row), false, tradeableParties);
 				List<Long> tradeableCounterPartiesForRow = getTradeablePartiesFor (endurSideData.getInt("id_number", row), true, tradeableParties);
 				List<Long> tradeablePortfoliosForRow = getTradeablePortfoliosFor (endurSideData.getInt("id_number", row), tradeablePortfolios);
+				Long defaultInternalBu = (endurSideData.getInt("default_party_id", row) != 0)?(Long.valueOf(endurSideData.getInt("default_party_id", row))):null;
+				Long defaultInternalPortfolio = (endurSideData.getInt("default_portfolio_id", row) != 0)?(Long.valueOf(endurSideData.getInt("default_portfolio_id", row))):null;
+				defaultInternalPortfolio = defaultInternalPortfolio != null?endurPortfolioIdToReferenceId.get(defaultInternalPortfolio):null;
 				DefaultReference role = getRole(endurSideData, row);
 				
 				UserTo converted = ImmutableUserTo.builder()
@@ -49,6 +66,8 @@ public class UserService extends AbstractToDiffService<UserTo> {
 						.firstName(endurSideData.getString("first_name", row))
 						.lastName(endurSideData.getString("last_name", row))
 						.roleId(role.getEntity().id())
+						.idDefaultInternalBu(defaultInternalBu)
+						.idDefaultInternalPortfolio(defaultInternalPortfolio)
 						.tradeableCounterPartyIds(tradeableCounterPartiesForRow)
 						.tradeableInternalPartyIds(tradeableInternalPartiesForRow)
 						.tradeablePortfolioIds(tradeablePortfoliosForRow)
@@ -116,7 +135,6 @@ public class UserService extends AbstractToDiffService<UserTo> {
 	
 	@Override
 	protected boolean isDiffInAuxFields(UserTo knownTo, UserTo updatedTo) {
-		
 		return !knownTo.email().equals(updatedTo.email())
 				|| !knownTo.firstName().equals(updatedTo.firstName())
 				|| !knownTo.lastName().equals(updatedTo.lastName())				

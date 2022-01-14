@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.apache.commons.validator.routines.UrlValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -13,8 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class EndurConnector {
-
-    private static final Logger logger = LoggerFactory.getLogger(EndurConnector.class);
+	private final static Logger logger = LogManager.getLogger(EndurConnector.class);
 
     private final RestTemplate restTemplate;
     private final String baseUrl;
@@ -28,20 +27,24 @@ public class EndurConnector {
     }
 
     public <T> T get(String url, Class<T> responseType, Object... uriVariables) {
+    	logger.info("Executing get to '" + url + "'");
         var result = restTemplate.getForObject(baseUrl + url, responseType, uriVariables);
         checkNotNull(result);
         return result;
     }
 
     public void put(String url, Object request, Object... uriVariables) {
+    	logger.info("Executing put to '" + url + "'");
         restTemplate.put(baseUrl + url, request, uriVariables);
     }
 
     public void post(String url, Object request, Object... uriVariables) {
+    	logger.info("Executing post to '" + url + "'");
         restTemplate.postForLocation(baseUrl + url, request, uriVariables);
     }
     
     public  <T> T postWithResponse(String url,  Class<T> responseType, Object request, Object... uriVariables) {
+    	logger.info("Executing post to '" + url + "'");
         ResponseEntity<T> result = restTemplate.postForEntity(baseUrl + url, request, responseType, uriVariables);
         return result.getBody();
     }

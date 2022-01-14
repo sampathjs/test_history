@@ -62,4 +62,11 @@ public abstract class IndexTo {
 		allowEmptyValue = false,
 		required = true)
     public abstract Long sortColumn();
+
+	@Override
+	public String toString() {
+		return "IndexTo [id=" + id() + ", idIndexName=" + idIndexName() + ", idCurrencyOneName="
+				+ idCurrencyOneName() + ", idCurrencyTwoName=" + idCurrencyTwoName() + ", idLifecycle="
+				+ idLifecycle() + "]";
+	} 
 }

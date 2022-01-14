@@ -28,9 +28,22 @@ public class PartyService extends AbstractToDiffService<PartyTo> {
 	protected List<PartyTo> convertReportToTransferObjects(Table endurSideData) {
 		List<PartyTo> convertedEntities = new ArrayList<>(endurSideData.getRowCount());
 		for (int row=endurSideData.getRowCount()-1; row >= 0; row--) {
-			DefaultReference type = getType (endurSideData, row);
+			DefaultReference type = getType (endurSideData, row, true);
+
+			PartyTo converted = ImmutablePartyTo.builder() // LE
+					.id(endurSideData.getInt("legal_entity_id", row))
+					.idLegalEntity(null)
+					 // assumption: The Endur side Report Builder Report is going to retrieve valid parties for TOMS only
+					.idLifecycle(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity().id())
+					.name(endurSideData.getString("short_name_le", row)) 
+					.sortColumn(5000000l) // has to be changed to more complex logic potentially 
+					.typeId(type.getEntity().id())
+					.build();
+			convertedEntities.add(converted);
 			
-			PartyTo converted = ImmutablePartyTo.builder()
+			type = getType (endurSideData, row, false);
+			
+			converted = ImmutablePartyTo.builder() // BU
 					.id(endurSideData.getInt("party_id", row))
 					.idLegalEntity(endurSideData.getInt("legal_entity_id", row) != 0?(long)endurSideData.getInt("legal_entity_id", row):0l)
 					 // assumption: The Endur side Report Builder Report is going to retrieve valid parties for TOMS only
@@ -44,15 +57,15 @@ public class PartyService extends AbstractToDiffService<PartyTo> {
 		return convertedEntities;
 	}
 
-	private DefaultReference getType(Table endurSideData, int row) {
+	private DefaultReference getType(Table endurSideData, int row, boolean isLegal) {
 		if (endurSideData.getString("int_ext", row).equalsIgnoreCase("Internal")) {
-			if (endurSideData.getInt("legal_entity_id", row) == 0) {
+			if (isLegal) {
 				return DefaultReference.PARTY_TYPE_INTERNAL_LE;
 			} else {
 				return DefaultReference.PARTY_TYPE_INTERNAL_BUNIT;
 			}
 		} else if (endurSideData.getString("int_ext", row).equalsIgnoreCase("External")) {
-			if (endurSideData.getInt("legal_entity_id", row) == 0) {
+			if (isLegal) {
 				return DefaultReference.PARTY_TYPE_EXTERNAL_LE;
 			} else {
 				return DefaultReference.PARTY_TYPE_EXTERNAL_BUNIT;								

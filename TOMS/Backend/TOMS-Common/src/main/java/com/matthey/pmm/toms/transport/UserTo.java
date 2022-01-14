@@ -111,4 +111,10 @@ public abstract class UserTo {
 			required = false,
 			allowableValues = "range[118,152], range[296,339]")    
     public abstract Long idDefaultInternalPortfolio();
+
+	@Override
+	public String toString() {
+		return "UserTo [id=" + id() + ", email=" + email() + ", firstName=" + firstName() + ", lastName="
+				+ lastName() + ", idLifecycleStatus=" + idLifecycleStatus() + "]";
+	}
 }

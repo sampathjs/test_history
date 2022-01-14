@@ -11,7 +11,7 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 
 public class ReportBuilderHelper {
-	private static final Logger logger = LoggerFactory.getLogger(TomsController.class);
+	private static final Logger logger = LoggerFactory.getLogger(ReportBuilderHelper.class);
 	private static final String SYNC_TABLE_NAME = "USER_jm_toms_sync";
 
 	public static Table runReport (TableFactory tf, String reportName) {

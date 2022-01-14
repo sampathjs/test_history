@@ -1,6 +1,8 @@
 package com.matthey.pmm.toms;
 
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -68,6 +70,7 @@ public class TomsController {
     @PostMapping("parties")
     public List<PartyTo> retrieveEndurPartyList (@RequestBody List<PartyTo> knownParties) {
     	logger.info("Parties Endpoint Called");
+    	logger.info(knownParties.stream().map(x -> x.toString()).collect(Collectors.joining("\n")));
     	PartyService service = new PartyService (session);
     	return service.createToListDifference(knownParties);
     }
@@ -144,7 +147,6 @@ public class TomsController {
     	ValidationRuleService validationRuleService = new ValidationRuleService(session);
     	return validationRuleService.getTickerFxRefSourceRules(references);
     }    
-
     
 	private void addReferenceDataDiff(List<ReferenceTo> knownReferenceData, List<ReferenceTo> globalDiffList,
 			AbstractReferenceService service, List<DefaultReferenceType> expectedTypes) {
@@ -154,11 +156,10 @@ public class TomsController {
 	    			.collect(Collectors.toList())));			
 		} catch (Exception ex) {
 			logger.error("Exception while calculating reference data diff for " + service.getClass().getName() + ": " + ex.toString());
-			StringBuilder sb = new StringBuilder();
-			for (StackTraceElement ste : ex.getStackTrace()) {
-				sb.append("\n").append(ste.toString());
-			}
-			logger.error(sb.toString());
+			StringWriter sw = new StringWriter(4000);
+			PrintWriter pw = new PrintWriter(sw);
+			ex.printStackTrace(pw);
+			logger.error(sw.toString());
 		}
 	}
     

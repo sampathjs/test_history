@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.transaction.Transactional;
 
@@ -121,8 +122,13 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 			entity.get().setDefaultInternalPortfolio(defaultInternalPortfolio);
 			return entity.get();
 		}
-		List<Reference> tradeablePortfolios = entityRepo.findTradeablePortfolioById(entity.get().getId());
-		List<Party> tradeableParties = entityRepo.findTradeablePartiesById(entity.get().getId());
+		List<Reference> tradeablePortfolios = to.tradeablePortfolioIds().stream()
+				.map(x -> refRepo.findById(x).get())
+				.collect(Collectors.toList());
+		List<Party> tradeableParties = Stream.concat(to.tradeableInternalPartyIds().stream(), to.tradeableCounterPartyIds().stream())
+				.map(x -> partyRepo.findById(x).get())
+				.collect(Collectors.toList());
+				
 		User newEntity = new User (to.id(), to.email(), to.firstName(), to.lastName(), role, lifecycleStatus, tradeableParties, 
 				tradeablePortfolios, defaultInternalBu, defaultInternalPortfolio);
 		newEntity = entityRepo.save(newEntity);

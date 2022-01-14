@@ -56,7 +56,7 @@ public abstract class PartyTo {
 			+ " The reference party has to have typeId=19 or typeId=20 (internal and external legal entity)",
 			allowEmptyValue = true,
 			required = false,
-			allowableValues = "1, 2, 19, 20")       
+			allowableValues = "1, 2, 19, 20")
     public abstract Long idLegalEntity();
     
     @Auxiliary
@@ -72,4 +72,9 @@ public abstract class PartyTo {
 		required = false)	        
     public abstract long sortColumn();
 
+	@Override
+	public String toString() {
+		return "PartyTo [id=" + id() + ", name=" + name() + ", typeId=" + typeId() + ", idLegalEntity="
+				+ idLegalEntity() + ", idLifecycle=" + idLifecycle() + "]";
+	}
 }

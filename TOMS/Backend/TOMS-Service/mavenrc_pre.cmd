@@ -1,0 +1,1 @@
+SET MAVEN_OPTS=-Djavax.net.ssl.trustStore=trust.jks -Djavax.net.ssl.trustStorePassword=foreveryone

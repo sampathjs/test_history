@@ -3,6 +3,9 @@ package com.matthey.pmm.toms.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.transport.ImmutableReferenceTo;
@@ -11,6 +14,7 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 
 public abstract class AbstractReferenceService extends AbstractToDiffService<ReferenceTo> {
+    private static final Logger logger = LogManager.getLogger(AbstractReferenceService.class);
 	
 	public AbstractReferenceService (final Session session) {
 		super(session);
@@ -21,8 +25,9 @@ public abstract class AbstractReferenceService extends AbstractToDiffService<Ref
 	@Override
 	protected void syncEndurSideIds (List<ReferenceTo> knownTos, List<ReferenceTo> endurSideTos) {
 		for (ReferenceTo knownTo : knownTos) {
-			for (int i=0; i < endurSideTos.size(); i++) {
-				if (endurSideTos.get(i).endurId() == knownTo.endurId()) {
+			for (int i=endurSideTos.size()-1; i >= 0; i--) {
+				if ((long)endurSideTos.get(i).endurId() == (long)knownTo.endurId()) {
+					logger.info("Matched Endur TO '" + endurSideTos.get(i) + "' with TOMS TO '" + knownTo + "'");
 					ReferenceTo oldEntry = endurSideTos.remove(i);
 					ReferenceTo endurSideWithUpdatedTomsId = ImmutableReferenceTo.builder()
 							.from(oldEntry)
@@ -46,7 +51,7 @@ public abstract class AbstractReferenceService extends AbstractToDiffService<Ref
 					.idType(getReferenceType().getEntity().id())
 					.name(endurSideData.getString("name", row))
 					.sortColumn(0l)
-					 // assumption: The Endur side Report Builder Report is going to retrieve valid parties for TOMS only
+					 // assumption: The Endur side Report Builder Report is going to retrieve data valid for TOMS only
 					.idLifecycle(DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity().id())
 					.build();
 			convertedEntities.add(converted);

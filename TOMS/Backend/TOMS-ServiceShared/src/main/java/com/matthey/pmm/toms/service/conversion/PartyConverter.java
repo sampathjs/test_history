@@ -51,7 +51,7 @@ public class PartyConverter extends EntityToConverter<Party, PartyTo>{
     @Transactional	
 	public Party toManagedEntity (PartyTo to) {		
 		Optional<Party> existingEntity  = partyRepo.findById(to.id());
-		Optional<Party> legalEntity  = partyRepo.findById(to.idLegalEntity());
+		Optional<Party> legalEntity  = to.idLegalEntity() != null?partyRepo.findById(to.idLegalEntity()):Optional.empty();
 		Reference type  = loadRef(to, to.typeId());
 		Reference lifecycleStatus  = loadRef(to, to.idLifecycle());
 		

@@ -73,4 +73,10 @@ public abstract class ReferenceTo {
 		allowEmptyValue = true,
 		required = false)	        
     public abstract Long sortColumn();
+
+	@Override
+	public String toString() {
+		return "ReferenceTo [id=" + id() + ", idType=" + idType() + ", name=" + name() + ", endurId="
+				+ endurId() + ", idLifecycle=" + idLifecycle() + "]";
+	}
 }

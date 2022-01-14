@@ -6,14 +6,13 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.matthey.pmm.toms.TomsController;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.service.misc.ReportBuilderHelper;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 
 public abstract class  AbstractToDiffService <T> {
-    private static final Logger logger = LogManager.getLogger(TomsController.class);
+    private static final Logger logger = LogManager.getLogger(AbstractToDiffService.class);
 
 	protected Session session;
 
