@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -94,11 +95,15 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class MockApplication implements WebMvcConfigurer {
 	 private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
 	            "classpath:/META-INF/resources/", "classpath:/resources/",
-	            "classpath:/static/", "classpath:/public/" };
+	            "classpath:/static/", "classpath:/public/", "classpath:/BOOT-INF/classes/templates/" };
 	
     public static void main(String[] args) {
         SpringApplication.run(MockApplication.class, args);
     }
+    
+//    public void configurePathMatch(PathMatchConfigurer configurer) {
+//        configurer.setUseSuffixPatternMatch(false);
+//	}
         
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -108,14 +113,53 @@ public class MockApplication implements WebMvcConfigurer {
         registry
             .addResourceHandler("/webjars/**")
             .addResourceLocations("classpath:/META-INF/resources/webjars/");
+        
         registry.addResourceHandler("/**")
         	.addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
+
+        registry
+    		.addResourceHandler("/*.png")
+    		.addResourceLocations("classpath:/");
+
+        registry
+    		.addResourceHandler("/*.ico")
+    		.addResourceLocations("classpath:/");
+
+
+        registry
+    		.addResourceHandler("/robots.txt")
+    		.addResourceLocations("classpath:/robots.txt");
+
+        registry
+    		.addResourceHandler("/*.json")
+    		.addResourceLocations("classpath:/");
+
+        
+        registry
+    		.addResourceHandler("/static/*.*")
+    		.addResourceLocations("classpath:/static/");
+
+        registry
+    		.addResourceHandler("/static/css/*.css")
+    		.addResourceLocations("classpath:/static/css/");
+
+        registry
+    		.addResourceHandler("/static/css/*.map")
+    		.addResourceLocations("classpath:/static/css/");
+
+        
+        registry
+    		.addResourceHandler("/static/js/*.*")
+    		.addResourceLocations("classpath:/static/js/");
+
+        registry
+    		.addResourceHandler("/static/media/*.*")
+    		.addResourceLocations("classpath:/static/media/");
+        
     }
 
     @Bean
     public Docket api() {
-    	String s = DbConstants.SCHEMA_NAME;
-    	TypeResolver typeResolver = new TypeResolver();
         return new Docket(DocumentationType.SWAGGER_2).select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
