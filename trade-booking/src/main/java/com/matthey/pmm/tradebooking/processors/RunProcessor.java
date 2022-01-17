@@ -65,7 +65,7 @@ public class RunProcessor {
 				processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Processing");
 				processLogUserTable.updateRows(processLogTable, COL_RUN_ID + ", " + COL_DEAL_COUNTER);
 				FileProcessor fileProcessor = new FileProcessor(session, constRepo, logger, runId, dealCounter);
-	    		logger.info("Now processing file' " + fileProcessor + "'");
+	    		logger.info("Processing file' " + fileNameToProcess + "' now.");
 	    		boolean success = fileProcessor.processFile(fileNameToProcess);
 	    		overallSuccess &= success;
 	    		if (success) {
