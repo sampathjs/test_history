@@ -46,6 +46,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableWebMvc
 @EnableScheduling
 public class Application implements WebMvcConfigurer {	
+	 private static final String[] CLASSPATH_RESOURCE_LOCATIONS = {
+	            "classpath:/META-INF/resources/", "classpath:/resources/",
+	            "classpath:/static/", "classpath:/public/", "classpath:/BOOT-INF/classes/templates/" };	
+	
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }   
@@ -58,6 +62,48 @@ public class Application implements WebMvcConfigurer {
         registry
             .addResourceHandler("/webjars/**")
             .addResourceLocations("classpath:/META-INF/resources/webjars/");
+        
+        registry.addResourceHandler("/**")
+        	.addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
+
+	    registry
+			.addResourceHandler("/*.png")
+			.addResourceLocations("classpath:/");
+	
+	    registry
+			.addResourceHandler("/*.ico")
+			.addResourceLocations("classpath:/");
+	
+	
+	    registry
+			.addResourceHandler("/robots.txt")
+			.addResourceLocations("classpath:/robots.txt");
+	
+	    registry
+			.addResourceHandler("/*.json")
+			.addResourceLocations("classpath:/");
+	
+	    
+	    registry
+			.addResourceHandler("/static/*.*")
+			.addResourceLocations("classpath:/static/");
+	
+	    registry
+			.addResourceHandler("/static/css/*.css")
+			.addResourceLocations("classpath:/static/css/");
+	
+	    registry
+			.addResourceHandler("/static/css/*.map")
+			.addResourceLocations("classpath:/static/css/");
+	
+	    
+	    registry
+			.addResourceHandler("/static/js/*.*")
+			.addResourceLocations("classpath:/static/js/");
+	
+	    registry
+			.addResourceHandler("/static/media/*.*")
+			.addResourceLocations("classpath:/static/media/");	
     }
 
     @Bean
