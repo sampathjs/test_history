@@ -26,7 +26,7 @@ public class LimsController {
 
 	public LimsController(Session session) {
 		this.session = session;
-		session.getDebug().logError("LimsController constructor started", EnumMessageSeverity.Error);
+		logger.info("LimsController constructor started", EnumMessageSeverity.Error);
 	}
 
 	@PostMapping("/Sample")
