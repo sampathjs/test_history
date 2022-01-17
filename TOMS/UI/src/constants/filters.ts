@@ -1,0 +1,1 @@
+export const MAX_UNEXPANDED_FILTER_LIST_OPTIONS = 3;
