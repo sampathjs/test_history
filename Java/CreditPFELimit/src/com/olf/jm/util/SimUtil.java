@@ -1,6 +1,11 @@
 package com.olf.jm.util;
 
+import java.util.Iterator;
+
 import com.olf.openrisk.internal.OpenRiskException;
+import com.olf.openrisk.simulation.ConstGeneralResult;
+import com.olf.openrisk.simulation.EnumGeneralResultType;
+import com.olf.openrisk.simulation.EnumResultType;
 import com.olf.openrisk.simulation.ResultType;
 import com.olf.openrisk.simulation.RevalResults;
 import com.olf.openrisk.table.ConstTable;
@@ -14,30 +19,67 @@ public class SimUtil {
 	}
 
 	public ConstTable getTranResults(RevalResults revalResults, ResultType resultType) throws OpenRiskException {
-		ConstTable tranResult = revalResults.getTransactionResult(resultType).getConstTable();
-		validateResult(resultType, tranResult);
-		return tranResult;
+		return getTranResults(revalResults, resultType, true);
 	}
 
 	public ConstTable getGenResults(RevalResults revalResults, ResultType resultType) throws OpenRiskException {
-		ConstTable genResult = revalResults.getGeneralResult(resultType).getConstTable();
-		validateResult(resultType, genResult);
-		return genResult;
+		return getGenResults(revalResults, resultType, true);
 	}
 
 	public ConstTable getGenResults(RevalResults revalResults, ResultType resultType, int instrumentType, int discountIndex,
 			int projectionIndex) throws OpenRiskException {
-		ConstTable genResult = revalResults.getGeneralResultTable(resultType, instrumentType, discountIndex, projectionIndex);
-		validateResult(resultType, genResult);
+		return getGenResults(revalResults, resultType, instrumentType, discountIndex, projectionIndex, true);
+	}
+
+	public ConstTable getTranResults(RevalResults revalResults, ResultType resultType, boolean validateResult) throws OpenRiskException {
+		ConstTable tranResult = revalResults.getTransactionResult(resultType).getConstTable();
+		if (validateResult) {
+			validateResult(resultType, tranResult);
+		}
+		return tranResult;
+	}
+
+	public ConstTable getGenResults(RevalResults revalResults, ResultType resultType, boolean validateResult) throws OpenRiskException {
+		ConstTable genResult = revalResults.getGeneralResult(resultType).getConstTable();
+		if (validateResult) {
+			validateResult(resultType, genResult);
+		}
 		return genResult;
 	}
+
+	public ConstTable getGenResults(RevalResults revalResults, ResultType resultType, int instrumentType, int discountIndex,
+			int projectionIndex, boolean validateResult) throws OpenRiskException {
+		ConstTable genResult = revalResults.getGeneralResultTable(resultType, instrumentType, discountIndex, projectionIndex);
+		if (validateResult) {
+			validateResult(resultType, genResult);
+		}
+		return genResult;
+	}
+
+	
+	public Table getAllGenResultsForInsType(RevalResults revalResults, ResultType resultType) throws OpenRiskException {
+
+		Table genResult = null;
+		for (Iterator<ConstGeneralResult> i = revalResults.getGeneralResults().iterator(); i.hasNext(); ) {
+			ConstGeneralResult result = i.next();
+			if(result.getResultType() == resultType.getId()) {
+				if(genResult == null) {
+					genResult = result.getConstTable().cloneStructure();
+				}
+				genResult.select(result.getConstTable(), "*", "id > 0");
+			}
+			
+		}
+		return genResult;
+	}
+	
 	
 	private void validateResult(ResultType resultType, ConstTable result) throws OpenRiskException {
 		if (result == null || result.getRowCount() == 0) {
 			throw new OpenRiskException("Failed to get sim results for " + resultType.getName());
 		}
 	}
-	
+
 	public Table getTranList(Transactions transactions, EnumTransactionFieldId[] fields) {
 
 		Table tranList = transactions.asTable(fields);

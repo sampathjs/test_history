@@ -40,7 +40,7 @@ import com.olf.openrisk.simulation.EnumConfiguration;
 import com.olf.openrisk.simulation.EnumResultType;
 import com.olf.openrisk.simulation.RevalResults;
 import com.olf.openrisk.simulation.Scenario;
-import com.olf.openrisk.simulation.SimulationFactory;
+import com.olf.openrisk.staticdata.Currency;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
@@ -48,6 +48,7 @@ import com.olf.openrisk.table.EnumFormatDouble;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.table.TableFormatter;
+import com.olf.openrisk.trading.EnumInsSub;
 import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumReceivePay;
 import com.olf.openrisk.trading.EnumToolset;
@@ -58,71 +59,62 @@ import com.openlink.util.constrepository.ConstRepository;
 @ScriptCategory({ EnumScriptCategory.SimResult })
 public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 
-	IOFactory iof;
-	SimulationFactory sf;
-	CalendarFactory cf;
-	TableFactory tf;
-
 	/** The const repository used to initialise the logging classes. */
 	private ConstRepository constRepo;
 	
 	private SimUtil simUtil = new SimUtil();
+	
+	private static IOFactory iof;
+	private static CalendarFactory cf;
+	private static TableFactory tf;
 
 	private static final String CONST_REPO_CONTEXT = "JM Credit PFE";
 	private static final String CONST_REPO_SUBCONTEXT = "Party Agreement UDSR";
-	private static final String CR_VAR_SIM_RES_GROUP = "SimResultGroup";
+	
 	private static final String CR_VAR_SIM_ATTR_COL_CALL_FREQ = "CollateralCallFreq";
 	private static final String CR_VAR_SIM_ATTR_PFE_CALC_HORIZON = "PFECalcHorizon";
+	private static final String CR_VAR_LOG_DEBUG_MESSAGES = "logDebugMessages";
+	
 	private static String SIM_ATTR_COL_CALL_FREQ_NAME = "";
 	private static String SIM_ATTR_PFE_CALC_HORIZON_NAME = "";
-	private static String SIM_RES_GROUP = "";
 	private static String SIM_ATTR_COL_CALL_FREQ_VALUE = "";
 	private static String SIM_ATTR_PFE_CALC_HORIZON_VALUE = "";
+	
+	private static String CLASSNAME = "";
+	private static boolean LOG_DEBUG_MSG = false;
+	private static Date scenarioDate;
+	private static Date currentDate;
+	private static Currency scenarioCurrency;
+	
+	JMCreditPFEPartyAgreementUdsr () {
+		CLASSNAME = this.getClass().getSimpleName();
+	}
 
 	@Override
 	public void calculate(Session session, Scenario scenario, RevalResult revalResult, Transactions transactions,
 			RevalResults prerequisites) {
 
+		long currentTime = System.currentTimeMillis();
+		String logPrefix = CLASSNAME + ".calculate() : ";
 		try {
-			initialize(session);
-			Logging.info("JM Credit PFE Party Agreement UDSR - Start");
+			initialize(session, scenario);
+			Logging.info(logPrefix + "JM Credit PFE Party Agreement UDSR - Start for scenario id " + scenario.getId());
 
 			Table tranList = getTranList(transactions);
 			ConstTable baseMtM = getBaseMtM(prerequisites);
-
 			Table creditPFEPAData = createOutputTable();
-			String cols = "deal_num, tran_num, ins_num, ins_type, external_lentity, tran_type, party_agreement_id";
-			creditPFEPAData.select(tranList, cols, "[IN.deal_num] > 0");
 			
-			ConstTable baseMtMNonCommSwap = baseMtM.createConstView("*", "ins_type !=" + EnumInsType.MetalSwap.getValue())
-					.createConstView("*", "ins_type !=" + EnumInsType.MetalBasisSwap.getValue());
-			
-			ConstTable baseMtMCommSwap = baseMtM.createConstView("*",
-					"ins_type ==" + EnumInsType.MetalSwap.getValue() + " OR ins_type ==" + EnumInsType.MetalBasisSwap.getValue());
-			
-			creditPFEPAData.select(baseMtMNonCommSwap,
-					"deal_leg->param_seq_num, currency_id->param_currency, " + EnumResultType.BaseMtm.getValue() + "->base_mtm",
-					"[IN.deal_num] == [OUT.deal_num] AND [IN.ins_num] == [OUT.ins_num]");
-			
-			creditPFEPAData.select(baseMtMCommSwap, "deal_leg->param_seq_num, currency_id->param_currency",
-					"[IN.deal_num] == [OUT.deal_num] AND [IN.ins_num] == [OUT.ins_num]");
-			
-			Table commSwap = tf.createTable();
-			commSwap.selectDistinct(baseMtMCommSwap, "deal_num", "[IN.deal_num] > 0");
-			commSwap.addColumn("param_seq_num", EnumColType.Int);
-			commSwap.select(baseMtMCommSwap, EnumResultType.BaseMtm.getValue() + "->base_mtm", "[IN.deal_num] == [OUT.deal_num]",
-					"SUM(base_mtm)");
-			creditPFEPAData.select(commSwap, "base_mtm", "[IN.deal_num] == [OUT.deal_num] AND [IN.param_seq_num] == [OUT.param_seq_num]");
+			updateTranAndBaseMTMData(creditPFEPAData, tranList, baseMtM);
 			
 			addPMCurrencyTable(creditPFEPAData);
-			
+
 			populateSimResultAttributes(revalResult);
 
 			addPayRec(transactions, creditPFEPAData);
 
 			addPartyAgreementFields(creditPFEPAData);
 
-			addCollateralCallDates(scenario, creditPFEPAData);
+			addCollateralCallDates(creditPFEPAData);
 
 			addhaircut(creditPFEPAData);
 
@@ -131,11 +123,40 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 			revalResult.setTable(creditPFEPAData);
 
 		} catch (OpenRiskException e) {
-			logErrorWithException("Failed to run sim result: " + e.getMessage());
+			String message = "Failed to run sim result: " + e.getMessage();
+			Logging.error(message);
+			throw new OpenRiskException(message);
 		}
 
-		Logging.info("JM Credit PFE Party Agreement UDSR - Complete");
+		Logging.info(logPrefix + "JM Credit PFE Party Agreement UDSR - completed in " + (System.currentTimeMillis() - currentTime) + " ms");
 		Logging.close();
+	}
+
+	private void updateTranAndBaseMTMData(Table creditPFEPAData, Table tranList, ConstTable baseMtM) {
+		
+		String cols = "deal_num, tran_num, ins_num, ins_type, external_lentity, tran_type, party_agreement_id";
+		creditPFEPAData.select(tranList, cols, "[IN.deal_num] >= 0");
+
+		ConstTable baseMtMNonCommSwap = baseMtM.createConstView("*", "ins_type !=" + EnumInsType.MetalSwap.getValue()).createConstView("*",
+				"ins_type !=" + EnumInsType.MetalBasisSwap.getValue());
+
+		ConstTable baseMtMCommSwap = baseMtM.createConstView("*",
+				"ins_type ==" + EnumInsType.MetalSwap.getValue() + " OR ins_type ==" + EnumInsType.MetalBasisSwap.getValue());
+
+		creditPFEPAData.select(baseMtMNonCommSwap,
+				"deal_leg->param_seq_num, currency_id->param_currency, " + EnumResultType.BaseMtm.getValue() + "->base_mtm",
+				"[IN.deal_num] == [OUT.deal_num] AND [IN.ins_num] == [OUT.ins_num] AND [IN." + EnumResultType.TranListing.getValue()
+						+ "] == [OUT.tran_num]");
+
+		creditPFEPAData.select(baseMtMCommSwap, "deal_leg->param_seq_num, currency_id->param_currency",
+				"[IN.deal_num] == [OUT.deal_num] AND [IN.ins_num] == [OUT.ins_num]");
+
+		Table commSwap = tf.createTable();
+		commSwap.selectDistinct(baseMtMCommSwap, "deal_num", "[IN.deal_num] >= 0");
+		commSwap.addColumn("param_seq_num", EnumColType.Int);
+		commSwap.select(baseMtMCommSwap, EnumResultType.BaseMtm.getValue() + "->base_mtm", "[IN.deal_num] == [OUT.deal_num]",
+				"SUM(base_mtm)");
+		creditPFEPAData.select(commSwap, "base_mtm", "[IN.deal_num] == [OUT.deal_num] AND [IN.param_seq_num] == [OUT.param_seq_num]");
 	}
 
 	@Override
@@ -143,7 +164,7 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 
 		Table result = revalResult.getTable();
 		TableFormatter formatter = result.getFormatter();
-		
+
 		formatter.setColumnTitle("deal_num", "Deal Number");
 		formatter.setColumnTitle("tran_num", "Tran Number");
 		formatter.setColumnTitle("ins_num", "ins Number");
@@ -161,7 +182,7 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		formatter.setColumnTitle("tran_type", "Tran Type");
 		formatter.setColumnTitle("haircut", "Haircut");
 		formatter.setColumnTitle("mtm_exposure", "MtM Exposure");
-		
+
 		formatter.setColumnFormatter("ins_type", formatter.createColumnFormatterAsRef(EnumReferenceTable.Instruments));
 		formatter.setColumnFormatter("external_lentity", formatter.createColumnFormatterAsRef(EnumReferenceTable.Party));
 		formatter.setColumnFormatter("param_currency", formatter.createColumnFormatterAsRef(EnumReferenceTable.Currency));
@@ -172,36 +193,98 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		formatter.setColumnFormatter("time_to_call_date", formatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 6, 10));
 		formatter.setColumnFormatter("haircut", formatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 6, 10));
 		formatter.setColumnFormatter("mtm_exposure", formatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 6, 10));
-		
+
 		formatter.getColumnFormatter("metal_leg").setHidden(true);
 	}
-	
+
 	private ConstTable getBaseMtM(RevalResults prerequisites) throws OpenRiskException {
-		return simUtil.getTranResults(prerequisites, sf.getResultType(EnumResultType.BaseMtm));
+
+		logDebugMsg(CLASSNAME + ".getBaseMtM() : get base MTM from sim results");
+		// BaseMTM results doesn't include tran numbers hence get from transaction results table
+		Table transactions = prerequisites.getResultsTable().getTable(0, 0).cloneData();
+		transactions.convertColumns("Int[40]");
+		ConstTable baseMtM = transactions.createConstView("deal_num, ins_num, ins_type, disc_idx, proj_idx, deal_leg, currency_id, "
+				+ EnumResultType.TranListing.getValue() + ", " + EnumResultType.BaseMtm.getValue());
+		return baseMtM;
 	}
-	
+
 	private Table getTranList(Transactions transactions) {
 
+		long currentTime = System.currentTimeMillis();
+		String logPrefix = CLASSNAME + ".getTranList() : ";
+		logDebugMsg(logPrefix + "method started");
 		EnumTransactionFieldId[] fields = { 
+				EnumTransactionFieldId.InternalBusinessUnit,
+				EnumTransactionFieldId.ExternalBusinessUnit,
+				EnumTransactionFieldId.InstrumentType,
+				EnumTransactionFieldId.InstrumentSubType,
 				EnumTransactionFieldId.ExternalLegalEntity,
 				EnumTransactionFieldId.BuySell,
 				EnumTransactionFieldId.InstrumentId,
 				EnumTransactionFieldId.InstrumentType,
 				EnumTransactionFieldId.TransactionType,
-				EnumTransactionFieldId.PartyAgreement };
-		return simUtil.getTranList(transactions, fields);
+				EnumTransactionFieldId.PartyAgreement,
+		};
+		Table tranList = simUtil.getTranList(transactions, fields);
+		logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
+
+		updatePartyAgreementForFxFarLeg(tranList);
+		
+		return tranList;
+	}
+
+	private void updatePartyAgreementForFxFarLeg(Table tranList) {
+
+		Table partyAgreementNearLeg = tf.createTable();
+		Table fxFarLegDeals = tf.createTable();
+		long currentTime = System.currentTimeMillis();
+		String logPrefix = CLASSNAME + ".updatePartyAgreementForFxFarLeg() : ";
+		try {
+			logDebugMsg(logPrefix + "method started");
+			fxFarLegDeals.selectDistinct(tranList, "*", "[IN.ins_sub_type] == " + EnumInsSub.FxFarLeg.getValue());
+			QueryResult qr = iof.createQueryResult();
+			qr.add(fxFarLegDeals.getColumnValuesAsInt("tran_num"));
+			int queryId = qr.getId();
+			
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT far.tran_num far_tran_num, near.tran_num near_tran_num, atav.party_agreement_id");
+			sql.append("\n FROM query_result qr");
+			sql.append("\n JOIN ab_tran far ON far.tran_num = qr.query_result AND qr.unique_id = ").append(queryId);
+			sql.append("    AND far.ins_sub_type = ").append(EnumInsSub.FxFarLeg.getValue());
+			sql.append("\n JOIN ab_tran near ON near.tran_group = far.tran_group");
+			sql.append("    AND near.ins_sub_type = ").append(EnumInsSub.FxNearLeg.getValue());
+			sql.append("\n JOIN ab_tran_agreement_view atav ON atav.tran_num = near.tran_num");
+			sql.append("\n AND atav.party_agreement_id !=0");
+			
+			partyAgreementNearLeg = iof.runSQL(sql.toString());
+			if (partyAgreementNearLeg.getRowCount() <= 0) {
+				Logging.error(logPrefix + "Failed to fetch Party Agreement for FX near leg deals");
+			}
+			tranList.select(partyAgreementNearLeg, "party_agreement_id", "[IN.far_tran_num] == [OUT.tran_num]");
+		} catch (OpenRiskException e) {
+			throw new OpenRiskException("Failed to get simulation result attribute: " + e.getMessage());
+		} finally {
+			logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
+		}
 	}
 
 	private void addPMCurrencyTable(Table creditPFEPAData) {
-		
-		Table pmCurrency = iof.runSQL("SELECT id_number AS currency_id, 1 AS metal_leg FROM currency WHERE precious_metal = 1"); 
+
+		long currentTime = System.currentTimeMillis();
+		String logPrefix = CLASSNAME + ".addPMCurrencyTable() : ";
+		logDebugMsg(logPrefix + "method started");
+		Table pmCurrency = iof.runSQL("SELECT id_number AS currency_id, 1 AS metal_leg FROM currency WHERE precious_metal = 1");
 		creditPFEPAData.select(pmCurrency, "metal_leg", "[IN.currency_id] == [OUT.param_currency]");
+		logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
 	}
 
 	private void populateSimResultAttributes(RevalResult revalResult) {
 
 		Table pfolioResult = null;
+		long currentTime = System.currentTimeMillis();
+		String logPrefix = CLASSNAME + ".populateSimResultAttributes() : ";
 		try {
+			logDebugMsg(logPrefix + "method started");
 			// ResultAttributeGroup.getAttributes throws an exception so getting the values directly from db tables
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT prt.name result_name, prt.id_number, pragi.res_attr_grp_id, pragi.res_attr_id");
@@ -220,7 +303,9 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 			SIM_ATTR_PFE_CALC_HORIZON_VALUE = getValueFromTable(pfolioResult, SIM_ATTR_PFE_CALC_HORIZON_NAME);
 
 		} catch (OpenRiskException e) {
-			logErrorWithException("Failed to get simulation result attribute: " + e.getMessage());
+			throw new OpenRiskException("Failed to get simulation result attribute: " + e.getMessage());
+		} finally {
+			logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
 		}
 	}
 
@@ -238,6 +323,9 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 
 	private void addPayRec(Transactions transactions, Table creditPFEPAData) {
 
+		long currentTime = System.currentTimeMillis();
+		String logPrefix = CLASSNAME + ".addPayRec() : ";
+		logDebugMsg(logPrefix + "method started");
 		Table payRec = null;
 		try {
 			QueryResult qr = iof.createQueryResult();
@@ -259,7 +347,7 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 			sql.append("\n               AND ab.position > 0 THEN 0");
 			sql.append("\n          WHEN ab.toolset = ").append(EnumToolset.Cash.getValue());
 			sql.append("\n               AND ab.position <=0 THEN 1");
-			sql.append("\n          WHEN ifp.fee_def_id > 2000 THEN ifp.pay_rec"); //For Fees
+			sql.append("\n          WHEN ifp.fee_def_id > 2000 THEN ifp.pay_rec"); // For Fees
 			sql.append("\n          ELSE ip.pay_rec");
 			sql.append("\n          END AS pay_rec");
 			sql.append("\n  FROM ab_tran ab");
@@ -274,22 +362,26 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 			if (payRec.getRowCount() < 0) {
 				throw new OpenRiskException("Query failed");
 			} else {
-				creditPFEPAData.select(payRec, "pay_rec->pay_receive", "[IN.deal_num] == [OUT.deal_num] " 
-						+ "AND [IN.tran_num] == [OUT.tran_num] AND [IN.ins_num] == [OUT.ins_num] "
-						+ "AND [IN.param_seq_num] == [OUT.param_seq_num]");
+				creditPFEPAData.select(payRec, "pay_rec->pay_receive",
+						"[IN.deal_num] == [OUT.deal_num] " + "AND [IN.tran_num] == [OUT.tran_num] AND [IN.ins_num] == [OUT.ins_num] "
+								+ "AND [IN.param_seq_num] == [OUT.param_seq_num]");
 			}
-			Logging.info("Pay Rec added to the table.");
+			logDebugMsg(logPrefix + "Pay Rec added to the table.");
 		} catch (OpenRiskException e) {
-			logErrorWithException("Failed to load pay rec from database table : " + e.getMessage());
+			throw new OpenRiskException("Failed to load pay rec from database table : " + e.getMessage());
 		} finally {
 			payRec.dispose();
+			logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
 		}
 	}
 
 	private void addPartyAgreementFields(Table creditPFEPAData) {
 
 		Table partyAgreementList = null;
+		long currentTime = System.currentTimeMillis();
+		String logPrefix = CLASSNAME + ".addPartyAgreementFields() : ";
 		try {
+			logDebugMsg(logPrefix + "method started");
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT intbu.party_id internal_bunit, extbu.party_id external_bunit, pa.party_agreement_id");
 			sql.append("\n     , netting_flag, haircut_calculator_flag, haircut_method, ai.ins_type");
@@ -300,7 +392,8 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 			sql.append("\n  JOIN party_agreement_assignment extbu ON pa.party_agreement_id = extbu.party_agreement_id");
 			sql.append("\n       AND extbu.internal_external_flag = 1");
 			sql.append("\n  JOIN agreement_ins ai ON pa.agreement_id = ai.agreement_id");
-			sql.append("\n  LEFT JOIN party_agreement_collateral pac ON pa.agreement_id = pac.party_agreement_id");
+			sql.append("\n  LEFT JOIN party_agreement_collateral pac ON pa.party_agreement_id = pac.party_agreement_id");
+			sql.append("\n        AND pac.int_ext = 0");
 			sql.append("\n WHERE pa.doc_status = 1");
 			partyAgreementList = iof.runSQL(sql.toString());
 
@@ -323,51 +416,63 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 						? ("".equalsIgnoreCase(valDateSeq) ? SIM_ATTR_COL_CALL_FREQ_VALUE : valDateSeq) : SIM_ATTR_PFE_CALC_HORIZON_VALUE;
 				creditPFEPAData.setString("collateral_valuation_date_seq", row, valDateSeq);
 			}
-			Logging.info("Party agreement info updated.");
+			logDebugMsg(logPrefix + "Party agreement info updated.");
 		} catch (OpenRiskException e) {
-			logErrorWithException("Failed to load party agreement netting flag : " + e.getMessage());
+			throw new OpenRiskException("Failed to load party agreement netting flag : " + e.getMessage());
 		} finally {
 			partyAgreementList.dispose();
+			logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
 		}
 	}
 
-	private void addCollateralCallDates(Scenario scenario, Table creditPFEPAData) {
+	private void addCollateralCallDates(Table creditPFEPAData) {
 
+		long currentTime = System.currentTimeMillis();
+		String logPrefix = CLASSNAME + ".addCollateralCallDates() : ";
 		try {
-			Configuration scenarioDateCfg = scenario.getConfigurations().find(EnumConfiguration.Date, "Scenario Date");
-			Date scenarioDate = scenarioDateCfg == null ? cf.createSymbolicDate("0cd").evaluate()
-					: scenarioDateCfg.getFields().getField("Current Date").getValueAsDate();
+			logDebugMsg(logPrefix + "method started");
 			HolidaySchedules hs = cf.createHolidaySchedules();
-			hs.addSchedule(scenario.getCurrency().getHolidaySchedule());
+			hs.addSchedule(scenarioCurrency.getHolidaySchedule());
 
 			int rowCount = creditPFEPAData.getRowCount();
 			for (int row = 0; row < rowCount; row++) {
 				SymbolicDate valDateSeq = cf.createSymbolicDate(creditPFEPAData.getString("collateral_valuation_date_seq", row));
 				valDateSeq.setHolidaySchedules(hs);
-				Date nextCallDate = valDateSeq.evaluate(scenarioDate);
+				Date nextCallDate = valDateSeq.evaluate(currentDate);
 				creditPFEPAData.setDate("next_collateral_call_date", row, nextCallDate);
 
-				double timeToCallDate = (cf.getJulianDate(nextCallDate) - cf.getJulianDate(scenarioDate)) / 365;
+				double timeToCallDate = (cf.getJulianDate(nextCallDate) - cf.getJulianDate(currentDate)) / 365;
 				creditPFEPAData.setDouble("time_to_call_date", row, timeToCallDate);
 			}
-			Logging.info("Collateral Call dates updated.");
+			logDebugMsg(logPrefix + "Collateral Call dates updated.");
 		} catch (OpenRiskException e) {
-			logErrorWithException("Failed to add Collateral Call dates : " + e.getMessage());
+			throw new OpenRiskException("Failed to add Collateral Call dates : " + e.getMessage());
+		} finally {
+			logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
 		}
 	}
 
 	private void addhaircut(Table creditPFEPAData) {
+
+		long currentTime = System.currentTimeMillis();
+		String logPrefix = CLASSNAME + ".addhaircut() : ";
 		try {
+			logDebugMsg(logPrefix + "method started");
 			creditPFEPAData.setColumnValues(creditPFEPAData.getColumnId("haircut"), 1.0);
-			Logging.info("Haircut values added.");
+			logDebugMsg(logPrefix + "Haircut values added.");
 		} catch (OpenRiskException e) {
-			logErrorWithException("Failed to add haircut values: " + e.getMessage());
+			throw new OpenRiskException("Failed to add haircut values: " + e.getMessage());
+		} finally {
+			logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
 		}
 	}
 
 	private void addMtmExposure(Table creditPFEPAData) {
 
+		long currentTime = System.currentTimeMillis();
+		String logPrefix = CLASSNAME + ".addMtmExposure() : ";
 		try {
+			logDebugMsg(logPrefix + "method started");
 			int rowCount = creditPFEPAData.getRowCount();
 			for (int row = 0; row < rowCount; row++) {
 				double haircut = creditPFEPAData.getDouble("haircut", row);
@@ -375,21 +480,26 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 				double baseMtm = creditPFEPAData.getDouble("base_mtm", row);
 				int payRec = creditPFEPAData.getInt("pay_receive", row);
 				int insType = creditPFEPAData.getInt("ins_type", row);
+				Date nextCallDate = creditPFEPAData.getDate("next_collateral_call_date", row);
 				double mtmExposure = 0;
-				if(insType == EnumInsType.MetalSwap.getValue() || insType == EnumInsType.MetalBasisSwap.getValue()) {
+				if(scenarioDate.after(nextCallDate)) {
+					mtmExposure = 0;
+				} else if (insType == EnumInsType.MetalSwap.getValue() || insType == EnumInsType.MetalBasisSwap.getValue()) {
 					mtmExposure = Math.max(0.0, haircut * baseMtm);
 				} else if ("Yes".equalsIgnoreCase(netting)) {
 					mtmExposure = haircut * baseMtm;
-				} else if(payRec == EnumReceivePay.Pay.getValue()) {
+				} else if (payRec == EnumReceivePay.Pay.getValue()) {
 					mtmExposure = 0.0;
 				} else {
 					mtmExposure = Math.max(0.0, haircut * baseMtm);
 				}
 				creditPFEPAData.setDouble("mtm_exposure", row, mtmExposure);
 			}
-			Logging.info("MTM Exposure values calculated and added.");
+			logDebugMsg(logPrefix + "MTM Exposure values calculated and added.");
 		} catch (OpenRiskException e) {
-			logErrorWithException("Failed to add MTM Exposure values : " + e.getMessage());
+			throw new OpenRiskException("Failed to add MTM Exposure values : " + e.getMessage());
+		} finally {
+			logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
 		}
 	}
 
@@ -418,20 +528,24 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		return data;
 	}
 
-	private void initialize(Session session) {
+	private void initialize(Session session, Scenario scenario) {
 		try {
 			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
 
 			iof = session.getIOFactory();
-			sf = session.getSimulationFactory();
 			cf = session.getCalendarFactory();
 			tf = session.getTableFactory();
-			
-			constRepo = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
-			SIM_RES_GROUP = constRepo.getStringValue(CR_VAR_SIM_RES_GROUP);
+
 			SIM_ATTR_COL_CALL_FREQ_NAME = constRepo.getStringValue(CR_VAR_SIM_ATTR_COL_CALL_FREQ);
 			SIM_ATTR_PFE_CALC_HORIZON_NAME = constRepo.getStringValue(CR_VAR_SIM_ATTR_PFE_CALC_HORIZON);
+			LOG_DEBUG_MSG = constRepo.getIntValue(CR_VAR_LOG_DEBUG_MESSAGES) == 1 ? true : false;
 
+			Configuration scenarioDateCfg = scenario.getConfigurations().find(EnumConfiguration.Date, "Scenario Date");
+			scenarioDate = scenarioDateCfg == null ? cf.createSymbolicDate("0cd").evaluate()
+					: scenarioDateCfg.getFields().getField("Current Date").getValueAsDate();
+			currentDate = session.getBusinessDate();
+			scenarioCurrency = scenario.getCurrency();
 		} catch (OpenRiskException e) {
 			throw new OpenRiskException("Failed to initialize : " + e.getMessage());
 		} catch (OException e) {
@@ -439,10 +553,10 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		}
 		Logging.info("********************* Start of new run ***************************");
 	}
-	
-	private void logErrorWithException(String msg) {
-		Logging.error(msg);
-		throw new OpenRiskException(msg);
-	}
 
+	private void logDebugMsg(String message){
+		if(LOG_DEBUG_MSG) {
+			Logging.debug(message);
+		}
+	}
 }
