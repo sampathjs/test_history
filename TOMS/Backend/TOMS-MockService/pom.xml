@@ -194,6 +194,30 @@
     </dependencies>    
     <build>
         <plugins>
+		    <plugin>
+		      <artifactId>maven-resources-plugin</artifactId>
+		      <version>2.6</version>
+		      <executions>
+		        <execution>
+		          <id>copy .env</id>
+		          <phase>clean</phase>
+		          <goals>
+		            <goal>copy-resources</goal>
+		          </goals>
+		          <configuration>
+		            <outputDirectory>../../UI</outputDirectory>
+		            <resources>          
+		              <resource>
+		                <directory>${basedir}</directory>
+                		<includes>
+                    		<include>.env</include>
+                		</includes>		                
+		              </resource>
+		            </resources>              
+		          </configuration>            
+		        </execution>		        
+		      </executions>
+		    </plugin>        
  			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
@@ -206,10 +230,21 @@
 			            <phase>generate-resources</phase>
 			        </execution>
 	                <execution>
+	                    <id>npm install</id>
+	                    <goals>
+	                        <goal>npm</goal>
+	                    </goals>
+			            <phase>generate-resources</phase>
+	                    <configuration>
+	                        <arguments>install react-scripts --save</arguments>
+	                    </configuration>
+	                </execution>
+	                <execution>
 	                    <id>npm run build</id>
 	                    <goals>
 	                        <goal>npm</goal>
 	                    </goals>
+			            <phase>generate-resources</phase>
 	                    <configuration>
 	                        <arguments>run build</arguments>
 	                    </configuration>
@@ -226,13 +261,13 @@
 		      <version>2.6</version>
 		      <executions>
 		        <execution>
-		          <id>copy-resources</id>
-		          <phase>validate</phase>
+		          <id>copy frontend to src/main/resources</id>
+		          <phase>process-resources</phase>
 		          <goals>
 		            <goal>copy-resources</goal>
 		          </goals>
 		          <configuration>
-		            <outputDirectory>${basedir}/target/classes</outputDirectory>
+		            <outputDirectory>${basedir}/src/main/resources</outputDirectory>
 		            <resources>          
 		              <resource>
 		                <directory>../../UI/build</directory>
@@ -242,13 +277,13 @@
 		          </configuration>            
 		        </execution>
 		        <execution>
-		          <id>copy-template</id>
-		          <phase>validate</phase>
+		          <id>copy frontend index.html to src/main/resources/templates</id>
+		          <phase>process-resources</phase>
 		          <goals>
-		            <goal>copy-resources</goal>
+		            <goal>resources</goal>
 		          </goals>
 		          <configuration>
-		            <outputDirectory>${basedir}/target/classes/tempates</outputDirectory>
+		            <outputDirectory>${basedir}/src/main/resources/templates</outputDirectory>
 		            <resources>          
 		              <resource>
 		                <directory>../../UI/build</directory>
