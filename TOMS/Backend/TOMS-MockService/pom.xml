@@ -272,6 +272,9 @@
 		              <resource>
 		                <directory>../../UI/build</directory>
 		                <filtering>true</filtering>
+		                <excludes>
+		                	<exclude>.env</exclude>
+		                </excludes>
 		              </resource>
 		            </resources>              
 		          </configuration>            
