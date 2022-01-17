@@ -60,31 +60,29 @@ export const OrderFills = () => {
           Outstanding quantity {outstandingQuantity} of {orderQuantity}
         </Styles.Quantity>
       </Styles.Header>
-      {!isEmpty(data) && (
-        <OrderPanelStyles.SectionRow>
-          <Styles.Table>
-            <Styles.TableHeader>
-              <Styles.TableRow>
-                <Styles.TableHeaderCell>Volume</Styles.TableHeaderCell>
-                <Styles.TableHeaderCell>Price</Styles.TableHeaderCell>
-                <Styles.TableHeaderCell>Date / Time</Styles.TableHeaderCell>
-                <Styles.TableHeaderCell>Owner</Styles.TableHeaderCell>
-                <Styles.TableHeaderCell>Endur Deal #</Styles.TableHeaderCell>
-                <Styles.TableHeaderCell>Endur Response</Styles.TableHeaderCell>
-              </Styles.TableRow>
-            </Styles.TableHeader>
-            <Styles.TableBody>
-              {data?.map((fill: OrderFill) => (
-                <Fill key={fill.id} fill={fill} />
-              ))}
+      <OrderPanelStyles.SectionRow>
+        <Styles.Table>
+          <Styles.TableHeader>
+            <Styles.TableRow>
+              <Styles.TableHeaderCell>Volume</Styles.TableHeaderCell>
+              <Styles.TableHeaderCell>Price</Styles.TableHeaderCell>
+              <Styles.TableHeaderCell>Date / Time</Styles.TableHeaderCell>
+              <Styles.TableHeaderCell>Owner</Styles.TableHeaderCell>
+              <Styles.TableHeaderCell>Endur Deal #</Styles.TableHeaderCell>
+              <Styles.TableHeaderCell>Endur Response</Styles.TableHeaderCell>
+            </Styles.TableRow>
+          </Styles.TableHeader>
+          <Styles.TableBody>
+            {data?.map((fill: OrderFill) => (
+              <Fill key={fill.id} fill={fill} />
+            ))}
 
-              {fields.map((field, index) => (
-                <NewFill key={field.id} index={index} />
-              ))}
-            </Styles.TableBody>
-          </Styles.Table>
-        </OrderPanelStyles.SectionRow>
-      )}
+            {fields.map((field, index) => (
+              <NewFill key={field.id} index={index} />
+            ))}
+          </Styles.TableBody>
+        </Styles.Table>
+      </OrderPanelStyles.SectionRow>
     </OrderPanelStyles.SecondarySection>
   );
 };
