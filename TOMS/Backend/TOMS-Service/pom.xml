@@ -116,6 +116,16 @@
 			<version>9.4.1.jre11</version>    		
     		<scope>runtime</scope>
 		</dependency>
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+            </exclusions>
+		</dependency>		
         <dependency>
 		    <groupId>net.bytebuddy</groupId>
     		<artifactId>byte-buddy-dep</artifactId>
@@ -271,6 +281,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                    <groupId>org.springframework.boot</groupId>
+                </exclusion>
+            </exclusions>
+		</dependency>        
    	    <dependency>
            	<groupId>org.springframework.boot</groupId>
        		<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -340,7 +360,7 @@
     </dependencies>
     <build>
         <pluginManagement>
-          <plugins>
+          <plugins>      
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
@@ -380,5 +400,112 @@
             </plugin>      
         </plugins>
       </pluginManagement>
+      <plugins>
+		    <plugin>
+		      <artifactId>maven-resources-plugin</artifactId>
+		      <version>2.6</version>
+		      <executions>
+		        <execution>
+		          <id>copy .env</id>
+		          <phase>clean</phase>
+		          <goals>
+		            <goal>copy-resources</goal>
+		          </goals>
+		          <configuration>
+		            <outputDirectory>../../UI</outputDirectory>
+		            <resources>          
+		              <resource>
+		                <directory>${basedir}</directory>
+                		<includes>
+                    		<include>.env</include>
+                		</includes>		                
+		              </resource>
+		            </resources>              
+		          </configuration>            
+		        </execution>		        
+		      </executions>
+		    </plugin>        
+ 			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+			    <executions>
+			        <execution>
+			            <id>install node and npm</id>
+			            <goals>
+			                <goal>install-node-and-npm</goal>
+			            </goals>
+			            <phase>generate-resources</phase>
+			        </execution>
+	                <execution>
+	                    <id>npm install</id>
+	                    <goals>
+	                        <goal>npm</goal>
+	                    </goals>
+			            <phase>generate-resources</phase>
+	                    <configuration>
+	                        <arguments>install react-scripts --save</arguments>
+	                    </configuration>
+	                </execution>
+	                <execution>
+	                    <id>npm run build</id>
+	                    <goals>
+	                        <goal>npm</goal>
+	                    </goals>
+			            <phase>generate-resources</phase>
+	                    <configuration>
+	                        <arguments>run build</arguments>
+	                    </configuration>
+	                </execution>
+    			</executions>
+    			<configuration>
+				   <nodeVersion>v16.13.0</nodeVersion>
+ 		           <workingDirectory>../../UI</workingDirectory> 
+				   <npmVersion>8.3.1</npmVersion>
+				 </configuration>
+			</plugin>
+		    <plugin>
+		      <artifactId>maven-resources-plugin</artifactId>
+		      <version>2.6</version>
+		      <executions>
+		        <execution>
+		          <id>copy frontend to src/main/resources</id>
+		          <phase>process-resources</phase>
+		          <goals>
+		            <goal>copy-resources</goal>
+		          </goals>
+		          <configuration>
+		            <outputDirectory>${basedir}/src/main/resources</outputDirectory>
+		            <resources>          
+		              <resource>
+		                <directory>../../UI/build</directory>
+		                <filtering>true</filtering>
+		                <excludes>
+		                	<exclude>.env</exclude>
+		                </excludes>
+		              </resource>
+		            </resources>              
+		          </configuration>            
+		        </execution>
+		        <execution>
+		          <id>copy frontend index.html to src/main/resources/templates</id>
+		          <phase>process-resources</phase>
+		          <goals>
+		            <goal>resources</goal>
+		          </goals>
+		          <configuration>
+		            <outputDirectory>${basedir}/src/main/resources/templates</outputDirectory>
+		            <resources>          
+		              <resource>
+		                <directory>../../UI/build</directory>
+                		<includes>
+                    		<include>index.html</include>
+                		</includes>		                
+		              </resource>
+		            </resources>              
+		          </configuration>            
+		        </execution>
+		      </executions>
+		    </plugin>
+  	  </plugins>
     </build>
 </project>
