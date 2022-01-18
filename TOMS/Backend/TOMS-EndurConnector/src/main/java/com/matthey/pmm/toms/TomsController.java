@@ -121,28 +121,28 @@ public class TomsController {
     }
     
     @PostMapping("counterPartyTickerRule")
-    public List<CounterPartyTickerRuleTo> retrieveCounterPartyTickerRules (List<ReferenceTo> references) {
+    public List<CounterPartyTickerRuleTo> retrieveCounterPartyTickerRules (@RequestBody List<ReferenceTo> references) {
     	logger.info("Counter Party Ticker Rule Endpoint Called");
     	ValidationRuleService validationRuleService = new ValidationRuleService(session);
     	return validationRuleService.getCounterPartyTickerRules(references);
     }
 
     @PostMapping("tickerPortfolioRule")
-    public List<TickerPortfolioRuleTo> retrieveTickerPortfolioRules (List<ReferenceTo> references) {
+    public List<TickerPortfolioRuleTo> retrieveTickerPortfolioRules (@RequestBody List<ReferenceTo> references) {
     	logger.info("Ticker Portfolio Rule Endpoint Called");
     	ValidationRuleService validationRuleService = new ValidationRuleService(session);
     	return validationRuleService.getTickerPortfolioRules(references);
     }
 
     @PostMapping("tickerRefSourceRule")
-    public List<TickerRefSourceRuleTo> retrieveTickerRefSourceRules (List<ReferenceTo> references) {
+    public List<TickerRefSourceRuleTo> retrieveTickerRefSourceRules (@RequestBody List<ReferenceTo> references) {
     	logger.info("Ticker Reference Source Rule Endpoint Called");
     	ValidationRuleService validationRuleService = new ValidationRuleService(session);
     	return validationRuleService.getTickerRefSourceRules(references);
     }    
 
     @PostMapping("tickerFxRefSourceRule")
-    public List<TickerFxRefSourceRuleTo> retrieveTickerFxRefSourceRules (List<ReferenceTo> references) {
+    public List<TickerFxRefSourceRuleTo> retrieveTickerFxRefSourceRules (@RequestBody List<ReferenceTo> references) {
     	logger.info("Ticker FX Reference Source Rule Endpoint Called");
     	ValidationRuleService validationRuleService = new ValidationRuleService(session);
     	return validationRuleService.getTickerFxRefSourceRules(references);
