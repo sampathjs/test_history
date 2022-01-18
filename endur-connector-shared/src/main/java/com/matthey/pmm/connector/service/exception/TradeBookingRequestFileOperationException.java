@@ -1,7 +1,7 @@
 package com.matthey.pmm.connector.service.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Class indicating a trade booking request can not be handled as there is already request
@@ -10,9 +10,10 @@ import org.springframework.web.server.ResponseStatusException;
  * @version 1.0
  */
 
-public class TradeBookingRequestFileOperationException extends ResponseStatusException {
+@ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR, reason = "File Operation Error While Processing Request")
+public class TradeBookingRequestFileOperationException extends Exception {
 	public TradeBookingRequestFileOperationException(String reason) {
-		super(HttpStatus.INTERNAL_SERVER_ERROR, reason);
+		super(reason);
 	}
 
 }

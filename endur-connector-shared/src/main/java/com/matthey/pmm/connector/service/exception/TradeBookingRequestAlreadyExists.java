@@ -1,7 +1,7 @@
 package com.matthey.pmm.connector.service.exception;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * Class indicating a trade booking request can not be handled as there is already request
@@ -9,10 +9,10 @@ import org.springframework.web.server.ResponseStatusException;
  * @author jwaechter
  * @version 1.0
  */
-
-public class TradeBookingRequestAlreadyExists extends ResponseStatusException {
+@ResponseStatus(code = HttpStatus.NOT_ACCEPTABLE, reason = "Trade Booking Request Already Exists")
+public class TradeBookingRequestAlreadyExists extends RuntimeException {
 	public TradeBookingRequestAlreadyExists(String reason) {
-		super(HttpStatus.NOT_ACCEPTABLE, reason);
+		super(reason);
 	}
 
 }
