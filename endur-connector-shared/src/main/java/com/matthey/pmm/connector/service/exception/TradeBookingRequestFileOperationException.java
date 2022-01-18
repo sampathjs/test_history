@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 
 @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR, reason = "File Operation Error While Processing Request")
-public class TradeBookingRequestFileOperationException extends Exception {
+public class TradeBookingRequestFileOperationException extends RuntimeException {
 	public TradeBookingRequestFileOperationException(String reason) {
 		super(reason);
 	}
