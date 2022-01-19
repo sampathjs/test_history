@@ -152,7 +152,6 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 		long currentTime = System.currentTimeMillis();
 		String logPrefix = CLASSNAME + ".calculateDealExposures() : ";
 		try {
-			double rowExposure = 0.0;
 			int dealNum = transaction.getDealTrackingId();
 			int tranNum = transaction.getTransactionId();
 			int insType = transaction.getInstrumentTypeObject().getId();
@@ -184,11 +183,11 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 			}
 			
 			clientData.setName("Credid PFE WorkSheet");
-			rowExposure = getExposureForDeal(session, vaRByTransResult, partyAgreementUDSR, extLe);
+			double[] rowExposure = getExposureForDeal(session, vaRByTransResult, partyAgreementUDSR, extLe);
 			clientData.addColumn("mtm_info", EnumColType.Table);
 			clientData.addColumn("var_info", EnumColType.Table);
 			clientData.addColumn("var_by_trans", EnumColType.Double);
-			clientData.setDouble("var_by_trans", 0, rowExposure);
+			clientData.setDouble("var_by_trans", 0, rowExposure[1]); 
 			clientData.setTable("mtm_info", 0, partyAgreementUDSR);
 			clientData.setTable("var_info", 0, vaRInfoUDSR);
 			
@@ -204,7 +203,7 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 				}
 			}
 			
-			dealExposure = definition.createDealExposure(rowExposure, transaction, fields);
+			dealExposure = definition.createDealExposure(rowExposure[0] + rowExposure[1], transaction, fields);
 			if (clientData != null)
 				dealExposure.setClientData(clientData);
 
@@ -216,9 +215,11 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 		return new DealExposure[] { dealExposure };
 	}
 
-	private double getExposureForDeal(Session session, Table vaRByTransResult, Table partyAgreementUDSR, int extLe) {
+	private double[] getExposureForDeal(Session session, Table vaRByTransResult, Table partyAgreementUDSR, int extLe) {
 
 		double exposure = 0.0;
+		double mtmExposure = 0.0;
+		double vaRExposure = 0.0;
 		Table baseMtmExposure = partyAgreementUDSR.calcByGroup("deal_num, scenario_id", "mtm_exposure");
 		ConstTable distinctScenarios = partyAgreementUDSR.createConstView("scenario_id").getDistinctValues("scenario_id");
 		int numOfScenarios = distinctScenarios.getRowCount();
@@ -228,12 +229,17 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 			double dealMtmExposure = row < 0 ? 0.0 : baseMtmExposure.getDouble("Sum mtm_exposure", row);
 			row = vaRByTransResult.find(vaRByTransResult.getColumnId("scenario_id"), scenarioId, 0);
 			double dealVarExposure = row < 0 ? 0.0 : vaRByTransResult.getDouble("result", row);
-			exposure = (dealMtmExposure + dealVarExposure) > exposure ? (dealMtmExposure + dealVarExposure) : exposure;
+			if((dealMtmExposure + dealVarExposure) > exposure) {
+				exposure = dealMtmExposure + dealVarExposure;
+				mtmExposure  = dealMtmExposure ;
+				vaRExposure = dealVarExposure;
+			}
+//			exposure = (dealMtmExposure + dealVarExposure) > exposure ? (dealMtmExposure + dealVarExposure) : exposure;
 		}
 		disposeTable(baseMtmExposure);
 
 		// Set Exposure to 0 if cpty is internal LE
-		return isCptyInternalLE(session, extLe) ? 0 : exposure;
+		return isCptyInternalLE(session, extLe) ? new double[] {0.0, 0.0} : new double[] {mtmExposure, vaRExposure};
 	}
 
 	@Override
@@ -653,12 +659,13 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 	}
 
 	private double arrayMax(double[] arr) {
-		
-	    double max = Double.NEGATIVE_INFINITY;
-	    for(double cur: arr)
-	        max = Math.max(max, cur);
 
-	    return max;
+		double max = Double.NEGATIVE_INFINITY;
+		if (arr == null)
+			return 0.0;
+		for (double cur : arr)
+			max = Math.max(max, cur);
+		return max;
 	}
 
 	private void calcUsage(Table exposure) {

@@ -134,7 +134,7 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 
 	private void updateTranAndBaseMTMData(Table creditPFEPAData, Table tranList, ConstTable baseMtM) {
 		
-		String cols = "deal_num, tran_num, ins_num, ins_type, external_lentity, tran_type, party_agreement_id";
+		String cols = "deal_num, tran_num, ins_num, ins_type, ins_sub_type, external_lentity, tran_type, party_agreement_id";
 		creditPFEPAData.select(tranList, cols, "[IN.deal_num] >= 0");
 
 		ConstTable baseMtMNonCommSwap = baseMtM.createConstView("*", "ins_type !=" + EnumInsType.MetalSwap.getValue()).createConstView("*",
@@ -152,11 +152,15 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 				"[IN.deal_num] == [OUT.deal_num] AND [IN.ins_num] == [OUT.ins_num]");
 
 		Table commSwap = tf.createTable();
-		commSwap.selectDistinct(baseMtMCommSwap, "deal_num", "[IN.deal_num] >= 0");
+		commSwap.select(baseMtMCommSwap, "deal_num", "[IN.deal_num] >= 0");
 		commSwap.addColumn("param_seq_num", EnumColType.Int);
 		commSwap.select(baseMtMCommSwap, EnumResultType.BaseMtm.getValue() + "->base_mtm", "[IN.deal_num] == [OUT.deal_num]",
 				"SUM(base_mtm)");
 		creditPFEPAData.select(commSwap, "base_mtm", "[IN.deal_num] == [OUT.deal_num] AND [IN.param_seq_num] == [OUT.param_seq_num]");
+		
+		creditPFEPAData.makeDistinct("deal_num, tran_num, ins_num, ins_type, ins_sub_type, external_lentity, param_seq_num, param_currency"
+				+ ", pay_receive, base_mtm, party_agreement_id, netting_flag, collateral_agreement, collateral_valuation_date_seq"
+				+ ", next_collateral_call_date, time_to_call_date, tran_type, haircut, mtm_exposure", "deal_num >=0");
 	}
 
 	@Override
