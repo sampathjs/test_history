@@ -242,6 +242,6 @@ public class User {
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", email=" + email + ", firstName=" + firstName + ", lastName=" + lastName + ", role="
-				+ role + ", lifecycleStatus=" + lifecycleStatus + "]";
+				+ role + ", lifecycleStatus=" + lifecycleStatus + ", tradeablePortfolios=" + tradeablePortfolios + "]";
 	}	
 }

@@ -27,7 +27,7 @@ public abstract class AbstractReferenceService extends AbstractToDiffService<Ref
 		for (ReferenceTo knownTo : knownTos) {
 			for (int i=endurSideTos.size()-1; i >= 0; i--) {
 				if ((long)endurSideTos.get(i).endurId() == (long)knownTo.endurId()) {
-					logger.info("Matched Endur TO '" + endurSideTos.get(i) + "' with TOMS TO '" + knownTo + "'");
+					logger.debug("Matched Endur TO '" + endurSideTos.get(i) + "' with TOMS TO '" + knownTo + "'");
 					ReferenceTo oldEntry = endurSideTos.remove(i);
 					ReferenceTo endurSideWithUpdatedTomsId = ImmutableReferenceTo.builder()
 							.from(oldEntry)

@@ -115,6 +115,6 @@ public abstract class UserTo {
 	@Override
 	public String toString() {
 		return "UserTo [id=" + id() + ", email=" + email() + ", firstName=" + firstName() + ", lastName="
-				+ lastName() + ", idLifecycleStatus=" + idLifecycleStatus() + "]";
+				+ lastName() + ", idLifecycleStatus=" + idLifecycleStatus() + ", tradeablePortfolioIds=" + tradeablePortfolioIds() + "]";
 	}
 }

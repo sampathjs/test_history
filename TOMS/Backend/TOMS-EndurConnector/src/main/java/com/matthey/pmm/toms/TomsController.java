@@ -70,7 +70,7 @@ public class TomsController {
     @PostMapping("parties")
     public List<PartyTo> retrieveEndurPartyList (@RequestBody List<PartyTo> knownParties) {
     	logger.info("Parties Endpoint Called");
-    	logger.info(knownParties.stream().map(x -> x.toString()).collect(Collectors.joining("\n")));
+    	logger.debug(knownParties.stream().map(x -> x.toString()).collect(Collectors.joining("\n")));
     	PartyService service = new PartyService (session);
     	return service.createToListDifference(knownParties);
     }
@@ -84,6 +84,8 @@ public class TomsController {
     @PostMapping("users")
     public List<UserTo> retrieveEndurUserList (@RequestBody TwoListsTo<UserTo, ReferenceTo> knownUsersAndPortfolios) {
     	logger.info("Users Endpoint Called");
+    	logger.debug("Provided portfolios: " + knownUsersAndPortfolios.listTwo());
+    	logger.debug("Provided users: " + knownUsersAndPortfolios.listOne());    	
     	UserService service = new UserService(session, knownUsersAndPortfolios.listTwo());
     	return service.createToListDifference(knownUsersAndPortfolios.listOne());
     }

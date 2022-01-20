@@ -77,7 +77,10 @@ public class PartyService extends AbstractToDiffService<PartyTo> {
 	
 	@Override
 	protected boolean isDiffInAuxFields(PartyTo knownTo, PartyTo updatedTo) {
-		return knownTo.idLegalEntity() != updatedTo.idLegalEntity()
+		return (   (knownTo.idLegalEntity() == null && updatedTo.idLegalEntity() != null)
+				    || (knownTo.idLegalEntity() != null && updatedTo.idLegalEntity() == null)
+				    || (knownTo.idLegalEntity() != null && updatedTo.idLegalEntity() != null 
+				        && (long)knownTo.idLegalEntity() != (long) updatedTo.idLegalEntity()))
 				|| !knownTo.name().equals(updatedTo.name())
 				|| knownTo.sortColumn() != updatedTo.sortColumn()
 				|| knownTo.typeId() != updatedTo.typeId()

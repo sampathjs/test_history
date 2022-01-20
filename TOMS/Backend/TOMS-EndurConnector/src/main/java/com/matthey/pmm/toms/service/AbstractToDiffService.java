@@ -59,7 +59,7 @@ public abstract class  AbstractToDiffService <T> {
 			} else {
 				updatedTo = endurSideDataAsTo.get(endurSideDataAsTo.indexOf(knownTo));
 				if (isDiffInAuxFields (knownTo, updatedTo)) {
-					logger.info("Found TO '" + knownTo + "' that is present on Endur and contains changes in auxilliary fields.");
+					logger.info("Found TO '" + knownTo + "' that is present on Endur and contains changes in auxilliary fields :" + updatedTo);
 					diffList.add(updatedTo);					
 				}
 			}

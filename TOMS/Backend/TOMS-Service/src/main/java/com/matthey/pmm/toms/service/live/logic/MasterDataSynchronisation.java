@@ -2,15 +2,18 @@ package com.matthey.pmm.toms.service.live.logic;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.Party;
@@ -28,7 +31,7 @@ import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.TwoListsTo;
 import com.matthey.pmm.toms.transport.UserTo;
 
-@Component
+@Service
 public class MasterDataSynchronisation {
     private static final Logger logger = LogManager.getLogger(MasterDataSynchronisation.class);
 	
@@ -63,6 +66,7 @@ public class MasterDataSynchronisation {
 		logger.info("Finished Master Data Synchronisation with Endur");
 	}
 
+	@Transactional
 	private boolean syncRefData() {
 		try {
 			logger.info("Synchronisaton of Reference Data");
@@ -85,7 +89,7 @@ public class MasterDataSynchronisation {
 			List<ReferenceTo> referenceDiff = Arrays.asList(endurConnector.postWithResponse("/toms/endur/references", ReferenceTo[].class, allReferences));
 			logger.info ("Successfully retrieved a difference list of " + referenceDiff.size() + " elements from Endur Connector");
 			logger.debug ("List of all Reference Diff as returned by Endur Connector: " + referenceDiff);
-			referenceDiff.forEach(x -> {logger.info("Serialising " + x); refConverter.toManagedEntity(x);});
+			referenceDiff.forEach(x -> {logger.info("Serialising " + x); refRepo.save(refConverter.toManagedEntity(x));});
 			logger.info("Successfully finished reference data synchronisation");			
 		} catch (Exception ex) {
 			logger.error("Exception while syncing ref data: " + ex.toString());
@@ -105,6 +109,7 @@ public class MasterDataSynchronisation {
 		return true;
 	}
 	
+	@Transactional
 	private boolean syncPartyData() {
 		try {
 			logger.info("Synchronisaton of Party Data");
@@ -113,16 +118,17 @@ public class MasterDataSynchronisation {
 			List<PartyTo> allPartyTos = allPartyEntities.stream()
 					.map(x -> partyConverter.toTo(x))
 					.collect(Collectors.toList());
-			List<PartyTo> partyDiff = Arrays.asList(endurConnector.postWithResponse("/toms/endur/parties", PartyTo[].class, allPartyTos));
+			PartyTo[] partyDiffAsArray = endurConnector.postWithResponse("/toms/endur/parties", PartyTo[].class, allPartyTos);
+			List<PartyTo> partyDiff = partyDiffAsArray != null? Arrays.asList():new ArrayList<>();
 			logger.info ("Successfully retrieved a difference list of " + partyDiff.size() + " elements from Endur Connector");
 			logger.debug ("List of all Party Diff as returned by Endur Connector: " + partyDiff);
 			partyDiff.stream() // legal entities first
 				.filter(x -> x.idLegalEntity() == null)
-				.forEach(x -> partyConverter.toManagedEntity(x));
+				.forEach(x -> partyRepo.save(partyConverter.toManagedEntity(x)));
 			partyDiff.stream() // then BUs that might reference LEs
 				.filter(x -> x.idLegalEntity() != null)
-				.forEach(x -> partyConverter.toManagedEntity(x));
-			logger.info("Successfully finished party data synchronisation");			
+				.forEach(x -> partyRepo.save(partyConverter.toManagedEntity(x)));
+			logger.info("Successfully finished party data synchronisation");
 		} catch (Exception ex) {
 			logger.error("Exception while synchronising party data: " + ex.getMessage());
 			StringWriter sw = new StringWriter(4000);
@@ -141,6 +147,7 @@ public class MasterDataSynchronisation {
 		return true;
 	}
 	
+	@Transactional
 	private boolean syncUserData() {
 		try {
 			logger.info("Synchronisaton of User Data");
@@ -161,10 +168,11 @@ public class MasterDataSynchronisation {
 					.listTwo(allPortfolioTos)
 					.build();
 			
-			List<UserTo> userDiff = Arrays.asList(endurConnector.postWithResponse("/toms/endur/users", UserTo[].class, knownUsersAndPortfolios));
+			UserTo[] userDiffAsArray = endurConnector.postWithResponse("/toms/endur/users", UserTo[].class, knownUsersAndPortfolios);
+			List<UserTo> userDiff = userDiffAsArray != null?Arrays.asList(userDiffAsArray):new ArrayList<>();
 			logger.info ("Successfully retrieved a difference list of " + userDiff.size() + " elements from Endur Connector");
 			logger.debug ("List of all User Diff as returned by Endur Connector: " + userDiff);
-			userDiff.forEach(x -> userConverter.toManagedEntity(x));
+			userDiff.forEach(x -> {logger.debug("Serialising : " + x); userRepo.save(userConverter.toManagedEntity(x)); });
 			logger.info("Successfully finished user data synchronisation");			
 		} catch (Exception ex) {
 			logger.error("Exception while syncing user data: " + ex.toString());

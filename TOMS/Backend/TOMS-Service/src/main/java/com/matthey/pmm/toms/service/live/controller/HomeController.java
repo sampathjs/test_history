@@ -1,4 +1,4 @@
-package com.matthey.pmm.toms.service.live;
+package com.matthey.pmm.toms.service.live.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;

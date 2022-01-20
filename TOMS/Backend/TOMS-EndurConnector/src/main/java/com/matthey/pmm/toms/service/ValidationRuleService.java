@@ -43,8 +43,7 @@ public class ValidationRuleService {
 		Map<String, Long> tickerEndurToTomsIdMap = new HashMap<>();
 		references.stream()
 			.filter(x -> x.idType() == DefaultReferenceType.TICKER.getEntity().id())
-			.forEach(x -> metalFormEndurToTomsIdMap.put(x.name(), x.id()));    	
-
+			.forEach(x -> tickerEndurToTomsIdMap.put(x.name(), x.id()));    	
 		
 		for (int row = reportData.getRowCount()-1; row >= 0; row--) {
 			long metalFormReferenceId = metalFormEndurToTomsIdMap.get(reportData.getString("form", row));
@@ -113,7 +112,7 @@ public class ValidationRuleService {
 		Map<String, Long> refSourceEndurToTomsIdMap = new HashMap<>();
 		references.stream()
 			.filter(x -> x.idType() == DefaultReferenceType.REF_SOURCE.getEntity().id())
-			.forEach(x -> tickerEndurToTomsIdMap.put(x.name(), x.id()));		
+			.forEach(x -> refSourceEndurToTomsIdMap.put(x.name(), x.id()));		
 		
 		for (int row = reportData.getRowCount()-1; row >= 0; row--) {
 			long tickerId = tickerEndurToTomsIdMap.get(reportData.getString("toms_product", row));
@@ -145,7 +144,7 @@ public class ValidationRuleService {
 		Map<String, Long> refSourceEndurToTomsIdMap = new HashMap<>();
 		references.stream()
 			.filter(x -> x.idType() == DefaultReferenceType.REF_SOURCE.getEntity().id())
-			.forEach(x -> tickerEndurToTomsIdMap.put(x.name(), x.id()));		
+			.forEach(x -> refSourceEndurToTomsIdMap.put(x.name(), x.id()));		
 
 		Map<String, Long> termCurrencyEndurToTomsIdMap = new HashMap<>();
 		references.stream()

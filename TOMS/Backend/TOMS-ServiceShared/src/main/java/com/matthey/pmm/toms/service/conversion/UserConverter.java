@@ -1,5 +1,6 @@
 package com.matthey.pmm.toms.service.conversion;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -8,6 +9,8 @@ import java.util.stream.Stream;
 
 import javax.transaction.Transactional;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +26,9 @@ import com.matthey.pmm.toms.transport.ImmutableUserTo;
 import com.matthey.pmm.toms.transport.UserTo;
 
 @Service
-public class UserConverter extends EntityToConverter<User, UserTo> {
+public class UserConverter extends EntityToConverter<User, UserTo> {	
+    private static final Logger logger = LogManager.getLogger(EntityToConverter.class);
+
 	@Autowired
 	private ReferenceRepository refRepo;
 
@@ -97,7 +102,8 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 		Reference lifecycleStatus = loadRef(to, to.idLifecycleStatus());
 		Reference defaultInternalPortfolio = to.idDefaultInternalPortfolio() != null?loadRef(to, to.idDefaultInternalPortfolio()):null;
 		Party defaultInternalBu = to.idDefaultInternalBu() != null?loadParty(to, to.idDefaultInternalBu()):null;
-
+		logger.debug("tradeablePortfolio IDs on TO: " + to.tradeablePortfolioIds());
+		
 		Optional<User> entity = entityRepo.findById(to.id());
 		if (entity.isPresent()) {
 			entity.get().setLifecycleStatus(lifecycleStatus);
@@ -107,31 +113,41 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 			entity.get().setRole(role);
 			Set<Long> tradeablePartyIds= entityRepo.findTradeablePartiesIdById(entity.get().getId());
 			Set<Long> tradeablePortfolioIds= entityRepo.findTradeablePortfolioIdById(entity.get().getId());
+			Set<Long> allTradeablePartiesOnTo = new HashSet<>(to.tradeableCounterPartyIds());
+			allTradeablePartiesOnTo.addAll(to.tradeableInternalPartyIds());
 			
-			if (    !entity.get().getTradeableParties().stream().map(x -> x.getId()).collect(Collectors.toList()).containsAll(tradeablePartyIds) | 
-					!tradeablePartyIds.containsAll(entity.get().getTradeableParties().stream().map(x -> x.getId()).collect(Collectors.toList()))) {
-				List<Party> tradeableParties = entityRepo.findTradeablePartiesById(entity.get().getId());
-				entity.get().setTradeableParties(tradeableParties);	
+			if (    !allTradeablePartiesOnTo.containsAll(tradeablePartyIds) || 
+					!tradeablePartyIds.containsAll(allTradeablePartiesOnTo)) {
+				entity.get().getTradeableParties().clear();
+				Stream.concat(to.tradeableInternalPartyIds().stream(), to.tradeableCounterPartyIds().stream())
+						.map(x -> partyRepo.findById(x).get())
+						.forEach(x -> {entity.get().getTradeableParties().add(x); });
 			}
-			if (    !entity.get().getTradeablePortfolios().stream().map(x -> x.getId()).collect(Collectors.toList()).containsAll(tradeablePortfolioIds) | 
-					!tradeablePortfolioIds.containsAll(entity.get().getTradeablePortfolios().stream().map(x -> x.getId()).collect(Collectors.toList()))) {
-				List<Reference> tradeablePortfolios = entityRepo.findTradeablePortfolioById(entity.get().getId());
-				entity.get().setTradeablePortfolios(tradeablePortfolios);				
+			if (    !to.tradeablePortfolioIds().containsAll(tradeablePortfolioIds) || 
+					!tradeablePortfolioIds.containsAll(to.tradeablePortfolioIds())) {
+				entity.get().getTradeablePortfolios().clear();
+				to.tradeablePortfolioIds().stream()
+						.map(x -> refRepo.findById(x).get())
+						.forEach(x -> {entity.get().getTradeablePortfolios().add(x); });
 			}
 			entity.get().setDefaultInternalBu(defaultInternalBu);
 			entity.get().setDefaultInternalPortfolio(defaultInternalPortfolio);
+			logger.debug("Updated User Entity: " + entity.get());
 			return entity.get();
 		}
 		List<Reference> tradeablePortfolios = to.tradeablePortfolioIds().stream()
+				.filter(x -> refRepo.existsById(x))
 				.map(x -> refRepo.findById(x).get())
 				.collect(Collectors.toList());
 		List<Party> tradeableParties = Stream.concat(to.tradeableInternalPartyIds().stream(), to.tradeableCounterPartyIds().stream())
+				.filter(x -> partyRepo.existsById(x))
 				.map(x -> partyRepo.findById(x).get())
 				.collect(Collectors.toList());
 				
 		User newEntity = new User (to.id(), to.email(), to.firstName(), to.lastName(), role, lifecycleStatus, tradeableParties, 
 				tradeablePortfolios, defaultInternalBu, defaultInternalPortfolio);
 		newEntity = entityRepo.save(newEntity);
+		logger.debug("New User Entity: " + newEntity);
 		return newEntity;
 	}
 }
