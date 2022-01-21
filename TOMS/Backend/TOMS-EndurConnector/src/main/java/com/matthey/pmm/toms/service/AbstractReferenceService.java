@@ -71,4 +71,9 @@ public abstract class AbstractReferenceService extends AbstractToDiffService<Ref
 				.idLifecycle(lifecycleStatus.getEntity().id())
 				.build();
 	}
+	
+	@Override
+	protected long getLifeCycleStatusId(ReferenceTo knownTo) {
+		return knownTo.idLifecycle();
+	}
 }

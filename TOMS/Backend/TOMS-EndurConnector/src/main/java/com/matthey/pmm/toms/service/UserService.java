@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.service.misc.ReportBuilderHelper;
 import com.matthey.pmm.toms.transport.ImmutableUserTo;
+import com.matthey.pmm.toms.transport.PartyTo;
 import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.matthey.pmm.toms.transport.UserTo;
 import com.olf.openrisk.application.Session;
@@ -109,9 +110,9 @@ public class UserService extends AbstractToDiffService<UserTo> {
 			int rowUserId = tradeablePortfolios.getInt("personnel_id", row);
 			if (userId == rowUserId) {
 				long endurPortfolioId = (long)tradeablePortfolios.getInt("id_number", row);
-				logger.info("Looking up TOMS ID for Endur Portfolio ID #" + endurPortfolioId + " for user #" + userId);
+				logger.debug("Looking up TOMS ID for Endur Portfolio ID #" + endurPortfolioId + " for user #" + userId);
 				Long referenceId = endurPortfolioIdToReferenceId.get(endurPortfolioId);
-				logger.info("TOMS ID by map.get: " + referenceId + " for Endur Portfolio ID #" + endurPortfolioId + " for user #" + userId);				
+				logger.debug("TOMS ID by map.get: " + referenceId + " for Endur Portfolio ID #" + endurPortfolioId + " for user #" + userId);				
 				tradeablePortfolioIds.add(referenceId);
 			}
 		}
@@ -162,5 +163,10 @@ public class UserService extends AbstractToDiffService<UserTo> {
 		return ImmutableUserTo.builder().from(knownTo)
 				.idLifecycleStatus(lifecycleStatus.getEntity().id())
 				.build();
+	}
+	
+	@Override
+	protected long getLifeCycleStatusId(UserTo knownTo) {
+		return knownTo.idLifecycleStatus();
 	}
 }

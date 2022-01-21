@@ -21,7 +21,7 @@ public class PartyService extends AbstractToDiffService<PartyTo> {
 	
 	@Override
 	protected void syncEndurSideIds(List<PartyTo> knownTos, List<PartyTo> endurSideTos) {
-		// nothing to do for parties
+		// nothing to do for parties as TOMS ID = Endur ID
 	}
 
 	@Override
@@ -30,6 +30,7 @@ public class PartyService extends AbstractToDiffService<PartyTo> {
 		for (int row=endurSideData.getRowCount()-1; row >= 0; row--) {
 			DefaultReference type = getType (endurSideData, row, true);
 
+			
 			PartyTo converted = ImmutablePartyTo.builder() // LE
 					.id(endurSideData.getInt("legal_entity_id", row))
 					.idLegalEntity(null)
@@ -39,7 +40,9 @@ public class PartyService extends AbstractToDiffService<PartyTo> {
 					.sortColumn(5000000l) // has to be changed to more complex logic potentially 
 					.typeId(type.getEntity().id())
 					.build();
-			convertedEntities.add(converted);
+			if (endurSideData.getInt("legal_entity_id", row) != 0) {
+				convertedEntities.add(converted);				
+			}
 			
 			type = getType (endurSideData, row, false);
 			
@@ -77,10 +80,10 @@ public class PartyService extends AbstractToDiffService<PartyTo> {
 	
 	@Override
 	protected boolean isDiffInAuxFields(PartyTo knownTo, PartyTo updatedTo) {
-		return (   (knownTo.idLegalEntity() == null && updatedTo.idLegalEntity() != null)
-				    || (knownTo.idLegalEntity() != null && updatedTo.idLegalEntity() == null)
-				    || (knownTo.idLegalEntity() != null && updatedTo.idLegalEntity() != null 
-				        && (long)knownTo.idLegalEntity() != (long) updatedTo.idLegalEntity()))
+		long idInternalEntityKnownTo = knownTo.idLegalEntity() != null?knownTo.idLegalEntity():0l;
+		long idInternalEntityUpdatedTo = updatedTo.idLegalEntity() != null?updatedTo.idLegalEntity():0l;
+		
+		return     idInternalEntityKnownTo != idInternalEntityUpdatedTo
 				|| !knownTo.name().equals(updatedTo.name())
 				|| knownTo.sortColumn() != updatedTo.sortColumn()
 				|| knownTo.typeId() != updatedTo.typeId()
@@ -92,5 +95,10 @@ public class PartyService extends AbstractToDiffService<PartyTo> {
 		return ImmutablePartyTo.builder().from(knownTo)
 				.idLifecycle(lifecycleStatus.getEntity().id())
 				.build();
+	}
+	
+	@Override
+	protected long getLifeCycleStatusId(PartyTo knownTo) {
+		return knownTo.idLifecycle();
 	}
 }

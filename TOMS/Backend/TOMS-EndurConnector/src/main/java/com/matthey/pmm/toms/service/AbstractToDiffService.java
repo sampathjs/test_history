@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.service.misc.ReportBuilderHelper;
+import com.matthey.pmm.toms.transport.ReferenceTo;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 
@@ -20,6 +21,8 @@ public abstract class  AbstractToDiffService <T> {
 	
 	protected abstract boolean isDiffInAuxFields(T knownTo, T updatedTo);
 
+	protected abstract long getLifeCycleStatusId(T to);	
+	
 	protected abstract T updateLifeCycleStatus(T knownTo, DefaultReference lifecycleStatus);	
 	
 	protected abstract List<T> convertReportToTransferObjects(Table endurSideData);
@@ -53,12 +56,15 @@ public abstract class  AbstractToDiffService <T> {
 		for (T knownTo : knownTos) {
 			T updatedTo;
 			if (!endurSideDataAsTo.contains(knownTo)) {
-				logger.info("Found TO '" + knownTo + "' that is not present on Endur. Set lifecycle status to deleted");
-				updatedTo = updateLifeCycleStatus (knownTo, DefaultReference.LIFECYCLE_STATUS_DELETED);
-				diffList.add(updatedTo);
+				if (getLifeCycleStatusId(knownTo) != DefaultReference.LIFECYCLE_STATUS_DELETED.getEntity().id()) {
+					logger.info("Found TO '" + knownTo + "' that is not present on Endur. Set lifecycle status to deleted.");
+					updatedTo = updateLifeCycleStatus (knownTo, DefaultReference.LIFECYCLE_STATUS_DELETED);
+					diffList.add(updatedTo);
+				}
 			} else {
 				updatedTo = endurSideDataAsTo.get(endurSideDataAsTo.indexOf(knownTo));
-				if (isDiffInAuxFields (knownTo, updatedTo)) {
+				updatedTo = updateLifeCycleStatus (knownTo, DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE);
+				if (isDiffInAuxFields (knownTo, updatedTo) || getLifeCycleStatusId(knownTo) != DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE.getEntity().id()) {
 					logger.info("Found TO '" + knownTo + "' that is present on Endur and contains changes in auxilliary fields :" + updatedTo);
 					diffList.add(updatedTo);					
 				}

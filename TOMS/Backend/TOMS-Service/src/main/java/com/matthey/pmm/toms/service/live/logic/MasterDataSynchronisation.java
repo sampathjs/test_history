@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.matthey.pmm.toms.enums.v1.DefaultReference;
 import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
 import com.matthey.pmm.toms.model.Party;
 import com.matthey.pmm.toms.model.Reference;
@@ -119,7 +120,7 @@ public class MasterDataSynchronisation {
 					.map(x -> partyConverter.toTo(x))
 					.collect(Collectors.toList());
 			PartyTo[] partyDiffAsArray = endurConnector.postWithResponse("/toms/endur/parties", PartyTo[].class, allPartyTos);
-			List<PartyTo> partyDiff = partyDiffAsArray != null? Arrays.asList():new ArrayList<>();
+			List<PartyTo> partyDiff = partyDiffAsArray != null? Arrays.asList(partyDiffAsArray):new ArrayList<>();
 			logger.info ("Successfully retrieved a difference list of " + partyDiff.size() + " elements from Endur Connector");
 			logger.debug ("List of all Party Diff as returned by Endur Connector: " + partyDiff);
 			partyDiff.stream() // legal entities first
