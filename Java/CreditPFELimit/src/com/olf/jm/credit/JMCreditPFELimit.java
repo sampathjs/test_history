@@ -522,6 +522,7 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 				Logging.warn(logPrefix + "Party agreement or collateral call date not found");	
 			} else {
 				String valDateSeq = partyAgreementList.getString("valuation_date_sequence", 0);
+				valDateSeq = "".equalsIgnoreCase(valDateSeq) ? "1y" : valDateSeq;
 				HolidaySchedules hs = cf.createHolidaySchedules();
 				hs.addSchedule(currency.getHolidaySchedule());
 				SymbolicDate symbolicDate = cf.createSymbolicDate(valDateSeq);

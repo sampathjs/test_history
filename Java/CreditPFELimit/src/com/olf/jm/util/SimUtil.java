@@ -66,7 +66,7 @@ public class SimUtil {
 				if(genResult == null) {
 					genResult = result.getConstTable().cloneStructure();
 				}
-				genResult.select(result.getConstTable(), "*", "id > 0");
+				genResult.select(result.getConstTable(), "*", "id > -1");
 			}
 			
 		}
