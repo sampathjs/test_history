@@ -66,23 +66,19 @@ public class FileSelection extends JDialog implements ActionListener {
 	 * @param display the display object from the context.
 	 */
 	public FileSelection(String message, String abOutdir, final Display display) {
-		setBounds(100, 100, 650, 300);
+		setBounds(100, 100, 1000, 600);
 		size = getBounds().getSize();
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(null);
-
-		selectedFile = new JTextField(abOutdir);
-		selectedFile.setBounds(10, 80, size.width-20, 20);
-		selectedFile.setEnabled(true);
-		selectedFile.setEditable(false);
 		
 		JLabel lblConfirmationText = new JLabel("<html><body>" + message + "</body></html>");
 		lblConfirmationText.setBounds(10, 10, size.width-20, 20);
 		lblConfirmationText.setVerticalAlignment(SwingConstants.TOP);
 		contentPanel.add(lblConfirmationText);
-		JButton fileChooserOpener = new JButton ("Select File");
+
+		JButton fileChooserOpener = new JButton ("Select File(s)");
 		fileChooserOpener.setBounds(10, 40, size.width-20, 20);
 		fileChooserOpener.setVerticalAlignment(SwingConstants.TOP);
 		fileChooserOpener.addActionListener(x -> {
@@ -103,10 +99,11 @@ public class FileSelection extends JDialog implements ActionListener {
 	        	// cancelled
 	        }
 		});
+		
 		JButton directoryChooserOpener = new JButton ("Select Directory Structure");
-		fileChooserOpener.setBounds(10, 40, size.width-20, 20);
-		fileChooserOpener.setVerticalAlignment(SwingConstants.TOP);
-		fileChooserOpener.addActionListener(x -> {
+		directoryChooserOpener.setBounds(10, 80, size.width-20, 20);
+		directoryChooserOpener.setVerticalAlignment(SwingConstants.TOP);
+		directoryChooserOpener.addActionListener(x -> {
 			JFileChooser fc = new JFileChooser(selectedFile.getText());
 			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			int returnVal = fc.showOpenDialog(this);
@@ -118,23 +115,30 @@ public class FileSelection extends JDialog implements ActionListener {
 	        }
 		});
 		
+		selectedFile = new JTextField(abOutdir);
+		selectedFile.setBounds(10, 120, size.width-20, 20);
+		selectedFile.setEnabled(true);
+		selectedFile.setEditable(false);
+
+		
+		contentPanel.add(lblConfirmationText);
 		contentPanel.add(fileChooserOpener);
 		contentPanel.add(directoryChooserOpener);
 		contentPanel.add(selectedFile);
 
 		JLabel clientLabel = new JLabel ("Client");
-		clientLabel.setBounds(10, 40, size.width-20, 20);
+		clientLabel.setBounds(10, 150, size.width-20, 20);
 		clientLabel.setVerticalAlignment(SwingConstants.TOP);
 		contentPanel.add(clientLabel);
 		
 		clientTextField = new JTextField ("Manual User Run");
-		clientTextField.setBounds(10, 40, size.width-20, 20);
-		contentPanel.add(clientLabel);		
+		clientTextField.setBounds(10, 180, size.width-20, 20);
+		contentPanel.add(clientTextField);		
 		
 		JLabel filler = new JLabel("<html><body></body></html>");
-		filler.setBounds(10, 120, size.width-80, 20);
+		filler.setBounds(10, 220, size.width-80, 20);
 		filler.setVerticalAlignment(SwingConstants.TOP);
-		contentPanel.add(fileChooserOpener);
+		contentPanel.add(filler);
 		
 		JPanel buttonPane = new JPanel();
 		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));

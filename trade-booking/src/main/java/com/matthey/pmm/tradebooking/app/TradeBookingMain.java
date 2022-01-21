@@ -45,8 +45,8 @@ public class TradeBookingMain extends AbstractGenericScript {
         	if (!checkParamTable(params)) {
         		return null;
         	}
-        	List<String> files = params.getTable("Files", 1).getRows().stream().map(x -> x.getString("filename")).collect(Collectors.toList());
-        	
+        	List<String> files = params.getTable("Files", 0).getRows().stream().map(x -> x.getString("filename")).collect(Collectors.toList());
+        	logger.info("Processing the following files: " + files);
         	RunProcessor runProcessor = new RunProcessor(session, logger, constRepo, params.getString("Client", 0), files);
         	runProcessor.processRun();
         	return null;    		

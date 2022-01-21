@@ -3,6 +3,7 @@ package com.matthey.pmm.tradebooking.processors;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.stream.Stream;
 
 import com.matthey.pmm.EndurLoggerFactory;
@@ -64,11 +65,13 @@ public class LogTable {
 		logTable.setString(COL_LINE_TEXT, row.getNumber(), logLineRaw);
 		logTable.setString(COL_STATUS, row.getNumber(), "Unprocessed");
 		logTable.setString(COL_MESSAGE, row.getNumber(), "");
+		
 	}
 	
 	public void addLogEntry (int lineNum, boolean succeeded, String message) {
 		logTable.setString(COL_STATUS, lineNum, succeeded?"Processed":"Failed");
 		logTable.setString(COL_MESSAGE, lineNum, message);
+		logTable.setDate(COL_LAST_UPDATE, lineNum, new Date());
 	}
 	
 	public void showLogTableToUser () {

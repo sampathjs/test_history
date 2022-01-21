@@ -47,11 +47,12 @@ public class TradeBookingParam extends AbstractGenericScript {
         // ask user to select a file.
         DialogReturn dr = displayDialog(context);
         if (dr.selectedFiles != null && dr.selectedFiles.length > 0) {
+        	int rowId = 0;
         	for (String selectedFile : dr.selectedFiles) {
             	Path path = Paths.get(selectedFile);
             	if (!path.toFile().isDirectory()) {
                 	fileList.addRow();
-                	fileList.setString(0, 0, selectedFile);
+                	fileList.setString(0, rowId++, selectedFile);
             	} else {
             		addDirectoryStructure (fileList, path);
             	}        		
