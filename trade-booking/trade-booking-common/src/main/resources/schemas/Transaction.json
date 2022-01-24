@@ -1,0 +1,192 @@
+{
+  "$id": "https://fintark.com/transaction_booker.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Schema for the transaction that will be accepted and processed by the transaction booking endpoint",
+  "$defs": {
+    "property_name": {
+      "type": "string",
+      "description": "The name of the property"
+    },
+    "property_value": {
+      "type": "string",
+      "description": "The string representation of the value of the property"
+    },
+    "property_value_type": {
+      "type": "string",
+      "enum": [
+        "string",
+        "integer",
+        "float",
+        "boolean",
+        "date"
+      ],
+      "description": "the type of the value"
+    },
+    "property_global_order_id": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string",
+          "enum": [
+            "MIN",
+            "MAX"
+          ]
+        }
+      ],
+      "description": "the global order of the property"
+    },
+    "property": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/property_name"
+        },
+        "value": {
+          "$ref": "#/$defs/property_value"
+        },
+        "value_type": {
+          "$ref": "#/$defs/property_value_type"
+        },
+        "global_order_id": {
+          "$ref": "#/$defs/property_global_order_id"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "value_type",
+        "global_order_id"
+      ],
+      "additionalProperties": false
+    },
+    "initialization_by_template": {
+      "type": "object",
+      "properties": {
+        "template_reference": {
+          "type": "string",
+          "description": "the reference of the template"
+        },
+        "required": [
+          "template_id"
+        ]
+      },
+      "additionalProperties": false
+    },
+    "initialization_by_clone": {
+      "type": "object",
+      "properties": {
+        "deal_id": {
+          "type": "string",
+          "description": "the id of the deal to clone"
+        },
+        "required": [
+          "deal_id"
+        ]
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "properties": {
+    "transaction_properties": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/property"
+      }
+    },
+    "legs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "leg_id": {
+            "type": "integer",
+            "description": "the leg id"
+          },
+          "leg_properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/property"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "resets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "leg_id": {
+            "type": "integer",
+            "description": "the leg id"
+          },
+          "reset_id": {
+            "type": "integer",
+            "description": "the reset id"
+          },
+          "reset_properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/property"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "processing_instruction": {
+      "type": "object",
+      "properties": {
+        "initialization": {
+          "type": "object",
+          "properties": {
+            "by_template": {
+              "$ref": "#/$defs/initialization_by_template"
+            },
+            "by_clone": {
+              "$ref": "#/$defs/initialization_by_clone"
+            }
+          },
+          "additionalProperties": false
+        },
+        "debug_definition": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "global_order_id": {
+                "$ref": "#/$defs/property_global_order_id"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "global_order_id"
+            ]
+          }
+        },
+        "transaction_processing": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "description": "The status to process to"
+              },
+              "global_order_id": {
+                "$ref": "#/$defs/property_global_order_id"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
