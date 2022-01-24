@@ -1,16 +1,11 @@
 package com.matthey.pmm.transaction;
 
-import lombok.val;
-
-import com.matthey.pmm.transaction.TransactionConverter;
-import com.matthey.pmm.transaction.TransactionItemsListExecutor;
 import com.olf.openrisk.application.Session;
-
-import java.util.Arrays;
-import java.util.List;
-
+import lombok.val;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.Arrays;
 
 public class TransactionConverterTest {
 
@@ -23,29 +18,31 @@ public class TransactionConverterTest {
                                 new PropertyTo.PropertyToBuilder().withName("p2n").withValue("22").withValueType(PropertyTo.PropertyValueType.INTEGER).withGlobalOrderId(1).build()
                         )
                 )
-                .withLegTos(
-                		Arrays.asList(
+                .withLegs(
+                        Arrays.asList(
                                 new LegTo.LegToBuilder().withLegId(1).withLegProperties(
-                                		Arrays.asList(
+                                        Arrays.asList(
                                                 new PropertyTo.PropertyToBuilder().withName("l1p1n").withValue("p1v").withValueType(PropertyTo.PropertyValueType.STRING).withGlobalOrderId(2).build(),
                                                 new PropertyTo.PropertyToBuilder().withName("l1p2n").withValue("22").withValueType(PropertyTo.PropertyValueType.INTEGER).withGlobalOrderId(4).build()
                                         )
                                 ).build(),
                                 new LegTo.LegToBuilder().withLegId(2).withLegProperties(
-                                		Arrays.asList(
+                                        Arrays.asList(
                                                 new PropertyTo.PropertyToBuilder().withName("l2p1n").withValue("p1v").withValueType(PropertyTo.PropertyValueType.STRING).withGlobalOrderId(6).build(),
                                                 new PropertyTo.PropertyToBuilder().withName("l2p2n").withValue("22").withValueType(PropertyTo.PropertyValueType.INTEGER).withGlobalOrderId(5).build()
                                         )
                                 ).build()
                         )
                 )
-                .withProcessingInstructionTo(
+                .withProcessingInstruction(
                         new ProcessingInstructionTo.ProcessingInstructionToBuilder()
                                 .withInitialization(
-                                        new Initialization.InitializationBuilder().withByTemplate(new InitializationByTemplateTo.InitializationByTemplateToBuilder().withTemplateReference("template-id").build()).build()
+                                        new InitializationTo.InitializationToBuilder().withByTemplate(
+                                                new InitializationByTemplateTo.InitializationByTemplateToBuilder().withTemplateReference("template-id").build()
+                                        ).build()
                                 )
-                                .withTransactionProcessingTo(
-                                		Arrays.asList(new TransactionProcessingTo.TransactionProcessingToBuilder().withStatus("new").withGlobalOrderId("MAX").build())
+                                .withTransactionProcessing(
+                                        Arrays.asList(new TransactionProcessingTo.TransactionProcessingToBuilder().withStatus("new").withGlobalOrderId("MAX").build())
                                 )
                                 .build()
                 )
