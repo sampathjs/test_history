@@ -44,6 +44,7 @@ import com.olf.openrisk.staticdata.Currency;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
+import com.olf.openrisk.table.EnumFormatDateTime;
 import com.olf.openrisk.table.EnumFormatDouble;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
@@ -134,8 +135,8 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 
 	private void updateTranAndBaseMTMData(Table creditPFEPAData, Table tranList, ConstTable baseMtM) {
 		
-		String cols = "deal_num, tran_num, ins_num, ins_type, ins_sub_type, external_lentity, tran_type, party_agreement_id";
-		creditPFEPAData.select(tranList, cols, "[IN.deal_num] >= 0");
+		creditPFEPAData.select(tranList, "deal_num, tran_num, ins_num, ins_type, ins_sub_type, start_date, end_date, external_lentity"
+				+ ", tran_type, party_agreement_id", "[IN.deal_num] >= 0");
 
 		ConstTable baseMtMNonCommSwap = baseMtM.createConstView("*", "ins_type !=" + EnumInsType.MetalSwap.getValue()).createConstView("*",
 				"ins_type !=" + EnumInsType.MetalBasisSwap.getValue());
@@ -158,9 +159,10 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 				"SUM(base_mtm)");
 		creditPFEPAData.select(commSwap, "base_mtm", "[IN.deal_num] == [OUT.deal_num] AND [IN.param_seq_num] == [OUT.param_seq_num]");
 		
-		creditPFEPAData.makeDistinct("deal_num, tran_num, ins_num, ins_type, ins_sub_type, external_lentity, param_seq_num, param_currency"
-				+ ", pay_receive, base_mtm, party_agreement_id, netting_flag, collateral_agreement, collateral_valuation_date_seq"
-				+ ", next_collateral_call_date, time_to_call_date, tran_type, haircut, mtm_exposure", "deal_num >=0");
+		creditPFEPAData.makeDistinct("deal_num, tran_num, ins_num, ins_type, ins_sub_type, start_date, end_date, external_lentity"
+				+ ", param_seq_num, param_currency, pay_receive, base_mtm, party_agreement_id, netting_flag, collateral_agreement"
+				+ ", collateral_valuation_date_seq, next_collateral_call_date, time_to_call_date, tran_type, haircut, mtm_exposure"
+				, "deal_num >=0");
 	}
 
 	@Override
@@ -173,6 +175,10 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		formatter.setColumnTitle("tran_num", "Tran Number");
 		formatter.setColumnTitle("ins_num", "ins Number");
 		formatter.setColumnTitle("ins_type", "Instrument");
+		formatter.setColumnTitle("ins_sub_type", "Instrument\nSub Type");
+		formatter.setColumnTitle("start_date", "Start Date");
+		formatter.setColumnTitle("end_date", "Maturity Date");
+		formatter.setColumnTitle("external_lentity", "External\nLegal Entity");
 		formatter.setColumnTitle("param_seq_num", "Deal Leg");
 		formatter.setColumnTitle("param_currency", "Param\nCurrency");
 		formatter.setColumnTitle("pay_receive", "Pay/Receive");
@@ -186,17 +192,22 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		formatter.setColumnTitle("tran_type", "Tran Type");
 		formatter.setColumnTitle("haircut", "Haircut");
 		formatter.setColumnTitle("mtm_exposure", "MtM Exposure");
-
+		
 		formatter.setColumnFormatter("ins_type", formatter.createColumnFormatterAsRef(EnumReferenceTable.Instruments));
+		formatter.setColumnFormatter("ins_sub_type", formatter.createColumnFormatterAsRef(EnumReferenceTable.InsSubType));
 		formatter.setColumnFormatter("external_lentity", formatter.createColumnFormatterAsRef(EnumReferenceTable.Party));
 		formatter.setColumnFormatter("param_currency", formatter.createColumnFormatterAsRef(EnumReferenceTable.Currency));
 		formatter.setColumnFormatter("pay_receive", formatter.createColumnFormatterAsRef(EnumReferenceTable.RecPay));
 		formatter.setColumnFormatter("party_agreement_id", formatter.createColumnFormatterAsRef(EnumReferenceTable.PartyAgreement));
+		formatter.setColumnFormatter("tran_type", formatter.createColumnFormatterAsRef(EnumReferenceTable.TransType));
 
 		formatter.setColumnFormatter("base_mtm", formatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 6, 10));
 		formatter.setColumnFormatter("time_to_call_date", formatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 6, 10));
 		formatter.setColumnFormatter("haircut", formatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 6, 10));
 		formatter.setColumnFormatter("mtm_exposure", formatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 6, 10));
+		
+		formatter.setColumnFormatter("start_date", formatter.createColumnFormatterAsDateTime(EnumFormatDateTime.Date));
+		formatter.setColumnFormatter("end_date", formatter.createColumnFormatterAsDateTime(EnumFormatDateTime.Date));
 
 		formatter.getColumnFormatter("metal_leg").setHidden(true);
 	}
@@ -228,6 +239,8 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 				EnumTransactionFieldId.InstrumentType,
 				EnumTransactionFieldId.TransactionType,
 				EnumTransactionFieldId.PartyAgreement,
+				EnumTransactionFieldId.StartDate,
+				EnumTransactionFieldId.MaturityDate
 		};
 		Table tranList = simUtil.getTranList(transactions, fields);
 		logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
@@ -261,7 +274,7 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 			sql.append("\n AND atav.party_agreement_id !=0");
 			
 			partyAgreementNearLeg = iof.runSQL(sql.toString());
-			if (partyAgreementNearLeg.getRowCount() <= 0) {
+			if (partyAgreementNearLeg.getRowCount() <= 0 && tranList.getRowCount() > 1) {
 				Logging.error(logPrefix + "Failed to fetch Party Agreement for FX near leg deals");
 			}
 			tranList.select(partyAgreementNearLeg, "party_agreement_id", "[IN.far_tran_num] == [OUT.tran_num]");
@@ -408,7 +421,7 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 				String valDateSeq = "";
 				if (partyAgreement > 0) {
 					int partyAgreementRow = partyAgreementList.find(partyAgreementList.getColumnId("party_agreement_id"), partyAgreement, 0);
-					if (partyAgreementRow > 0) {
+					if (partyAgreementRow > -1) {
 						netting = partyAgreementList.getInt("netting_flag", partyAgreementRow) == 0 ? "No" : "Yes";
 						valDateSeq = partyAgreementList.getString("valuation_date_sequence", partyAgreementRow);
 					}
@@ -485,8 +498,10 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 				int payRec = creditPFEPAData.getInt("pay_receive", row);
 				int insType = creditPFEPAData.getInt("ins_type", row);
 				Date nextCallDate = creditPFEPAData.getDate("next_collateral_call_date", row);
+				Date maturityDate = creditPFEPAData.getInt("end_date", row) == 0 ? cf.getDate(creditPFEPAData.getInt("start_date", row))
+						: cf.getDate(creditPFEPAData.getInt("end_date", row));
 				double mtmExposure = 0;
-				if(scenarioDate.after(nextCallDate)) {
+				if (scenarioDate.after(nextCallDate) && scenarioDate.after(maturityDate)) {
 					mtmExposure = 0;
 				} else if (insType == EnumInsType.MetalSwap.getValue() || insType == EnumInsType.MetalBasisSwap.getValue()) {
 					mtmExposure = Math.max(0.0, haircut * baseMtm);
@@ -514,6 +529,9 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		data.addColumn("tran_num", EnumColType.Int);
 		data.addColumn("ins_num", EnumColType.Int);
 		data.addColumn("ins_type", EnumColType.Int);
+		data.addColumn("ins_sub_type", EnumColType.Int);
+		data.addColumn("start_date", EnumColType.Int);
+		data.addColumn("end_date", EnumColType.Int);
 		data.addColumn("external_lentity", EnumColType.Int);
 		data.addColumn("param_seq_num", EnumColType.Int);
 		data.addColumn("param_currency", EnumColType.Int);

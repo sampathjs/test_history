@@ -30,6 +30,7 @@ import com.olf.jm.logging.Logging;
 import com.olf.jm.util.SimUtil;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.calendar.CalendarFactory;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.market.EnumIdxPurpose;
@@ -48,6 +49,7 @@ import com.olf.openrisk.table.EnumFormatDouble;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.table.TableFormatter;
+import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumReceivePay;
 import com.olf.openrisk.trading.EnumToolset;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
@@ -104,7 +106,8 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 			filteroutNonVaRIncedies(tranGptDeltaByLeg);
 
 			Table creditPFEVaRInfo = createOutputTable();
-			creditPFEVaRInfo.select(tranList, "deal_num, tran_num, ins_num, toolset, ins_type, external_lentity, buy_sell", "[IN.deal_num] >= 0");
+			creditPFEVaRInfo.select(tranList, "deal_num, tran_num, ins_num, toolset, ins_type, start_date, end_date, external_lentity"
+					+ ", buy_sell", "[IN.deal_num] >= 0");
 			creditPFEVaRInfo.select(creditPFEPA,
 					"param_seq_num, party_agreement_id, time_to_call_date, next_collateral_call_date, pay_receive, netting_flag",
 					"[IN.deal_num] == [OUT.deal_num] AND [IN.tran_num] == [OUT.tran_num] AND [IN.ins_num] == [OUT.ins_num]");
@@ -113,16 +116,7 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 			creditPFEVaRInfo.select(varGptRawData, "gpt_label, gpt_name, gpt_date, gpt_time, gpt_sigma", "[IN.index_id] == [OUT.index_id]"
 					+ " AND [IN.vol_id] == [OUT.vol_id] AND [IN.gpt_id] == [OUT.gpt_id]");
 
-			Table temp = tf.createTable();
-			temp.addColumn("scenario_date", EnumColType.Int);
-			temp.addColumn("value", EnumColType.Double);
-			temp.addRows(1);
-			temp.setInt("scenario_date", 0, session.getCalendarFactory().getJulianDate(scenarioDate));
-			temp.setDouble("value", 0, 0.0);
-			
-			creditPFEVaRInfo.select(temp, "value->delta", "[IN.scenario_date] < [OUT.next_collateral_call_date] ");
-			creditPFEVaRInfo.select(temp, "value->gamma", "[IN.scenario_date] < [OUT.next_collateral_call_date] ");
-			creditPFEVaRInfo.select(temp, "value->gpt_sigma", "[IN.scenario_date] < [OUT.next_collateral_call_date] ");
+			updateGreekValuesForScenario(session, creditPFEVaRInfo);
 			
 			scaleGreeksColumns(scenario, creditPFEVaRInfo);
 
@@ -140,6 +134,26 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 		Logging.close();
 	}
 
+	private void updateGreekValuesForScenario(Session session, Table creditPFEVaRInfo) {
+		
+		try {
+			int rowCount = creditPFEVaRInfo.getRowCount();
+			CalendarFactory cf = session.getCalendarFactory();
+			for (int row = 0; row < rowCount; row++) {
+				Date nextCallDate = creditPFEVaRInfo.getDate("next_collateral_call_date", row);
+				Date maturityDate = creditPFEVaRInfo.getInt("end_date", row) == 0 ? cf.getDate(creditPFEVaRInfo.getInt("start_date", row))
+						: cf.getDate(creditPFEVaRInfo.getInt("end_date", row));
+				if (scenarioDate.after(nextCallDate) && scenarioDate.after(maturityDate)) {
+					creditPFEVaRInfo.setDouble("delta", row, 0.0);
+					creditPFEVaRInfo.setDouble("gamma", row, 0.0);
+					creditPFEVaRInfo.setDouble("gpt_sigma", row, 0.0);
+				}
+			}
+		} catch (OpenRiskException e) {
+			throw new OpenRiskException("Failed to add MTM Exposure values : " + e.getMessage());
+		}
+	}
+
 	@Override
 	public void format(final Session session, final RevalResult revalResult) {
 
@@ -149,6 +163,12 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 		formatter.setColumnTitle("deal_num", "Deal Number");
 		formatter.setColumnTitle("tran_num", "Tran Number");
 		formatter.setColumnTitle("ins_num", "ins Number");
+		formatter.setColumnTitle("toolset", "Toolset");
+		formatter.setColumnTitle("ins_type", "Instrument");
+		formatter.setColumnTitle("start_date", "Start Date");
+		formatter.setColumnTitle("end_date", "Maturity Date");
+		formatter.setColumnTitle("external_lentity", "External\nLegal Entity");
+		formatter.setColumnTitle("buy_sell", "Buy Sell");
 		formatter.setColumnTitle("param_seq_num", "Deal Leg");
 		formatter.setColumnTitle("party_agreement_id", "Party Agreement");
 		formatter.setColumnTitle("index_id", "Index\nName");
@@ -165,8 +185,10 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 		formatter.setColumnTitle("pay_receive", "Pay/Receive");
 		formatter.setColumnTitle("netting_flag", "Netting");
 		
+		formatter.setColumnFormatter("toolset", formatter.createColumnFormatterAsRef(EnumReferenceTable.Toolsets));
 		formatter.setColumnFormatter("ins_type", formatter.createColumnFormatterAsRef(EnumReferenceTable.Instruments));
 		formatter.setColumnFormatter("external_lentity", formatter.createColumnFormatterAsRef(EnumReferenceTable.Party));
+		formatter.setColumnFormatter("buy_sell", formatter.createColumnFormatterAsRef(EnumReferenceTable.BuySell));
 		formatter.setColumnFormatter("pay_receive", formatter.createColumnFormatterAsRef(EnumReferenceTable.RecPay));
 		formatter.setColumnFormatter("party_agreement_id", formatter.createColumnFormatterAsRef(EnumReferenceTable.PartyAgreement));
 		formatter.setColumnFormatter("index_id", formatter.createColumnFormatterAsRef(EnumReferenceTable.Index));
@@ -179,6 +201,8 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 		formatter.setColumnFormatter("gamma", formatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 6, 10));
 		formatter.setColumnFormatter("time_to_call_date", formatter.createColumnFormatterAsDouble(EnumFormatDouble.Notnl, 6, 10));
 
+		formatter.setColumnFormatter("start_date", formatter.createColumnFormatterAsDateTime(EnumFormatDateTime.Date));
+		formatter.setColumnFormatter("end_date", formatter.createColumnFormatterAsDateTime(EnumFormatDateTime.Date));
 	}
 
 	private void filterOutPayNonNettingRows(Table creditPFEVaRInfo) {
@@ -297,6 +321,8 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 				EnumTransactionFieldId.Toolset,
 				EnumTransactionFieldId.InstrumentType,
 				EnumTransactionFieldId.TransactionType,
+				EnumTransactionFieldId.StartDate,
+				EnumTransactionFieldId.MaturityDate
 		};
 		Table tranList = simUtil.getTranList(transactions, fields);
 		logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
@@ -312,6 +338,8 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 		data.addColumn("ins_num", EnumColType.Int);
 		data.addColumn("toolset", EnumColType.Int);
 		data.addColumn("ins_type", EnumColType.Int);
+		data.addColumn("start_date", EnumColType.Int);
+		data.addColumn("end_date", EnumColType.Int);
 		data.addColumn("external_lentity", EnumColType.Int);
 		data.addColumn("buy_sell", EnumColType.Int);
 		data.addColumn("param_seq_num", EnumColType.Int);

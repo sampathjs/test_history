@@ -110,6 +110,8 @@ public class SimUtil {
 		renameColumn(table, EnumTransactionFieldId.SettleDate.getName(), "settle_date");
 		renameColumn(table, EnumTransactionFieldId.SettleCurrency.getName(), "settle_ccy");
 		renameColumn(table, EnumTransactionFieldId.Ticker.getName(), "ticker");
+		renameColumn(table, EnumTransactionFieldId.StartDate.getName(), "start_date");
+		renameColumn(table, EnumTransactionFieldId.MaturityDate.getName(), "end_date");
 	}
 
 	private void renameColumn(Table table, String fromName, String toNmae) {
