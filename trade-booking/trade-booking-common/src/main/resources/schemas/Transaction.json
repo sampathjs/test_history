@@ -111,26 +111,13 @@
               "$ref": "#/$defs/property"
             }
           },
-   	      "resets": {
-	      	"type": "array",
-	      	"items": {
-	        	"type": "object",
-	        	"properties": {
-	          		"reset_id": {
-	            		"type": "integer",
-	            		"description": "the reset id"
-	          		 },
-	          		 "reset_properties": {
-	            		"type": "array",
-	            		"items": {
-	              			"$ref": "#/$defs/property"
-	            		}
-	          		}
-	        	},
-	       		"additionalProperties": false
-	      	  }
-	    	}
-        },
+   		 "reset_properties": {
+         		"type": "array",
+          		"items": {
+           			"$ref": "#/$defs/property"
+           		}
+       		}
+       	},
         "additionalProperties": false
       }
     },

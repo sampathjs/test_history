@@ -74,9 +74,8 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         transaction.getLegs().forEach(leg -> {
             leg.getLegProperties().forEach(p -> 
                     propertyItems.add(LegPropertyItem.builder().property(p).leg(leg).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder.apply(p.getGlobalOrderId())).build()));
-            leg.getResets().forEach(reset -> {
-                reset.getResetProperties().forEach(p ->
-                        propertyItems.add(ResetPropertyItem.builder().property(p).leg(leg).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder.apply(p.getGlobalOrderId())).build()));
+            leg.getResetProperties().forEach(reset -> {
+                    propertyItems.add(ResetPropertyItem.builder().property(reset).leg(leg).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder.apply(reset.getGlobalOrderId())).build());
             });
         });
         return propertyItems;
