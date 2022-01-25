@@ -1,5 +1,6 @@
 package com.matthey.pmm.transaction;
 
+import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.matthey.pmm.transaction.items.*;
 import com.olf.openrisk.application.Session;
 import lombok.val;
@@ -10,8 +11,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class TransactionConverter implements BiFunction<Session, TransactionTo, List<? extends TransactionItem<?, ?, ?, ?>>> {
-
+public class TransactionConverter implements BiFunction<Session, TransactionTo, List<? extends TransactionItem<?, ?, ?, ?>>> {	
     private static final Function<Object, Integer> toIntegerGlobalOrder = o -> {
         if (o instanceof String) {
             val s = (String) o;
@@ -33,6 +33,12 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         if (Integer.MAX_VALUE == ti2.order()) return -1;
         return ti1.order() - ti2.order();
     };
+    
+    private final LogTable logTable;
+    
+    public TransactionConverter (final LogTable logTable) {
+    	this.logTable = logTable;
+    }
 
     @Override
     public List<? extends TransactionItem<?, ?, ?, ?>> apply(Session Session, TransactionTo transaction) {
@@ -52,24 +58,26 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         result.addAll(buildTransactionProcessingInstructions(Session, transaction));
 
         result.sort(TRANSACTION_ITEM_COMPARATOR);
-
+        
+        logTable.init(result);
         return result;
     }
 
     private List<TransactionItem<?, ?, ?, ?>> buildResetPropertyTransactionItems(Session session, TransactionTo transaction) {
         val propertyItems = new LinkedList<TransactionItem<?, ?, ?, ?>>();
-        transaction.getResets().forEach(reset -> {
-            reset.getResetProperties().forEach(p ->
-                    propertyItems.add(ResetPropertyItem.builder().property(p).reset(reset).ocSession(session).order(toIntegerGlobalOrder.apply(p.getGlobalOrderId())).build()));
-        });
+
         return propertyItems;
     }
 
     private List<TransactionItem<?, ?, ?, ?>> buildLegPropertyTransactionItems(Session session, TransactionTo transaction) {
         val propertyItems = new LinkedList<TransactionItem<?, ?, ?, ?>>();
         transaction.getLegs().forEach(leg -> {
-            leg.getLegProperties().forEach(p ->
-                    propertyItems.add(LegPropertyItem.builder().property(p).leg(leg).ocSession(session).order(toIntegerGlobalOrder.apply(p.getGlobalOrderId())).build()));
+            leg.getLegProperties().forEach(p -> 
+                    propertyItems.add(LegPropertyItem.builder().property(p).leg(leg).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder.apply(p.getGlobalOrderId())).build()));
+            leg.getResets().forEach(reset -> {
+                reset.getResetProperties().forEach(p ->
+                        propertyItems.add(ResetPropertyItem.builder().property(p).leg(leg).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder.apply(p.getGlobalOrderId())).build()));
+            });
         });
         return propertyItems;
     }
@@ -77,7 +85,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
     private List<TransactionItem<?, ?, ?, ?>> buildTransactionPropertyTransactionItems(Session session, TransactionTo transaction) {
         val propertyItems = new LinkedList<TransactionItem<?, ?, ?, ?>>();
         transaction.getTransactionProperties().forEach(p ->
-                propertyItems.add(TransactionPropertyItem.builder().property(p).transaction(transaction).ocSession(session).order(toIntegerGlobalOrder.apply(p.getGlobalOrderId())).build())
+                propertyItems.add(TransactionPropertyItem.builder().property(p).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder.apply(p.getGlobalOrderId())).build())
         );
         return propertyItems;
     }
@@ -88,7 +96,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         if (transactionProcessing == null)
             throw new IllegalStateException("no transaction processing instruction defined");
         transactionProcessing.forEach(tp ->
-                processingTransactionItems.add(TransactionProcessingItem.builder().transactionProcessing(tp).transaction(transaction).ocSession(session).order(toIntegerGlobalOrder.apply(tp.getGlobalOrderId())).build())
+                processingTransactionItems.add(TransactionProcessingItem.builder().transactionProcessing(tp).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder.apply(tp.getGlobalOrderId())).build())
         );
         return processingTransactionItems;
     }
@@ -98,7 +106,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         val debugProcessingInstructions = transaction.getProcessingInstruction().getDebugDefinition();
         if (debugProcessingInstructions != null)
             debugProcessingInstructions.forEach(dd ->
-                    debugTransactionItems.add(DebugItem.builder().debugDefinition(dd).transaction(transaction).ocSession(session).order(toIntegerGlobalOrder.apply(dd.getGlobalOrderId())).build())
+                    debugTransactionItems.add(DebugItem.builder().debugDefinition(dd).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder.apply(dd.getGlobalOrderId())).build())
             );
         return debugTransactionItems;
     }
@@ -113,11 +121,11 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
                 throw new IllegalStateException("only by_template or by_clone must be configured");
             if (byTemplate != null)
                 initializationTransactionItems.add(
-                        InitializationByTemplateItem.builder().initializationByTemplate(byTemplate).transaction(transaction).ocSession(session).order(Integer.MIN_VALUE).build()
+                        InitializationByTemplateItem.builder().initializationByTemplate(byTemplate).transaction(transaction).logTable(logTable).ocSession(session).order(Integer.MIN_VALUE).build()
                 );
             if (byClone != null)
                 initializationTransactionItems.add(
-                        InitializationByCloneItem.builder().initializationByClone(byClone).transaction(transaction).ocSession(session).order(Integer.MIN_VALUE).build()
+                        InitializationByCloneItem.builder().initializationByClone(byClone).transaction(transaction).logTable(logTable).ocSession(session).order(Integer.MIN_VALUE).build()
                 );
         }
         return initializationTransactionItems;

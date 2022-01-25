@@ -3,8 +3,16 @@ package com.matthey.pmm.tradebooking.processors;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.matthey.pmm.transaction.TransactionConverter;
+import com.matthey.pmm.transaction.TransactionItemsListExecutor;
+import com.matthey.pmm.transaction.TransactionTo;
+import com.matthey.pmm.transaction.items.TransactionItem;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.trading.EnumTranStatus;
@@ -40,8 +48,8 @@ public class FileProcessor {
 		this.runId = runId;
 		this.dealCounter = dealCounter;
 		try {
-			executeDebugCommands = Boolean.parseBoolean(constRepo.getStringValue("executeDebugCommands", "false"));			
-		} catch (Exception ex) {			
+			executeDebugCommands = Boolean.parseBoolean(constRepo.getStringValue("executeDebugCommands", "false"));
+		} catch (Exception ex) {
 			logger.error("Could not read or parse Const Repso entry " + constRepo.getContext() 
 				+ "\\" + constRepo.getSubcontext() + "\\executeDebugCommands that is expected to contain the String"
 				+ " values 'true' or 'false'. Defaulting to false");
@@ -54,272 +62,48 @@ public class FileProcessor {
 	}
 
 	public boolean processFile (String fullPath) {
-		logTable = new LogTable(session, logger, fullPath, runId, dealCounter);
+		logTable = new LogTable(session, logger, runId, dealCounter);
 		firstLine = true;
 		newDeal = null;
-		currentLine = 0;
-		try (Stream<String> stream = Files.lines(Paths.get(fullPath))) {
-			try {
-				stream.forEachOrdered(this::processLine);
-			} catch (Exception ex) {
-				logger.error("Error while processing file '" + fullPath + "': " + ex.toString());
-				for (StackTraceElement ste : ex.getStackTrace()) {
-					logger.error(ste.toString());
-				}
-				return false;
-			}
+
+	    ObjectMapper mapper = new ObjectMapper();
+	    TransactionTo transaction=null;
+	    try {
+	    	transaction = mapper.readValue(Paths.get(fullPath).toFile(), TransactionTo.class);
 		} catch (IOException e) {
-			logger.error("Error while reading file '" + fullPath + "': " + e.toString());
+			String message = (e instanceof DatabindException)?
+					"Error while parsing JSON context of file '" + fullPath + "': " + e.toString():
+					"Error while reading file '" + fullPath + "': " + e.toString();
+			logger.error(message);
 			for (StackTraceElement ste : e.getStackTrace()) {
 				logger.error(ste.toString());
+			}		
+		} 
+	    TransactionConverter converter = new TransactionConverter(logTable);
+	    TransactionItemsListExecutor executor = new TransactionItemsListExecutor();
+	    List<? extends TransactionItem<?, ?, ?, ?>> transactionAsList;
+	    try {
+	    	transactionAsList = converter.apply(session, transaction);
+	    } catch (Throwable t) {
+			logger.error("Error while generating action plan for transaction in file '" + fullPath + "': " + t.toString());
+			for (StackTraceElement ste : t.getStackTrace()) {
+				logger.error(ste.toString());
 			}
-		}
+			throw t;
+	    }
+	    try {
+	    	executor.apply(transactionAsList);
+	    } catch (Throwable t) {
+			logger.error("Error while executing action plan (booking trade) for transaction in file '" + fullPath + "': " + t.toString());
+			for (StackTraceElement ste : t.getStackTrace()) {
+				logger.error(ste.toString());
+			}
+			throw t;
+	    }
+	    
 		logTable.persistToDatabase();
 		if (executeDebugCommands) {
 			logTable.showLogTableToUser();
-		}
-		return true;
-	}
-
-	private void processLine (String line) {
-		try {
-			String message="";
-			if (firstLine) {
-				if (!processLoadTemplate (line)) {
-					message = "Error parsing input file: first line does not contain valid load template command";
-					logTable.addLogEntry(currentLine, false, message);
-					throw new RuntimeException (message);
-				}
-				firstLine = false;
-			} else if (checkForSetTranField(line)) {
-				message = setTranField(line);
-			} else if (checkForProcessDeal(line)) {
-				message = processDeal(line);
-			} else if (checkForSetLegField(line)) {
-				message = setLegField (line);
-			} else if (checkForAddLeg(line)) {
-				message = addLeg (line);
-			} else if (checkForSetResetDefinitionValue(line)) {
-				message = setResetDefinitionField (line);
-			} else if (checkForDebugShowTransaction(line)) {
-				if (executeDebugCommands) {
-					message = debugShowToUser (line);
-				} else {
-					message = "debugShowToUser() not executed as debug comnand execution is disabled";
-					logger.info(message);
-				}
-			} else { // if line is not known
-				String errorMsg = "Could not process line '" + line + "' as it was not categorised into any of the existing commands";
-				logger.error(errorMsg);
-				throw new RuntimeException (errorMsg);
-			}
-			logTable.addLogEntry(currentLine, true, message);
-		} catch (Exception ex) {
-			logTable.addLogEntry(currentLine, false, ex.getMessage());	
-			throw ex;
-		} finally {
-			currentLine++;			
-		}
-	}
-
-	private boolean checkForDebugShowTransaction(String line) {
-		String lineNormalised = line.trim();
-		if (!lineNormalised.startsWith("debugShowToUser()")) {
-			return false;
-		}		
-		return true;
-	}
-	
-	private String debugShowToUser(String line) {
-		logger.info("Line '" + line + "' categorised as debugShowToUser()");
-		session.getTradingFactory().viewTransaction(newDeal);
-		String msg = "Successfully showed Transaction to User";
-		logger.info(msg);
-		return msg;
-	}
-	
-	private String addLeg(String line) {
-		logger.info("Line '" + line + "' categorised as addLeg");
-		Leg newLeg = newDeal.getLegs().addItem();
-		String msg = "Successfully added a new leg.";
-		logger.info(msg);
-		return msg;
-	}
-
-	private boolean checkForAddLeg(String line) {
-		String lineNormalised = line.trim();
-		if (!lineNormalised.startsWith("addLeg()")) {
-			return false;
-		}		
-		return true;
-	}
-
-	private String setResetDefinitionField(String line) {
-		logger.info("Line '" + line + "' categorised as setResetDefinitionField");
-		String lineNormalised = line.trim();
-		String legNumber = lineNormalised.substring(24, lineNormalised.indexOf(",")).trim();
-		String resetDefField = lineNormalised.substring(lineNormalised.indexOf(",")+1, lineNormalised.lastIndexOf(",")).trim();
-		String newValue = lineNormalised.substring(lineNormalised.lastIndexOf(",")+1, lineNormalised.indexOf(")")).trim();
-		logger.info("On Leg #'" + legNumber + " setting the field '" + resetDefField + "' on the reset definition to new value '" + newValue + "'");
-		int legNo;
-		try {
-			legNo = Integer.parseInt(legNumber);
-		} catch (NumberFormatException ex) {
-			String errorMsg = "The provided leg '" + legNumber + "' in the first parameter is  not a number.";
-			logger.error(errorMsg);
-			throw new RuntimeException (errorMsg);
-		}
-		Leg leg = newDeal.getLeg(legNo);
-		Field field = leg.getResetDefinition().getField(resetDefField);
-		if (field == null) {
-			String errorMsg ="The field '"  + resetDefField + "' was not found on the reset definition.";
-			logger.error(errorMsg);	
-			throw new RuntimeException(errorMsg);
-		}
-		field.setValue(newValue);
-		String msg = "Successfully set On Leg #'" + legNumber + " the field '" + resetDefField + "' on the reset definition to new value '" + newValue + "'";
-		logger.info(msg);
-		return msg;
-	}
-
-	private boolean checkForSetResetDefinitionValue(String line) {
-		String lineNormalised = line.trim();
-		if (!lineNormalised.startsWith("setResetDefinitionField(")) {
-			return false;
-		}		
-		if (!lineNormalised.endsWith(")")) {
-			return false;
-		}
-		if (lineNormalised.split(",").length != 3) {
-			return false;
-		}
-		return true;
-	}
-
-	private String setLegField(String line) {
-		logger.info("Line '" + line + "' categorised as setLegField");
-		String lineNormalised = line.trim();
-		String legNumber = lineNormalised.substring(12, lineNormalised.indexOf(",")).trim();
-		String legField = lineNormalised.substring(lineNormalised.indexOf(",")+1, lineNormalised.lastIndexOf(",")).trim();
-		String newValue = lineNormalised.substring(lineNormalised.lastIndexOf(",")+1, lineNormalised.indexOf(")")).trim();
-		logger.info("On Leg #'" + legNumber + " setting the field '" + legField + "' to new value '" + newValue + "'");
-		int legNo;
-		try {
-			legNo = Integer.parseInt(legNumber);
-		} catch (NumberFormatException ex) {
-			String errorMsg = "The provided leg '" + legNumber + "' in the first parameter is  not a number.";
-			logger.error(errorMsg);
-			throw new RuntimeException (errorMsg);
-		}
-		Leg leg = newDeal.getLeg(legNo);
-		Field field = leg.getField(legField);
-		if (field == null) {
-			String errorMsg ="The leg field '"  + legField + "' was not found.";
-			logger.error(errorMsg);	
-			throw new RuntimeException(errorMsg);
-		}
-		field.setValue(newValue);
-		String msg = "Successfully set On Leg #'" + legNumber + " the field '" + legField + "' to new value '" + newValue + "'";
-		logger.info(msg);
-		return msg;
-	}
-
-	private boolean checkForSetLegField(String line) {
-		String lineNormalised = line.trim();
-		if (!lineNormalised.startsWith("setLegField(")) {
-			return false;
-		}		
-		if (!lineNormalised.endsWith(")")) {
-			return false;
-		}
-		if (lineNormalised.split(",").length != 3) {
-			return false;
-		}
-		return true;
-	}
-
-	private String setTranField(String line) {
-		logger.info("Line '" + line + "' categorised as setTranfield");
-		String lineNormalised = line.trim();
-		String tranfieldToSet = lineNormalised.substring(13, lineNormalised.indexOf(",")).trim();
-		String newValue = lineNormalised.substring(lineNormalised.indexOf(",")+1, lineNormalised.indexOf(")")).trim();
-		logger.info("Setting tranField '" + tranfieldToSet + "' to new value '" + newValue + "'");
-		Field field = newDeal.getField(tranfieldToSet);
-		field.setValue(newValue);
-		String msg = "Successfully set tranField '" + tranfieldToSet + "' to new value '" + newValue + "'";
-		logger.info(msg);
-		return msg;
-	}
-
-	private boolean checkForSetTranField(String line) {
-		String lineNormalised = line.trim();
-		if (!lineNormalised.startsWith("setTranField(")) {
-			return false;
-		}		
-		if (!lineNormalised.endsWith(")")) {
-			return false;
-		}
-		if (lineNormalised.split(",").length != 2) {
-			return false;
-		}
-		return true;
-	}
-
-	private String processDeal(String line) {
-		logger.info("Line '" + line + "' categorised as process (the deal to book)");
-		String lineNormalised = line.trim();
-		String newStatus = lineNormalised.substring(8, lineNormalised.indexOf(")")).trim();
-		logger.info("Processing deal to book to new status '" + newStatus + "'");
-		EnumTranStatus newStatusEnum;
-		try {
-			newStatusEnum = EnumTranStatus.valueOf(newStatus);
-		} catch (IllegalArgumentException ex) {
-			logger.error("The tran status '" + newStatus + "' is not valid. Allowed values are " + EnumTranStatus.values());
-			throw ex;
-		}
-		try {
-			newDeal.process(newStatusEnum);			
-		} catch (OpenRiskException ex) {
-			logger.error("Error while processing transaction to status '" + newStatus + "': " + ex.toString() + "\n" + ex.getMessage());
-			for (StackTraceElement ste : ex.getStackTrace()) {
-				logger.error(ste.toString());
-			}
-			throw ex;
-		}
-		String msg = "Successfully processed deal to new status '" + newStatus + "'";
-		logger.info(msg);
-		return msg;
-	}
-
-	private boolean checkForProcessDeal(String line) {
-		String lineNormalised = line.trim();
-		if (!lineNormalised.startsWith("process(")) {
-			return false;
-		}		
-		if (!lineNormalised.endsWith(")")) {
-			return false;
-		}
-		return true;
-	}
-
-
-	private boolean processLoadTemplate(String line) {
-		logger.info("Processing load template command in first line (mandatory)");
-		String lineNormalised = line.trim();
-		if (!lineNormalised.startsWith("loadTemplate(")) {
-			logger.error("Could not find load template command (expected to be in first line of file). Syntax is loadTemplate(<Template Reference>)"
-					+ " but found '" + lineNormalised + "'");
-			return false;
-		}
-		if (!lineNormalised.endsWith(")")) {
-			logger.error("Could not find load template command (expected to be in first line of file). Syntax is loadTemplate(<Template Reference>)"
-					+ " but found '" + lineNormalised + "' - missing closing brackets");
-			return false;
-		}
-		String templateReference = lineNormalised.substring(13, lineNormalised.length()-1);
-		logger.info("Loading template having reference '" + templateReference + "'");
-		try (Transaction template = session.getTradingFactory().retrieveTransactionByReference(templateReference, EnumTranStatus.Template)){
-			newDeal = session.getTradingFactory().createTransactionFromTemplate(template);			
 		}
 		return true;
 	}

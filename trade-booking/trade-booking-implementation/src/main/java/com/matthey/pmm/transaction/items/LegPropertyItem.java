@@ -55,4 +55,9 @@ public class LegPropertyItem extends TransactionItem<PropertyTo, LegTo, Transact
 		logTable.addLogEntry(order, true, msg);
 		return input;
     }
+    
+	@Override
+	public String toString() {
+		return "Set field '" + item.getName() + "' on leg #" + context.getLegId() + " to value '" +  item.getValue() + "'";
+	}
 }

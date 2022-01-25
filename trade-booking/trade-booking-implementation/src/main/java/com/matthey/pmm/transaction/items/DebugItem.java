@@ -34,4 +34,9 @@ public class DebugItem extends TransactionItem<DebugDefinitionTo, TransactionTo,
 		}
 		return input;
     }
+
+	@Override
+	public String toString() {
+		return "showTransactionToUser";
+	}
 }

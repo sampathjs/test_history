@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
 
-import com.matthey.pmm.EndurLoggerFactory;
-import com.matthey.pmm.tradebooking.app.TradeBookingMain;
+import com.matthey.pmm.transaction.items.TransactionItem;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.EnumColType;
@@ -34,7 +34,7 @@ public class LogTable {
 	private final int runId;
 	private final int dealCounter;
 	
-	public LogTable (final Session session, final Logger logger, final String fullPath, final int runId, final int dealCounter) {
+	public LogTable (final Session session, final Logger logger, final int runId, final int dealCounter) {
 		this.session = session;
 		this.logger = logger;
 		this.logTable = session.getTableFactory().createTable("Trade Booking Tool Log Table");
@@ -47,14 +47,10 @@ public class LogTable {
 		logTable.addColumn(COL_STATUS, EnumColType.String);
 		logTable.addColumn(COL_MESSAGE, EnumColType.String);
 		logTable.addColumn(COL_LAST_UPDATE, EnumColType.DateTime);
-		try (Stream<String> stream = Files.lines(Paths.get(fullPath))) {
-			stream.forEach(this::createLogLine);
-		} catch (IOException e) {
-			logger.error("Error while reading file '" + fullPath + "': " + e.toString());
-    		for (StackTraceElement ste : e.getStackTrace()) {
-    			logger.error(ste.toString());
-    		} 
-		}
+	}
+	
+	public void init (List<TransactionItem<?, ?, ?, ?>>  actionPlan) {
+		actionPlan.forEach(x -> createLogLine(x.toString()));
 	}
 	
 	private void createLogLine (String logLineRaw) {

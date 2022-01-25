@@ -4,8 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.matthey.pmm.tradebooking.processors.LogTable;
+import com.matthey.pmm.transaction.LegTo;
 import com.matthey.pmm.transaction.PropertyTo;
-import com.matthey.pmm.transaction.ResetTo;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
@@ -13,12 +13,12 @@ import com.olf.openrisk.trading.Transaction;
 
 import lombok.Builder;
 
-public class ResetPropertyItem extends TransactionItem<PropertyTo, ResetTo, Transaction, Transaction> {
+public class ResetPropertyItem extends TransactionItem<PropertyTo, LegTo, Transaction, Transaction> {
     private static final Logger logger = LogManager.getLogger(ResetPropertyItem.class);
 
     @Builder
-    public ResetPropertyItem(int order, PropertyTo property, ResetTo reset, Session ocSession, LogTable logTable) {
-        super(order, property, reset, ocSession, logTable, Transaction.class);
+    public ResetPropertyItem(int order, PropertyTo property, LegTo leg, Session ocSession, LogTable logTable) {
+        super(order, property, leg, ocSession, logTable, Transaction.class);
     }
 
     @Override
@@ -53,4 +53,7 @@ public class ResetPropertyItem extends TransactionItem<PropertyTo, ResetTo, Tran
 		return input;
     }
 
+	public String toString() {
+		return "Set reset definition field '" + item.getName() + "' on leg #" + context.getLegId() + " to value '" +  item.getValue() + "'";
+	}
 }

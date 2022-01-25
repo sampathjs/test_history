@@ -1,5 +1,6 @@
 package com.matthey.pmm.transaction;
 
+import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
 import lombok.val;
 import org.junit.Test;
@@ -50,7 +51,7 @@ public class TransactionConverterTest {
 
         System.out.println("---------");
 
-        val result = new TransactionConverter().apply(Mockito.mock(Session.class), tx);
+        val result = new TransactionConverter(Mockito.mock(LogTable.class)).apply(Mockito.mock(Session.class), tx);
 
         result.forEach(ti -> System.out.println("" + ti + " " + ti.getClass().getName()));
 

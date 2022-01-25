@@ -42,4 +42,8 @@ public class TransactionProcessingItem extends TransactionItem<TransactionProces
 		logger.info(msg);
 		return input;
     }
+    
+	public String toString() {
+		return "Process transaction to status '" + item.getStatus() + "'";
+	}
 }

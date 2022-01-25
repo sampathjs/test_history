@@ -43,4 +43,9 @@ public class InitializationByCloneItem extends TransactionItem<InitializationByC
 			throw ex;
 		}
     }
+    
+	@Override
+	public String toString() {
+		return "Init Transaction By Clone From Tran #" + item.getDealId();
+	}
 }

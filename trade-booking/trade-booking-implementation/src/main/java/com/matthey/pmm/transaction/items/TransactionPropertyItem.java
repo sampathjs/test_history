@@ -41,4 +41,8 @@ public class TransactionPropertyItem extends TransactionItem<PropertyTo, Transac
 		return input;
     }
 
+	public String toString() {
+		return "Set transaction field '" + item.getName() + "' to value '" +  item.getValue() + "'";
+	}
+
 }

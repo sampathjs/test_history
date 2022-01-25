@@ -44,4 +44,9 @@ public class InitializationByTemplateItem extends TransactionItem<Initialization
 			throw ex;
 		}
     }
+    
+	@Override
+	public String toString() {
+		return "Init Transaction By Clone From Template Having Reference '" + item.getTemplateReference() + "'";
+	}
 }
