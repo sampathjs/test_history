@@ -12,6 +12,9 @@ import org.junit.Test;
 import java.io.InputStream;
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 public class FileImportTest {
 
     @Test
@@ -29,11 +32,11 @@ public class FileImportTest {
             Set<ValidationMessage> validationResult = schema.validate(json);
 
             // print validation errors
-            if (validationResult.isEmpty()) {
-                System.out.println("validation successful)");
-            } else {
+            if (!validationResult.isEmpty()) {
                 validationResult.forEach(vm -> System.out.println(vm.getMessage()));
             }
+
+            assertTrue(validationResult.isEmpty());
         }
     }
 
@@ -50,9 +53,7 @@ public class FileImportTest {
 
             ObjectMapper objectMapper = new ObjectMapper();
             val transactionTo = objectMapper.readValue(jsonStream, TransactionTo.class);
-            transactionTo.getLegs().forEach(leg -> {
-                System.out.println("received leg " + leg.getLegId());
-            });
+            assertEquals(2, transactionTo.getLegs().size());
         }
 
     }
