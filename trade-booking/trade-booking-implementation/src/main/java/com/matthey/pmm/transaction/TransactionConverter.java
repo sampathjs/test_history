@@ -2,7 +2,6 @@ package com.matthey.pmm.transaction;
 
 import com.matthey.pmm.transaction.items.*;
 import com.olf.openrisk.application.Session;
-
 import lombok.val;
 
 import java.util.Comparator;
@@ -59,7 +58,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
 
     private List<TransactionItem<?, ?, ?, ?>> buildResetPropertyTransactionItems(Session session, TransactionTo transaction) {
         val propertyItems = new LinkedList<TransactionItem<?, ?, ?, ?>>();
-        transaction.getResetTos().forEach(reset -> {
+        transaction.getResets().forEach(reset -> {
             reset.getResetProperties().forEach(p ->
                     propertyItems.add(ResetPropertyItem.builder().property(p).reset(reset).ocSession(session).order(toIntegerGlobalOrder.apply(p.getGlobalOrderId())).build()));
         });
@@ -68,7 +67,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
 
     private List<TransactionItem<?, ?, ?, ?>> buildLegPropertyTransactionItems(Session session, TransactionTo transaction) {
         val propertyItems = new LinkedList<TransactionItem<?, ?, ?, ?>>();
-        transaction.getLegTos().forEach(leg -> {
+        transaction.getLegs().forEach(leg -> {
             leg.getLegProperties().forEach(p ->
                     propertyItems.add(LegPropertyItem.builder().property(p).leg(leg).ocSession(session).order(toIntegerGlobalOrder.apply(p.getGlobalOrderId())).build()));
         });
@@ -85,7 +84,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
 
     private List<TransactionItem<?, ?, ?, ?>> buildTransactionProcessingInstructions(Session session, TransactionTo transaction) {
         val processingTransactionItems = new LinkedList<TransactionItem<?, ?, ?, ?>>();
-        val transactionProcessing = transaction.getProcessingInstructionTo().getTransactionProcessingTo();
+        val transactionProcessing = transaction.getProcessingInstruction().getTransactionProcessing();
         if (transactionProcessing == null)
             throw new IllegalStateException("no transaction processing instruction defined");
         transactionProcessing.forEach(tp ->
@@ -96,7 +95,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
 
     private List<TransactionItem<?, ?, ?, ?>> buildDebugProcessingInstructions(Session session, TransactionTo transaction) {
         val debugTransactionItems = new LinkedList<TransactionItem<?, ?, ?, ?>>();
-        val debugProcessingInstructions = transaction.getProcessingInstructionTo().getDebugDefinitionTo();
+        val debugProcessingInstructions = transaction.getProcessingInstruction().getDebugDefinition();
         if (debugProcessingInstructions != null)
             debugProcessingInstructions.forEach(dd ->
                     debugTransactionItems.add(DebugItem.builder().debugDefinition(dd).transaction(transaction).ocSession(session).order(toIntegerGlobalOrder.apply(dd.getGlobalOrderId())).build())
@@ -106,7 +105,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
 
     private List<TransactionItem<?, ?, ?, ?>> buildInitializationProcessingInstructions(Session session, TransactionTo transaction) {
         val initializationTransactionItems = new LinkedList<TransactionItem<?, ?, ?, ?>>();
-        val initialization = transaction.getProcessingInstructionTo().getInitialization();
+        val initialization = transaction.getProcessingInstruction().getInitialization();
         if (initialization != null) {
             val byTemplate = initialization.getByTemplate();
             val byClone = initialization.getByClone();
