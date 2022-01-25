@@ -11,7 +11,11 @@
 # production
 /build
 
+<<<<<<< HEAD
 # node 
+=======
+# node
+>>>>>>> 2d0eb88f476a6a4437b1677fd5e6234f25e83292
 /node
 
 # misc
