@@ -11,7 +11,7 @@
         "status": "Validated"
       }
     ],
-    "debug_definition": [
+    "debug_show": [
       {
         "global_order_id": 6
       }

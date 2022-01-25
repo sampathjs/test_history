@@ -139,7 +139,7 @@
           },
           "additionalProperties": false
         },
-        "debug_definition": {
+        "debug_show": {
           "type": "array",
           "items": {
             "type": "object",

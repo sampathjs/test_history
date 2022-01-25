@@ -1,24 +1,16 @@
 package com.matthey.pmm.transaction;
 
+import com.matthey.pmm.tradebooking.processors.LogTable;
+import com.matthey.pmm.transaction.items.*;
+import com.olf.openrisk.application.Session;
+import lombok.val;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import com.matthey.pmm.tradebooking.processors.LogTable;
-import com.matthey.pmm.transaction.items.DebugItem;
-import com.matthey.pmm.transaction.items.InitializationByCloneItem;
-import com.matthey.pmm.transaction.items.InitializationByTemplateItem;
-import com.matthey.pmm.transaction.items.LegPropertyItem;
-import com.matthey.pmm.transaction.items.ResetPropertyItem;
-import com.matthey.pmm.transaction.items.TransactionItem;
-import com.matthey.pmm.transaction.items.TransactionProcessingItem;
-import com.matthey.pmm.transaction.items.TransactionPropertyItem;
-import com.olf.openrisk.application.Session;
-
-import lombok.val;
-
-public class TransactionConverter implements BiFunction<Session, TransactionTo, List<? extends TransactionItem<?, ?, ?, ?>>> {	
+public class TransactionConverter implements BiFunction<Session, TransactionTo, List<? extends TransactionItem<?, ?, ?, ?>>> {
     private static final Comparator<TransactionItem<?, ?, ?, ?>> TRANSACTION_ITEM_COMPARATOR = (ti1, ti2) -> {
         if (Integer.MIN_VALUE == ti1.order()) return -1;
         if (Integer.MIN_VALUE == ti2.order()) return 1;
@@ -26,11 +18,11 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         if (Integer.MAX_VALUE == ti2.order()) return -1;
         return ti1.order() - ti2.order();
     };
-    
+
     private final LogTable logTable;
-    
-    public TransactionConverter (final LogTable logTable) {
-    	this.logTable = logTable;
+
+    public TransactionConverter(final LogTable logTable) {
+        this.logTable = logTable;
     }
 
     @Override
@@ -38,7 +30,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         int countOfItems = calculateCountOfItems(transaction);
 
         val result = new ArrayList<TransactionItem<?, ?, ?, ?>>(countOfItems);
-        
+
         buildTransactionPropertyTransactionItems(Session, transaction, countOfItems, result);
 
         buildLegPropertyTransactionItems(Session, transaction, countOfItems, result);
@@ -48,38 +40,38 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         buildDebugProcessingInstructions(Session, transaction, countOfItems, result);
 
         buildTransactionProcessingInstructions(Session, transaction, countOfItems, result);
-                
+
         logTable.init(result);
         return result;
     }
 
-	private int calculateCountOfItems(TransactionTo transaction) {
-		int itemCount = 0;
-		for (LegTo leg : transaction.getLegs()) {
-			itemCount += leg.getLegProperties().size();
-			itemCount += leg.getResetProperties().size();			
-		}
-		itemCount += transaction.getProcessingInstruction().getDebugDefinition().size();
-		itemCount += transaction.getProcessingInstruction().getTransactionProcessing().size();
-		itemCount += 1; // initialisation
-		itemCount += transaction.getTransactionProperties().size();
-		return itemCount;
-	}
+    private int calculateCountOfItems(TransactionTo transaction) {
+        int itemCount = 0;
+        for (LegTo leg : transaction.getLegs()) {
+            itemCount += leg.getLegProperties().size();
+            itemCount += leg.getResetProperties().size();
+        }
+        itemCount += transaction.getProcessingInstruction().getDebugShow().size();
+        itemCount += transaction.getProcessingInstruction().getTransactionProcessing().size();
+        itemCount += 1; // initialisation
+        itemCount += transaction.getTransactionProperties().size();
+        return itemCount;
+    }
 
 
     private void buildLegPropertyTransactionItems(Session session, TransactionTo transaction, int countOfItems, ArrayList<TransactionItem<?, ?, ?, ?>> result) {
         transaction.getLegs().forEach(leg -> {
-            leg.getLegProperties().forEach(p -> 
-            	result.add(LegPropertyItem.builder().property(p).leg(leg).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(p.getGlobalOrderId(), countOfItems, result)).build()));
+            leg.getLegProperties().forEach(p ->
+                    result.add(LegPropertyItem.builder().property(p).leg(leg).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(p.getGlobalOrderId(), countOfItems, result)).build()));
             leg.getResetProperties().forEach(reset -> {
-            	result.add(ResetPropertyItem.builder().property(reset).leg(leg).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(reset.getGlobalOrderId(), countOfItems, result)).build());
+                result.add(ResetPropertyItem.builder().property(reset).leg(leg).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(reset.getGlobalOrderId(), countOfItems, result)).build());
             });
         });
     }
 
     private void buildTransactionPropertyTransactionItems(Session session, TransactionTo transaction, int countOfItems, ArrayList<TransactionItem<?, ?, ?, ?>> result) {
-    	transaction.getTransactionProperties().forEach(p ->
-        	result.add(TransactionPropertyItem.builder().property(p).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(p.getGlobalOrderId(), countOfItems, result)).build())
+        transaction.getTransactionProperties().forEach(p ->
+                result.add(TransactionPropertyItem.builder().property(p).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(p.getGlobalOrderId(), countOfItems, result)).build())
         );
     }
 
@@ -88,15 +80,15 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         if (transactionProcessing == null)
             throw new IllegalStateException("no transaction processing instruction defined");
         transactionProcessing.forEach(tp ->
-        	result.add(TransactionProcessingItem.builder().transactionProcessing(tp).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(tp.getGlobalOrderId(), countOfItems, result)).build())
+                result.add(TransactionProcessingItem.builder().transactionProcessing(tp).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(tp.getGlobalOrderId(), countOfItems, result)).build())
         );
     }
 
     private void buildDebugProcessingInstructions(Session session, TransactionTo transaction, int countOfItems, ArrayList<TransactionItem<?, ?, ?, ?>> result) {
-        val debugProcessingInstructions = transaction.getProcessingInstruction().getDebugDefinition();
+        val debugProcessingInstructions = transaction.getProcessingInstruction().getDebugShow();
         if (debugProcessingInstructions != null)
-            debugProcessingInstructions.forEach(dd ->
-            	result.add(DebugItem.builder().debugDefinition(dd).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(dd.getGlobalOrderId(), countOfItems, result)).build())
+            debugProcessingInstructions.forEach(ds ->
+                    result.add(DebugItem.builder().debugShowTo(ds).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(ds.getGlobalOrderId(), countOfItems, result)).build())
             );
     }
 
@@ -108,21 +100,21 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
             if (byTemplate != null && byClone != null)
                 throw new IllegalStateException("One of by_template or by_clone but not both must be configured");
             if (byTemplate != null)
-            	result.add(
+                result.add(
                         InitializationByTemplateItem.builder().initializationByTemplate(byTemplate).transaction(transaction).logTable(logTable)
-                        	.ocSession(session).order(toIntegerGlobalOrder(0, countOfItems, result)).build()
+                                .ocSession(session).order(toIntegerGlobalOrder(0, countOfItems, result)).build()
                 );
             if (byClone != null)
-            	result.add(
+                result.add(
                         InitializationByCloneItem.builder().initializationByClone(byClone).transaction(transaction).logTable(logTable)
-                        .ocSession(session).order(toIntegerGlobalOrder(0, countOfItems, result)).build()
+                                .ocSession(session).order(toIntegerGlobalOrder(0, countOfItems, result)).build()
                 );
         }
     }
-    
-   int toIntegerGlobalOrder (Object o, int countOfItems, ArrayList<TransactionItem<?, ?, ?, ?>> result) {
+
+    int toIntegerGlobalOrder(Object o, int countOfItems, ArrayList<TransactionItem<?, ?, ?, ?>> result) {
         result.sort(TRANSACTION_ITEM_COMPARATOR);
-	    int ret = 0;
+        int ret = 0;
         if (o instanceof String) {
             val s = (String) o;
             if ("MIN".equals(s))
@@ -132,14 +124,16 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
             else throw new IllegalArgumentException("unknown order token " + s);
         } else if (o instanceof Integer)
             ret = (Integer) o;
-        for (int i=0; i < result.size(); i++) {
-        	if (result.get(i).order() <= ret) {
-        		continue;
-        	}
-        	if (result.get(i).order() == ret+1) {
-        		ret++;
-        	}
+        for (int i = 0; i < result.size(); i++) {
+            if (result.get(i).order() <= ret) {
+                continue;
+            }
+            if (result.get(i).order() == ret + 1) {
+                ret++;
+            }
         }
         return ret;
-    };
+    }
+
+    ;
 }

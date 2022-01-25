@@ -1,7 +1,7 @@
 package com.matthey.pmm.transaction.items;
 
 import com.matthey.pmm.tradebooking.processors.LogTable;
-import com.matthey.pmm.transaction.DebugDefinitionTo;
+import com.matthey.pmm.transaction.DebugShowTo;
 import com.matthey.pmm.transaction.TransactionTo;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.Transaction;
@@ -9,12 +9,12 @@ import lombok.Builder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class DebugItem extends TransactionItem<DebugDefinitionTo, TransactionTo, Transaction, Transaction> {
+public class DebugItem extends TransactionItem<DebugShowTo, TransactionTo, Transaction, Transaction> {
     private static final Logger logger = LogManager.getLogger(TransactionItem.class);
 
     @Builder
-    public DebugItem(int order, DebugDefinitionTo debugDefinition, TransactionTo transaction, Session ocSession, LogTable logTable) {
-        super(order, debugDefinition, transaction, ocSession, logTable, Transaction.class);
+    public DebugItem(int order, DebugShowTo debugShowTo, TransactionTo transaction, Session ocSession, LogTable logTable) {
+        super(order, debugShowTo, transaction, ocSession, logTable, Transaction.class);
     }
 
     @Override
