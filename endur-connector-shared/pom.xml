@@ -108,7 +108,7 @@
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
-            <artifactId>trade-booking-endur-connector</artifactId>
+            <artifactId>trade-booking-implementation</artifactId>
             <version>1.0.0</version>
         </dependency>		
         <dependency>
