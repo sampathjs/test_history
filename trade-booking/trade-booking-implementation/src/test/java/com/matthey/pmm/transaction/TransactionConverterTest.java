@@ -51,11 +51,11 @@ public class TransactionConverterTest {
 
         System.out.println("---------");
 
-        val result = new TransactionConverter(Mockito.mock(LogTable.class)).apply(Mockito.mock(Session.class), tx);
-
-        result.forEach(ti -> System.out.println("" + ti + " " + ti.getClass().getName()));
-
-        new TransactionItemsListExecutor().apply(result);
+//        val result = new TransactionConverter(Mockito.mock(LogTable.class)).apply(Mockito.mock(Session.class), tx);
+//
+//        result.forEach(ti -> System.out.println("" + ti + " " + ti.getClass().getName()));
+//
+//        new TransactionItemsListExecutor().apply(result);
 
     }
 
