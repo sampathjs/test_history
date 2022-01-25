@@ -167,12 +167,22 @@
                 "$ref": "#/$defs/property_global_order_id"
               }
             },
-            "additionalProperties": false
+            "additionalProperties": false,
+            "required": [
+              "global_order_id"
+            ]
           }
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "initialization",
+        "transaction_processing"
+      ]
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "required": [
+    "processing_instruction"
+  ]
 }

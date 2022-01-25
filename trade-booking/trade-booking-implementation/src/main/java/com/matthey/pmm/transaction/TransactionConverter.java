@@ -106,7 +106,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
             val byTemplate = initialization.getByTemplate();
             val byClone = initialization.getByClone();
             if (byTemplate != null && byClone != null)
-                throw new IllegalStateException("only by_template or by_clone must be configured");
+                throw new IllegalStateException("One of by_template or by_clone but not both must be configured");
             if (byTemplate != null)
             	result.add(
                         InitializationByTemplateItem.builder().initializationByTemplate(byTemplate).transaction(transaction).logTable(logTable)
