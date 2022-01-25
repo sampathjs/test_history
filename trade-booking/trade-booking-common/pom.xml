@@ -57,6 +57,12 @@
             <type>jar</type>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.0.66</version>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>

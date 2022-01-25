@@ -1,6 +1,6 @@
 {
   "$id": "https://fintark.com/transaction_booker.schema.json",
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
   "description": "Schema for the transaction that will be accepted and processed by the transaction booking endpoint",
   "$defs": {
     "property_name": {
@@ -71,7 +71,7 @@
       },
       "additionalProperties": false,
       "required": [
-        "template_id"
+        "template_reference"
       ]
     },
     "initialization_by_clone": {
