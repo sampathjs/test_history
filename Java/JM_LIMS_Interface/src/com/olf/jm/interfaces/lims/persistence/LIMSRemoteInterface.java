@@ -20,7 +20,8 @@ import com.olf.openrisk.trading.EnumPlannedMeasureFieldId;
 
 /*
  * History:
- * 2015-09-01	V1.0	jwaechter	-	initial version	
+ * 2015-09-01	V1.0	jwaechter	-	initial version
+ * 2021-12-15	V2.0	Prashanth   -   Remove login to query from Lims Database instead fetch from user tables		
  */
 
 /**
@@ -31,31 +32,22 @@ import com.olf.openrisk.trading.EnumPlannedMeasureFieldId;
 public class LIMSRemoteInterface {
 	private final Session session;
 	private final LIMSServer server;
-	private final ConnectionExternal sampleServer;
-	private final ConnectionExternal resultServer;
 
 	public LIMSRemoteInterface (final Session session, final LIMSServer server) {
 		this.session = session;
 		this.server = server;
-		this.sampleServer = getConnectionExternalSample(server);
-		this.resultServer = getConnectionExternalResult(server);
 	}
 
 	public Table loadSampleIDsFromLims (String batchId, Map<String, String> productsToTests) {
-		String finalSql = getSampleQuery(batchId, productsToTests.keySet());
-		Object[][] sampleResult = sampleServer.query(finalSql);
-		if (sampleResult != null && sampleResult.length != 0) {
-			Table remoteSqlResult = session.getTableFactory().createTable(sampleResult);
-			guardedSetColNameAndTitle(remoteSqlResult, 0, "SAMPLE_NUMBER", "Sample Number");
-			guardedSetColNameAndTitle(remoteSqlResult, 1, "PRODUCT", "Product");
-			guardedSetColNameAndTitle(remoteSqlResult, 2, "JM_BATCH_ID", "Batch ID"); 
-			remoteSqlResult.addColumn("ANALYSIS", EnumColType.String);
-			for (TableRow row : remoteSqlResult.getRows()) {
-				String product = row.getString ("PRODUCT");
+		Table sampleResult = getSampleData( batchId, productsToTests.keySet());
+		if (sampleResult != null && sampleResult.getRowCount()!= 0) {
+			sampleResult.addColumn("analysis", EnumColType.String);
+			for (TableRow row : sampleResult.getRows()) {
+				String product = row.getString ("product");
 				String analysis = productsToTests.get(product);
-				remoteSqlResult.setString("ANALYSIS", row.getNumber(), analysis);
+				sampleResult.setString("analysis", row.getNumber(), analysis);
 			}
-			return remoteSqlResult;
+			return sampleResult;
 		}
 		return session.getTableFactory().createTable("No Results");
 	}
@@ -69,14 +61,14 @@ public class LIMSRemoteInterface {
 	
 	public MeasuresWithSource loadPlannedMeasureDetailsFromLims (String sample, 
 			String batchNum, String analysis, String purity, String brand) {
-		String finalQuery = getResultQuery (sample, analysis);
+		
+		Table resultTable = getResultData(sample, analysis);
 		MeasuresWithSource mws = new MeasuresWithSource (batchNum, purity, brand);
-		Object[][] rawMeasures=resultServer.query(finalQuery);
-		for (Object[] rawMeasure : rawMeasures) {
-			String name=((String)rawMeasure[0]).toUpperCase(); // one or two letters from chemical period table.
-
-			MeasurementUnits unit=MeasurementUnits.valueOf((String)rawMeasure[1]);
-			String formattedEntry= (String)rawMeasure[2];
+		for(TableRow row : resultTable.getRows()){
+			// one or two letters from chemical period table.
+			String name = ((String)row.getValue(resultTable.getColumnId("name"))).toUpperCase() ;
+			MeasurementUnits unit=MeasurementUnits.valueOf((String)row.getValue(resultTable.getColumnId("units")));
+			String formattedEntry= (String)row.getValue(resultTable.getColumnId("formatted_entry"));
 			boolean isNumber = isNumeric (formattedEntry);
 			double value = (isNumber)?Double.parseDouble(formattedEntry):0.0d;
 
@@ -178,4 +170,33 @@ public class LIMSRemoteInterface {
 		}
 		return String.format(rawQuery, batchId, prods.toString());
 	}
+	
+	private Table getResultData(String sample, String analysis) {
+
+		String sql = "Select * from USER_JM_LIMS_RESULT \nWHERE sample_number = '" + sample + "'  AND analysis = '" + analysis + "'";
+		Table resultUT = session.getTableFactory().createTable();
+		resultUT = session.getIOFactory().runSQL(sql);
+		return resultUT;
+	}
+
+	private Table getSampleData(String batchId, Set<String> products) {
+
+		StringBuilder prods = new StringBuilder();
+		boolean first = true;
+		for (String product : products) {
+			if (!first) {
+				prods.append(", ");
+			}
+			prods.append("'");
+			prods.append(product);
+			prods.append("'");
+			first = false;
+		}
+		String sql = "Select * from USER_JM_LIMS_SAMPLES \nWHERE UPPER(jm_batch_id) LIKE ('" + batchId + "') AND product IN ("
+				+ prods.toString() + ")";
+		Table sampleUT = session.getTableFactory().createTable();
+		sampleUT = session.getIOFactory().runSQL(sql);
+		return sampleUT;
+	}
+
 }

@@ -1,15 +1,10 @@
 package com.olf.jm.interfaces.lims.persistence;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
-
 import com.olf.embedded.application.Context;
 import com.olf.jm.interfaces.lims.model.ConfigurationItem;
 import com.olf.jm.interfaces.lims.model.LIMSServer;
-import com.olf.jm.interfaces.lims.model.MeasureDetails;
-import com.olf.jm.interfaces.lims.model.MeasureSource;
 import com.olf.jm.interfaces.lims.model.MeasuresWithSource;
 import com.olf.jm.interfaces.lims.model.MetalProductTestTableCols;
 import com.olf.jm.interfaces.lims.model.OverridableException;
@@ -19,15 +14,18 @@ import com.olf.jm.interfaces.lims.model.RelevantUserTables;
 import com.olf.openjvs.Ask;
 import com.olf.openjvs.OException;
 import com.olf.openjvs.enums.ASK_SELECT_TYPES;
-import com.olf.openjvs.enums.COL_TYPE_ENUM;
 import com.olf.openrisk.scheduling.Nomination;
-import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
-import com.olf.openrisk.trading.EnumPlannedMeasureFieldId;
 import com.olf.jm.logging.Logging;
 import com.openlink.util.misc.TableUtilities;
 
+
+/*
+ * History:
+ * 2015-09-01	V1.0	jwaechter	-	initial version
+ * 2021-12-15	V2.0	Prashanth   -   Remove login to query from Lims Database instead fetch from user tables		
+ */
 
 /**
  * The Class JmBrandProcessor. Used to set the measures for JM brand batches
@@ -162,33 +160,26 @@ public class JmBrandProcessor extends ProcessorBase {
 						.getString(MetalProductTestTableCols.RESULT
 								.getColName()));
 			}
-			samples = remote
-					.loadSampleIDsFromLims(batchNumber, productsToTests);
+			samples = remote.loadSampleIDsFromLims(batchNumber, productsToTests);
 			if (samples.getRowCount() == 0) {
-				return new MeasuresWithSource(batchNumber, purity,
-						RelNomField.BRAND.guardedGetString(getBatch()));
+				return new MeasuresWithSource(batchNumber, purity, RelNomField.BRAND.guardedGetString(getBatch()));
 			}
 			Pair<String, Pair<String, String>> sampleBatchAnalysis = new Pair<>(
-					Integer.toString(samples.getInt("SAMPLE_NUMBER", 0)),
-					new Pair<>(samples.getString("JM_BATCH_ID", 0),
-							samples.getString("ANALYSIS", 0)));
+					samples.getString("sample_number", 0),
+					new Pair<>(samples.getString("jm_batch_id", 0),
+							samples.getString("analysis", 0)));
 
 			if (samples.getRowCount() > 1) {
-				String savedSampleId = (RelNomField.SAMPLE_ID
-						.guardedGetString(getBatch()) != null && !RelNomField.SAMPLE_ID
-						.guardedGetString(getBatch()).trim().equals("")) ? RelNomField.SAMPLE_ID
-						.guardedGetString(getBatch()) : "0";
-				int rowId = samples.find(samples.getColumnId("SAMPLE_NUMBER"),
-						Integer.parseInt(savedSampleId), 0);
+				String savedSampleId = (RelNomField.SAMPLE_ID.guardedGetString(getBatch()) != null
+						&& !RelNomField.SAMPLE_ID.guardedGetString(getBatch()).trim().equals(""))
+								? RelNomField.SAMPLE_ID.guardedGetString(getBatch()) : "0";
+				int rowId = samples.find(samples.getColumnId("sample_number"), "" + Integer.parseInt(savedSampleId), 0);
 				if (rowId == -1) {
 					sampleBatchAnalysis = userSampleSelect(samples, batchNumber);
 				} else {
-					String selectedBatch = samples.getString("JM_BATCH_ID",
-							rowId);
-					String selectedAnalysis = samples.getString("ANALYSIS",
-							rowId);
-					sampleBatchAnalysis = new Pair<>(savedSampleId, new Pair<>(
-							selectedBatch, selectedAnalysis));
+					String selectedBatch = samples.getString("jm_batch_id", rowId);
+					String selectedAnalysis = samples.getString("analysis", rowId);
+					sampleBatchAnalysis = new Pair<>(savedSampleId, new Pair<>(selectedBatch, selectedAnalysis));
 				}
 			}
 			RelNomField.SAMPLE_ID.guardedSet(getBatch(),
@@ -234,14 +225,14 @@ public class JmBrandProcessor extends ProcessorBase {
 			if (Ask.viewTable(askTable, "LIMs Query", ""
 					+ "Please Complete the Following Fields") == 0) {
 				throw new RuntimeException(
-						"Selectio of Samples retrieved by LIMS interface cancelled by User");
+						"Selection of Samples retrieved by LIMS interface cancelled by User");
 			}
 			com.olf.openjvs.Table temp = askTable.getTable("return_value", 1);
 			String selectedSample = temp.getString("ted_str_value", 1);
-			String selectedBatch = samples.getString("JM_BATCH_ID",
-					samples.find(0, Integer.parseInt(selectedSample), 0));
-			String selectedAnalysis = samples.getString("ANALYSIS",
-					samples.find(0, Integer.parseInt(selectedSample), 0));
+			String selectedBatch = samples.getString("jm_batch_id",
+					samples.find(0, selectedSample, 0));
+			String selectedAnalysis = samples.getString("analysis",
+					samples.find(0, selectedSample, 0));
 			return new Pair<>(selectedSample, new Pair<>(selectedBatch,
 					selectedAnalysis));
 		} catch (OException e) {

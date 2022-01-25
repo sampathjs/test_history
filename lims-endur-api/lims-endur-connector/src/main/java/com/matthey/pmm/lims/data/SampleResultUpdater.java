@@ -41,6 +41,7 @@ public class SampleResultUpdater {
     	
     	UserTable userTableJMLimsSamples = session.getIOFactory().getUserTable(USER_TABLE_USER_JM_LIMS_SAMPLES);
 		Table userJMLimsSamples = userTableJMLimsSamples.getTableStructure();
+		Table userJMLimsSamplesToDelete = session.getTableFactory().createTable();
 		
 		UserTable userTableJMLimsResults = session.getIOFactory().getUserTable(USER_TABLE_USER_JM_LIMS_RESULT);
 		Table userJMLimsResults = userTableJMLimsResults.getTableStructure();
@@ -73,6 +74,9 @@ public class SampleResultUpdater {
 				userJMLimsSamples.setString("jm_batch_id", sampleRow, batchId);
 				userJMLimsSamples.setString("sample_number", sampleRow, sampleId);
 				userJMLimsSamples.setString("product", sampleRow, productId);
+				userJMLimsSamples.setDate("last_updated", sampleRow, new java.util.Date());
+				
+				logger.info("Parsing XML for batchId = " + batchId + ", sampleNumber = " + sampleId + ", product = " + productId);
 				
 				//Loop through Test
 				NodeList tests = sample.getElementsByTagName("Test");
@@ -113,8 +117,10 @@ public class SampleResultUpdater {
 		        }
 			}
 			
+			userJMLimsSamplesToDelete.select(userJMLimsSamples, "jm_batch_id, sample_number, product", "[IN.jm_batch_id]  != '0'");
 			// For update messages, get the list of sample numbers to be deleted.
 			userJMLimsResultsToDelete.select(userJMLimsResults, "sample_number", "[IN.sample_number] != '0'");
+			
 		} catch (DOMException e1) {
 			logger.error("DOMException : " + e1.getMessage());
 			status = false;

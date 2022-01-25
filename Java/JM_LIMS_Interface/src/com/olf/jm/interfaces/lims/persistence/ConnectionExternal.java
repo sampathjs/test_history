@@ -12,6 +12,12 @@ import java.util.List;
 
 import com.olf.jm.logging.Logging;
 
+/*
+ * History:
+ * 2015-09-01	V1.0	jwaechter	-	initial version
+ * 2021-12-15	V2.0	Prashanth   -   Initialise logging		
+ */
+
 public class ConnectionExternal {
 	/**
 	 * Full class name of the JDBC driver used to connect to the AS400 remote system.
@@ -30,6 +36,7 @@ public class ConnectionExternal {
 		this.dbName = dbName;
 		this.user = user;
 		this.password = password;
+		Logging.init(this.getClass(), "", "");
 	}
 
 	public Object[][] query (String sql) {

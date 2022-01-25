@@ -1,15 +1,12 @@
 package com.matthey.pmm;
 
 import com.olf.openrisk.application.Application;
-import com.olf.openrisk.application.EnumMessageSeverity;
 import com.olf.openrisk.application.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
