@@ -167,6 +167,7 @@
                 "$ref": "#/$defs/property_global_order_id"
               }
             },
+            "minItems": 1,
             "additionalProperties": false,
             "required": [
               "global_order_id"
