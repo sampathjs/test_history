@@ -187,6 +187,7 @@
                                 <ignoreNonCompile>true</ignoreNonCompile>
                                 <ignoredDependencies>
                                     <dependency>org.springframework*</dependency>
+                                    <dependency>com.matthey.pmm*</dependency>
                                 </ignoredDependencies>
                             </configuration>
                         </execution>
