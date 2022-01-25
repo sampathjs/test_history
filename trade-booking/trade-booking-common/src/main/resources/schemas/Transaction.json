@@ -67,12 +67,12 @@
         "template_reference": {
           "type": "string",
           "description": "the reference of the template"
-        },
-        "required": [
-          "template_id"
-        ]
+        }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "template_id"
+      ]
     },
     "initialization_by_clone": {
       "type": "object",
@@ -80,12 +80,12 @@
         "deal_id": {
           "type": "string",
           "description": "the id of the deal to clone"
-        },
-        "required": [
-          "deal_id"
-        ]
+        }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "required": [
+        "deal_id"
+      ]
     }
   },
   "type": "object",
@@ -111,14 +111,17 @@
               "$ref": "#/$defs/property"
             }
           },
-   		 "reset_properties": {
-         		"type": "array",
-          		"items": {
-           			"$ref": "#/$defs/property"
-           		}
-       		}
-       	},
-        "additionalProperties": false
+          "reset_properties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/property"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "leg_id"
+        ]
       }
     },
     "processing_instruction": {
