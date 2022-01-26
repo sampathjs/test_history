@@ -28,8 +28,7 @@ public class LegPropertyItem extends TransactionItem<PropertyTo, LegTo, Transact
                 Leg newLeg = input.getLegs().addItem();
                 logger.info("Successfully added a new leg to the new transaction.");
             } catch (Exception ex) {
-                String errorMsg = "Error while adding new leg to transaction";
-                logTable.addLogEntry(order, false, errorMsg);
+                String errorMsg = "Error while adding new leg to transaction: ";
                 logException(ex, logger, errorMsg);
                 throw ex;
             }

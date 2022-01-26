@@ -27,7 +27,7 @@ public class ResetPropertyItem extends TransactionItem<PropertyTo, LegTo, Transa
                 Leg newLeg = input.getLegs().addItem();
                 logger.info("Successfully added a new leg to the new transaction.");
             } catch (Exception ex) {
-                super.logException(ex, logger, "Error while adding new leg to transaction: ");
+                logException(ex, logger, "Error while adding new leg to transaction: ");
                 throw ex;
             }
         }
