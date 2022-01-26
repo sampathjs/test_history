@@ -49,6 +49,7 @@ import com.olf.openrisk.table.EnumFormatDouble;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.table.TableFormatter;
+import com.olf.openrisk.table.TableRow;
 import com.olf.openrisk.trading.EnumInsSub;
 import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumReceivePay;
@@ -120,17 +121,17 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 			addhaircut(creditPFEPAData);
 
 			addMtmExposure(creditPFEPAData);
-
+			
 			revalResult.setTable(creditPFEPAData);
 
 		} catch (OpenRiskException e) {
 			String message = "Failed to run sim result: " + e.getMessage();
 			Logging.error(message);
 			throw new OpenRiskException(message);
+		} finally {
+			Logging.info(logPrefix + "JM Credit PFE Party Agreement UDSR - completed in " + (System.currentTimeMillis() - currentTime) + " ms");
+			Logging.close();	
 		}
-
-		Logging.info(logPrefix + "JM Credit PFE Party Agreement UDSR - completed in " + (System.currentTimeMillis() - currentTime) + " ms");
-		Logging.close();
 	}
 
 	private void updateTranAndBaseMTMData(Table creditPFEPAData, Table tranList, ConstTable baseMtM) {
@@ -138,31 +139,30 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		creditPFEPAData.select(tranList, "deal_num, tran_num, ins_num, ins_type, ins_sub_type, start_date, end_date, external_lentity"
 				+ ", tran_type, party_agreement_id", "[IN.deal_num] >= 0");
 
-		ConstTable baseMtMNonCommSwap = baseMtM.createConstView("*", "ins_type !=" + EnumInsType.MetalSwap.getValue()).createConstView("*",
-				"ins_type !=" + EnumInsType.MetalBasisSwap.getValue());
-
-		ConstTable baseMtMCommSwap = baseMtM.createConstView("*",
-				"ins_type ==" + EnumInsType.MetalSwap.getValue() + " OR ins_type ==" + EnumInsType.MetalBasisSwap.getValue());
-
-		creditPFEPAData.select(baseMtMNonCommSwap,
-				"deal_leg->param_seq_num, currency_id->param_currency, " + EnumResultType.BaseMtm.getValue() + "->base_mtm",
-				"[IN.deal_num] == [OUT.deal_num] AND [IN.ins_num] == [OUT.ins_num] AND [IN." + EnumResultType.TranListing.getValue()
-						+ "] == [OUT.tran_num]");
-
-		creditPFEPAData.select(baseMtMCommSwap, "deal_leg->param_seq_num, currency_id->param_currency",
-				"[IN.deal_num] == [OUT.deal_num] AND [IN.ins_num] == [OUT.ins_num]");
-
-		Table commSwap = tf.createTable();
-		commSwap.select(baseMtMCommSwap, "deal_num", "[IN.deal_num] >= 0");
-		commSwap.addColumn("param_seq_num", EnumColType.Int);
-		commSwap.select(baseMtMCommSwap, EnumResultType.BaseMtm.getValue() + "->base_mtm", "[IN.deal_num] == [OUT.deal_num]",
-				"SUM(base_mtm)");
-		creditPFEPAData.select(commSwap, "base_mtm", "[IN.deal_num] == [OUT.deal_num] AND [IN.param_seq_num] == [OUT.param_seq_num]");
+		Table baseMtMtemp = creditPFEPAData.cloneData();
+		baseMtMtemp.select(baseMtM, "deal_leg->param_seq_num, currency_id->param_currency, base_mtm",
+				"[IN.deal_num] == [OUT.deal_num] AND [IN.tran_num] == [OUT.tran_num]");
 		
-		creditPFEPAData.makeDistinct("deal_num, tran_num, ins_num, ins_type, ins_sub_type, start_date, end_date, external_lentity"
-				+ ", param_seq_num, param_currency, pay_receive, base_mtm, party_agreement_id, netting_flag, collateral_agreement"
-				+ ", collateral_valuation_date_seq, next_collateral_call_date, time_to_call_date, tran_type, haircut, mtm_exposure"
-				, "deal_num >=0");
+		Table baseMtMNotForNetting = tf.createTable();
+		baseMtMNotForNetting.select(baseMtMtemp, "*", "[IN.party_agreement_id] != 0 AND [IN.ins_type] !=" + EnumInsType.MetalSwap.getValue()
+				+ " AND [IN.ins_type] !=" + EnumInsType.MetalBasisSwap.getValue());
+		creditPFEPAData.select(baseMtMNotForNetting, "param_seq_num, param_currency, base_mtm",
+				"[IN.deal_num] == [OUT.deal_num] AND [IN.tran_num] == [OUT.tran_num]");
+
+		Table baseMtMForNetting = tf.createTable("baseMtMForNetting");
+		baseMtMForNetting.select(baseMtMtemp, "*", "[IN.party_agreement_id] == 0");
+		baseMtMForNetting.select(baseMtMtemp, "*", "[IN.party_agreement_id] != 0 AND [IN.ins_type] ==" + EnumInsType.MetalSwap.getValue());
+		baseMtMForNetting.select(baseMtMtemp, "*", "[IN.party_agreement_id] != 0 AND [IN.ins_type] ==" + EnumInsType.MetalBasisSwap.getValue());
+		
+		Table baseMTMNettedOnZeroLeg = tf.createTable("baseMTMNettedOnZeroLeg");
+		baseMTMNettedOnZeroLeg.selectDistinct(baseMtMForNetting, "deal_num", "[IN.deal_num] >= 0");
+		baseMTMNettedOnZeroLeg.addColumn("param_seq_num", EnumColType.Int);
+		baseMTMNettedOnZeroLeg.select(baseMtMForNetting, "base_mtm", "[IN.deal_num] == [OUT.deal_num]", "SUM(base_mtm)");
+		
+		creditPFEPAData.select(baseMtMForNetting, "param_seq_num, param_currency",
+				"[IN.deal_num] == [OUT.deal_num] AND [IN.tran_num] == [OUT.tran_num]");
+		creditPFEPAData.select(baseMTMNettedOnZeroLeg, "base_mtm",
+				"[IN.deal_num] == [OUT.deal_num] AND [IN.param_seq_num] == [OUT.param_seq_num]");
 	}
 
 	@Override
@@ -218,8 +218,22 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		// BaseMTM results doesn't include tran numbers hence get from transaction results table
 		Table transactions = prerequisites.getResultsTable().getTable(0, 0).cloneData();
 		transactions.convertColumns("Int[40]");
-		ConstTable baseMtM = transactions.createConstView("deal_num, ins_num, ins_type, disc_idx, proj_idx, deal_leg, currency_id, "
-				+ EnumResultType.TranListing.getValue() + ", " + EnumResultType.BaseMtm.getValue());
+		transactions.setColumnName(transactions.getColumnId("" + EnumResultType.TranListing.getValue()), "tran_num");
+		transactions.setColumnName(transactions.getColumnId("" + EnumResultType.BaseMtm.getValue()), "base_mtm");
+
+		// Work around for FX swap deals in quick credit check mode since Tran listing result is 0 for all rows
+		if (transactions.getRowCount() == 4) {
+			int[] distinctDealNum = transactions.getDistinctValues("deal_num").getColumnValuesAsInt("deal_num");
+			if (distinctDealNum.length == 1 && distinctDealNum[0] == 0) {
+				for (TableRow row : transactions.getRows()) {
+					int value = (int) Math.ceil((double) row.getInt("sort") / 2);
+					row.getCell("tran_num").setInt(value);
+				}
+			}
+		}
+
+		ConstTable baseMtM = transactions
+				.createConstView("deal_num, ins_num, ins_type, disc_idx, proj_idx, deal_leg, currency_id, tran_num, base_mtm");
 		return baseMtM;
 	}
 
@@ -246,6 +260,14 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
 
 		updatePartyAgreementForFxFarLeg(tranList);
+		
+		// Work around for FX swap deals in quick credit check mode
+		if (tranList.getRowCount() == 2 && tranList.getInt("tran_num", 0) == 0) {
+			if(tranList.getInt("ins_type", 0) == EnumInsType.FxInstrument.getValue()) {
+				tranList.setInt("tran_num", 0, tranList.getInt("ins_sub_type", 0) == EnumInsSub.FxNearLeg.getValue() ? 1 : 2);
+				tranList.setInt("tran_num", 1, tranList.getInt("ins_sub_type", 1) == EnumInsSub.FxNearLeg.getValue() ? 1 : 2);
+			}
+		}
 		
 		return tranList;
 	}

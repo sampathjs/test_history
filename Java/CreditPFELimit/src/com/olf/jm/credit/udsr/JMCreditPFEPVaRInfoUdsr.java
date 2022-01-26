@@ -49,6 +49,7 @@ import com.olf.openrisk.table.EnumFormatDouble;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFactory;
 import com.olf.openrisk.table.TableFormatter;
+import com.olf.openrisk.trading.EnumInsSub;
 import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumReceivePay;
 import com.olf.openrisk.trading.EnumToolset;
@@ -318,6 +319,7 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 				EnumTransactionFieldId.ExternalLegalEntity,
 				EnumTransactionFieldId.BuySell,
 				EnumTransactionFieldId.InstrumentId,
+				EnumTransactionFieldId.InstrumentSubType,
 				EnumTransactionFieldId.Toolset,
 				EnumTransactionFieldId.InstrumentType,
 				EnumTransactionFieldId.TransactionType,
@@ -325,8 +327,16 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 				EnumTransactionFieldId.MaturityDate
 		};
 		Table tranList = simUtil.getTranList(transactions, fields);
+		
+		// Work around for FX swap deals in quick credit check mode
+		if (tranList.getRowCount() == 2 && tranList.getInt("tran_num", 0) == 0) {
+			if(tranList.getInt("ins_type", 0) == EnumInsType.FxInstrument.getValue()) {
+				tranList.setInt("tran_num", 0, tranList.getInt("ins_sub_type", 0) == EnumInsSub.FxNearLeg.getValue() ? 1 : 2);
+				tranList.setInt("tran_num", 1, tranList.getInt("ins_sub_type", 1) == EnumInsSub.FxNearLeg.getValue() ? 1 : 2);
+			}
+		}
+		
 		logDebugMsg(logPrefix + "method completed in " + (System.currentTimeMillis() - currentTime) + " ms");
-
 		return tranList;
 	}
 	

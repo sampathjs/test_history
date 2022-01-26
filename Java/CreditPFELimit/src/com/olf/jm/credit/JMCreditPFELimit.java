@@ -155,6 +155,7 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 			int dealNum = transaction.getDealTrackingId();
 			int tranNum = transaction.getTransactionId();
 			int insType = transaction.getInstrumentTypeObject().getId();
+			int insSubType = transaction.getToolset() != EnumToolset.Loandep ? transaction.getInstrumentSubType().getValue() : 0;
 			logDebugMsg(logPrefix + "Processing for deal : " + dealNum);
 			
 			SimulationFactory sf = session.getSimulationFactory();
@@ -163,7 +164,8 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 			Table vaRByTransResult = revalResults.getTable("result", row).createView("*", "id == " + tranNum).asTable();
 			
 			row = revalResults.find(revalResults.getColumnId("result_type"), sf.getResultType(SIM_PARTY_AFREEMENT_UDSR_NAME).getId(), 0);
-			Table partyAgreementUDSR = revalResults.getTable("result", row).createView("*", "deal_num == " + dealNum).asTable();
+			Table partyAgreementUDSR = revalResults.getTable("result", row)
+					.createView("*", "deal_num == " + dealNum + " AND ins_sub_type == " + insSubType).asTable();
 			
 			row = revalResults.find(revalResults.getColumnId("result_type"), sf.getResultType(SIM_VAR_INFO_UDSR_NAME).getId(), 0);
 			Table vaRInfoUDSR = revalResults.getTable("result", row).createView("*", "deal_num == " + dealNum).asTable();
