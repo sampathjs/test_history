@@ -28,7 +28,7 @@ public abstract class TransactionItem<T, C, I, O> implements Function<I, O> {
     public abstract O apply(I input);
 
     public O execute(Object input) {
-        if (Void.class.equals(inputClass) || inputClass.isInstance(input)) {
+        if (Void.class.equals(inputClass) || (input != null && inputClass.isInstance(input))) {
             return apply((I) input);
         }
         throw new IllegalArgumentException("incompatible argument. Expected " + inputClass.getName() + ", got " + input.getClass().getName());

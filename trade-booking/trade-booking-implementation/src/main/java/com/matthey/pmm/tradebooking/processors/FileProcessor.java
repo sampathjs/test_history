@@ -13,6 +13,7 @@ import com.openlink.util.constrepository.ConstRepository;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,6 +76,7 @@ public class FileProcessor {
         List<? extends TransactionItem<?, ?, ?, ?>> transactionAsList;
         try {
             transactionAsList = converter.apply(session, transaction);
+            logger.info(transactionAsList.stream().map(x -> x.toString()).collect(Collectors.joining("\n")));
         } catch (Throwable t) {
             logger.error("Error while generating action plan for transaction in file '" + fullPath + "': " + t.toString());
             for (StackTraceElement ste : t.getStackTrace()) {
