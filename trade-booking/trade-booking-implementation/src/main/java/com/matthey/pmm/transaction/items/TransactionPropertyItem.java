@@ -43,6 +43,7 @@ public class TransactionPropertyItem extends TransactionItem<PropertyTo, Transac
         }
         String msg = "Successfully set tranField '" + item.getName() + "' to new value '" + item.getValue() + "'";
         getLogger().info(msg);
+        logTable.addLogEntry(order, true, msg);
         return input;
     }
 

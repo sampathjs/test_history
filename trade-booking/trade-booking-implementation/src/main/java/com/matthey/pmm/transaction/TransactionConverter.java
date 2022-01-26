@@ -52,7 +52,8 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         buildDebugProcessingInstructions(Session, transaction, countOfItems, result);
 
         buildTransactionProcessingInstructions(Session, transaction, countOfItems, result);
-
+        result.sort(TRANSACTION_ITEM_COMPARATOR);
+        
         logTable.init(result);
         return result;
     }
@@ -92,7 +93,7 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         if (transactionProcessing == null)
             throw new IllegalStateException("No transaction processing instruction defined. Exactly one transaction processing instruction is required.");
         transactionProcessing.forEach(tp ->
-                result.add(TransactionProcessingItem.builder().transactionProcessing(tp).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(0, countOfItems, result)).build())
+                result.add(TransactionProcessingItem.builder().transactionProcessing(tp).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(countOfItems-1, countOfItems, result)).build())
         );
     }
 
