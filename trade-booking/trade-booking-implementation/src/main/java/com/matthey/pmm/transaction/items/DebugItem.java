@@ -10,7 +10,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class DebugItem extends TransactionItem<DebugShowTo, TransactionTo, Transaction, Transaction> {
-    private static final Logger logger = LogManager.getLogger(TransactionItem.class);
+    private static Logger logger = null;
+    
+	private static Logger getLogger () {
+		if (logger == null) {
+			logger = LogManager.getLogger(TransactionItem.class);
+		}
+		return logger;
+	}
 
     @Builder
     public DebugItem(int order, DebugShowTo debugShowTo, TransactionTo transaction, Session ocSession, LogTable logTable) {
@@ -19,15 +26,15 @@ public class DebugItem extends TransactionItem<DebugShowTo, TransactionTo, Trans
 
     @Override
     public Transaction apply(Transaction input) {
-        logger.info("Showing new transaction to user");
+        getLogger().info("Showing new transaction to user");
         boolean success = ocSession.getTradingFactory().viewTransaction(input);
         if (success) {
             String msg = "Successfully showed transaction to user";
-            logger.info(msg);
+            getLogger().info(msg);
             logTable.addLogEntry(order, true, "");
         } else {
             String msg = "Failed to show transaction to user";
-            logger.info(msg);
+            getLogger().error(msg);
             logTable.addLogEntry(order, false, msg);
         }
         return input;

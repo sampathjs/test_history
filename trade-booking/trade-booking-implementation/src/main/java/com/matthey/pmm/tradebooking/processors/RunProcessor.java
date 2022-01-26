@@ -31,7 +31,7 @@ public class RunProcessor {
 	private static final String COL_LAST_UPDATE = "last_update";
 
 	
-	private static final Logger logger = LogManager.getLogger(RunProcessor.class);
+	private static Logger logger = null;
 	private final Session session;
 	private final List<String> filesToProcess;
 	private final String client;
@@ -39,6 +39,13 @@ public class RunProcessor {
 	private final ConstRepository constRepo;
 	private final Table runLogTable;
 	private Table processLogTable;
+	
+	private static Logger getLogger () {
+		if (logger == null) {
+			logger = LogManager.getLogger(RunProcessor.class);
+		}
+		return logger;
+	}
 		
 	public RunProcessor (final Session session, final ConstRepository constRepo,
 			final String client, final List<String> filesToProcess) {
@@ -65,18 +72,18 @@ public class RunProcessor {
 				processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Processing");
 				processLogUserTable.updateRows(processLogTable, COL_RUN_ID + ", " + COL_DEAL_COUNTER);
 				FileProcessor fileProcessor = new FileProcessor(session, constRepo, runId, dealCounter);
-	    		logger.info("Processing file' " + fileNameToProcess + "' now.");
+	    		getLogger().info("Processing file' " + fileNameToProcess + "' now.");
 	    		boolean success = fileProcessor.processFile(fileNameToProcess);
 	    		overallSuccess &= success;
 	    		if (success) {
 		    		runLogTable.setString (COL_STATUS, 0, "Processing deal #" + dealCounter + " finished successfully");
-	    			logger.info("Processing of ' " + fileNameToProcess + "' finished successfully");
+	    			getLogger().info("Processing of ' " + fileNameToProcess + "' finished successfully");
 	    			processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Finished Successfully");
 	    			processLogTable.setInt(COL_DEAL_TRACKING_NUM, dealCounter, fileProcessor.getLatestDealTrackingNum());
 	    		} else {
 		    		runLogTable.setString (COL_STATUS, 0, "Processing deal #" + dealCounter + " failed");
 	    			processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Failed");
-	    			logger.error("Processing of ' " + fileNameToProcess + "' failed");	    			
+	    			getLogger().error("Processing of ' " + fileNameToProcess + "' failed");	    			
 	    		}
 	    		processLogTable.setDate(COL_LAST_UPDATE, dealCounter, new Date());
 				runLogUserTable.updateRows(runLogTable, COL_RUN_ID);

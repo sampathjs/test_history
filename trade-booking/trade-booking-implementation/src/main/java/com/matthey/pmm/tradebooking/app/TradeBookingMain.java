@@ -35,12 +35,19 @@ import com.olf.openrisk.table.EnumColType;
 
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class TradeBookingMain extends AbstractGenericScript {
-    private static Logger logger = LogManager.getLogger(TradeBookingMain.class);
+    private static Logger logger = null;
 	
 	public static final String CONST_REPO_CONTEXT = "DealBooking";
 	public static final String CONST_REPO_SUBCONTEXT = "MainScript";	
 	
 	private ConstRepository constRepo;
+	
+	private static Logger getLogger () {
+		if (logger == null) {
+			logger = LogManager.getLogger(TradeBookingMain.class);
+		}
+		return logger;
+	}
 	
     /**
      * @param context
@@ -57,14 +64,14 @@ public class TradeBookingMain extends AbstractGenericScript {
         		return null;
         	}
         	List<String> files = params.getTable("Files", 0).getRows().stream().map(x -> x.getString("filename")).collect(Collectors.toList());
-        	logger.info("Processing the following files: " + files);
+        	getLogger().info("Processing the following files: " + files);
         	RunProcessor runProcessor = new RunProcessor(session, constRepo, params.getString("Client", 0), files);
         	runProcessor.processRun();
         	return null;    		
     	} catch (Exception ex) {
-    		logger.error("Deal Booking Process Failed: " + ex.toString() + "\n " + ex.getMessage());
+    		getLogger().error("Deal Booking Process Failed: " + ex.toString() + "\n " + ex.getMessage());
     		for (StackTraceElement ste : ex.getStackTrace()) {
-    			logger.error(ste.toString());
+    			getLogger().error(ste.toString());
     		}
     		throw ex;
     	}
@@ -72,63 +79,63 @@ public class TradeBookingMain extends AbstractGenericScript {
     
 	private boolean checkParamTable(ConstTable table) {
 		if (table.getRowCount() != 1) {
-			logger.error("Row count on parameter table is " + table.getRowCount() + " expected is exactly 1");
+			getLogger().error("Row count on parameter table is " + table.getRowCount() + " expected is exactly 1");
 			return false;
 		}
 		if (table.getColumnCount() != 3) {
-			logger.error("Column count on parameter table is " + table.getColumnCount() + " expected is exactly 3");
+			getLogger().error("Column count on parameter table is " + table.getColumnCount() + " expected is exactly 3");
 			return false;
 		}
 		if (!table.isValidColumn("Succeeded")) {
-			logger.error("Column 'Succeeded' on parameter table is not valid");
+			getLogger().error("Column 'Succeeded' on parameter table is not valid");
 			return false;
 		}
 		
 		if (!table.isValidColumn("Files")) {
-			logger.error("Column 'Files' on parameter table is not valid");
+			getLogger().error("Column 'Files' on parameter table is not valid");
 			return false;
 		}
 
 		if (!table.isValidColumn("Client")) {
-			logger.error("Column 'Client' on parameter table is not valid");
+			getLogger().error("Column 'Client' on parameter table is not valid");
 			return false;
 		}
 		
 		if (table.getColumn("Succeeded").getType() != EnumColType.Int) {
-			logger.error("Column 'Succeeded' on parameter table is not of type Int");			
+			getLogger().error("Column 'Succeeded' on parameter table is not of type Int");			
 			return false;
 		}
 
 		if (table.getColumn("Files").getType() != EnumColType.Table) {
-			logger.error("Column 'Files' on parameter table is not of type Table");			
+			getLogger().error("Column 'Files' on parameter table is not of type Table");			
 			return false;
 		}
 
 		if (table.getColumn("Client").getType() != EnumColType.String) {
-			logger.error("Column 'Client' on parameter table is not of type String");			
+			getLogger().error("Column 'Client' on parameter table is not of type String");			
 			return false;
 		}
 
 		if (table.getInt("Succeeded", 0) != 1) {
-			logger.info("Nothing to process as param script did not succeed or was cancelled");
+			getLogger().info("Nothing to process as param script did not succeed or was cancelled");
 			return false;
 		}
 
 		if (!table.getTable("Files", 0).isValidColumn("filename")) {
-			logger.error("Column 'filename' on subtable 'Files' on the parameter table is not valid");			
+			getLogger().error("Column 'filename' on subtable 'Files' on the parameter table is not valid");			
 			return false;
 		}
 
 		if (table.getTable("Files", 0).getColumn("filename").getType() != EnumColType.String) {
-			logger.error("Column 'filename' on subtable 'Files' on the parameter table is not of type String");			
+			getLogger().error("Column 'filename' on subtable 'Files' on the parameter table is not of type String");			
 			return false;
 		}
 		
 		if (table.getTable("Files", 0).getRowCount() == 0) {
-			logger.info("Nothing to process as no files to process have been specifiedin the param script");			
+			getLogger().info("Nothing to process as no files to process have been specifiedin the param script");			
 			return false;
 		}
-		logger.info("Check of parameter table succeeded without issues found");
+		getLogger().info("Check of parameter table succeeded without issues found");
 		return true;
 	}
 
@@ -148,8 +155,7 @@ public class TradeBookingMain extends AbstractGenericScript {
 
 		initLog4J(abOutdir);
 		
-		logger = LogManager.getLogger(TradeBookingMain.class);
-		logger.info("\n\n********************* Start of new run ***************************");
+		getLogger().info("\n\n********************* Start of new run ***************************");
 
 		try {
 			UIManager.setLookAndFeel( // for dialogs that are used in pre process runs
@@ -180,16 +186,15 @@ public class TradeBookingMain extends AbstractGenericScript {
 		LayoutComponentBuilder layoutBuilder = builder.newLayout("PatternLayout")
 		    .addAttribute("pattern", "%d{yyyy-MM-dd HH:mm:ss.SSS}{UTC} [%t] %-5level %logger{36} - %msg%n");
 		ComponentBuilder triggeringPolicy = builder.newComponent("Policies")
-			    .addComponent(builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", "50M"));		
+			    .addComponent(builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", "50M"));
+		
+		
 		appenderBuilder = builder.newAppender("rolling", "RollingFile")
 		    .addAttribute("fileName", abOutdir + "/Logs/trade-booking.log")
 		    .addAttribute("filePattern", abOutdir + "/Logs/trade-booking.%i.log.zip")
 		    .add(layoutBuilder)
 		    .addComponent(triggeringPolicy);
-		    
-		
 		builder.add(appenderBuilder);
-		
 		// create the new logger
 		builder.add( builder.newLogger( "com.matthey.pmm", Level.INFO )
 		    .add( builder.newAppenderRef( "rolling" ) )
@@ -198,5 +203,6 @@ public class TradeBookingMain extends AbstractGenericScript {
 		builder.add( builder.newRootLogger( Level.INFO )
 		    .add( builder.newAppenderRef( "rolling" ) ) );
 		LoggerContext ctx = Configurator.initialize(builder.build());
+		Configurator.setLevel("com.matthey.pmm", Level.INFO);
 	}
 }

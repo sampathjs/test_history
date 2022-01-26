@@ -24,12 +24,19 @@ public class LogTable {
 	private static final String COL_DEAL_COUNTER = "deal_counter";
 	private static final String COL_LAST_UPDATE = "last_update";
 	
-	private static final Logger logger = LogManager.getLogger(LogTable.class);
+	private static Logger logger = null;
 	private final Table logTable;
 	private final Session session;
 	
 	private final int runId;
 	private final int dealCounter;
+	
+	private static Logger getLogger () {
+		if (logger == null) {
+			logger = LogManager.getLogger(LogTable.class);
+		}
+		return logger;
+	}
 	
 	public LogTable (final Session session, final int runId, final int dealCounter) {
 		this.session = session;
