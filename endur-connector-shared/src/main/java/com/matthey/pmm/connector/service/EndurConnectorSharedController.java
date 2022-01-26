@@ -4,20 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.FileAttribute;
 import java.util.Arrays;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matthey.pmm.EndurLoggerFactory;
 import com.matthey.pmm.connector.service.exception.TradeBookingRequestAlreadyExists;
 import com.matthey.pmm.connector.service.exception.TradeBookingRequestErrorWhileProcessing;
 import com.matthey.pmm.connector.service.exception.TradeBookingRequestFileOperationException;
@@ -27,13 +25,11 @@ import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.openlink.util.constrepository.ConstRepository;
 
-import ch.qos.logback.classic.Logger;
-
 @RestController
 @RequestMapping("/shared")
 public class EndurConnectorSharedController {
-    private static final Logger logger = EndurLoggerFactory.getLogger(TradeBookingMain.class);
-
+	private static final Logger logger = LogManager.getLogger(EndurConnectorSharedController.class);
+	
 	private static final String CONTEXT = "EndurConnectorShared";
 	private static final String SUBCONTEXT = "TradeBooking";
 	private static final String VAR_BASE_DIR = "BaseDirectory"; 
@@ -52,7 +48,7 @@ public class EndurConnectorSharedController {
     		@RequestBody String tradeBookingActionPlan) {
         ConstRepository constRepo = initConstRepo(CONTEXT, SUBCONTEXT); 
         File inputFile = saveFileToLocalFolder(clientName, fileName, overwrite, constRepo);
-        RunProcessor rp = new RunProcessor(session,logger, constRepo, clientName, Arrays.asList(inputFile.getPath()));
+        RunProcessor rp = new RunProcessor(session, constRepo, clientName, Arrays.asList(inputFile.getPath()));
         try {
         	rp.processRun(); 
         } catch (Exception ex) {

@@ -6,12 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-
-import ch.qos.logback.classic.Logger;
 
 public class RunProcessor {
 	private static final String USER_TABLE_RUN_LOG = "USER_jm_builder_run_log";
@@ -30,7 +31,7 @@ public class RunProcessor {
 	private static final String COL_LAST_UPDATE = "last_update";
 
 	
-	private final Logger logger;
+	private static final Logger logger = LogManager.getLogger(RunProcessor.class);
 	private final Session session;
 	private final List<String> filesToProcess;
 	private final String client;
@@ -39,10 +40,9 @@ public class RunProcessor {
 	private final Table runLogTable;
 	private Table processLogTable;
 		
-	public RunProcessor (final Session session, final Logger logger, final ConstRepository constRepo,
+	public RunProcessor (final Session session, final ConstRepository constRepo,
 			final String client, final List<String> filesToProcess) {
 		this.session = session;
-		this.logger = logger;
 		this.constRepo = constRepo;
 		this.client = client;
 		this.filesToProcess = new ArrayList<>(filesToProcess);
@@ -64,7 +64,7 @@ public class RunProcessor {
 				runLogUserTable.updateRows(runLogTable, COL_RUN_ID);
 				processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Processing");
 				processLogUserTable.updateRows(processLogTable, COL_RUN_ID + ", " + COL_DEAL_COUNTER);
-				FileProcessor fileProcessor = new FileProcessor(session, constRepo, logger, runId, dealCounter);
+				FileProcessor fileProcessor = new FileProcessor(session, constRepo, runId, dealCounter);
 	    		logger.info("Processing file' " + fileNameToProcess + "' now.");
 	    		boolean success = fileProcessor.processFile(fileNameToProcess);
 	    		overallSuccess &= success;

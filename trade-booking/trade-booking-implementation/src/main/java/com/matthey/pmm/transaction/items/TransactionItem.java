@@ -1,18 +1,17 @@
 package com.matthey.pmm.transaction.items;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.experimental.Accessors;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.function.Function;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.experimental.Accessors;
 
 @AllArgsConstructor
 @Accessors(fluent = true)

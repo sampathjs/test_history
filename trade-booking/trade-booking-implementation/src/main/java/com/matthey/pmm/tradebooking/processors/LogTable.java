@@ -1,11 +1,10 @@
 package com.matthey.pmm.tradebooking.processors;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Stream;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.matthey.pmm.transaction.items.TransactionItem;
 import com.olf.openrisk.application.Session;
@@ -13,8 +12,6 @@ import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
-
-import ch.qos.logback.classic.Logger;
 
 public class LogTable {
     private static final String USER_TABLE_TRADE_LOG = "USER_jm_builder_trade_log";
@@ -27,16 +24,15 @@ public class LogTable {
 	private static final String COL_DEAL_COUNTER = "deal_counter";
 	private static final String COL_LAST_UPDATE = "last_update";
 	
-	private final Logger logger;	
+	private static final Logger logger = LogManager.getLogger(LogTable.class);
 	private final Table logTable;
 	private final Session session;
 	
 	private final int runId;
 	private final int dealCounter;
 	
-	public LogTable (final Session session, final Logger logger, final int runId, final int dealCounter) {
+	public LogTable (final Session session, final int runId, final int dealCounter) {
 		this.session = session;
-		this.logger = logger;
 		this.logTable = session.getTableFactory().createTable("Trade Booking Tool Log Table");
 		this.runId = runId;
 		this.dealCounter = dealCounter;

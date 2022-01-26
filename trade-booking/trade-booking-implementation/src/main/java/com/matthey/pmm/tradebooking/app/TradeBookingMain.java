@@ -6,10 +6,12 @@ import java.util.stream.Collectors;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
-import com.matthey.pmm.EndurLoggerFactory;
 import com.matthey.pmm.tradebooking.processors.RunProcessor;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
@@ -17,14 +19,12 @@ import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
 
-import ch.qos.logback.classic.Logger;
-
 import com.olf.openrisk.table.EnumColType;
 
 
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class TradeBookingMain extends AbstractGenericScript {
-    private static final Logger logger = EndurLoggerFactory.getLogger(TradeBookingMain.class);
+    private static final Logger logger = LogManager.getLogger(TradeBookingMain.class);
 	
 	public static final String CONST_REPO_CONTEXT = "DealBooking";
 	public static final String CONST_REPO_SUBCONTEXT = "MainScript";	
@@ -47,7 +47,7 @@ public class TradeBookingMain extends AbstractGenericScript {
         	}
         	List<String> files = params.getTable("Files", 0).getRows().stream().map(x -> x.getString("filename")).collect(Collectors.toList());
         	logger.info("Processing the following files: " + files);
-        	RunProcessor runProcessor = new RunProcessor(session, logger, constRepo, params.getString("Client", 0), files);
+        	RunProcessor runProcessor = new RunProcessor(session, constRepo, params.getString("Client", 0), files);
         	runProcessor.processRun();
         	return null;    		
     	} catch (Exception ex) {

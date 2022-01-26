@@ -1,6 +1,5 @@
 package com.matthey.pmm.tradebooking.processors;
 
-import ch.qos.logback.classic.Logger;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matthey.pmm.transaction.TransactionConverter;
@@ -15,13 +14,15 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class FileProcessor {
-    private final Logger logger;
+
+public class FileProcessor {	
+	private static final Logger logger = LogManager.getLogger(FileProcessor.class);
 
     private final Session session;
 
-    private boolean firstLine = true;
     private Transaction newDeal = null;
 
     private final int runId;
@@ -32,9 +33,8 @@ public class FileProcessor {
     private LogTable logTable;
     private int currentLine;
 
-    public FileProcessor(final Session session, final ConstRepository constRepo, final Logger logger,
+    public FileProcessor(final Session session, final ConstRepository constRepo,
                          final int runId, final int dealCounter) {
-        this.logger = logger;
         this.session = session;
         this.constRepo = constRepo;
         this.runId = runId;
@@ -54,8 +54,7 @@ public class FileProcessor {
     }
 
     public boolean processFile(String fullPath) {
-        logTable = new LogTable(session, logger, runId, dealCounter);
-        firstLine = true;
+        logTable = new LogTable(session, runId, dealCounter);
         newDeal = null;
 
         ObjectMapper mapper = new ObjectMapper();
