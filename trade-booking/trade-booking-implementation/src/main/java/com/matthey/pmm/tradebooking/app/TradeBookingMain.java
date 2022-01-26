@@ -179,12 +179,15 @@ public class TradeBookingMain extends AbstractGenericScript {
 		// create a rolling file appender
 		LayoutComponentBuilder layoutBuilder = builder.newLayout("PatternLayout")
 		    .addAttribute("pattern", "%d{yyyy-MM-dd HH:mm:ss.SSS}{UTC} [%t] %-5level %logger{36} - %msg%n");
+		ComponentBuilder triggeringPolicy = builder.newComponent("Policies")
+			    .addComponent(builder.newComponent("SizeBasedTriggeringPolicy").addAttribute("size", "50M"));
+		
 		appenderBuilder = builder.newAppender("rolling", "RollingFile")
 		    .addAttribute("fileName", abOutdir + "/Logs/trade-booking.log")
 		    .addAttribute("filePattern", abOutdir + "/Logs/trade-booking.%i.log.zip")
-		    .add(layoutBuilder);
+		    .add(layoutBuilder)
+		    .addComponent(triggeringPolicy);
 		builder.add(appenderBuilder);
-		
 		// create the new logger
 		builder.add( builder.newLogger( "com.matthey.pmm", Level.INFO )
 		    .add( builder.newAppenderRef( "rolling" ) )
