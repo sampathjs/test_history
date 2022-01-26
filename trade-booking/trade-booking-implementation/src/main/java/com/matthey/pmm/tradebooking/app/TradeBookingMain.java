@@ -6,8 +6,19 @@ import java.util.stream.Collectors;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Filter;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.builder.api.AppenderComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilder;
+import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory;
+import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
+import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
@@ -24,7 +35,7 @@ import com.olf.openrisk.table.EnumColType;
 
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class TradeBookingMain extends AbstractGenericScript {
-    private static final Logger logger = LogManager.getLogger(TradeBookingMain.class);
+    private static Logger logger = LogManager.getLogger(TradeBookingMain.class);
 	
 	public static final String CONST_REPO_CONTEXT = "DealBooking";
 	public static final String CONST_REPO_SUBCONTEXT = "MainScript";	
@@ -131,6 +142,13 @@ public class TradeBookingMain extends AbstractGenericScript {
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
+
+
+		String abOutdir = session.getSystemVariable("AB_OUTDIR");
+
+		initLog4J(abOutdir);
+		
+		logger = LogManager.getLogger(TradeBookingMain.class);
 		logger.info("\n\n********************* Start of new run ***************************");
 
 		try {
@@ -145,5 +163,35 @@ public class TradeBookingMain extends AbstractGenericScript {
 		} catch (UnsupportedLookAndFeelException e) {
 			throw new RuntimeException (e);
 		}
+	}
+
+	private void initLog4J(String abOutdir) {
+		ConfigurationBuilder< BuiltConfiguration > builder = ConfigurationBuilderFactory.newConfigurationBuilder();
+		
+		builder.setStatusLevel( Level.INFO);
+		builder.setConfigurationName("RollingBuilder");
+		// create a console appender
+		AppenderComponentBuilder appenderBuilder = builder.newAppender("Stdout", "CONSOLE").addAttribute("target",
+		    ConsoleAppender.Target.SYSTEM_OUT);
+		appenderBuilder.add(builder.newLayout("PatternLayout")
+		    .addAttribute("pattern", "%d{yyyy-MM-dd HH:mm:ss.SSS}{UTC} [%t] %-5level %logger{36} - %msg%n"));
+		builder.add( appenderBuilder );
+		// create a rolling file appender
+		LayoutComponentBuilder layoutBuilder = builder.newLayout("PatternLayout")
+		    .addAttribute("pattern", "%d{yyyy-MM-dd HH:mm:ss.SSS}{UTC} [%t] %-5level %logger{36} - %msg%n");
+		appenderBuilder = builder.newAppender("rolling", "RollingFile")
+		    .addAttribute("fileName", abOutdir + "/Logs/trade-booking.log")
+		    .addAttribute("filePattern", abOutdir + "/Logs/trade-booking.%i.log.zip")
+		    .add(layoutBuilder);
+		builder.add(appenderBuilder);
+		
+		// create the new logger
+		builder.add( builder.newLogger( "com.matthey.pmm", Level.INFO )
+		    .add( builder.newAppenderRef( "rolling" ) )
+		    .addAttribute( "additivity", false ) );
+		
+		builder.add( builder.newRootLogger( Level.INFO )
+		    .add( builder.newAppenderRef( "rolling" ) ) );
+		LoggerContext ctx = Configurator.initialize(builder.build());
 	}
 }
