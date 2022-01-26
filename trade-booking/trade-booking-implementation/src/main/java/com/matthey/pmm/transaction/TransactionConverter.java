@@ -43,11 +43,11 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
 
         val result = new ArrayList<TransactionItem<?, ?, ?, ?>>(countOfItems);
 
+        buildInitializationProcessingInstructions(Session, transaction, countOfItems, result);
+
         buildTransactionPropertyTransactionItems(Session, transaction, countOfItems, result);
 
         buildLegPropertyTransactionItems(Session, transaction, countOfItems, result);
-
-        buildInitializationProcessingInstructions(Session, transaction, countOfItems, result);
 
         buildDebugProcessingInstructions(Session, transaction, countOfItems, result);
 
@@ -90,9 +90,9 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
     private void buildTransactionProcessingInstructions(Session session, TransactionTo transaction, int countOfItems, ArrayList<TransactionItem<?, ?, ?, ?>> result) {
         val transactionProcessing = transaction.getProcessingInstruction().getTransactionProcessing();
         if (transactionProcessing == null)
-            throw new IllegalStateException("no transaction processing instruction defined");
+            throw new IllegalStateException("No transaction processing instruction defined. Exactly one transaction processing instruction is required.");
         transactionProcessing.forEach(tp ->
-                result.add(TransactionProcessingItem.builder().transactionProcessing(tp).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(tp.getGlobalOrderId(), countOfItems, result)).build())
+                result.add(TransactionProcessingItem.builder().transactionProcessing(tp).transaction(transaction).ocSession(session).logTable(logTable).order(toIntegerGlobalOrder(0, countOfItems, result)).build())
         );
     }
 
@@ -133,17 +133,22 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
                 ret = 0;
             else if ("MAX".equals(s))
                 ret = countOfItems;
-            else throw new IllegalArgumentException("unknown order token " + s);
+            else throw new IllegalArgumentException("Unknown order token " + s + " in '" + o.toString() + "'");
         } else if (o instanceof Integer)
             ret = (Integer) o;
+        if (ret >= countOfItems) {
+        	throw new IllegalArgumentException ("Global Order ID " + ret + " in '" + o.toString() + "' is greater than count of items (" + countOfItems + ").");
+        }
         for (int i = 0; i < result.size(); i++) {
             if (result.get(i).order() <= ret) {
                 continue;
             }
             if (result.get(i).order() == ret + 1) {
                 ret++;
+                break;
             }
         }
+        getLogger().info("Action Item '" + o.toString() + "' is going to have order id #" + ret);
         return ret;
     }
 }
