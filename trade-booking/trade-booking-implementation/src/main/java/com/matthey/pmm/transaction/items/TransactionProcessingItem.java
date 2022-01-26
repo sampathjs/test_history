@@ -46,6 +46,7 @@ public class TransactionProcessingItem extends TransactionItem<TransactionProces
         }
         String msg = "Successfully processed deal to new status '" + item.getStatus() + "'";
         getLogger().info(msg);
+        logTable.addLogEntry(order, true, msg);
         return input;
     }
 

@@ -31,7 +31,7 @@ public class DebugItem extends TransactionItem<DebugShowTo, TransactionTo, Trans
         if (success) {
             String msg = "Successfully showed transaction to user";
             getLogger().info(msg);
-            logTable.addLogEntry(order, true, "");
+            logTable.addLogEntry(order, true, msg);
         } else {
             String msg = "Failed to show transaction to user";
             getLogger().error(msg);
