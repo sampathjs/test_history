@@ -11,7 +11,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class InitializationByTemplateItem extends TransactionItem<InitializationByTemplateTo, TransactionTo, Void, Transaction> {
-    private static final Logger logger = LogManager.getLogger(InitializationByCloneItem.class);
+    private static  Logger logger = null;
+    
+	private static Logger getLogger () {
+		if (logger == null) {
+			logger = LogManager.getLogger(InitializationByTemplateItem.class);
+		}
+		return logger;
+	}
 
     @Builder
     public InitializationByTemplateItem(int order, InitializationByTemplateTo initializationByTemplate, TransactionTo transaction, Session ocSession, LogTable logTable) {
@@ -29,16 +36,16 @@ public class InitializationByTemplateItem extends TransactionItem<Initialization
             }
             tranNum = sqlResult.getInt(0, 0);
         } catch (Exception ex) {
-            logException(ex, logger, "Error while executing SQL '" + sql + "': ");
+            logException(ex, getLogger(), "Error while executing SQL '" + sql + "': ");
             throw ex;
         }
         try {
             Transaction cloned = ocSession.getTradingFactory().createTransactionFromTemplate(tranNum);
             logTable.addLogEntry(order, true, "");
-            logger.info("New transaction created from templat #" + tranNum + " having reference '" + item.getTemplateReference() + "'successfully");
+            getLogger().info("New transaction created from templat #" + tranNum + " having reference '" + item.getTemplateReference() + "'successfully");
             return cloned;
         } catch (Exception ex) {
-            logException(ex, logger, "Error while creating transaction from template #" + tranNum + " having reference '" + item.getTemplateReference() + "' : ");
+            logException(ex, getLogger(), "Error while creating transaction from template #" + tranNum + " having reference '" + item.getTemplateReference() + "' : ");
             throw ex;
         }
     }

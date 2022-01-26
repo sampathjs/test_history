@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class TransactionConverter implements BiFunction<Session, TransactionTo, List<? extends TransactionItem<?, ?, ?, ?>>> {
-	private static final Logger logger = LogManager.getLogger(TransactionConverter.class);	
+	private static Logger logger = null;
 	
     private static final Comparator<TransactionItem<?, ?, ?, ?>> TRANSACTION_ITEM_COMPARATOR = (ti1, ti2) -> {
         if (Integer.MIN_VALUE == ti1.order()) return -1;
@@ -26,6 +26,13 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
 
     private final LogTable logTable;
 
+	private static Logger getLogger () {
+		if (logger == null) {
+			logger = LogManager.getLogger(TransactionConverter.class);
+		}
+		return logger;
+	}
+    
     public TransactionConverter(final LogTable logTable) {
         this.logTable = logTable;
     }
@@ -139,6 +146,4 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         }
         return ret;
     }
-
-    ;
 }

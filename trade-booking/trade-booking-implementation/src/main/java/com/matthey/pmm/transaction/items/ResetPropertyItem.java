@@ -12,8 +12,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ResetPropertyItem extends TransactionItem<PropertyTo, LegTo, Transaction, Transaction> {
-    private static final Logger logger = LogManager.getLogger(ResetPropertyItem.class);
+    private static Logger logger = null;
 
+	private static Logger getLogger () {
+		if (logger == null) {
+			logger = LogManager.getLogger(TransactionItem.class);
+		}
+		return logger;
+	}
+    
     @Builder
     public ResetPropertyItem(int order, PropertyTo property, LegTo leg, Session ocSession, LogTable logTable) {
         super(order, property, leg, ocSession, logTable, Transaction.class);
@@ -21,13 +28,13 @@ public class ResetPropertyItem extends TransactionItem<PropertyTo, LegTo, Transa
 
     @Override
     public Transaction apply(Transaction input) {
-        logger.info("Processing command #'" + order + "' - setting a reset definition field");
+        getLogger().info("Processing command #'" + order + "' - setting a reset definition field");
         while (input.getLegCount() < context.getLegId()) {
             try {
                 Leg newLeg = input.getLegs().addItem();
-                logger.info("Successfully added a new leg to the new transaction.");
+                getLogger().info("Successfully added a new leg to the new transaction.");
             } catch (Exception ex) {
-                logException(ex, logger, "Error while adding new leg to transaction: ");
+                logException(ex, getLogger(), "Error while adding new leg to transaction: ");
                 throw ex;
             }
         }
@@ -35,18 +42,18 @@ public class ResetPropertyItem extends TransactionItem<PropertyTo, LegTo, Transa
         Field field = leg.getResetDefinition().getField(item.getName());
         if (field == null) {
             String errorMsg = "The field '" + item.getName() + "' was not found on the reset definition.";
-            logger.error(errorMsg);
+            getLogger().error(errorMsg);
             logTable.addLogEntry(order, false, errorMsg);
             throw new RuntimeException(errorMsg);
         }
         try {
             field.setValue(item.getValue());
         } catch (Exception ex) {
-            logException(ex, logger, "Could not set reset definition field '" + item.getName() + "' to value '" + item.getValue() + "' on leg #" + context.getLegId());
+            logException(ex, getLogger(), "Could not set reset definition field '" + item.getName() + "' to value '" + item.getValue() + "' on leg #" + context.getLegId());
             throw ex;
         }
         String msg = "Successfully set on Leg #'" + context.getLegId() + " the field '" + item.getName() + "' on the reset definition to new value '" + item.getValue() + "'";
-        logger.info(msg);
+        getLogger().info(msg);
         logTable.addLogEntry(order, true, msg);
         return input;
     }

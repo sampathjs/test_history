@@ -11,8 +11,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class InitializationByCloneItem extends TransactionItem<InitializationByCloneTo, TransactionTo, Void, Transaction> {
-    private static final Logger logger = LogManager.getLogger(InitializationByCloneItem.class);
+    private static Logger logger = null;
 
+	private static Logger getLogger () {
+		if (logger == null) {
+			logger = LogManager.getLogger(InitializationByCloneItem.class);
+		}
+		return logger;
+	}
+    
     @Builder
     public InitializationByCloneItem(int order, InitializationByCloneTo initializationByClone, TransactionTo transaction, Session ocSession, LogTable logTable) {
         super(order, initializationByClone, transaction, ocSession, logTable, Void.class);
@@ -28,16 +35,16 @@ public class InitializationByCloneItem extends TransactionItem<InitializationByC
                 throw new RuntimeException(errorMessage);
             }
         } catch (Exception ex) {
-            logException(ex, logger, "Error while executing SQL '" + sql + "': ");
+            logException(ex, getLogger(), "Error while executing SQL '" + sql + "': ");
             throw ex;
         }
         try {
             Transaction cloned = ocSession.getTradingFactory().cloneTransaction(tranNum);
             logTable.addLogEntry(order, true, "");
-            logger.info("New transaction cloned from existing transaction #" + tranNum + " successfully");
+            getLogger().info("New transaction cloned from existing transaction #" + tranNum + " successfully");
             return cloned;
         } catch (Exception ex) {
-            logException(ex, logger, "Error while cloning from transaction #" + tranNum + ": ");
+            logException(ex, getLogger(), "Error while cloning from transaction #" + tranNum + ": ");
             throw ex;
         }
     }
