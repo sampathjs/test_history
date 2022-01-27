@@ -45,10 +45,11 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
 
         buildTransactionProcessingInstructions(session, transaction, orderingState, result);
 
-        result = TransactionItemsUtils.ensureMonotonicallyIncreasingOrder(result);
+        val monotonicallyIncreasingOrderingResult =
+                TransactionItemsUtils.ensureMonotonicallyIncreasingOrder(result);
 
-        logTable.init(result);
-        return result;
+        logTable.init(monotonicallyIncreasingOrderingResult);
+        return monotonicallyIncreasingOrderingResult;
     }
 
     private int calculateCountOfItems(TransactionTo transaction) {
