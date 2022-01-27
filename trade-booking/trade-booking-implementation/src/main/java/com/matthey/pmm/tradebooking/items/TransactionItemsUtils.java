@@ -70,9 +70,7 @@ public class TransactionItemsUtils {
 
         transactionItems.sort((ti1, ti2) -> ti1.order() - ti2.order());
         var order = 0;
-        val iterator = transactionItems.iterator();
-        while (iterator.hasNext()) {
-            val transactionItem = iterator.next();
+        for (T transactionItem : transactionItems) {
             transactionItem.order(order);
             order++;
         }
