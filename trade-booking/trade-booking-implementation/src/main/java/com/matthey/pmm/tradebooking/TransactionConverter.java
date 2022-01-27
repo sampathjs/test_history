@@ -40,20 +40,20 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
     }
 
     @Override
-    public List<? extends TransactionItem<?, ?, ?, ?>> apply(Session Session, TransactionTo transaction) {
+    public List<? extends TransactionItem<?, ?, ?, ?>> apply(Session session, TransactionTo transaction) {
         int countOfItems = calculateCountOfItems(transaction);
 
         val result = new ArrayList<TransactionItem<?, ?, ?, ?>>(countOfItems);
 
-        buildInitializationProcessingInstructions(Session, transaction, countOfItems, result);
+        buildInitializationProcessingInstructions(session, transaction, countOfItems, result);
 
-        buildTransactionPropertyTransactionItems(Session, transaction, countOfItems, result);
+        buildTransactionPropertyTransactionItems(session, transaction, countOfItems, result);
 
-        buildLegPropertyTransactionItems(Session, transaction, countOfItems, result);
+        buildLegPropertyTransactionItems(session, transaction, countOfItems, result);
 
-        buildDebugProcessingInstructions(Session, transaction, countOfItems, result);
+        buildDebugProcessingInstructions(session, transaction, countOfItems, result);
 
-        buildTransactionProcessingInstructions(Session, transaction, countOfItems, result);
+        buildTransactionProcessingInstructions(session, transaction, countOfItems, result);
         result.sort(TRANSACTION_ITEM_COMPARATOR);
         
         logTable.init(result);
@@ -148,7 +148,8 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
             }
             if (result.get(i).order() == ret + 1) {
                 ret++;
-                break;
+            } else {
+            	break;
             }
         }
         getLogger().info("Action Item '" + o.toString() + "' is going to have order id #" + ret);

@@ -1,5 +1,7 @@
 package com.matthey.pmm.tradebooking.app;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,9 +70,10 @@ public class TradeBookingMain extends AbstractGenericScript {
         	return null;    		
     	} catch (Exception ex) {
     		getLogger().error("Deal Booking Process Failed: " + ex.toString() + "\n " + ex.getMessage());
-    		for (StackTraceElement ste : ex.getStackTrace()) {
-    			getLogger().error(ste.toString());
-    		}
+    		StringWriter sw = new StringWriter(4000);
+    		PrintWriter pw = new PrintWriter(sw);
+    		ex.printStackTrace(pw);
+    		logger.error(sw.toString());
     		throw ex;
     	}
     }

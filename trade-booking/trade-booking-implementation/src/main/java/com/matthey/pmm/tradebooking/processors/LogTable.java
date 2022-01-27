@@ -60,7 +60,7 @@ public class LogTable {
 		TableRow row = logTable.addRow();
 		logTable.setInt(COL_RUN_ID, row.getNumber(), runId);
 		logTable.setInt(COL_DEAL_COUNTER, row.getNumber(), dealCounter);
-		logTable.setInt(COL_LINE_NUMBER, row.getNumber(), row.getNumber()+1);
+		logTable.setInt(COL_LINE_NUMBER, row.getNumber(), row.getNumber());
 		logTable.setString(COL_LINE_TEXT, row.getNumber(), logLineRaw);
 		logTable.setString(COL_STATUS, row.getNumber(), "Unprocessed");
 		logTable.setString(COL_MESSAGE, row.getNumber(), "");

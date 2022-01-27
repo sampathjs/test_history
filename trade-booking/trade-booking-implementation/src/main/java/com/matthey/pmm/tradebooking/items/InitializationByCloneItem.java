@@ -27,6 +27,7 @@ public class InitializationByCloneItem extends TransactionItem<InitializationByC
 
     @Override
     public Transaction apply(Void input) {
+        getLogger().info("Processing command #" + order + " - init by cloning existing transaction");
         int tranNum = Integer.parseInt(item.getDealId());
         String sql = "SELECT tran_num FROM ab_tran WHERE deal_tracking_num = " + item.getDealId() + " AND current_flag = 1";
         try (Table sqlResult = ocSession.getIOFactory().runSQL(sql)) {
@@ -40,8 +41,9 @@ public class InitializationByCloneItem extends TransactionItem<InitializationByC
         }
         try {
             Transaction cloned = ocSession.getTradingFactory().cloneTransaction(tranNum);
-            logTable.addLogEntry(order, true, "");
-            getLogger().info("New transaction cloned from existing transaction #" + tranNum + " successfully");
+            String message = "New transaction cloned from existing transaction #" + tranNum + " successfully";
+            logTable.addLogEntry(order, true, message);
+            getLogger().info(message);
             return cloned;
         } catch (Exception ex) {
             logException(ex, getLogger(), "Error while cloning from transaction #" + tranNum + ": ");

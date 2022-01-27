@@ -28,7 +28,7 @@ public class ResetPropertyItem extends TransactionItem<PropertyTo, LegTo, Transa
 
     @Override
     public Transaction apply(Transaction input) {
-        getLogger().info("Processing command #'" + order + "' - setting a reset definition field");
+        getLogger().info("Processing command #" + order + " - setting a reset definition field");
         while (input.getLegCount() < context.getLegId()) {
             try {
                 Leg newLeg = input.getLegs().addItem();

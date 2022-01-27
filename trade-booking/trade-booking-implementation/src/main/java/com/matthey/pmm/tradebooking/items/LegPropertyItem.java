@@ -28,7 +28,7 @@ public class LegPropertyItem extends TransactionItem<PropertyTo, LegTo, Transact
 
     @Override
     public Transaction apply(Transaction input) {
-        getLogger().info("Processing line '" + order + "' - setting a leg value");
+        getLogger().info("Processing command #" + order + " - setting a leg value");
         getLogger().info("On Leg #'" + context.getLegId() + " setting the field '" + item.getName() + "' to new value '" + item.getValue() + "'");
         while (input.getLegCount() < context.getLegId()) {
             try {

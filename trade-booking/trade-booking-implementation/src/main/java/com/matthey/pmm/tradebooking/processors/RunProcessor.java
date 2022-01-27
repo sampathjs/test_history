@@ -1,5 +1,7 @@
 package com.matthey.pmm.tradebooking.processors;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -73,7 +75,19 @@ public class RunProcessor {
 				processLogUserTable.updateRows(processLogTable, COL_RUN_ID + ", " + COL_DEAL_COUNTER);
 				FileProcessor fileProcessor = new FileProcessor(session, constRepo, runId, dealCounter);
 	    		getLogger().info("Processing file' " + fileNameToProcess + "' now.");
-	    		boolean success = fileProcessor.processFile(fileNameToProcess);
+	    		boolean success;
+	    		String failReason = "";
+	    		try {
+		    		success = fileProcessor.processFile(fileNameToProcess);
+	    		} catch (Throwable t) {
+	    			success = false;
+	    			getLogger().error("Error while processing file '" + fileNameToProcess + "': " + t.toString());
+	        		StringWriter sw = new StringWriter(4000);
+	        		PrintWriter pw = new PrintWriter(sw);
+	        		t.printStackTrace(pw);
+	        		logger.error(sw.toString());
+	        		failReason = t.toString();
+	    		}
 	    		overallSuccess &= success;
 	    		if (success) {
 		    		runLogTable.setString (COL_STATUS, 0, "Processing deal #" + dealCounter + " finished successfully");
@@ -82,7 +96,7 @@ public class RunProcessor {
 	    			processLogTable.setInt(COL_DEAL_TRACKING_NUM, dealCounter, fileProcessor.getLatestDealTrackingNum());
 	    		} else {
 		    		runLogTable.setString (COL_STATUS, 0, "Processing deal #" + dealCounter + " failed");
-	    			processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Failed");
+	    			processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Failed. " + failReason);
 	    			getLogger().error("Processing of ' " + fileNameToProcess + "' failed");	    			
 	    		}
 	    		processLogTable.setDate(COL_LAST_UPDATE, dealCounter, new Date());

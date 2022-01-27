@@ -26,7 +26,7 @@ public class DebugItem extends TransactionItem<DebugShowTo, TransactionTo, Trans
 
     @Override
     public Transaction apply(Transaction input) {
-        getLogger().info("Showing new transaction to user");
+        getLogger().info("Processing command #" + order + " - showing transaction to user");
         boolean success = ocSession.getTradingFactory().viewTransaction(input);
         if (success) {
             String msg = "Successfully showed transaction to user";

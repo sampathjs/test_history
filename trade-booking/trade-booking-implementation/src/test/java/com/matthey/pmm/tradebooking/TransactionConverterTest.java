@@ -2,6 +2,8 @@ package com.matthey.pmm.tradebooking;
 
 import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.io.IOFactory;
+
 import lombok.val;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -51,7 +53,11 @@ public class TransactionConverterTest {
 
         System.out.println("---------");
 
-//        val result = new TransactionConverter(Mockito.mock(LogTable.class)).apply(Mockito.mock(Session.class), tx);
+//        LogTable mockLogTable = Mockito.mock(LogTable.class);       
+//        Session mockSession = Mockito.mock(Session.class);
+//        Mockito.when(mockSession.getIOFactory()).thenReturn(Mockito.mock(IOFactory.class));
+//        
+//        val result = new TransactionConverter(mockLogTable).apply(mockSession, tx);
 //
 //        result.forEach(ti -> System.out.println("" + ti + " " + ti.getClass().getName()));
 //

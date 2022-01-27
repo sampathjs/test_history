@@ -28,7 +28,7 @@ public class TransactionProcessingItem extends TransactionItem<TransactionProces
 
     @Override
     public Transaction apply(Transaction input) {
-        getLogger().info("Processing command '" + order + "' categorised as processing (the deal to be booked) to a new status");
+        getLogger().info("Processing command #" + order + " categorised as processing (the deal to be booked) to a new status");
         EnumTranStatus newStatusEnum;
         try {
             newStatusEnum = EnumTranStatus.valueOf(item.getStatus());

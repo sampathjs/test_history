@@ -27,6 +27,7 @@ public class InitializationByTemplateItem extends TransactionItem<Initialization
 
     @Override
     public Transaction apply(Void input) {
+        getLogger().info("Processing command #" + order + " - init by creating from template");
         String sql = "SELECT tran_num FROM ab_tran WHERE reference = '" + item.getTemplateReference() + "' AND current_flag = 1";
         int tranNum;
         try (Table sqlResult = ocSession.getIOFactory().runSQL(sql)) {
@@ -41,8 +42,9 @@ public class InitializationByTemplateItem extends TransactionItem<Initialization
         }
         try {
             Transaction cloned = ocSession.getTradingFactory().createTransactionFromTemplate(tranNum);
-            logTable.addLogEntry(order, true, "");
-            getLogger().info("New transaction created from templat #" + tranNum + " having reference '" + item.getTemplateReference() + "'successfully");
+            String message = "Successfully created new transaction from template #" + tranNum + " having reference '" + item.getTemplateReference() + "'";
+            logTable.addLogEntry(order, true, message);
+            getLogger().info(message);
             return cloned;
         } catch (Exception ex) {
             logException(ex, getLogger(), "Error while creating transaction from template #" + tranNum + " having reference '" + item.getTemplateReference() + "' : ");

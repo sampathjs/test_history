@@ -27,7 +27,7 @@ public class TransactionPropertyItem extends TransactionItem<PropertyTo, Transac
 
     @Override
     public Transaction apply(Transaction input) {
-        getLogger().info("Processing command '" + order + "' - Setting a transaction level field");
+        getLogger().info("Processing command #" + order + " - Setting a transaction level field");
         Field field = input.getField(item.getName());
         if (field == null) {
             String errorMsg = "The field '" + item.getName() + "' was not found on the transaction";
