@@ -136,22 +136,22 @@ public class SampleResultUpdater {
 		}
         
     	if(status) {
-    		status = updateUserTables(userTableJMLimsSamples, userJMLimsSamples, userTableJMLimsResults, userJMLimsResultsToDelete, userJMLimsResults);
+    		status = updateUserTables(userTableJMLimsSamples, userJMLimsSamplesToDelete, userJMLimsSamples, userTableJMLimsResults, userJMLimsResultsToDelete, userJMLimsResults);
     	}
 		
 		logger.info("Method completed");
 		return status ? "Success" : "Failure";
     }
 
-	private boolean updateUserTables(UserTable userTableJMLimsSamples, Table userJMLimsSamples, UserTable userTableJMLimsResults,
-			Table userJMLimsResultsToDelete, Table userJMLimsResults) {
+	private boolean updateUserTables(UserTable userTableJMLimsSamples, Table userJMLimsSamplesToDelete, Table userJMLimsSamples,
+			UserTable userTableJMLimsResults, Table userJMLimsResultsToDelete, Table userJMLimsResults) {
 
 		try {
 			
 			// Delete existing rows from user table
 			logger.info("Rows in user table " + USER_TABLE_USER_JM_LIMS_SAMPLES + " before deletion: " + userTableJMLimsSamples.getRowCount());
 			logger.info("Delete existing rows from user table " + USER_TABLE_USER_JM_LIMS_SAMPLES);
-			userTableJMLimsSamples.deleteMatchingRows(userJMLimsSamples);
+			userTableJMLimsSamples.deleteMatchingRows(userJMLimsSamplesToDelete);
 			logger.info("Rows in user table " + USER_TABLE_USER_JM_LIMS_SAMPLES + " after deletion: " + userTableJMLimsSamples.getRowCount());
 			
 			// Delete existing rows from user table
