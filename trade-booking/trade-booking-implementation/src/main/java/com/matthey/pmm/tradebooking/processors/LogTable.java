@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.matthey.pmm.transaction.items.TransactionItem;
+import com.matthey.pmm.tradebooking.items.TransactionItem;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.EnumColType;

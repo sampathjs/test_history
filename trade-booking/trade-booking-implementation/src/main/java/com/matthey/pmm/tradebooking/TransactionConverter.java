@@ -1,7 +1,9 @@
-package com.matthey.pmm.transaction;
+package com.matthey.pmm.tradebooking;
 
+import com.matthey.pmm.tradebooking.items.*;
 import com.matthey.pmm.tradebooking.processors.LogTable;
-import com.matthey.pmm.transaction.items.*;
+import com.matthey.pmm.tradebooking.LegTo;
+import com.matthey.pmm.tradebooking.TransactionTo;
 import com.olf.openrisk.application.Session;
 import lombok.val;
 

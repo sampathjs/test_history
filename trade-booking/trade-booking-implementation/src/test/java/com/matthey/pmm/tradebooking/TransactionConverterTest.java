@@ -1,4 +1,4 @@
-package com.matthey.pmm.transaction;
+package com.matthey.pmm.tradebooking;
 
 import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;

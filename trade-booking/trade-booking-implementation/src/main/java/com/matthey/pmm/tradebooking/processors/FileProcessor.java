@@ -2,10 +2,10 @@ package com.matthey.pmm.tradebooking.processors;
 
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.matthey.pmm.transaction.TransactionConverter;
-import com.matthey.pmm.transaction.TransactionItemsListExecutor;
-import com.matthey.pmm.transaction.TransactionTo;
-import com.matthey.pmm.transaction.items.TransactionItem;
+import com.matthey.pmm.tradebooking.TransactionConverter;
+import com.matthey.pmm.tradebooking.TransactionItemsListExecutor;
+import com.matthey.pmm.tradebooking.items.TransactionItem;
+import com.matthey.pmm.tradebooking.TransactionTo;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
@@ -32,7 +32,6 @@ public class FileProcessor {
     private final ConstRepository constRepo;
     private boolean executeDebugCommands;
     private LogTable logTable;
-    private int currentLine;
     
 	private static Logger getLogger () {
 		if (logger == null) {
@@ -48,10 +47,10 @@ public class FileProcessor {
         this.runId = runId;
         this.dealCounter = dealCounter;
         try {
-            executeDebugCommands = Boolean.parseBoolean(constRepo.getStringValue("executeDebugCommands", "false"));
+            executeDebugCommands = Boolean.parseBoolean(this.constRepo.getStringValue("executeDebugCommands", "false"));
         } catch (Exception ex) {
-            getLogger().error("Could not read or parse Const Repso entry " + constRepo.getContext()
-                    + "\\" + constRepo.getSubcontext() + "\\executeDebugCommands that is expected to contain the String"
+            getLogger().error("Could not read or parse Const Repso entry " + this.constRepo.getContext()
+                    + "\\" + this.constRepo.getSubcontext() + "\\executeDebugCommands that is expected to contain the String"
                     + " values 'true' or 'false'. Defaulting to false");
             executeDebugCommands = false;
         }
@@ -92,7 +91,7 @@ public class FileProcessor {
             throw t;
         }
         try {
-            executor.apply(transactionAsList);
+            newDeal = executor.apply(transactionAsList);
         } catch (Throwable t) {
             getLogger().error("Error while executing action plan (booking trade) for transaction in file '" + fullPath + "': " + t.toString());
             for (StackTraceElement ste : t.getStackTrace()) {

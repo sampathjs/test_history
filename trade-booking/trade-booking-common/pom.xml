@@ -99,7 +99,7 @@
                 </executions>
                 <configuration>
                     <sourceDirectory>${basedir}/src/main/resources/schemas</sourceDirectory>
-                    <targetPackage>com.matthey.pmm.transaction</targetPackage>
+                    <targetPackage>com.matthey.pmm.tradebooking</targetPackage>
                     <outputDirectory>${basedir}/src-generated/main/java</outputDirectory>
                     <generateBuilders>true</generateBuilders>
                     <useInnerClassBuilders>true</useInnerClassBuilders>

@@ -1,4 +1,4 @@
-package com.matthey.pmm.transaction.items;
+package com.matthey.pmm.tradebooking.items;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

@@ -1,8 +1,8 @@
-package com.matthey.pmm.transaction.items;
+package com.matthey.pmm.tradebooking.items;
 
 import com.matthey.pmm.tradebooking.processors.LogTable;
-import com.matthey.pmm.transaction.TransactionProcessingTo;
-import com.matthey.pmm.transaction.TransactionTo;
+import com.matthey.pmm.tradebooking.TransactionProcessingTo;
+import com.matthey.pmm.tradebooking.TransactionTo;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.trading.EnumTranStatus;
