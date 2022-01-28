@@ -236,12 +236,11 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 				mtmExposure  = dealMtmExposure ;
 				vaRExposure = dealVarExposure;
 			}
-//			exposure = (dealMtmExposure + dealVarExposure) > exposure ? (dealMtmExposure + dealVarExposure) : exposure;
 		}
 		disposeTable(baseMtmExposure);
 
 		// Set Exposure to 0 if cpty is internal LE
-		return isCptyInternalLE(session, extLe) ? new double[] {0.0, 0.0} : new double[] {mtmExposure, vaRExposure};
+		return isCptyInternalLE(session, extLe) ? new double[] {0.0, 0.0} : new double[] {mtmExposure, vaRExposure*-1};
 	}
 
 	@Override
