@@ -22,7 +22,6 @@ import com.olf.openjvs.enums.TRAN_STATUS_ENUM;
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | 001 | 24-Nov-2020 |               | Giriraj Joshi   | Initial version.                                                                |
  * | 002 | 08-Mar-2021 |               | Giriraj Joshi   | EPI-1636. 2 bugs fixed.                                                         |
- * | 002 | 21-May-2021 |               | Arindam Ray     | EPI-1636. bugs fixed.                                                         |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 public class PMMERPTaxReport implements IScript {
@@ -85,102 +84,141 @@ public class PMMERPTaxReport implements IScript {
 					   // Other cashflows we will check the operations.
 					   //    - If Buy then depending on tax rate we will get tax code. If tax rate not defined then if UK is country of the LE then GD else G0.
 					   //    - If Sell then if tax rate not defined and country of LE is not UK then GA, G0 otherwise.
-					   + "\n          ,CASE WHEN p.party_id = 20039 THEN" //If JM PLC then for Buy code is GC else G8
-					   + "\n                CASE WHEN ab.buy_sell = " + BUY_SELL_ENUM.BUY.toInt() + " THEN 'GC'" 
-					   + "\n                     WHEN ab.buy_sell = " + BUY_SELL_ENUM.SELL.toInt()+ " THEN 'G8'"
-					   + "\n                END"
-					   + "\n           ELSE CASE WHEN ab.toolset = " + TOOLSET_ENUM.CASH_TOOLSET.toInt() + " THEN "
-					   + "\n                     CASE WHEN cflow.name IN ('Manual VAT' ,'VAT', 'Transportation','Transfer Charge') THEN 'GF'"
-					   + "\n                          WHEN cflow.name LIKE 'Metal Rentals - %' THEN "
-					   //+ "\n                               CASE WHEN ISNULL (pif.value, 'No') = 'Yes' THEN "
-					   + "\n                               CASE WHEN pr.legal_entity_id = 20039 THEN "
-					   + "\n                                         CASE WHEN ab.buy_sell = " + BUY_SELL_ENUM.SELL.toInt()+ " THEN 'GC'"
-					   + "\n                                              WHEN ab.buy_sell = " + BUY_SELL_ENUM.BUY.toInt() + " THEN 'G8'"  
-					   + "\n                                         END"
-					   + "\n                                    ELSE CASE WHEN (pa.country != 20077 AND ISNULL(abtei.value, 'TBD') = 'TBD') THEN 'GA'"
-					   + "\n                                         ELSE CASE WHEN ab.buy_sell = " + BUY_SELL_ENUM.SELL.toInt()+ " THEN 'G0'"
-					   + "\n                                                   WHEN ab.buy_sell = " + BUY_SELL_ENUM.BUY.toInt() + " THEN 'GD'" 
-					   + "\n                                              END"
+					   + "\n          ,CASE WHEN ab.toolset = " + TOOLSET_ENUM.CASH_TOOLSET.toInt() + " THEN "
+					   + "\n                     CASE WHEN ab.buy_sell = " + BUY_SELL_ENUM.BUY.toInt() + " THEN "
+					   + "\n                               CASE WHEN cflow.name LIKE 'Metal Rentals - %' THEN 'G8'" //For all Buy Metal Rentals code is GC
+					   + "\n                                    ELSE CASE WHEN pa.country = 20077 THEN " //Country is UK
+					   + "\n                                                   CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G3'" 
+					   + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'UK Std Tax' THEN 'G5'" 
+					   + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN " 
+					   + "\n                                                             CASE WHEN cflow.name = 'Transfer Charge' THEN 'G3'" 
+					   + "\n                                                                  WHEN cflow.name = 'VAT' THEN 'G5'" 
+					   + "\n                                                                  WHEN cflow.name = 'Transportation' THEN 'G8'" 
+					   + "\n                                                                  WHEN cflow.name = 'Shipping Charges' THEN 'G8'" 
+					   + "\n                                                             END"
+					   + "\n                                                   END"
+					   + "\n                                              ELSE " //Country other than UK
+					   + "\n                                                   CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G1'"  
+					   + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN 'G1'"
+					   + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'EU Zero Rated' THEN 'G1'" 
+					   + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'G1'"
+					   + "\n                                                   END"
 					   + "\n                                         END"
 					   + "\n                               END"
-					   + "\n                          ELSE CASE WHEN ab.buy_sell = " + BUY_SELL_ENUM.BUY.toInt() + " THEN "
-					   + "\n                                         CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G0'"
-					   + "\n                                              WHEN ISNULL(abtei.value, 'TBD') = 'EU Zero Rated' THEN 'G2'"
-					   + "\n                                              WHEN ISNULL(abtei.value, 'TBD') = 'UK Std Tax' THEN 'G5'"
-					   + "\n                                              WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN 'G4'"
-				       + "\n                                              WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN "
-					   + "\n                                                   CASE WHEN pa.country = 20077 THEN  'GD'"
-				       + "\n                                                        ELSE 'G0'"
-				       + "\n                                                   END"
-				       + "\n                                         END"
-					   + "\n                                    WHEN ab.buy_sell = " + BUY_SELL_ENUM.SELL.toInt() + " THEN "
-					   + "\n                                         CASE WHEN ISNULL(abtei.value, 'TBD') IN ('Zero Rated', 'TBD') THEN "
-					   + "\n                                                   CASE WHEN pa.country != 20077 THEN 'GA'"
-					   + "\n                                                        ELSE 'G0'"
+					   + "\n                          WHEN ab.buy_sell = " + BUY_SELL_ENUM.SELL.toInt() + " THEN "
+					   + "\n                               CASE WHEN cflow.name LIKE 'Metal Rentals - %' THEN 'GC'" //For all Sell Metal Rentals code is G8
+					   + "\n                                    ELSE CASE WHEN pa.country = 20077 THEN " //Country is UK
+					   + "\n                                                   CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G3'" 
+					   + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'GD'" 
+					   + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN " 
+					   + "\n                                                             CASE WHEN cflow.name = 'Manual VAT' THEN 'GF'" 
+					   + "\n                                                                  ELSE 'G1'" 
+					   + "\n                                                             END"
 					   + "\n                                                   END"
-					   + "\n                                              WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN 'G1'"
-				       + "\n                                              ELSE ''"
+					   + "\n                                              ELSE " //Country other than UK
+					   + "\n                                                   CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'GB'"
+					   + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN 'GB'"
+					   + "\n                                                   END"
 					   + "\n                                         END"
-				       + "\n                               END"
+					   + "\n                               END"
 					   + "\n                     END"
-					   //Get tax code for non-Cash deals. Here again driver is the operation
-					   //If Buy - If FX and ComSwap
-					   //            -- If country of LE is not UK then GA.
-					   //            -- If part of JM Group then GC
-					   //            -- For different tax rates, set to different tax codes
-					   //       - If Commodity or Loan Deposit
-					   //            -- If country of LE is not UK then GT
-					   //            -- For different tax rates, set to different tax codes
-					   //If Sell - If no tax rate defined, country of LE is not UK then G0. If part of JM Group then G8. For other cases, G2.
-					   //        - If a tax rate is defined, then set to different tax code depending on the rate defined.
+					   //For Buy operation
 					   + "\n                ELSE CASE WHEN ab.buy_sell = " + BUY_SELL_ENUM.BUY.toInt() + " THEN "
 					   + "\n                               CASE WHEN ab.toolset IN (" + TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt() + "," + TOOLSET_ENUM.FX_TOOLSET.toInt() + ") THEN "
 					   + "\n                                         CASE WHEN pa.country != 20077 THEN 'GA'"
 					   + "\n                                              ELSE CASE WHEN ISNULL (pif.value, 'No') = 'Yes' THEN 'GC'"
-					   + "\n                                                        ELSE CASE WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN 'GD'"
+					   + "\n                                                        ELSE CASE WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN "
+					   + "\n                                                                       CASE WHEN ab.currency IN (53, 54, 55, 56) THEN 'GD' "
+					   + "\n                                                                            ELSE 'GF' "
+					   + "\n                                                                       END"
 				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'Reverse Charge Gold +' THEN 'GR'" 
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'Reverse Charge Gold -' THEN 'G7'"
 				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'GD'"
-				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'GD'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'UK Std Tax' THEN 'GF'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'GF'"
 				       + "\n                                                             END"
 				       + "\n                                                   END"
 				       + "\n                                         END"
-				       + "\n                                    WHEN ab.toolset IN ("  + TOOLSET_ENUM.COMMODITY_TOOLSET.toInt() + "," + TOOLSET_ENUM.LOANDEP_TOOLSET.toInt() + ") THEN "
-				       + "\n                                         CASE WHEN pa.country != 20077 THEN 'GT'"
-					   + "\n                                              ELSE CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'GQ'"
-					   + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'UK Std Tax' THEN 'GX'"
-				       + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'GD'"
+				       + "\n                                    WHEN ab.toolset IN ("  + TOOLSET_ENUM.COMMODITY_TOOLSET.toInt() + ") THEN "
+				       + "\n                                         CASE WHEN pa.country = 20077 THEN "
+					   + "\n                                                   CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G3'"
+					   + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'UK Std Tax' THEN 'G5'"
+				       + "\n                                                        WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'G8'"
 				       + "\n                                                   END"
+					   //+ "\n                                              ELSE CASE WHEN ISNULL(pRegion.value,'') = 'EU' THEN" 
+					   + "\n                                              ELSE CASE WHEN c.geographic_zone = 20004 THEN" 
+				       + "\n                                                             CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G1'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'EU Zero Rated' THEN 'G3'" 
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'G3'"
+					   + "\n                                                             END"
+					   + "\n                                                        ELSE 'G1'" 
+				       + "\n                                                   END"
+				       + "\n                                         END"
+				       + "\n                                    WHEN ab.toolset IN (" + TOOLSET_ENUM.LOANDEP_TOOLSET.toInt() + ") THEN "
+					   + "\n                                         CASE WHEN pa.country = 20077 THEN 'GD' "
+					   + "\n                                              ELSE 'GB'"
 				       + "\n                                         END"
 				       + "\n                               END"
 					   + "\n                          WHEN ab.buy_sell = " + BUY_SELL_ENUM.SELL.toInt()+ " THEN "
-					   + "\n                               CASE WHEN ISNULL(abtei.value, '') = '' THEN "
-					   + "\n                                         CASE WHEN pa.country != 20077 THEN 'G0'"
-					   + "\n                                              ELSE CASE WHEN ISNULL (pif.value, 'No') = 'Yes' THEN 'G2'"
-					   + "\n                                                        ELSE 'G2'"
+					   //When party address is in the UK
+					   + "\n                               CASE WHEN pa.country = 20077 THEN "
+					   + "\n                                         CASE WHEN ISNULL (pif.value, 'No') = 'Yes' THEN 'G8'" //Sell -> UK -> JM Group =  
+					   + "\n                                              ELSE CASE WHEN ab.toolset IN (" + TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt() + "," + TOOLSET_ENUM.FX_TOOLSET.toInt() + ") THEN "
+					   + "\n                                                             CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G4'"
+					   + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'UK Std Tax' THEN 'G5'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'G4'"
+					   + "\n                                                             END"
+					   + "\n                                                        WHEN ab.toolset IN (" + TOOLSET_ENUM.COMMODITY_TOOLSET.toInt() + "," + TOOLSET_ENUM.LOANDEP_TOOLSET.toInt() + ") THEN "
+				       + "\n                                                             CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G3'"
+					   + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'UK Std Tax' THEN 'G5'"
+					   + "\n                                                             END"
 					   + "\n                                                   END"
 					   + "\n                                         END"
-					   + "\n                                    ELSE CASE WHEN abtei.value = 'Zero Rated' THEN 'G0'"
-				       + "\n                                              WHEN abtei.value = 'UK Std Tax' THEN 'G5'"
-				       + "\n                                              WHEN abtei.value = 'EU Zero Rated' THEN 'G2'"
-				       + "\n                                              WHEN abtei.value = 'No Tax' THEN 'G4'"
-				       + "\n                                              WHEN abtei.value = '+Reverse Charge Gold' THEN 'RG'"
-				       + "\n                                              ELSE ''"
-				       + "\n                                         END"
-				       + "\n                               END"
-					   + "\n                          ELSE ' '"
-				       + "\n                     END"
-				       + "\n                END"
+					   //+ "\n                                    ELSE CASE WHEN ISNULL(pRegion.value,'') = 'EU' THEN" 
+					   + "\n                                    ELSE CASE WHEN c.geographic_zone = 20004 THEN" 
+					   + "\n                                                   CASE WHEN ab.toolset IN (" + TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt() + "," + TOOLSET_ENUM.FX_TOOLSET.toInt() + ") THEN "
+					   + "\n                                                             CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G2'"
+					   + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'EU Zero Rated' THEN 'G2'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'Reverse Charge Gold +' THEN 'G2'" 
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'Reverse Charge Gold -' THEN 'G2'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN 'G2'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'G2'"
+					   + "\n                                                             END"
+					   + "\n                                                        WHEN ab.toolset IN (" + TOOLSET_ENUM.COMMODITY_TOOLSET.toInt() + "," + TOOLSET_ENUM.LOANDEP_TOOLSET.toInt() + ") THEN "
+				       + "\n                                                             CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G3'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'EU Zero Rated' THEN 'G3'" 
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'Reverse Charge Gold +' THEN 'G2'" 
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'Reverse Charge Gold -' THEN 'G2'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'G3'"
+					   + "\n                                                             END"
+					   + "\n                                                   END"
+					   + "\n                                              ELSE " 
+					   + "\n                                                   CASE WHEN ab.toolset IN (" + TOOLSET_ENUM.COM_SWAP_TOOLSET.toInt() + "," + TOOLSET_ENUM.FX_TOOLSET.toInt() + ") THEN "
+					   + "\n                                                             CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G0'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'G0'"
+					   + "\n                                                             END"
+					   + "\n                                                        WHEN ab.toolset IN (" + TOOLSET_ENUM.COMMODITY_TOOLSET.toInt() + "," + TOOLSET_ENUM.LOANDEP_TOOLSET.toInt() + ") THEN "
+				       + "\n                                                             CASE WHEN ISNULL(abtei.value, 'TBD') = 'Zero Rated' THEN 'G1'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'No Tax' THEN 'G1'"
+				       + "\n                                                                  WHEN ISNULL(abtei.value, 'TBD') = 'TBD' THEN 'G1'"
+					   + "\n                                                             END"
+					   + "\n                                                   END"
+					   + "\n                                         END"
+					   + "\n                               END"
+					   + "\n                          END"
 					   + "\n           END  as tax_code"
 				       //Net Amount
 					   //Deals with cashflow VAT and Manual VAT have the tax as amount on the deal. To get Net amount we need to multiply by 5 as the rate assumed is 20%.
 				       //For cancelled invoices we need to reverse the sign to show reversal
 					   //Position is obtained from stldoc_details table. If an entry is not present here, we get from historical data. Endur removes entry from this table if a deal is cancelled.
-					   + "\n          ,CASE WHEN cflow.name IN ('VAT', 'Manual VAT') THEN 0.00"
-					   //+ "\n                     CASE WHEN ISNULL(sdit.type_name,ISNULL(sdith.type_name,' ')) IN ('Cancellation VAT Num', 'Cancellation Doc Num') THEN (-1.0 * ISNULL(sdd.para_position,ISNULL(sddh.para_position,0.00)) * 5.0) "
-					   //+ "\n                          ELSE (ISNULL(sdd.para_position, ISNULL(sddh.para_position,0.00)) * 5.0) "
-					   //+ "\n                     END"
+					   + "\n          ,CASE WHEN cflow.name IN ('VAT', 'Manual VAT') THEN "
+					   + "\n                     CASE WHEN ISNULL(sdit.type_name,ISNULL(sdith.type_name,' ')) IN ('Cancellation VAT Num', 'Cancellation Doc Num') THEN (-1.0 * ISNULL(sdd.para_position,ISNULL(sddh.para_position,0.00)) * 5.0) "
+					   + "\n                          ELSE (ISNULL(sdd.para_position, ISNULL(sddh.para_position,0.00)) * 5.0) "
+					   + "\n                     END"
 					   + "\n                ELSE CASE WHEN ISNULL(sdit.type_name,ISNULL(sdith.type_name,' ')) IN ('Cancellation VAT Num', 'Cancellation Doc Num') THEN ( -1.0 * ISNULL(sdd.para_position,ISNULL(sddh.para_position,0.00))) "
-					   + "\n                          ELSE  ISNULL(sdd.para_position, ISNULL(sddh.para_position,0.00)) "
+					   + "\n                          ELSE CASE WHEN ISNULL(abtei.value, 'TBD') = 'Reverse Charge Gold -' THEN ISNULL(sdd.para_position, ISNULL(sddh.para_position,0.00)) * 5.0"
+					   + "\n                                    ELSE ISNULL(sdd.para_position, ISNULL(sddh.para_position,0.00)) "
+					   + "\n                               END"
 					   + "\n                     END"
 					   + "\n           END as net_amount"  
 					   //Tax Amount
@@ -254,7 +292,12 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n        INNER JOIN cflow_type cflow ON cflow.id_number = ab.cflow_type"
 					   //For FX and ComSwap, the pick up deals where metal ccy event dates are between the range specified 
 					   + "\n        INNER JOIN ab_tran_event abte ON abte.tran_num = ab.tran_num "
-					   + "\n                                      AND abte.event_type = " + EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt()	
+					   + "\n                                      AND ( abte.event_type = " + EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt()
+					   + "\n                                            OR (abte.event_type = " + EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt()
+					   + "\n                                                AND  EXISTS(SELECT 1 FROM ab_tran_event_info abteif "
+					   + "\n                                                            WHERE abteif.event_num = abte.event_num"  
+					   + "\n                                                            AND   abteif.type_id = 20002 " 
+					   + "\n                                                            AND   abteif.value = 'Reverse Charge Gold -')))"
 					   + "\n                                      AND abte.currency IN (" + CCY_LIST + ")"			   
 					   + "\n                                      AND (    "
 					   + "\n                                               (ab.toolset IN (" + TOOLSET_ENUM.FX_TOOLSET.toInt() 
@@ -287,6 +330,10 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                                                    )"
 					   + "\n                                               )"
 					   + "\n                                          )"
+					   //LBMA and LPPM are party infos on LE. Region is Party Info on BU.
+					   + "\n        LEFT OUTER JOIN party_info pLBMA ON p.party_id = pLBMA.party_id AND pLBMA.type_id = 20013"
+					   + "\n        LEFT OUTER JOIN party_info pLPPM ON p.party_id = pLPPM.party_id AND pLPPM.type_id = 20020"
+					   //+ "\n        LEFT OUTER JOIN party_info pRegion ON ab.external_bunit = pRegion.party_id AND pRegion.type_id = 20035"
 					   //For FX and ConSwap get invoice date from metal ccy event date
 					   + "\n        LEFT OUTER JOIN ab_tran_event abte_metal_ccy ON abte_metal_ccy.tran_num = ab.tran_num "
 					   + "\n                                                     AND ab.toolset IN (" + TOOLSET_ENUM.FX_TOOLSET.toInt() 
@@ -297,7 +344,7 @@ public class PMMERPTaxReport implements IScript {
 					   + "\n                                                     AND abte_metal_ccy.event_date <= '" + toDate + "'"	
 					   //Join with stldoc_details with cash event type and normal currencies. An outer join is required here as we need to look into history tables later.
 					   + "\n        LEFT OUTER JOIN stldoc_details sdd ON sdd.tran_num = ab.tran_num "
-					   + "\n                                      AND sdd.event_type = " + EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt()
+					   + "\n                                      AND sdd.event_type IN (" + EVENT_TYPE_ENUM.EVENT_TYPE_CASH_SETTLE.toInt()+ ", " + EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt()+ ")"
 					   + "\n                                      AND sdd.settle_ccy IN (" + CCY_LIST + ")"
 				       + "\n                                      AND sdd.event_num = abte.event_num"
 					   + "\n        LEFT OUTER JOIN currency ccy ON ccy.id_number = sdd.settle_ccy "
@@ -386,7 +433,7 @@ public class PMMERPTaxReport implements IScript {
 					   //We have to get documents that were cancelled and not present in the main tables.
 				       //This happens when more than 1 deal were part of an invoice, one of the deal was later cancelled and invoice re-issued
 					   //For Loan Depot and Commodity, invoices generated between the date range specified must be considered
-					   + "\n        LEFT OUTER JOIN stldoc_details_hist sddh ON sddh.tran_num = ab.tran_num AND sddh.event_type = 14" 
+					   + "\n        LEFT OUTER JOIN stldoc_details_hist sddh ON sddh.tran_num = abte.tran_num AND sddh.event_type = 14 AND sddh.event_num = abte.event_num" 
 					   + "\n        LEFT OUTER JOIN stldoc_info_h sdih ON sdih.document_num = sddh.document_num"
 					   + "\n                                           AND  (    (ab.toolset IN  (" + TOOLSET_ENUM.LOANDEP_TOOLSET.toInt() 
 					   + "\n                                                                , " + TOOLSET_ENUM.COMMODITY_TOOLSET.toInt() + ")"
@@ -451,14 +498,12 @@ public class PMMERPTaxReport implements IScript {
 			{
 				
 				returnt.sortCol("isReverseGold");
-	            tblData.select(returnt, "*", "isReverseGold EQ 1");
+	            tblData.select(returnt, "*", "isReverseGold EQ 1 AND tax_amount LT 0.000001");
 	            tblData.addCol("toDelete", COL_TYPE_ENUM.COL_INT);
 	            int colTran = tblData.getColNum("tran_num");
 	            int colDelete = tblData.getColNum("toDelete");
-	            int colTaxAmount = tblData.getColNum("tax_amount");
-	            int colTaxAmountGBP = tblData.getColNum("tax_amount_gbp");
 	            
-	            tblData.group("tran_num, invoice_id");
+	            tblData.group("tran_num, invoice_id, tax_amount");
 	            tblData.sortCol(colTran);
 	            int dataCount = tblData.getNumRows();
 	            for (int i=1; i <= dataCount; i++)
@@ -471,12 +516,13 @@ public class PMMERPTaxReport implements IScript {
 	            	if ((currTran == prevTran) && (currInvoice.equalsIgnoreCase(prevInvoice)))
 	            	{ 
 	            		tblData.setInt(colDelete, i, 1);
-	            		tblData.setDouble(colTaxAmount, i-1, 0.00);
-	            		tblData.setDouble(colTaxAmount, i, 0.00);
-	            		tblData.setDouble(colTaxAmountGBP, i-1, 0.00);
-	            		tblData.setDouble(colTaxAmountGBP, i, 0.00);
+	            		//tblData.setDouble(colTaxAmount, i-1, 0.00);
+	            		//tblData.setDouble(colTaxAmount, i, 0.00);
+	            		//tblData.setDouble(colTaxAmountGBP, i-1, 0.00);
+	            		//tblData.setDouble(colTaxAmountGBP, i, 0.00);
 	            	}
 	            }
+	            tblData.sortCol(colTran);
 				returnt.select(tblData, "*", "tran_num EQ $tran_num AND isReverseGold EQ $isReverseGold");
 				returnt.deleteWhereValue(colDelete, 1);
 				returnt.delCol(colDelete);
