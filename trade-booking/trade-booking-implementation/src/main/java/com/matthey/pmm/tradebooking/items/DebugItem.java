@@ -1,8 +1,8 @@
-package com.matthey.pmm.transaction.items;
+package com.matthey.pmm.tradebooking.items;
 
+import com.matthey.pmm.tradebooking.DebugShowTo;
+import com.matthey.pmm.tradebooking.TransactionTo;
 import com.matthey.pmm.tradebooking.processors.LogTable;
-import com.matthey.pmm.transaction.DebugShowTo;
-import com.matthey.pmm.transaction.TransactionTo;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.Transaction;
 import lombok.Builder;
@@ -11,13 +11,13 @@ import org.apache.logging.log4j.Logger;
 
 public class DebugItem extends TransactionItem<DebugShowTo, TransactionTo, Transaction, Transaction> {
     private static Logger logger = null;
-    
-	private static Logger getLogger () {
-		if (logger == null) {
-			logger = LogManager.getLogger(TransactionItem.class);
-		}
-		return logger;
-	}
+
+    private static Logger getLogger() {
+        if (logger == null) {
+            logger = LogManager.getLogger(TransactionItem.class);
+        }
+        return logger;
+    }
 
     @Builder
     public DebugItem(int order, DebugShowTo debugShowTo, TransactionTo transaction, Session ocSession, LogTable logTable) {
@@ -26,7 +26,7 @@ public class DebugItem extends TransactionItem<DebugShowTo, TransactionTo, Trans
 
     @Override
     public Transaction apply(Transaction input) {
-        getLogger().info("Showing new transaction to user");
+        getLogger().info("Processing command #" + order + " - showing transaction to user");
         boolean success = ocSession.getTradingFactory().viewTransaction(input);
         if (success) {
             String msg = "Successfully showed transaction to user";

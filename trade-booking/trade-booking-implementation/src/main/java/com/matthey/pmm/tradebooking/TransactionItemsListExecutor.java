@@ -1,6 +1,6 @@
-package com.matthey.pmm.transaction;
+package com.matthey.pmm.tradebooking;
 
-import com.matthey.pmm.transaction.items.TransactionItem;
+import com.matthey.pmm.tradebooking.items.TransactionItem;
 import com.olf.openrisk.trading.Transaction;
 
 import lombok.val;

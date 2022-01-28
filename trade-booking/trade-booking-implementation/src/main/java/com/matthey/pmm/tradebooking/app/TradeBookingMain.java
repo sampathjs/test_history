@@ -1,5 +1,7 @@
 package com.matthey.pmm.tradebooking.app;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,7 +11,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.ConsoleAppender;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -20,17 +21,16 @@ import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFact
 import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
+import com.matthey.pmm.tradebooking.processors.RunProcessor;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
-import com.matthey.pmm.tradebooking.processors.RunProcessor;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.ConstTable;
+import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-
-import com.olf.openrisk.table.EnumColType;
 
 
 @ScriptCategory({ EnumScriptCategory.Generic })
@@ -70,9 +70,10 @@ public class TradeBookingMain extends AbstractGenericScript {
         	return null;    		
     	} catch (Exception ex) {
     		getLogger().error("Deal Booking Process Failed: " + ex.toString() + "\n " + ex.getMessage());
-    		for (StackTraceElement ste : ex.getStackTrace()) {
-    			getLogger().error(ste.toString());
-    		}
+    		StringWriter sw = new StringWriter(4000);
+    		PrintWriter pw = new PrintWriter(sw);
+    		ex.printStackTrace(pw);
+    		logger.error(sw.toString());
     		throw ex;
     	}
     }
@@ -171,7 +172,7 @@ public class TradeBookingMain extends AbstractGenericScript {
 		}
 	}
 
-	private void initLog4J(String abOutdir) {
+	private void initLog4J(String abOutdir) {	
 		ConfigurationBuilder< BuiltConfiguration > builder = ConfigurationBuilderFactory.newConfigurationBuilder();
 		
 		builder.setStatusLevel( Level.INFO);
@@ -196,13 +197,13 @@ public class TradeBookingMain extends AbstractGenericScript {
 		    .addComponent(triggeringPolicy);
 		builder.add(appenderBuilder);
 		// create the new logger
-		builder.add( builder.newLogger( "com.matthey.pmm", Level.INFO )
+		builder.add( builder.newLogger( "com.matthey.pmm.tradebooking", Level.INFO )
 		    .add( builder.newAppenderRef( "rolling" ) )
 		    .addAttribute( "additivity", false ) );
 		
 		builder.add( builder.newRootLogger( Level.INFO )
 		    .add( builder.newAppenderRef( "rolling" ) ) );
 		LoggerContext ctx = Configurator.initialize(builder.build());
-		Configurator.setLevel("com.matthey.pmm", Level.INFO);
+		Configurator.setLevel("com.matthey.pmm.tradebooking", Level.INFO);
 	}
 }

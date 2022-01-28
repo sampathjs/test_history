@@ -1,8 +1,8 @@
-package com.matthey.pmm.transaction.items;
+package com.matthey.pmm.tradebooking.items;
 
 import com.matthey.pmm.tradebooking.processors.LogTable;
-import com.matthey.pmm.transaction.PropertyTo;
-import com.matthey.pmm.transaction.TransactionTo;
+import com.matthey.pmm.tradebooking.PropertyTo;
+import com.matthey.pmm.tradebooking.TransactionTo;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
@@ -27,7 +27,7 @@ public class TransactionPropertyItem extends TransactionItem<PropertyTo, Transac
 
     @Override
     public Transaction apply(Transaction input) {
-        getLogger().info("Processing command '" + order + "' - Setting a transaction level field");
+        getLogger().info("Processing command #" + order + " - Setting a transaction level field");
         Field field = input.getField(item.getName());
         if (field == null) {
             String errorMsg = "The field '" + item.getName() + "' was not found on the transaction";

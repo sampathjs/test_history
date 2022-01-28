@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.matthey.pmm.transaction.items.TransactionItem;
+import com.matthey.pmm.tradebooking.items.TransactionItem;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.EnumColType;
@@ -38,9 +38,9 @@ public class LogTable {
 		return logger;
 	}
 	
-	public LogTable (final Session session, final int runId, final int dealCounter) {
+	public LogTable (final Session session, final int runId, final int dealCounter, String filename) {
 		this.session = session;
-		this.logTable = session.getTableFactory().createTable("Trade Booking Tool Log Table");
+		this.logTable = session.getTableFactory().createTable("Run Log Table for " + filename);
 		this.runId = runId;
 		this.dealCounter = dealCounter;
 		logTable.addColumn(COL_RUN_ID, EnumColType.Int);
@@ -60,7 +60,7 @@ public class LogTable {
 		TableRow row = logTable.addRow();
 		logTable.setInt(COL_RUN_ID, row.getNumber(), runId);
 		logTable.setInt(COL_DEAL_COUNTER, row.getNumber(), dealCounter);
-		logTable.setInt(COL_LINE_NUMBER, row.getNumber(), row.getNumber()+1);
+		logTable.setInt(COL_LINE_NUMBER, row.getNumber(), row.getNumber());
 		logTable.setString(COL_LINE_TEXT, row.getNumber(), logLineRaw);
 		logTable.setString(COL_STATUS, row.getNumber(), "Unprocessed");
 		logTable.setString(COL_MESSAGE, row.getNumber(), "");

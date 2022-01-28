@@ -2,6 +2,8 @@ package com.matthey.pmm.connector.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
@@ -10,16 +12,21 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matthey.pmm.connector.service.exception.TradeBookingRequestAlreadyExists;
 import com.matthey.pmm.connector.service.exception.TradeBookingRequestErrorWhileProcessing;
 import com.matthey.pmm.connector.service.exception.TradeBookingRequestFileOperationException;
-import com.matthey.pmm.tradebooking.app.TradeBookingMain;
+import com.matthey.pmm.connector.service.exception.TradeBookingRequestIllegalJsonData;
+import com.matthey.pmm.tradebooking.TransactionTo;
 import com.matthey.pmm.tradebooking.processors.RunProcessor;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
@@ -36,9 +43,33 @@ public class EndurConnectorSharedController {
     
     private final Session session;
 
+    @Autowired
+    @Qualifier ("PrettyFormatter")
+    private ObjectMapper prettyFormatter;
+
     
     public EndurConnectorSharedController(Session session) {
         this.session = session;
+    }
+    
+    @PostMapping("/tradeBookingJson")
+    public int postTradeBookingRequest(@RequestParam String clientName,
+    		@RequestParam String fileName,
+    		@RequestParam boolean overwrite,
+    		@RequestBody TransactionTo tradeBookingActionPlan) {
+    	try {
+        	String asTextFile = prettyFormatter.writeValueAsString(tradeBookingActionPlan);
+        	int dealTrackingNumOfBookedDeal = postTradeBookingRequest (clientName, fileName, overwrite, asTextFile);
+        	return dealTrackingNumOfBookedDeal;
+    	} catch (JsonProcessingException ex) {
+    		String msg = "Error while convertig JSON object for formatted text: " + ex.toString();
+    		logger.error (msg);
+    		StringWriter sw = new StringWriter(4000);
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
+            throw new TradeBookingRequestIllegalJsonData (msg);
+    	}
     }
     
     @PostMapping("/tradeBooking")
@@ -52,7 +83,13 @@ public class EndurConnectorSharedController {
         try {
         	rp.processRun(); 
         } catch (Exception ex) {
-        	throw new TradeBookingRequestErrorWhileProcessing("Error while processing the trade book request: " + ex.toString());
+        	String msg = "Error while processing trade book request " + ex.toString();
+    		logger.error (msg);
+            StringWriter sw = new StringWriter(4000);
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
+        	throw new TradeBookingRequestErrorWhileProcessing(msg);
         }
         Map<String, Integer> bookedDealNums = rp.getBookedDealTrackingNums();
         if (bookedDealNums.isEmpty()) {
@@ -83,10 +120,11 @@ public class EndurConnectorSharedController {
             		StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         } catch (IOException ex) {
         	String msg = "Internal error while processing Trade Booking Request: File Operation Exception";
-        	logger.error(msg + ": " + ex.toString());
-        	for (StackTraceElement ste : ex.getStackTrace()) {
-            	logger.error(ste.toString());        		
-        	}
+    		logger.error (msg);
+            StringWriter sw = new StringWriter(4000);
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            logger.error(sw.toString());
         	throw new TradeBookingRequestFileOperationException(msg);
         }
 		return inputFile;

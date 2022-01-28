@@ -1,0 +1,70 @@
+{
+  "processing_instruction": {
+    "initialization": {
+      "by_template": {
+        "template_reference": "TOMS REFERENCE AVERAGE TRADE"
+      }
+    },
+    "transaction_processing": [
+      {
+        "global_order_id": "MAX",
+        "status": "Validated"
+      }
+    ],
+    "debug_show": [
+      {
+        "global_order_id": 7
+      }
+    ]
+  },
+  "transaction_properties": [
+    {
+      "name": "Reference String",
+      "value": "TOMS Test Deal",
+      "value_type": "string",
+      "global_order_id": 1
+    },
+    {
+      "name": "External Business Unit",
+      "value": "METALOR USA REFINING - BU",
+      "value_type": "string",
+      "global_order_id": 2
+    },
+    {
+      "name": "End User",
+      "value": "METALOR USA REFINING - BU",
+      "value_type": "string",
+      "global_order_id": 3
+    }
+  ],
+  "legs": [
+    {
+      "leg_id": 0,
+      "leg_properties": [
+        {
+          "name": "Fixed / Float",
+          "value": "Fixed",
+          "value_type": "string",
+          "global_order_id": 4
+        },
+        {
+          "name": "Start Date",
+          "value": "24-Dec-2021",
+          "value_type": "string",
+          "global_order_id": 5
+        }
+      ]
+    },
+    {
+      "leg_id": 1,
+      "leg_properties": [
+        {
+          "name": "Start Date",
+          "value": "31-Dec-2021",
+          "value_type": "string",
+          "global_order_id": 6
+        }
+      ]
+    }
+  ]
+}

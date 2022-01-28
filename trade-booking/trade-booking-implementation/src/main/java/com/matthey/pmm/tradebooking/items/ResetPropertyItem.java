@@ -1,8 +1,8 @@
-package com.matthey.pmm.transaction.items;
+package com.matthey.pmm.tradebooking.items;
 
 import com.matthey.pmm.tradebooking.processors.LogTable;
-import com.matthey.pmm.transaction.LegTo;
-import com.matthey.pmm.transaction.PropertyTo;
+import com.matthey.pmm.tradebooking.LegTo;
+import com.matthey.pmm.tradebooking.PropertyTo;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
@@ -28,16 +28,8 @@ public class ResetPropertyItem extends TransactionItem<PropertyTo, LegTo, Transa
 
     @Override
     public Transaction apply(Transaction input) {
-        getLogger().info("Processing command #'" + order + "' - setting a reset definition field");
-        while (input.getLegCount() < context.getLegId()) {
-            try {
-                Leg newLeg = input.getLegs().addItem();
-                getLogger().info("Successfully added a new leg to the new transaction.");
-            } catch (Exception ex) {
-                logException(ex, getLogger(), "Error while adding new leg to transaction: ");
-                throw ex;
-            }
-        }
+        getLogger().info("Processing command #" + order + " - setting a reset definition field");
+        ensureLegCount (input, context.getLegId(), getLogger());
         Leg leg = input.getLeg(context.getLegId());
         Field field = leg.getResetDefinition().getField(item.getName());
         if (field == null) {
