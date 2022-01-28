@@ -2,6 +2,9 @@ package com.matthey.pmm.tradebooking.items;
 
 import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.trading.Leg;
+import com.olf.openrisk.trading.Transaction;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,5 +45,18 @@ public abstract class TransactionItem<T, C, I, O> implements Function<I, O>, Glo
         ex.printStackTrace(pw);
         logger.error(sw.toString());
         logTable.addLogEntry(order, false, headerMessage + ex.toString());
+    }
+    
+    protected void ensureLegCount (Transaction tran, int maxLegId, Logger logger) {
+        while (tran.getLegCount() < maxLegId + 1) { // + 1 because the first leg has ID #0
+        	logger.info("Leg count of #" + tran.getLegCount() + " is insufficient - adding one more leg");
+            try {
+                Leg newLeg = tran.getLegs().addItem();
+                logger.info("Successfully added a new leg to the new transaction.");
+            } catch (Exception ex) {
+                logException(ex, logger, "Error while adding new leg to transaction: ");
+                throw ex;
+            }
+        }
     }
 }

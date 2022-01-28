@@ -38,9 +38,9 @@ public class LogTable {
 		return logger;
 	}
 	
-	public LogTable (final Session session, final int runId, final int dealCounter) {
+	public LogTable (final Session session, final int runId, final int dealCounter, String filename) {
 		this.session = session;
-		this.logTable = session.getTableFactory().createTable("Trade Booking Tool Log Table");
+		this.logTable = session.getTableFactory().createTable("Run Log Table for " + filename);
 		this.runId = runId;
 		this.dealCounter = dealCounter;
 		logTable.addColumn(COL_RUN_ID, EnumColType.Int);

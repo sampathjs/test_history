@@ -30,16 +30,7 @@ public class LegPropertyItem extends TransactionItem<PropertyTo, LegTo, Transact
     public Transaction apply(Transaction input) {
         getLogger().info("Processing command #" + order + " - setting a leg value");
         getLogger().info("On Leg #'" + context.getLegId() + " setting the field '" + item.getName() + "' to new value '" + item.getValue() + "'");
-        while (input.getLegCount() < context.getLegId()) {
-            try {
-                Leg newLeg = input.getLegs().addItem();
-                getLogger().info("Successfully added a new leg to the new transaction.");
-            } catch (Exception ex) {
-                String errorMsg = "Error while adding new leg to transaction: ";
-                logException(ex, getLogger(), errorMsg);
-                throw ex;
-            }
-        }
+        ensureLegCount (input, context.getLegId(), getLogger());
         Leg leg = input.getLeg(context.getLegId());
         Field field = leg.getField(item.getName());
         if (field == null) {

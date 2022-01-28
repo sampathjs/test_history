@@ -64,60 +64,63 @@ public class FileProcessor {
     }
 
     public boolean processFile(String fullPath) {
-        logTable = new LogTable(session, runId, dealCounter);
-        newDeal = null;
+    	try {
+            logTable = new LogTable(session, runId, dealCounter, fullPath);
+            newDeal = null;
 
-        ObjectMapper mapper = new ObjectMapper();
-        TransactionTo transaction = null;
-        try {
-        	getLogger().info("Reading input file '" + fullPath + "' and converting it to JSON Transaction Object");
-            transaction = mapper.readValue(Paths.get(fullPath).toFile(), TransactionTo.class);
-        	getLogger().info("Successfully read input file '" + fullPath + "'. Conversion succeeded");
-        } catch (IOException e) {
-            String message = (e instanceof JsonParseException || e instanceof JsonMappingException) ?
-                    "Error while parsing JSON context of file '" + fullPath + "': " + e.toString() :
-                    "Error while reading file '" + fullPath + "': " + e.toString();
-            getLogger().error(message);
-    		StringWriter sw = new StringWriter(4000);
-    		PrintWriter pw = new PrintWriter(sw);
-    		e.printStackTrace(pw);
-    		logger.error(sw.toString());
-            return false;
-        }
-        TransactionConverter converter = new TransactionConverter(logTable);
-        TransactionItemsListExecutor executor = new TransactionItemsListExecutor();
-        List<? extends TransactionItem<?, ?, ?, ?>> transactionAsList;
-        try {
-            getLogger().info("Converting parsed JSON object");
-            transactionAsList = converter.apply(session, transaction);
-            getLogger().info("Converted parsed JSON object. Parsed Action Plan: ");
-            getLogger().info(transactionAsList.stream().map(x -> x.toString()).collect(Collectors.joining("\n")));
-        } catch (Throwable t) {
-            getLogger().error("Error while generating action plan for transaction in file '" + fullPath + "': " + t.toString());
-    		StringWriter sw = new StringWriter(4000);
-    		PrintWriter pw = new PrintWriter(sw);
-    		t.printStackTrace(pw);
-    		logger.error(sw.toString());
-            return false;
-        }
-        try {
-            getLogger().info("Executing action plan to book deal");
-            newDeal = executor.apply(transactionAsList);
-            getLogger().info("Successfully executed action plan");
-        } catch (Throwable t) {
-            getLogger().error("Error while executing action plan (booking trade) for transaction in file '" + fullPath + "': " + t.toString());
-    		StringWriter sw = new StringWriter(4000);
-    		PrintWriter pw = new PrintWriter(sw);
-    		t.printStackTrace(pw);
-    		logger.error(sw.toString());
-            return false;
-        }
-        getLogger().info("Persisting log table to database");
-        logTable.persistToDatabase();
-        getLogger().info("Successfully persisted log table to database");
-        if (executeDebugCommands) {
-            logTable.showLogTableToUser();
-        }
+            ObjectMapper mapper = new ObjectMapper();
+            TransactionTo transaction = null;
+            try {
+            	getLogger().info("Reading input file '" + fullPath + "' and converting it to JSON Transaction Object");
+                transaction = mapper.readValue(Paths.get(fullPath).toFile(), TransactionTo.class);
+            	getLogger().info("Successfully read input file '" + fullPath + "'. Conversion succeeded");
+            } catch (IOException e) {
+                String message = (e instanceof JsonParseException || e instanceof JsonMappingException) ?
+                        "Error while parsing JSON context of file '" + fullPath + "': " + e.toString() :
+                        "Error while reading file '" + fullPath + "': " + e.toString();
+                getLogger().error(message);
+        		StringWriter sw = new StringWriter(4000);
+        		PrintWriter pw = new PrintWriter(sw);
+        		e.printStackTrace(pw);
+        		logger.error(sw.toString());
+                return false;
+            }
+            TransactionConverter converter = new TransactionConverter(logTable);
+            TransactionItemsListExecutor executor = new TransactionItemsListExecutor();
+            List<? extends TransactionItem<?, ?, ?, ?>> transactionAsList;
+            try {
+                getLogger().info("Converting parsed JSON object");
+                transactionAsList = converter.apply(session, transaction);
+                getLogger().info("Converted parsed JSON object. ");
+            } catch (Throwable t) {
+                getLogger().error("Error while generating action plan for transaction in file '" + fullPath + "': " + t.toString());
+        		StringWriter sw = new StringWriter(4000);
+        		PrintWriter pw = new PrintWriter(sw);
+        		t.printStackTrace(pw);
+        		logger.error(sw.toString());
+                logTable.persistToDatabase();
+                return false;
+            }
+            try {
+                getLogger().info("Executing action plan to book deal");
+                newDeal = executor.apply(transactionAsList);
+                getLogger().info("Successfully executed action plan");
+            } catch (Throwable t) {
+                getLogger().error("Error while executing action plan (booking trade) for transaction in file '" + fullPath + "': " + t.toString());
+        		StringWriter sw = new StringWriter(4000);
+        		PrintWriter pw = new PrintWriter(sw);
+        		t.printStackTrace(pw);
+        		logger.error(sw.toString());
+                return false;
+            }    		
+    	} finally {
+            getLogger().info("Persisting log table to database");
+            logTable.persistToDatabase();
+            getLogger().info("Successfully persisted log table to database");
+            if (executeDebugCommands) {
+                logTable.showLogTableToUser();
+            }    		
+    	}
         return true;
     }
 }

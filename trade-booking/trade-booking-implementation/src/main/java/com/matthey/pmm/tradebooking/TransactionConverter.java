@@ -52,20 +52,6 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         return monotonicallyIncreasingOrderingResult;
     }
 
-    private int calculateCountOfItems(TransactionTo transaction) {
-        int itemCount = 0;
-        for (LegTo leg : transaction.getLegs()) {
-            itemCount += leg.getLegProperties().size();
-            itemCount += leg.getResetProperties().size();
-        }
-        itemCount += transaction.getProcessingInstruction().getDebugShow().size();
-        itemCount += transaction.getProcessingInstruction().getTransactionProcessing().size();
-        itemCount += 1; // initialisation
-        itemCount += transaction.getTransactionProperties().size();
-        return itemCount;
-    }
-
-
     private void buildLegPropertyTransactionItems(Session session, TransactionTo transaction, OrderingState orderingState,
                                                   List<TransactionItem<?, ?, ?, ?>> result) {
         transaction.getLegs().forEach(leg -> {
