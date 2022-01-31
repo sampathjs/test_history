@@ -10,12 +10,13 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
-public class TransactionConverter implements BiFunction<Session, TransactionTo, List<? extends TransactionItem<?, ?, ?, ?>>> {
+public class TransactionConverter implements Function<TransactionTo, List<? extends TransactionItem<?, ?, ?, ?>>> {
     private static Logger logger = null;
 
     private final LogTable logTable;
+    private final Session session;
 
     private static Logger getLogger() {
         if (logger == null) {
@@ -24,12 +25,13 @@ public class TransactionConverter implements BiFunction<Session, TransactionTo, 
         return logger;
     }
 
-    public TransactionConverter(final LogTable logTable) {
+    public TransactionConverter(final Session session, final LogTable logTable) {
+        this.session = session;
         this.logTable = logTable;
     }
 
     @Override
-    public List<? extends TransactionItem<?, ?, ?, ?>> apply(Session session, TransactionTo transaction) {
+    public List<? extends TransactionItem<?, ?, ?, ?>> apply(TransactionTo transaction) {
 
         val orderingState = TransactionItemsUtils.initializeOrderingState(transaction);
 
