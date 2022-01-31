@@ -520,10 +520,8 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 				int payRec = creditPFEPAData.getInt("pay_receive", row);
 				int insType = creditPFEPAData.getInt("ins_type", row);
 				Date nextCallDate = creditPFEPAData.getDate("next_collateral_call_date", row);
-				Date maturityDate = creditPFEPAData.getInt("end_date", row) == 0 ? cf.getDate(creditPFEPAData.getInt("start_date", row))
-						: cf.getDate(creditPFEPAData.getInt("end_date", row));
 				double mtmExposure = 0;
-				if (scenarioDate.after(nextCallDate) && scenarioDate.after(maturityDate)) {
+				if (scenarioDate.after(nextCallDate) ) {
 					mtmExposure = 0;
 				} else if (insType == EnumInsType.MetalSwap.getValue() || insType == EnumInsType.MetalBasisSwap.getValue()) {
 					mtmExposure = Math.max(0.0, haircut * baseMtm);

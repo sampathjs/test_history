@@ -142,9 +142,7 @@ public class JMCreditPFEPVaRInfoUdsr extends AbstractSimulationResult2 {
 			CalendarFactory cf = session.getCalendarFactory();
 			for (int row = 0; row < rowCount; row++) {
 				Date nextCallDate = creditPFEVaRInfo.getDate("next_collateral_call_date", row);
-				Date maturityDate = creditPFEVaRInfo.getInt("end_date", row) == 0 ? cf.getDate(creditPFEVaRInfo.getInt("start_date", row))
-						: cf.getDate(creditPFEVaRInfo.getInt("end_date", row));
-				if (scenarioDate.after(nextCallDate) && scenarioDate.after(maturityDate)) {
+				if (scenarioDate.after(nextCallDate)) {
 					creditPFEVaRInfo.setDouble("delta", row, 0.0);
 					creditPFEVaRInfo.setDouble("gamma", row, 0.0);
 					creditPFEVaRInfo.setDouble("gpt_sigma", row, 0.0);

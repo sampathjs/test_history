@@ -185,7 +185,8 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 			}
 			
 			clientData.setName("Credid PFE WorkSheet");
-			double[] rowExposure = getExposureForDeal(session, vaRByTransResult, partyAgreementUDSR, extLe);
+			int matDateforDeal = transaction.getField(EnumTransactionFieldId.MaturityDate).getValueAsInt();
+			double[] rowExposure = getExposureForDeal(session, vaRByTransResult, partyAgreementUDSR, extLe, matDateforDeal);
 			clientData.addColumn("mtm_info", EnumColType.Table);
 			clientData.addColumn("var_info", EnumColType.Table);
 			clientData.addColumn("var_by_trans", EnumColType.Double);
@@ -217,30 +218,32 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 		return new DealExposure[] { dealExposure };
 	}
 
-	private double[] getExposureForDeal(Session session, Table vaRByTransResult, Table partyAgreementUDSR, int extLe) {
+	private double[] getExposureForDeal(Session session, Table vaRByTransResult, Table partyAgreementUDSR, int extLe, int matDateforDeal) {
 
 		double exposure = 0.0;
 		double mtmExposure = 0.0;
 		double vaRExposure = 0.0;
-		Table baseMtmExposure = partyAgreementUDSR.calcByGroup("deal_num, scenario_id", "mtm_exposure");
-		ConstTable distinctScenarios = partyAgreementUDSR.createConstView("scenario_id").getDistinctValues("scenario_id");
+		ConstTable partyAgreementUDSRForDeal = partyAgreementUDSR.createConstView("*", "scenario_date <= " + matDateforDeal);
+		ConstTable vaRByTransResultForDeal = vaRByTransResult.createConstView("*", "scenario_date <= " + matDateforDeal);
+		Table baseMtmExposure = partyAgreementUDSRForDeal.calcByGroup("deal_num, scenario_id", "mtm_exposure");
+		ConstTable distinctScenarios = partyAgreementUDSRForDeal.createConstView("scenario_id").getDistinctValues("scenario_id");
 		int numOfScenarios = distinctScenarios.getRowCount();
 		for (int scenarioRow = 0; scenarioRow < numOfScenarios; scenarioRow++) {
 			int scenarioId = distinctScenarios.getInt("scenario_id", scenarioRow);
 			int row = baseMtmExposure.find(baseMtmExposure.getColumnId("scenario_id"), scenarioId, 0);
 			double dealMtmExposure = row < 0 ? 0.0 : baseMtmExposure.getDouble("Sum mtm_exposure", row);
-			row = vaRByTransResult.find(vaRByTransResult.getColumnId("scenario_id"), scenarioId, 0);
-			double dealVarExposure = row < 0 ? 0.0 : vaRByTransResult.getDouble("result", row);
-			if((dealMtmExposure + dealVarExposure) > exposure) {
+			row = vaRByTransResultForDeal.find(vaRByTransResultForDeal.getColumnId("scenario_id"), scenarioId, 0);
+			double dealVarExposure = row < 0 ? 0.0 : vaRByTransResultForDeal.getDouble("result", row) * -1;
+			if ((dealMtmExposure + dealVarExposure) > exposure) {
 				exposure = dealMtmExposure + dealVarExposure;
-				mtmExposure  = dealMtmExposure ;
+				mtmExposure = dealMtmExposure;
 				vaRExposure = dealVarExposure;
 			}
 		}
 		disposeTable(baseMtmExposure);
 
 		// Set Exposure to 0 if cpty is internal LE
-		return isCptyInternalLE(session, extLe) ? new double[] {0.0, 0.0} : new double[] {mtmExposure, vaRExposure*-1};
+		return isCptyInternalLE(session, extLe) ? new double[] { 0.0, 0.0 } : new double[] { mtmExposure, vaRExposure };
 	}
 
 	@Override
@@ -258,8 +261,9 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 			
 			SimulationFactory sf = session.getSimulationFactory();
 			Simulation sim = sf.retrieveSimulation(CM_EXP_ARG_SAVED_SIM_VALUE);
+			Date collCallDate = getCollCallDate(session, transactions, sim);
 			
-			results = runSimulation(session, sim, transactions); 
+			results = runSimulation(session, sim, transactions, collCallDate); 
 			
 			Table partyAgreementUDSR = tf.createTable("Party Agreement Info");
 			Table vaRInfoUDSR = tf.createTable("VaR Info");
@@ -267,21 +271,31 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 			int numOfScenarios = results.getCount();
 			for(int scenarioId = 1; scenarioId <= numOfScenarios; scenarioId++) {
 				RevalResults scenarioResults = results.getScenarioResults(scenarioId);
+				Date scenarioDate = getScenarioDateForScenario(sim, scenarioId); 
+				int scenarioDateJd = cf.getJulianDate(scenarioDate);
 				
 				Table partyAgreementUDSRForScenario = getPartyAgreementUDSR(sf, scenarioResults).asTable();
 				partyAgreementUDSRForScenario.addColumn("scenario_id", EnumColType.Int);
+				partyAgreementUDSRForScenario.addColumn("scenario_date", EnumColType.Int);
 				partyAgreementUDSRForScenario.setColumnValues(partyAgreementUDSRForScenario.getColumnId("scenario_id"), scenarioId);
+				partyAgreementUDSRForScenario.setColumnValues(partyAgreementUDSRForScenario.getColumnId("scenario_date"), scenarioDateJd);
 				partyAgreementUDSR.select(partyAgreementUDSRForScenario, "*", "scenario_id > -1");
 				
 				Table vaRInfoUDSRForScenario = getVaRInfoUDSR(sf, scenarioResults).asTable();
 				vaRInfoUDSRForScenario.addColumn("scenario_id", EnumColType.Int);
+				vaRInfoUDSRForScenario.addColumn("scenario_date", EnumColType.Int);
 				vaRInfoUDSRForScenario.setColumnValues(vaRInfoUDSRForScenario.getColumnId("scenario_id"), scenarioId);
+				vaRInfoUDSRForScenario.setColumnValues(vaRInfoUDSRForScenario.getColumnId("scenario_date"), scenarioDateJd);
 				vaRInfoUDSR.select(vaRInfoUDSRForScenario, "*", "scenario_id > -1");
 				
-				Table vaRByTransResultForScenario = getVaRByTransResultForAllIns(sf, scenarioResults);
-				vaRByTransResultForScenario.addColumn("scenario_id", EnumColType.Int);
-				vaRByTransResultForScenario.setColumnValues(vaRByTransResultForScenario.getColumnId("scenario_id"), scenarioId);
-				vaRByTransResult.select(vaRByTransResultForScenario, "*", "scenario_id > -1");
+				if (isVaRByTransResultRequiredForScenario(transactions, collCallDate, scenarioDate)) {
+					Table vaRByTransResultForScenario = getVaRByTransResultForAllIns(sf, scenarioResults);
+					vaRByTransResultForScenario.addColumn("scenario_id", EnumColType.Int);
+					vaRByTransResultForScenario.addColumn("scenario_date", EnumColType.Int);
+					vaRByTransResultForScenario.setColumnValues(vaRByTransResultForScenario.getColumnId("scenario_id"), scenarioId);
+					vaRByTransResultForScenario.setColumnValues(vaRByTransResultForScenario.getColumnId("scenario_date"), scenarioDateJd);
+					vaRByTransResult.select(vaRByTransResultForScenario, "*", "scenario_id > -1");
+				}
 			}
 			
 			extrapolateResultsForOtherScenarios(sim, transactions, partyAgreementUDSR, vaRInfoUDSR, vaRByTransResult);
@@ -307,7 +321,20 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 		return revalResults;
 	}
 
-	private SimResults runSimulation(Session session, Simulation sim, Transactions transactions) {
+	private Date getScenarioDateForScenario(Simulation sim, int scenarioId) {
+		
+		Scenario scenario = sim.getScenario(scenarioId);
+		Configuration scenarioDateCfg = scenario.getConfigurations().find(EnumConfiguration.Date, "Scenario Date");
+		Date scenarioDate = scenarioDateCfg == null ? cf.createSymbolicDate("0cd").evaluate()
+				: scenarioDateCfg.getFields().getField("Modified Scenario Date").getValueAsDate();
+		return scenarioDate;
+	}
+
+	private boolean isVaRByTransResultRequiredForScenario(Transactions transactions, Date collCallDate, Date scenarioDate) {
+		return transactions.getCount() <= 2 && CM_EXP_ARG_SIM_PERFORMANCE_MODE_VALUE == 0 && scenarioDate.after(collCallDate) ? false : true;
+	}
+
+	private SimResults runSimulation(Session session, Simulation sim, Transactions transactions, Date collCallDate) {
 
 		SimResults results = null;
 		String logPrefix = CLASSNAME + ".runSimulation() : ";
@@ -315,13 +342,14 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 		//for other toolsets remove Scenarios with scenario date greater tgab Next Collateral Call Date Or Maturity Date 
 		Transaction transaction = getTransaction(transactions); 
 		long currentTimeSim = System.currentTimeMillis();
+		
 		if (transactions.getCount() > 2 || CM_EXP_ARG_SIM_PERFORMANCE_MODE_VALUE == 0) {
 			// Running in Batch mode so run default sim definition with all scenarios.
 			Logging.info(logPrefix + "Run revaluation for the simulation definition " + sim.getName() + " with "
 					+ sim.getScenarios().getCount() + " scenarios");
 			results = sim.run(transactions);
 		} else {
-			removeUnwantedScenarios(session, sim, transactions);
+			removeUnwantedScenarios(session, sim, transactions, collCallDate);
 			if ((transaction.getToolset() == EnumToolset.Fx || transaction.getToolset() == EnumToolset.Cash)
 					&& CM_EXP_ARG_SIM_PERFORMANCE_MODE_VALUE == 2) {
 				Simulation simCopy = sim.clone();
@@ -340,6 +368,21 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 				+ (System.currentTimeMillis() - currentTimeSim) + " ms");
 		
 		return results;
+	}
+
+	private Date getCollCallDate(Session session, Transactions transactions, Simulation sim) {
+
+		Transaction transaction = getTransaction(transactions);
+		int partyAgreementId = transaction.getField(EnumTransactionFieldId.PartyAgreement).getValueAsInt();
+		Date matDate = getLastMatDate(session, transactions, sim.getScenario(1).getCurrency());
+		// Assumption: all scenarios have same currency.
+		Date collCallDate = getCollCallDateFromPA(session, partyAgreementId, sim.getScenario(1).getCurrency());
+		collCallDate = matDate == null ? collCallDate
+				: (collCallDate == null ? matDate : (matDate.before(collCallDate) ? matDate : collCallDate));
+		if (collCallDate == null) {
+			Logging.warn("Invalid collateral call date. Credit check will be run for all scenarios");
+		}
+		return collCallDate;
 	}
 
 	private Transaction getTransaction(Transactions transactions) {
@@ -380,28 +423,34 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 				scalingFactorScen1 = scenarioDateCfg.getFields().getField("Input Volatility Scaling Factor").getValueAsDouble();
 				continue;
 			}
+			Date scenarioDate = getScenarioDateForScenario(sim, scenarioId); 
+			int scenarioDateJd = cf.getJulianDate(scenarioDate);
 			partyAgreementUDSRCopy = partyAgreementUDSRScen1.cloneData();
 			partyAgreementUDSRCopy.setColumnValues(partyAgreementUDSRCopy.getColumnId("scenario_id"), scenarioId);
+			partyAgreementUDSRCopy.setColumnValues(partyAgreementUDSRCopy.getColumnId("scenario_date"), scenarioDateJd);
 			partyAgreementUDSR.appendRows(partyAgreementUDSRCopy);
 			partyAgreementUDSRCopy.clear();
-			
-			vaRByTransResultCopy = vaRByTransResultScen1.cloneData();
-			vaRByTransResultCopy.setColumnValues(vaRByTransResultCopy.getColumnId("scenario_id"), scenarioId);
-			vaRByTransResult.appendRows(vaRByTransResultCopy);
-			vaRByTransResultCopy.clear();
-			
-			vaRInfoUDSRCopy = vaRInfoUDSRScen1.cloneData();
-			vaRInfoUDSRCopy.setColumnValues(vaRInfoUDSRCopy.getColumnId("scenario_id"), scenarioId);
 			
 			Configuration scenarioDateCfg = scenario.getConfigurations().find(EnumConfiguration.Result, "Parametric VaR Attributes");
 			Double scalingFactor = scenarioDateCfg.getFields().getField("Input Volatility Scaling Factor").getValueAsDouble();
 			scalingFactor = (scalingFactor == 0) ? 1 : scalingFactor;
 			
+			vaRByTransResultCopy = vaRByTransResultScen1.cloneData();
+			vaRByTransResultCopy.setColumnValues(vaRByTransResultCopy.getColumnId("scenario_id"), scenarioId);
+			vaRByTransResultCopy.setColumnValues(vaRByTransResultCopy.getColumnId("scenario_date"), scenarioDateJd);
+			vaRByTransResultCopy.calcColumn("result", "result * " + scalingFactor);
+			int compVarCollId = vaRByTransResultCopy.getColumnId("Component VaR");
+			vaRByTransResultCopy.calcColumn(compVarCollId, "result * " + scalingFactor);
+			vaRByTransResult.appendRows(vaRByTransResultCopy);
+			vaRByTransResultCopy.clear();
+			
+			vaRInfoUDSRCopy = vaRInfoUDSRScen1.cloneData();
+			vaRInfoUDSRCopy.setColumnValues(vaRInfoUDSRCopy.getColumnId("scenario_id"), scenarioId);
+			vaRInfoUDSRCopy.setColumnValues(vaRInfoUDSRCopy.getColumnId("scenario_date"), scenarioDateJd);
 			vaRInfoUDSRCopy.calcColumn("delta", "delta * " + scalingFactor);
 			vaRInfoUDSRCopy.calcColumn("delta", "delta / " + scalingFactorScen1);
 			vaRInfoUDSRCopy.calcColumn("gamma", "gamma * " + Math.pow(scalingFactor, 2));
 			vaRInfoUDSRCopy.calcColumn("gamma", "gamma / " + Math.pow(scalingFactorScen1, 2));
-			
 			vaRInfoUDSR.appendRows(vaRInfoUDSRCopy);
 			vaRInfoUDSRCopy.clear();
 		}
@@ -434,34 +483,21 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 		}
 	}
 
-	private void removeUnwantedScenarios(Session session, Simulation sim, Transactions transactions) {
+	private void removeUnwantedScenarios(Session session, Simulation sim, Transactions transactions, Date collCallDate) {
 
 		// DO not remove scenarios in Bach mode. Assumption is that in batch mode deal count will always be more than 2.
 		// Do not remove scenarios if run mode is 0
-		if (transactions.getCount() > 2 || CM_EXP_ARG_SIM_PERFORMANCE_MODE_VALUE == 0 ){
+		if (transactions.getCount() > 2 || CM_EXP_ARG_SIM_PERFORMANCE_MODE_VALUE == 0) {
 			return;
 		}
 
-		Transaction transaction = getTransaction(transactions);
-		int partyAgreementId = transaction.getField(EnumTransactionFieldId.PartyAgreement).getValueAsInt();
-		Date matDate = getLastMatDate(session, transactions, sim.getScenario(1).getCurrency());
-		//Assumption: all scenarios have same currency.
-		Date collCallDate = getCollCallDate(session, partyAgreementId, sim.getScenario(1).getCurrency()); 
-		collCallDate = matDate == null ? collCallDate : (collCallDate == null ? matDate : (matDate.before(collCallDate) ? matDate : collCallDate));
-		if(collCallDate ==null) {
-			Logging.warn("Invalid collateral call date. Credit check will be run for all scenarios");
-			return;
-		}
-		
 		Scenarios scenarios = sim.getScenarios();
 		int scenarioCount = scenarios.getCount();
 		// Do not remove first scenario. Always have atleast 1 scenario in sim definition.
-		for(int count = scenarioCount; count > 1; count-- ) {
-			Scenario scenario = scenarios.get(count-1);
-			Configuration scenarioDateCfg = scenario.getConfigurations().find(EnumConfiguration.Date, "Scenario Date");
-			Date scenarioDate = scenarioDateCfg == null ? cf.createSymbolicDate("0cd").evaluate()
-					: scenarioDateCfg.getFields().getField("Modified Scenario Date").getValueAsDate();
-			if(scenarioDate.after(collCallDate)) {
+		for (int count = scenarioCount; count > 1; count--) {
+			Scenario scenario = scenarios.get(count - 1);
+			Date scenarioDate = getScenarioDateForScenario(sim, scenario.getId());
+			if (scenarioDate.after(collCallDate)) {
 				sim.removeScenario(scenario);
 			}
 		}
@@ -494,12 +530,12 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 		return lastMatDate;
 	}
 
-	private Date getCollCallDate(Session session, int partyAgreementId, Currency currency) {
+	private Date getCollCallDateFromPA(Session session, int partyAgreementId, Currency currency) {
 		
 		Date collCallDate = null;
 		Table partyAgreementList = null;
 		long currentTime = System.currentTimeMillis();
-		String logPrefix = CLASSNAME + ".getCollCallDate() : ";
+		String logPrefix = CLASSNAME + ".getCollCallDateFromPA() : ";
 		try {
 			logDebugMsg(logPrefix + "method started");
 			StringBuilder sql = new StringBuilder();
@@ -522,8 +558,10 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 			} else if(partyAgreementList.getRowCount() <= 0) {
 				Logging.warn(logPrefix + "Party agreement or collateral call date not found");	
 			} else {
+				int partyAgreement = partyAgreementList.getValueAsInt("party_agreement_id", 0);
+				String collAgreement = partyAgreement <= 0 ? "No" : "Yes";
 				String valDateSeq = partyAgreementList.getString("valuation_date_sequence", 0);
-				valDateSeq = "".equalsIgnoreCase(valDateSeq) ? "1y" : valDateSeq;
+				valDateSeq = "Yes".equalsIgnoreCase(collAgreement) ? ("".equalsIgnoreCase(valDateSeq) ? "1m" : valDateSeq) : "1y";
 				HolidaySchedules hs = cf.createHolidaySchedules();
 				hs.addSchedule(currency.getHolidaySchedule());
 				SymbolicDate symbolicDate = cf.createSymbolicDate(valDateSeq);
@@ -730,7 +768,7 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 		// Get num of Scenarios -> Assuming all deals have same number of scenarios
 		ConstTable vaRInfo = clientDataForLineAndPA.getTable("var_info", 0);
 		// Summarise the client data for exposure line by index id and grid point id
-		Table summary = vaRInfo.calcByGroup("index_id, scenario_id, vol_id, gpt_id, gpt_label, gpt_name, gpt_date, gpt_time, gpt_sigma", "delta, gamma");
+		Table summary = vaRInfo.calcByGroup("index_id, scenario_id, vol_id, gpt_id, gpt_label, gpt_name, gpt_date, gpt_time", "delta, gamma, gpt_sigma");
 		
 		com.olf.openjvs.Table corrMatrix = tf.toOpenJvs(exposureCache.getTable("corr_matrix", 0));
 		ConstTable distinctScenarios = summary.createConstView("scenario_id").getDistinctValues("scenario_id");
@@ -744,7 +782,7 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 			// Get Grid Point info from exposure cache and replace sensitivity values with exposure line's values
 			Table gptInfoOC = exposureCache.getTable("gpt_info", 0).cloneData();
 			gptInfoOC.select(summary,
-					"index_id, vol_id, gpt_id, gpt_label, gpt_name, gpt_date, gpt_time, gpt_sigma, Sum delta->gpt_delta, Sum gamma->gpt_gamma",
+					"index_id, vol_id, gpt_id, gpt_label, gpt_name, gpt_date, gpt_time, Sum gpt_sigma->gpt_sigma, Sum delta->gpt_delta, Sum gamma->gpt_gamma",
 					"[IN.index_id] == [OUT.index_id] AND [IN.gpt_id] == [OUT.gpt_id] AND [IN.scenario_id] == " + scenarioId);
 			com.olf.openjvs.Table gptInfo = tf.toOpenJvs(gptInfoOC);
 			double vaRExposure = 0.0;
