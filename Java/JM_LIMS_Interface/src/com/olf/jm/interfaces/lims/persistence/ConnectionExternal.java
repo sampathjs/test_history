@@ -36,7 +36,7 @@ public class ConnectionExternal {
 		this.dbName = dbName;
 		this.user = user;
 		this.password = password;
-		Logging.init(this.getClass(), "", "");
+		Logging.init(this.getClass(), ConfigurationItem.CONST_REP_CONTEXT, ConfigurationItem.CONST_REP_SUBCONTEXT);
 	}
 
 	public Object[][] query (String sql) {
