@@ -14,16 +14,20 @@ import com.openlink.util.constrepository.ConstRepository;
 import org.apache.commons.lang3.ArrayUtils;
 import com.olf.jm.logging.Logging;
 
-/**
- * History:
- *  1.01   2021-06-24  Prashanth     EPI-1687   initial version to populate additional columns which will be used in 
- *                                              JM_DL_Metal, JM_DL_Netting and queryScript
+/*
+ * History: 
+ * 2015-04-28	V1.0	 Prashanth 	- initial version - inital version to populate few columns which will 
+ * 									  be used in JM_DL_Metal, JM_DL_Netting and queryScript
+ * 2022-01-12   V1.1	 Denes Nagy - added tolerance level to account balance calculations
+ * 2022-01-19   V1.2	 Denes Nagy - past receivables logic integration with MTS tables
  */
 
 public class BODataLoadUtil {
 	
 	private static final String ACCT_CLASS_METAL = "Metal Account";
 	private static final String CONST_REPO_VAR_CONFIRM_STATUS_FR_STP = "confirmStatusForSTP";
+	private static final String CONST_REPO_VAR_TOLERANCE = "balanceSignTolerance"; // tolerance level to still count account balance as positive
+	private static final String CONST_PAST_REC_FROM_DATE = "countPastReceivablesFromDate";
 	private static final String ARGT_COL_NAME_PAST_RECEIVABLES = "past_receivables";
 	private static final String ARGT_COL_TITLE_PAST_RECEIVABLES = "Past\nReceivables";
 	private static final String ARGT_COL_NAME_CONFIRM_STATUS = "confirm_status";
@@ -82,14 +86,9 @@ public class BODataLoadUtil {
 		DBaseTable.execISql(argumentTable, sql.toString());
 		Logging.info("Query for Metal accounts in scope for each counterparty - completed in "
 				+ (System.currentTimeMillis() - currentTime) + " ms");
-		if(argumentTable.getNumRows() > 0) {
-			// Update qid and qtbl so that it reflects query id for tran numbers
-			this.qid = Query.tableQueryInsert(argumentTable, "tran_num");
-			this.qtbl = Query.getResultTableForId(qid);	
-		} else {
-			this.qid = 0;
-			this.qtbl = "query_result";
-		}
+		// Update qid and qtbl so that it reflects query id for tran numbers
+		this.qid = Query.tableQueryInsert(argumentTable, "tran_num");
+		this.qtbl = Query.getResultTableForId(qid);
 	}
 	
 	/**
@@ -110,24 +109,33 @@ public class BODataLoadUtil {
 	
 	
 	/**
-	 * This method updates the past receivables field based on the below logic
-	 * If any deal for this counterparty has an event where amount > 0 
-	 * and date < today and event info "recon_status" != Cleared, 
-	 * then mark the "Past Receivables" flag here to "Pending", otherwise "Cleared".
-	 * .
+	 * This method updates the past receivables field to 'Pending'
+	 * for the list of business units where they have not yet paid to JM as per AutoMatch recon status.
+	 * For all others it is set to 'Cleared'.
 	 * @throws OException
 	 */
 	public void populatePastReceivables() throws OException {
 		
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT DISTINCT atev.external_bunit, 'Pending' AS ").append(ARGT_COL_NAME_PAST_RECEIVABLES);
-		sql.append("\n FROM query_result qr ");
-		sql.append("\n JOIN ab_tran_event_view atev ON atev.tran_num = qr.query_result");
-		sql.append("\n      AND qr.unique_id = ").append(qid);
-		sql.append("\n JOIN ab_tran_event_info atei ON atei.event_num = atev.event_num AND atei.value = 'No'");
-		sql.append("\n JOIN tran_event_info_types teit ON atei.type_id = teit.type_id AND teit.type_name ='Recon_Ref'");
-
+		int datefrom = _constRepo.getDateValue(CONST_PAST_REC_FROM_DATE);
+		
 		argumentTable.setColValString(ARGT_COL_NAME_PAST_RECEIVABLES, "Cleared");
+        
+        StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT ab_tran.external_bunit, 'Pending' AS ").append(ARGT_COL_NAME_PAST_RECEIVABLES);
+		sql.append("\n FROM ab_tran_event, ab_tran, account_view int_account_info, ab_tran_event_settle abes_ai, stldoc_header, stldoc_details std, configuration conf");
+        sql.append("\n WHERE (ab_tran.tran_num = ab_tran_event.tran_num)  and (ab_tran_event.event_num = abes_ai.event_num) and (abes_ai.int_account_id = int_account_info.account_id)  and (ab_tran_event.event_num = std.event_num) and (std.document_num = stldoc_header.document_num)");
+		sql.append("\n AND (ab_tran.tran_status in (3,4))  and (ab_tran.toolset in (6,9,10,15))"); //validated, matured
+		sql.append("\n AND (ab_tran_event.event_date < conf.prev_business_date) and (ab_tran_event.event_date > " + datefrom + ")");  //since date specified in Const Rep
+		sql.append("\n AND (ab_tran_event.para_position < 0)"); //only money owed to JM
+		sql.append("\n AND (ab_tran_event.event_type in (14,98)) and (ab_tran_event.internal_conf_status = 2)"); //cash & tax settlement, known status
+		sql.append("\n AND (int_account_info.account_id in (select account_id from mts_exp_account_number where exp_status_id=1))"); //only for accounts in scope for matching
+		sql.append("\n AND (stldoc_header.stldoc_def_id = 20003)");  //payment documents only
+		sql.append("\n AND (not exists (select * from mts_event_recon mer LEFT OUTER JOIN mts_cash_applied_link dxr17 ON (mer.event_num=dxr17.object_id) ");
+		sql.append("\n LEFT OUTER JOIN mts_cash_applied_link dxr18 ON (dxr18.payment_grp_id = dxr17.payment_grp_id and dxr18.payment_id = 0) ");
+		sql.append("\n LEFT OUTER JOIN swift_940t_header dxr19 ON (dxr19.record_id=dxr18.object_id) ");
+		sql.append("\n WHERE (mer.event_tracking_num = ab_tran_event.event_tracking_num and ((mer.recon_status_id = 9) or (mer.recon_status_id=10) and (dxr19.recon_status_id=21)))))");
+			//for which there is no 'Paid' event recon status record in MTS/AutoMatch and also no 'Partial' event recon status paired with "Matched with bank charge" statement recon status
+		
 		Table tbl = null;	
 		try {
 			Logging.info("Query(for "+ARGT_COL_NAME_PAST_RECEIVABLES +"): "  +sql);
@@ -242,49 +250,44 @@ public class BODataLoadUtil {
 		// Check if deal's metal location is not in scope [holding bank in JM
 		// 			group], if not set to "N/A - location" and end check.
 		// Check metal account balance (metal=deal metal; loco=deal loco) and
-		//			display its sign: Positive (including zero) or Negative.
+		//			display its sign: Positive (including zero plus tolerance from constant repository) or Negative.
 
+		int tolerance = _constRepo.getIntValue(CONST_REPO_VAR_TOLERANCE);
+		
 		StringBuilder sql = new StringBuilder();
-		sql.append("WITH metal_accounts AS (");
-		sql.append("\n	 SELECT DISTINCT mes.ext_account_id FROM  ").append(qtbl).append(" qr");
-		sql.append("\n	   JOIN ab_tran_event me ON qr.query_result = me.tran_num AND qr.unique_id = ").append(qid);
-		sql.append("\n		    AND me.currency IN (SELECT id_number FROM currency WHERE precious_metal = 1)");
-		sql.append("\n	   JOIN ab_tran_event_settle mes ON mes.event_num = me.event_num AND mes.ext_account_id > 0");
-		sql.append("\n ) , acc_bal AS (   ");
-		sql.append("\n   SELECT DISTINCT ates.ext_account_id, ate.event_date, ates.currency_id");
-		sql.append("\n       , ROUND(SUM(-ate.para_position) OVER (PARTITION BY ates.ext_account_id");
-		sql.append("\n       , ates.currency_id ORDER BY ate.event_date),6) running_balance ");
-		sql.append("\n     FROM ab_tran_event ate");
-		sql.append("\n     JOIN ab_tran_event_settle ates ON ates.event_num = ate.event_num");
-		sql.append("\n     JOIN ab_tran ab ON ab.tran_num = ate.tran_num AND ab.current_flag = 1");
-		sql.append("\n           AND tran_status IN (3,4)");
-		sql.append("\n    WHERE ates.currency_id IN (SELECT id_number from currency where precious_metal = 1) ");
-		sql.append("\n      AND ates.ext_account_id IN ( SELECT ext_account_id FROM metal_accounts)");
-		sql.append("\n ) SELECT DISTINCT sd.tran_num, sd.external_bunit, sd.document_num, sd.event_type");
-		sql.append("\n       , sd.cflow_type, mes.ext_account_id ");
-		sql.append("\n       , CASE WHEN sd.tran_currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1) ");
-		sql.append("\n              THEN 'N/A - deal'");
-		sql.append("\n              WHEN mes.ext_account_id IN (SELECT a.account_id FROM account a ");
-		sql.append("\n                      JOIN party p ON a.holder_id = p.party_id AND p.int_ext != 0)");
-		sql.append("\n              THEN 'N/A - location'");
-		sql.append("\n              WHEN (acc_bal.running_balance ) >= 0 THEN 'Positive'");
-		sql.append("\n              ELSE 'Negative'");
-		sql.append("\n          END ").append(ARGT_COL_NAME_DEAL_METAL_BALANCE);
-		sql.append("\n       , CASE WHEN sd.tran_currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1) ");
-		sql.append("\n              THEN 0.0");
-		sql.append("\n              WHEN mes.ext_account_id IN (SELECT a.account_id FROM account a ");
-		sql.append("\n                      JOIN party p ON a.holder_id = p.party_id AND p.int_ext != 0)");
-		sql.append("\n              THEN 0.0");
-		sql.append("\n              ELSE acc_bal.running_balance");
-		sql.append("\n          END ").append(ARGT_COL_NAME_DEAL_METAL_BALANCE_VALUE);
-		sql.append("\n     FROM ").append(qtbl).append(" qr");
-		sql.append("\n     JOIN stldoc_details sd ON sd.tran_num = qr.query_result AND qr.unique_id = ").append(qid);
-		sql.append("\n     LEFT JOIN ab_tran_event me ON sd.tran_num = me.tran_num");
-		sql.append("\n          AND me.currency IN (SELECT id_number FROM currency WHERE precious_metal = 1)");
-		sql.append("\n     LEFT JOIN ab_tran_event_settle mes ON mes.event_num = me.event_num");
-		sql.append("\n     LEFT JOIN acc_bal ON acc_bal.ext_account_id = mes.ext_account_id");
-		sql.append("\n          AND acc_bal.currency_id = me.currency AND acc_bal.event_date = me.event_date");
-			 
+		sql.append("SELECT DISTINCT sd.tran_num, sd.external_bunit, sd.document_num, sd.event_type, sd.cflow_type, ");
+		sql.append("\n    mes.ext_account_id, ");
+		sql.append("\n  CASE WHEN sd.tran_currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1) ");
+		sql.append("\n      THEN 'N/A - deal'");
+		sql.append("\n      WHEN mes.ext_account_id IN (SELECT a.account_id FROM account a ");
+		sql.append("\n                                 JOIN party p ON a.holder_id = p.party_id AND p.int_ext != 0)");
+		sql.append("\n      THEN 'N/A - location'");
+		sql.append("\n      WHEN (acc_bal.running_balance ) >= "+ tolerance +" THEN 'Positive'");
+		sql.append("\n      ELSE 'Negative'");
+		sql.append("\n  END ").append(ARGT_COL_NAME_DEAL_METAL_BALANCE);
+		sql.append("\n, CASE WHEN sd.tran_currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1) ");
+		sql.append("\n      THEN 0.0");
+		sql.append("\n      WHEN mes.ext_account_id IN (SELECT a.account_id FROM account a ");
+		sql.append("\n                                 JOIN party p ON a.holder_id = p.party_id AND p.int_ext != 0)");
+		sql.append("\n      THEN 0.0");
+		sql.append("\n      ELSE acc_bal.running_balance");
+		sql.append("\n  END ").append(ARGT_COL_NAME_DEAL_METAL_BALANCE_VALUE);
+		sql.append("\nFROM ").append(qtbl).append(" qr");
+		sql.append("\n JOIN stldoc_details sd ON sd.tran_num = qr.query_result");
+		sql.append("\n LEFT JOIN ab_tran_event me ON sd.tran_num = me.tran_num");
+		sql.append("\n      AND me.currency IN (SELECT id_number FROM currency WHERE precious_metal = 1)");
+		sql.append("\n LEFT JOIN ab_tran_event_settle mes ON mes.event_num = me.event_num");
+		sql.append("\n JOIN ( SELECT DISTINCT ates.ext_account_id, ate.event_date, ates.currency_id");
+		sql.append("\n            , ROUND(SUM(-ate.para_position) OVER (PARTITION BY ates.ext_account_id");
+		sql.append("\n                , ates.currency_id ORDER BY ate.event_date),6) running_balance");
+		sql.append("\n 	      FROM ab_tran_event ate");
+		sql.append("\n        JOIN ab_tran_event_settle ates  ON ates.event_num = ate.event_num");
+		sql.append("\n        JOIN ab_tran ab ON ab.tran_num = ate.tran_num AND ab.current_flag = 1");
+		sql.append("\n              AND tran_status IN (3,4) )");
+		sql.append("\n  acc_bal ON acc_bal.ext_account_id = mes.ext_account_id AND acc_bal.currency_id = me.currency");
+		sql.append("\n          AND acc_bal.event_date = me.event_date");
+		sql.append("\n WHERE qr.unique_id = ").append(qid);
+		
 		Table dealMetalBalance = Table.tableNew();
 		long currentTime = System.currentTimeMillis();
 		Logging.info("Query for " + ARGT_COL_NAME_DEAL_METAL_BALANCE + "): " + sql.toString());
@@ -307,11 +310,13 @@ public class BODataLoadUtil {
 	 * Check if any of the counterparty's metal account balances is negative, across all JM group 
 	 * locations and metals, excluding the deal's own location and metal: 
 	 * if yes, set to "[acct identifier] - Negative" (the first negative balance), 
-	 * otherwise "All Positive".
+	 * otherwise "All Positive". Sign check includes tolerance.
 	 * 
 	 * @throws OException
 	 */
 	public void populateAnyOtherBalance() throws OException {
+
+		int tolerance = _constRepo.getIntValue(CONST_REPO_VAR_TOLERANCE);
 
 		// Get count of metal accounts in scope for each counterparty
 		int acm = Ref.getValue(SHM_USR_TABLES_ENUM.ACCOUNT_CLASS_TABLE, ACCT_CLASS_METAL);
@@ -340,20 +345,19 @@ public class BODataLoadUtil {
 		maNegBalSql.append("\n  JOIN ab_tran_event ate ON ate.tran_num = ab.tran_num");
 		maNegBalSql.append("\n  JOIN ab_tran_event_settle ates  ON ates.event_num = ate.event_num");
 		maNegBalSql.append("\n  JOIN account acc  ON acc.account_id = ates.ext_account_id AND acc.account_class = ").append(acm);
+		maNegBalSql.append("\n  JOIN idx_unit iu ON iu.unit_id= ates.unit");
 		maNegBalSql.append("\n  JOIN party p1 ON p1.party_id = ab.external_bunit");
 		maNegBalSql.append("\n  JOIN party ho ON acc.holder_id = ho.party_id  AND ho.int_ext = 0");
 		maNegBalSql.append("\n  JOIN account_info ai ON ai.account_id = acc.account_id AND ai.info_type_id = ");
 		maNegBalSql.append("\n        (SELECT type_id FROM account_info_type WHERE type_name = 'Loco')");
-		maNegBalSql.append("\n            AND ai.info_value IS NOT NULL");
+		maNegBalSql.append("\n  JOIN user_jm_loco ujl ON ujl.loco_name = ai.info_value");
 		maNegBalSql.append("\n WHERE ab.tran_status IN (3,4)");
 		maNegBalSql.append("\n   AND ab.current_flag = 1");
 		maNegBalSql.append("\n   AND ate.event_date <= '").append(OCalendar.formatDateInt(OCalendar.today())).append("'");
-		maNegBalSql.append("\n   AND ab.external_bunit IN (SELECT DISTINCT bu.external_bunit FROM ab_tran bu");
-		maNegBalSql.append("\n         JOIN query_result qr ON qr.query_result = bu.tran_num ");
-		maNegBalSql.append("\n              AND qr.unique_id =").append(qid).append(")");
 		maNegBalSql.append("\n GROUP BY acc.account_id, ab.external_bunit, p1.short_name, ates.currency_id, ai.info_value");
-		maNegBalSql.append("\n HAVING ROUND(SUM(-ate.para_position),6) < 0.0000");
+		maNegBalSql.append("\n HAVING ROUND(SUM(-ate.para_position),6) < " + tolerance + "");
 		maNegBalSql.append("\n ORDER BY ab.external_bunit, rn");
+
 		
 		Table maNegBal = Table.tableNew();
 		currentTime = System.currentTimeMillis();
