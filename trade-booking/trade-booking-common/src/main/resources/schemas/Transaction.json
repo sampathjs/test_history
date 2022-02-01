@@ -23,6 +23,16 @@
       ],
       "description": "the type of the value"
     },
+    "property_change_type": {
+      "type": "string",
+      "default": "add",
+      "enum": [
+        "add",
+        "update",
+        "delete"
+      ],
+      "description": "the change type of the property"
+    },
     "property_global_order_id": {
       "anyOf": [
         {
@@ -49,6 +59,9 @@
         },
         "value_type": {
           "$ref": "#/$defs/property_value_type"
+        },
+        "change_type": {
+          "$ref": "#/$defs/property_change_type"
         },
         "global_order_id": {
           "$ref": "#/$defs/property_global_order_id"
@@ -86,6 +99,19 @@
       "additionalProperties": false,
       "required": [
         "deal_id"
+      ]
+    },
+    "initialization_by_tran_number": {
+      "type": "object",
+      "properties": {
+        "deal_tran_number": {
+          "type": "integer",
+          "description": "the deal tran number"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "deal_tran_number"
       ]
     }
   },
@@ -136,6 +162,9 @@
             },
             "by_clone": {
               "$ref": "#/$defs/initialization_by_clone"
+            },
+            "by_tran_number": {
+              "$ref": "#/$defs/initialization_by_tran_number"
             }
           },
           "additionalProperties": false
