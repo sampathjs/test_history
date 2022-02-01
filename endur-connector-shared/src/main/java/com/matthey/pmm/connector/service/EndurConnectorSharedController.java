@@ -58,6 +58,8 @@ public class EndurConnectorSharedController {
     		@RequestParam boolean overwrite,
     		@RequestBody TransactionTo tradeBookingActionPlan) {
     	try {
+    		logger.info("/tradeBookingJson endpoint called with clientName='" + clientName  
+    				+ "', fileName='" + fileName + "', overwrite=" + overwrite + " and tradeBookingActionPlan = \n" + tradeBookingActionPlan.toString());
         	String asTextFile = prettyFormatter.writeValueAsString(tradeBookingActionPlan);
         	int dealTrackingNumOfBookedDeal = postTradeBookingRequest (clientName, fileName, overwrite, asTextFile);
         	return dealTrackingNumOfBookedDeal;
@@ -78,12 +80,15 @@ public class EndurConnectorSharedController {
     		@RequestParam boolean overwrite,
     		@RequestBody String tradeBookingActionPlan) {
         ConstRepository constRepo = initConstRepo(CONTEXT, SUBCONTEXT); 
-        File inputFile = saveFileToLocalFolder(clientName, fileName, overwrite, constRepo);
+        File inputFile = saveFileToLocalFolder(clientName, fileName, tradeBookingActionPlan, overwrite, constRepo);
         RunProcessor rp = new RunProcessor(session, constRepo, clientName, Arrays.asList(inputFile.getPath()));
         try {
-        	rp.processRun(); 
+        	boolean success = rp.processRun();
+        	if (!success) {
+        		throw new RuntimeException ("Trade Booking Processor Failed to Book Trade");
+        	}
         } catch (Exception ex) {
-        	String msg = "Error while processing trade book request " + ex.toString();
+        	String msg = "Error while processing trade book request: " + ex.toString();
     		logger.error (msg);
             StringWriter sw = new StringWriter(4000);
             PrintWriter pw = new PrintWriter(sw);
@@ -93,7 +98,7 @@ public class EndurConnectorSharedController {
         }
         Map<String, Integer> bookedDealNums = rp.getBookedDealTrackingNums();
         if (bookedDealNums.isEmpty()) {
-        	throw new TradeBookingRequestErrorWhileProcessing("No trade has been booked durign the trade booking request");
+        	throw new TradeBookingRequestErrorWhileProcessing("No trade has been booked during the trade booking request");
         }
         for (Map.Entry<String, Integer> entry : bookedDealNums.entrySet()) {
         	return entry.getValue();
@@ -101,14 +106,13 @@ public class EndurConnectorSharedController {
         return -1;
     }
 
-	private File saveFileToLocalFolder(String clientName, String fileName, boolean overwrite, ConstRepository constRepo) {
+	private File saveFileToLocalFolder(String clientName, String fileName, String fileContent, boolean overwrite, ConstRepository constRepo) {
 		String baseDir;
 		try {
-			baseDir = constRepo.getStringValue(VAR_BASE_DIR, session.getSystemSetting("AB_OUTDIR"));
+			baseDir = constRepo.getStringValue(VAR_BASE_DIR, session.getSystemSetting("AB_OUTDIR") + "/IncomingTrades/");
 		} catch (OException e) {
 			throw new RuntimeException ("Internal error while processing Trade Booking Request: Const Repository Operation Failed");
 		}
-        
         File inputFile = new File(baseDir, fileName);
         inputFile.getParentFile().mkdirs();
         if (inputFile.exists() && !overwrite) {
