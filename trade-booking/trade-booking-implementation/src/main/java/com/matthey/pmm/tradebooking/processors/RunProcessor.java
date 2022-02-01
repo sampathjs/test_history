@@ -60,7 +60,7 @@ public class RunProcessor {
 		processLogTable = setupProcessLogTable();
 	}
 
-	public void processRun () {
+	public boolean processRun () {
 		try (UserTable runLogUserTable = session.getIOFactory().getUserTable(USER_TABLE_RUN_LOG);
 			 UserTable processLogUserTable = session.getIOFactory().getUserTable(USER_TABLE_PROCESS_LOG)) {
 			runLogUserTable.insertRows(runLogTable);
@@ -74,7 +74,7 @@ public class RunProcessor {
 				processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Processing");
 				processLogUserTable.updateRows(processLogTable, COL_RUN_ID + ", " + COL_DEAL_COUNTER);
 				FileProcessor fileProcessor = new FileProcessor(session, constRepo, runId, dealCounter);
-	    		getLogger().info("Processing file' " + fileNameToProcess + "' now.");
+	    		getLogger().info("Processing file ' " + fileNameToProcess + "' now.");
 	    		boolean success;
 	    		String failReason = "";
 	    		try {
@@ -110,7 +110,8 @@ public class RunProcessor {
 	    		runLogTable.setString (COL_STATUS, 0, "Finished processing of all deals of run. Some deals failed to be booked.");	    		
 	    	}
 	    	runLogTable.setDate(COL_END_DATE, 0, new Date());
-			runLogUserTable.updateRows(runLogTable, COL_RUN_ID);	    	
+			runLogUserTable.updateRows(runLogTable, COL_RUN_ID);	
+			return overallSuccess;
 		}
 	}
 	
