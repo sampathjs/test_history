@@ -4,16 +4,15 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.apache.commons.validator.routines.UrlValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import org.tinylog.Logger;
+
 @Component
 public class ServiceConnector {
-    private static final Logger logger = LoggerFactory.getLogger(ServiceConnector.class);
 
     private final RestTemplate restTemplate;
     private final String baseUrl;
@@ -22,7 +21,7 @@ public class ServiceConnector {
         this.restTemplate = restTemplate;
         checkArgument(new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS).isValid(baseUrl),
                       "invalid Service connector URL: " + baseUrl);
-        logger.info("Service connector URL: {}", baseUrl);
+        Logger.info("Service connector URL: {}", baseUrl);
         this.baseUrl = baseUrl;
     }
 

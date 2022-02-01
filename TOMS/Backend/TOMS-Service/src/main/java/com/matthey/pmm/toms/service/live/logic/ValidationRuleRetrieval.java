@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +17,10 @@ import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
+import org.tinylog.Logger;
+
 @Component
-public class ValidationRuleRetrieval {
-    private static final Logger logger = LogManager.getLogger(ValidationRuleRetrieval.class);
-	
+public class ValidationRuleRetrieval {	
 	@Autowired
 	private EndurConnector endurConnector;
 	
@@ -34,7 +32,7 @@ public class ValidationRuleRetrieval {
 	
 			
 	public List<CounterPartyTickerRuleTo> retrieveCounterPartyTickerRules () {
-		logger.info("Starting Retrieving Counter Party Ticker Rules from Endur");
+		Logger.info("Starting Retrieving Counter Party Ticker Rules from Endur");
 		try {
 			List<Reference> entities = refRepo.findByTypeIdIn(Arrays.asList(DefaultReferenceType.METAL_FORM.getEntity().id(),
 					DefaultReferenceType.METAL_LOCATION.getEntity().id(), 
@@ -46,12 +44,12 @@ public class ValidationRuleRetrieval {
 			
 			List<CounterPartyTickerRuleTo> rules = Arrays.asList(endurConnector.postWithResponse("/toms/endur/counterPartyTickerRule", CounterPartyTickerRuleTo[].class,
 					references));
-			logger.info("Finished Retrieving Counter Party Ticker Rules from Endur");
+			Logger.info("Finished Retrieving Counter Party Ticker Rules from Endur");
 			return rules;
 		} catch (Exception ex) {
-			logger.error("Error while retrieving Counter Party Ticker Rules from Endur Connector: " + ex.getMessage());
+			Logger.error("Error while retrieving Counter Party Ticker Rules from Endur Connector: " + ex.getMessage());
 			for (StackTraceElement ste : ex.getStackTrace()) {
-				logger.error(ste.toString());
+				Logger.error(ste.toString());
 			}
 			throw ex;
 		} 
@@ -59,7 +57,7 @@ public class ValidationRuleRetrieval {
 
 
 	public List<TickerPortfolioRuleTo> retrieveTickerPortfolioRules() {
-		logger.info("Starting Retrieving Ticker Portfolio Rules from Endur");
+		Logger.info("Starting Retrieving Ticker Portfolio Rules from Endur");
 		try {
 			List<Reference> entities = refRepo.findByTypeIdIn(Arrays.asList(DefaultReferenceType.PORTFOLIO.getEntity().id(),
 					DefaultReferenceType.TICKER.getEntity().id()));
@@ -70,19 +68,19 @@ public class ValidationRuleRetrieval {
 			
 			List<TickerPortfolioRuleTo> rules = Arrays.asList(endurConnector.postWithResponse("/toms/endur/tickerPortfolioRule", TickerPortfolioRuleTo[].class,
 					references));
-			logger.info("Finished Retrieving Ticker Portfolio Rules from Endur");
+			Logger.info("Finished Retrieving Ticker Portfolio Rules from Endur");
 			return rules;
 		} catch (Exception ex) {
-			logger.error("Error while retrieving Ticker Portfolio Rules from Endur Connector: " + ex.getMessage());
+			Logger.error("Error while retrieving Ticker Portfolio Rules from Endur Connector: " + ex.getMessage());
 			for (StackTraceElement ste : ex.getStackTrace()) {
-				logger.error(ste.toString());
+				Logger.error(ste.toString());
 			}
 			throw ex;
 		} 
 	}
 	
 	public List<TickerRefSourceRuleTo> retrieveTickerRefSourceRules() {
-		logger.info("Starting Retrieving Ticker Reference Source Rules from Endur");
+		Logger.info("Starting Retrieving Ticker Reference Source Rules from Endur");
 		try {
 			List<Reference> entities = refRepo.findByTypeIdIn(Arrays.asList(DefaultReferenceType.REF_SOURCE.getEntity().id(),
 					DefaultReferenceType.TICKER.getEntity().id()));
@@ -93,19 +91,19 @@ public class ValidationRuleRetrieval {
 			
 			List<TickerRefSourceRuleTo> rules = Arrays.asList(endurConnector.postWithResponse("/toms/endur/tickerRefSourceRule", TickerRefSourceRuleTo[].class,
 					references));
-			logger.info("Finished Retrieving Ticker Reference Source Rules from Endur");
+			Logger.info("Finished Retrieving Ticker Reference Source Rules from Endur");
 			return rules;
 		} catch (Exception ex) {
-			logger.error("Error while retrieving Ticker Reference Source Rules from Endur Connector: " + ex.getMessage());
+			Logger.error("Error while retrieving Ticker Reference Source Rules from Endur Connector: " + ex.getMessage());
 			for (StackTraceElement ste : ex.getStackTrace()) {
-				logger.error(ste.toString());
+				Logger.error(ste.toString());
 			}
 			throw ex;
 		} 
 	}
 	
 	public List<TickerFxRefSourceRuleTo> retrieveTickerFxRefSourceRules() {
-		logger.info("Starting Retrieving Ticker FX Reference Source Rules from Endur");
+		Logger.info("Starting Retrieving Ticker FX Reference Source Rules from Endur");
 		try {
 			List<Reference> entities = refRepo.findByTypeIdIn(Arrays.asList(DefaultReferenceType.REF_SOURCE.getEntity().id(),
 					DefaultReferenceType.TICKER.getEntity().id(), DefaultReferenceType.CCY_CURRENCY.getEntity().id()));
@@ -116,12 +114,12 @@ public class ValidationRuleRetrieval {
 			
 			List<TickerFxRefSourceRuleTo> rules = Arrays.asList(endurConnector.postWithResponse("/toms/endur/tickerFxRefSourceRule", TickerFxRefSourceRuleTo[].class,
 					references));
-			logger.info("Finished Retrieving Ticker FX Reference Source Rules from Endur");
+			Logger.info("Finished Retrieving Ticker FX Reference Source Rules from Endur");
 			return rules;
 		} catch (Exception ex) {
-			logger.error("Error while retrieving Ticker FX Reference Source Rules from Endur Connector: " + ex.getMessage());
+			Logger.error("Error while retrieving Ticker FX Reference Source Rules from Endur Connector: " + ex.getMessage());
 			for (StackTraceElement ste : ex.getStackTrace()) {
-				logger.error(ste.toString());
+				Logger.error(ste.toString());
 			}
 			throw ex;
 		} 

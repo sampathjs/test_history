@@ -375,8 +375,9 @@ public enum DefaultReference {
 	EMAIL_STATUS_TRANSITION (DefaultReferenceType.PROCESS_TRANSITION_TYPE, 378, "Email Status Transition", 0l),
 	ACTION_REJECT (DefaultReferenceType.ACTION, 379, "Order Rejection", 0l),
 	ACTION_PULL (DefaultReferenceType.ACTION, 380, "Order Pull", 0l),
-	ACTION_CANCEL (DefaultReferenceType.ACTION, 381, "Order Cancel", 0l),
+	ACTION_CANCEL (DefaultReferenceType.ACTION, 381, "Order Cancel", 0l),	
 	// 382 already used above
+	FILL_STATUS_PROCESSING (DefaultReferenceType.FILL_STATUS, 383, "Processing", 921000l),
 	;
 	
 	private final ReferenceTo ref;

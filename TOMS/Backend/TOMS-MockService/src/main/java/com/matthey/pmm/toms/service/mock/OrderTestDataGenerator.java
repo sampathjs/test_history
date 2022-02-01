@@ -57,6 +57,8 @@ import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
+import org.tinylog.Logger;
+
 @Service
 @Transactional
 public class OrderTestDataGenerator {
@@ -157,6 +159,7 @@ public class OrderTestDataGenerator {
 				null, 0.0d, null, null, Arrays.asList(), Arrays.asList(), Arrays.asList(), 
 				// << order fields
 				0.0d,  0.0d, 0.0d,  Arrays.asList());
+		Logger.info("Creating new Test Reference Order");
 		fillOrderFields(newTestOrder);
 		newTestOrder.setOrderTypeName(refConverter.toManagedEntity(DefaultReference.ORDER_TYPE_REFERENCE_ORDER.getEntity()));
 		newTestOrder.setContangoBackwardation(randomDoubleOrNull(MAX_CONTANGO_BACKWARDATION));
@@ -169,6 +172,7 @@ public class OrderTestDataGenerator {
 	}
 
 	public Order createTestLimitOrder() {
+		Logger.info("Creating new Test Limit Order");
 		LimitOrder newTestOrder = new LimitOrder(null, 1, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
 				null, null, null, null, null, 0.0d, null, null, Arrays.asList(), Arrays.asList(), Arrays.asList(), null, null, null, null, null, null, null, null, null, null, null);
 		fillOrderFields(newTestOrder);

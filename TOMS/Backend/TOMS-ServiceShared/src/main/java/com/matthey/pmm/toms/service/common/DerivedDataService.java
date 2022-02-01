@@ -8,8 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +21,8 @@ import com.matthey.pmm.toms.transport.TickerFxRefSourceRuleTo;
 import com.matthey.pmm.toms.transport.TickerPortfolioRuleTo;
 import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
+import org.tinylog.Logger;
+
 /**
  * Service using orders and validation rules as input and returning the values of certain Endur fields to be populated.
  * @author jwaechter
@@ -31,9 +31,7 @@ import com.matthey.pmm.toms.transport.TickerRefSourceRuleTo;
 
 @Service
 @Transactional
-public class DerivedDataService {
-    private static final Logger logger = LoggerFactory.getLogger(DerivedDataService.class);
-	
+public class DerivedDataService {	
 	/**
 	 * Connector used to connect to other instances of the service to load the validation rules.
 	 */
@@ -52,7 +50,7 @@ public class DerivedDataService {
     	if (filteredRules.size() == 0) {
     		String msg = "Can not identify a matching index for the provided combination of reference source from leg '" 
     				+ leg + "' and order " + referenceOrder;
-    		logger.error(msg);
+    		Logger.error(msg);
     		throw new RuntimeException(msg);
     	}
     	return indexRepo.findById(filteredRules.get(0).idIndex()).get();

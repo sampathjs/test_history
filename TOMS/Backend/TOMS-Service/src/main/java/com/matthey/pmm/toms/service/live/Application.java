@@ -9,8 +9,6 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import org.tinylog.Logger;
 
 //import com.fasterxml.jackson.databind.Module;
 //import com.fasterxml.jackson.datatype.guava.GuavaModule;
@@ -118,10 +118,9 @@ public class Application implements WebMvcConfigurer {
     @Bean
     public CommandLineRunner startupActions (MasterDataSynchronisation masterDataSynchronisation) {
     	return (args) -> { 
-    		Logger logger = LogManager.getLogger(Application.class);
-    		logger.info("Starting Masterdata Synchronisation on Startup");
+    		Logger.info("Starting Masterdata Synchronisation on Startup");
     		masterDataSynchronisation.syncMasterdataWithEndur();
-    		logger.info("Finished Masterdata Synchronisation on Startup");
+    		Logger.info("Finished Masterdata Synchronisation on Startup");
     	};
     }
     

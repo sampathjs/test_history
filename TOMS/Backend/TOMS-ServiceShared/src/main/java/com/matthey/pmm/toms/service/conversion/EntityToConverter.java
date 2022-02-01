@@ -7,9 +7,6 @@ import java.util.Optional;
 
 import javax.transaction.Transactional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.matthey.pmm.toms.model.CreditCheck;
 import com.matthey.pmm.toms.model.DatabaseFile;
 import com.matthey.pmm.toms.model.Fill;
@@ -37,9 +34,9 @@ import com.matthey.pmm.toms.repository.UserRepository;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.exception.ConversionException;
 
-public abstract class EntityToConverter <Entity, TO> {
-    protected static final Logger logger = LoggerFactory.getLogger(EntityToConverter.class);
-    
+import org.tinylog.Logger;
+
+public abstract class EntityToConverter <Entity, TO> {    
 	/**
 	 * Converts an entity to its corresponding TO.
 	 * @param entity The entity to be converted to a TO.
@@ -220,7 +217,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the reference type having ID #" + refTypeId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return type.get();
@@ -239,7 +236,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the reference having ID #" + refId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return ref.get();
@@ -258,7 +255,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the party having ID #" + partyId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return party.get();
@@ -277,7 +274,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the user having ID #" + userId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return user.get();
@@ -296,7 +293,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the fill having ID #" + fillId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return fill.get();
@@ -315,7 +312,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the order comment having ID #" + orderCommentId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return orderComment.get();
@@ -334,7 +331,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the credit check having ID #" + creditCheckId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return creditCheck.get();
@@ -353,7 +350,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the order status having ID #" + orderStatusId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return orderStatus.get();
@@ -372,7 +369,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the index having ID #" + indexId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return index.get();
@@ -391,7 +388,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the Reference Order Leg having ID #" + legId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return leg.get();
@@ -410,7 +407,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the Database File having ID #" + databaseFileId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return file.get();
@@ -429,7 +426,7 @@ public abstract class EntityToConverter <Entity, TO> {
 			String msg = "Error while converting Transport Object '" + to.toString() + "': "
 					+ " can't find the Order having ID #" + orderId + "."
 					+ " Please ensure all instances of member variables are present before conversion.";			
-			logger.error(msg);
+			Logger.error(msg);
 			throw new ConversionException (msg);
 		}
 		return file.get();

@@ -1,8 +1,6 @@
 package com.matthey.pmm.toms.service.live;
 
 import com.google.common.base.Stopwatch;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.Filter;
@@ -17,11 +15,11 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import org.tinylog.Logger;
+
 @Component
 @WebFilter("/**")
 public class ServiceRequestFilter implements Filter {
-    private static final Logger logger = LogManager.getLogger(ServiceRequestFilter.class);
-
     @Override
     public void init(FilterConfig filterConfig) {
     }
@@ -31,15 +29,15 @@ public class ServiceRequestFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String method = httpServletRequest.getMethod();
         String uri = httpServletRequest.getRequestURI();
-        logger.info("Processing HTTP " + method + " " + httpServletRequest.getRequestURL());        
+        Logger.info("Processing HTTP " + method + " " + httpServletRequest.getRequestURL());        
         Stopwatch stopwatch = Stopwatch.createStarted();
         try {
             chain.doFilter(request, response);
         } catch (ServletException  | IOException e) {
-            logger.error("an error has occurred: " + e.getMessage(), e);
+            Logger.error("an error has occurred: " + e.getMessage(), e);
         } finally {
             stopwatch.stop();
-            logger.info("finished request {} {} within {} ms", method, uri, stopwatch.elapsed(TimeUnit.MILLISECONDS));
+            Logger.info("finished request {} {} within {} ms", method, uri, stopwatch.elapsed(TimeUnit.MILLISECONDS));
         }
     }
 

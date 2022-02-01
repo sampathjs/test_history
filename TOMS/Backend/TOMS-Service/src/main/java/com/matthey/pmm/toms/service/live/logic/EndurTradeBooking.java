@@ -1,12 +1,11 @@
 package com.matthey.pmm.toms.service.live.logic;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -28,11 +27,24 @@ import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.common.DerivedDataService;
 import com.matthey.pmm.toms.service.conversion.FillConverter;
 import com.matthey.pmm.toms.service.logic.ServiceConnector;
+import com.matthey.pmm.tradebooking.DebugShowTo.DebugShowToBuilder;
+import com.matthey.pmm.tradebooking.InitializationByTemplateTo.InitializationByTemplateToBuilder;
+import com.matthey.pmm.tradebooking.InitializationTo.InitializationToBuilder;
+import com.matthey.pmm.tradebooking.LegTo;
+import com.matthey.pmm.tradebooking.LegTo.LegToBuilder;
+import com.matthey.pmm.tradebooking.ProcessingInstructionTo.ProcessingInstructionToBuilder;
+import com.matthey.pmm.tradebooking.PropertyTo;
+import com.matthey.pmm.tradebooking.PropertyTo.PropertyToBuilder;
+import com.matthey.pmm.tradebooking.PropertyTo.PropertyValueType;
+import com.matthey.pmm.tradebooking.TransactionProcessingTo.TransactionProcessingToBuilder;
+import com.matthey.pmm.tradebooking.TransactionTo;
+import com.matthey.pmm.tradebooking.TransactionTo.TransactionToBuilder;
+
+import org.tinylog.Logger;
+
 
 @Component
-public class EndurTradeBooking {
-	private final static Logger logger = LogManager.getLogger(EndurTradeBooking.class);
-	
+public class EndurTradeBooking {	
     @Autowired 
     private OrderRepository orderRepo;
     
@@ -61,17 +73,11 @@ public class EndurTradeBooking {
     @Value(value = "${toms.endur.service.tradebooking.template.limitOrder.forward.fixedPassThru:TOMS LIMIT FORWARD DEAL}")
     private String templateLimitOrderForwardFixedPassThru;
 
-    @Value(value = "${toms.endur.service.tradebooking.template.reference.fixing.sameCurrency:TOMS REFERENCE FIXING TRADE}")
-    private String templateReferenceOrderFixingSameCurrency;
-
-    @Value(value = "${toms.endur.service.tradebooking.template.reference.fixing.differrentCurrency:TOMS REFERENCE FIXING TRADE}")
-    private String templateReferenceOrderFixingDifferentCurrency;
+    @Value(value = "${toms.endur.service.tradebooking.template.reference.fixing:TOMS REFERENCE FIXING TRADE}")
+    private String templateReferenceOrderFixing;
     
-    @Value(value = "${toms.endur.service.tradebooking.template.reference.averaging.sameCurrency:TOMS REFERENCE AVERAGE TRADE}")
-    private String templateReferenceOrderAveragingSameCurrency;
-
-    @Value(value = "${toms.endur.service.tradebooking.template.reference.averaging.differrentCurrency:TOMS REFERENCE AVERAGE TRADE}")
-    private String templateReferenceOrderAveragingDifferentCurrency;
+    @Value(value = "${toms.endur.service.tradebooking.template.reference.averaging:TOMS REFERENCE AVERAGE TRADE}")
+    private String templateReferenceOrderAveraging;
     
     @Value(value = "${toms.endur.service.tradebooking.endurDateFormat:dd.MMM.YYYY}")
     private String dateFormatEndur;
@@ -84,10 +90,10 @@ public class EndurTradeBooking {
     }
     
     public void processOpenFills () {
-    	logger.info("************************************************* Starting to process open fill requests *************************************************");
+    	Logger.info("************************************************* Starting to process open fill requests *************************************************");
     	List<Order> orderWithOpenFills = orderRepo.findAllLatestOrdersWithFillStatusIn(Arrays.asList(DefaultReference.FILL_STATUS_OPEN.getEntity().id()));
-    	logger.info("The following orders have been identified to have open fills:");
-    	orderWithOpenFills.forEach(x -> logger.info(x.toString()));
+    	Logger.info("The following orders have been identified to have open fills:");
+    	orderWithOpenFills.forEach(x -> Logger.info(x.toString()));
     	// identify open fill within Order
     	for (Order order : orderWithOpenFills) {
     		for (Fill fill : order.getFills()) {
@@ -96,22 +102,22 @@ public class EndurTradeBooking {
     			}
     		}
     	}
-    	logger.info("************************************************* Finished processing of open fill requests **********************************************");    	
+    	Logger.info("************************************************* Finished processing of open fill requests **********************************************");    	
     }
 
 	private void processOpenFill(Order order, Fill fill) {
-		logger.info("For order #" + order.getOrderId() + " the fill #" + fill.getId() + " has been identified to be in status open");
-		logger.info("Generating Deal Creation Action Plan");
-		String dealCreationActionPlan;
+		Logger.info("For order #" + order.getOrderId() + " the fill #" + fill.getId() + " has been identified to be in status open");
+		Logger.info("Generating Deal Creation Action Plan");
+		TransactionTo dealCreationActionPlan;
 		if (order instanceof LimitOrder) {
 			dealCreationActionPlan = createLimitOrderDealCreationPlan ((LimitOrder)order, fill);
 		} else {
 			dealCreationActionPlan = createReferenceOrderDealCreationPlan ((ReferenceOrder)order, fill);
 		}
-		logger.info("Deal Creation Action Plan has been generated.");
-		logger.debug(dealCreationActionPlan);
+		Logger.info("Deal Creation Action Plan has been generated.");
+		Logger.debug(dealCreationActionPlan);
 		String fileName = createFileName (order, fill);
-		logger.info("The deal creation plan is going to be submitted as file '" + fileName + "' for client '" + clientName + "' to Endur");
+		Logger.info("The deal creation plan is going to be submitted as file '" + fileName + "' for client '" + clientName + "' to Endur");
 		submitDealBookingRequest(order, fill, dealCreationActionPlan, fileName);
 	}
 
@@ -119,31 +125,38 @@ public class EndurTradeBooking {
 		return "" + order.getOrderId() + "_" + fill.getId() + ".trade";
 	}
 
-	private void submitDealBookingRequest(Order order, Fill fill, String dealCreationActionPlan, String fileName) {
+	private void submitDealBookingRequest(Order order, Fill fill, TransactionTo dealCreationActionPlan, String fileName) {
 		// update fill and order to transition
-		fill.setFillStatus(refRepo.findById(DefaultReference.FILL_STATUS_TRANSITION.getEntity().id()).get());
-		logger.info("Updating Order Fill to Status" + fill.getFillStatus().getValue());
+		fill.setFillStatus(refRepo.findById(DefaultReference.FILL_STATUS_PROCESSING.getEntity().id()).get());
+		Logger.info("Updating Order Fill to Status" + fill.getFillStatus().getValue());
 		updateFill(order, fill);
 		// now request Endur to book the trade
 		try {
-			Long endurTradeId = endurConnector.postWithResponse("/shared/tradeBooking?clientName={clientName}&&fileName={fileName}&&overwrite=false",
+			Long endurTradeId = endurConnector.postWithResponse("/shared/tradeBookingJson?clientName={clientName}&&fileName={fileName}&&overwrite=false",
 					Long.class, dealCreationActionPlan, clientName, fileName);
-			logger.info("Endur Trade #" + endurTradeId + " has been created successfully for order #" + order.getOrderId() + ", fill #" + fill.getId());
-			fill.setFillStatus(refRepo.findById(DefaultReference.FILL_STATUS_COMPLETED.getEntity().id()).get());
-			fill.setTradeId(endurTradeId);
+			if (endurTradeId != null && endurTradeId.longValue() == -1) {
+				Logger.error("Endur Trade #" + endurTradeId + " has NOT been created successfully for order #" + order.getOrderId() + ", fill #" + fill.getId());
+				fill.setFillStatus(refRepo.findById(DefaultReference.FILL_STATUS_FAILED.getEntity().id()).get());
+				fill.setTradeId(null);
+			} else {
+				Logger.info("Endur Trade #" + endurTradeId + " has been created successfully for order #" + order.getOrderId() + ", fill #" + fill.getId());
+				fill.setFillStatus(refRepo.findById(DefaultReference.FILL_STATUS_COMPLETED.getEntity().id()).get());
+				fill.setTradeId(endurTradeId);
+			}
 		} catch (HttpClientErrorException | HttpServerErrorException  | UnknownHttpStatusCodeException ex) {
-			logger.error("Error on Endur side while trying to book trade for order #" + order.getOrderId() + ", fill #" + fill.getId() 
+			Logger.error("Error on Endur side while trying to book trade for order #" + order.getOrderId() + ", fill #" + fill.getId() 
 				+ " : " + ex.toString());
 			StringBuilder sb = new StringBuilder();
 			for (StackTraceElement ste : ex.getStackTrace()) {
 				sb.append("\n").append(ste.toString());	
 			}
-			logger.error(sb.toString());
+			Logger.error(sb.toString());
 			fill.setFillStatus(refRepo.findById(DefaultReference.FILL_STATUS_FAILED.getEntity().id()).get());
 			fill.setErrorMessage(ex.toString());
-		}		
-		// update fill and order to new status
-		updateFill(order, fill);
+		} finally {
+			// update fill and order to new status
+			updateFill(order, fill);			
+		}
 	}
 
 	private void updateFill(Order order, Fill fill) {
@@ -156,167 +169,454 @@ public class EndurTradeBooking {
 						order.getOrderId(), fill.getId());
 			}			
 		} catch (HttpClientErrorException | HttpServerErrorException  | UnknownHttpStatusCodeException ex) {
-			logger.error("Unable to update fill status to '" + fill.getFillStatus().getValue() + "' for "
+			Logger.error("Unable to update fill status to '" + fill.getFillStatus().getValue() + "' for "
 					+ "order #" + order.getOrderId() + ", fill #" + fill.getId() + ": " + ex.toString());
 			StringBuilder sb = new StringBuilder();
 			for (StackTraceElement ste : ex.getStackTrace()) {
 				sb.append("\n").append(ste.toString());	
 			}
-			logger.error(sb.toString());			
+			Logger.error(sb.toString());			
 		}
 	}
 
-	private String createReferenceOrderDealCreationPlan(ReferenceOrder referenceOrder, Fill fill) {
-		logger.info("Order Type is ReferenceOrder, creating reference order deal creation action plan");
-		logger.info("Contract Type of reference order is " + referenceOrder.getContractType().getValue());
-		String actionPlan = null;
-		if (referenceOrder.getContractType().getId() == DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING.getEntity().id()) {
-			actionPlan =  createReferenceFixingOrderDealCreationPlan(referenceOrder, fill);
-		} else if (referenceOrder.getContractType().getId() == DefaultReference.CONTRACT_TYPE_REFERENCE_AVERAGE.getEntity().id()) {
-			actionPlan = createReferenceAveragingOrderDealCreationPlan(referenceOrder, fill);
-		} else {
-			String msg = "Unknown contract type '" + referenceOrder.getContractType().getValue() + "'(" +  referenceOrder.getContractType().getId() + ")"
-					+ " on Reference Order #" + referenceOrder.getOrderId();
-			logger.error(msg);
-			throw new RuntimeException (msg);
+	private TransactionTo createReferenceOrderDealCreationPlan(ReferenceOrder order, Fill fill) {
+		Logger.info("Order Type is ReferenceOrder, creating reference order deal creation action plan");
+		Logger.info("Contract Type of reference order is " + order.getContractType().getValue());
+		List<LegTo> legs = new ArrayList<>(order.getLegs().size());
+		int legNo=0;
+		int globalOrderIdLegAttributes = 6;
+		for (ReferenceOrderLeg leg : order.getLegs()) {
+			LegToBuilder legBuilder = new LegToBuilder();
+			IndexEntity projIndex = derivedDataService.getReferenceOrderLegIndexFromTickerRefSourceRule(order, leg);
+			legBuilder.withLegId(legNo++);
+			List<PropertyTo> legProperties = new ArrayList<>();
+			List<PropertyTo> resetProperties = new ArrayList<>();
+			if (legNo > 0) {
+				legProperties.add(new PropertyToBuilder()
+						.withGlobalOrderId(globalOrderIdLegAttributes++)
+						.withName("Projection Index")
+						.withValue(projIndex.getIndexName().getValue())
+						.withValueType(PropertyValueType.STRING)
+						.build());
+			} 
+			legProperties.add(new PropertyToBuilder()
+					.withGlobalOrderId(globalOrderIdLegAttributes++)
+					.withName("Start Date")
+					.withValue(formatDateForEndur(leg.getFixingStartDate()))
+					.withValueType(PropertyValueType.DATE)
+					.build());
+			legProperties.add(new PropertyToBuilder()
+					.withGlobalOrderId(globalOrderIdLegAttributes++)
+					.withName("Maturity Date")
+					.withValue(formatDateForEndur(leg.getFixingEndDate()))
+					.withValueType(PropertyValueType.DATE)
+					.build());
+			if (legNo > 0) {
+				legProperties.add(new PropertyToBuilder()
+						.withGlobalOrderId(globalOrderIdLegAttributes++)
+						.withName("Unit")
+						.withValue(order.getBaseQuantityUnit().getValue())
+						.withValueType(PropertyValueType.STRING)
+						.build());
+			}
+			legProperties.add(new PropertyToBuilder()
+					.withGlobalOrderId(globalOrderIdLegAttributes++)
+					.withName("NotnldpSwap")
+					.withValue(Double.toString(leg.getNotional()))
+					.withValueType(PropertyValueType.FLOAT)
+					.build());
+			if (legNo > 0 ) {
+				resetProperties.add(new PropertyToBuilder()
+						.withGlobalOrderId(globalOrderIdLegAttributes++)
+						.withName("Reference Source")
+						.withValue(leg.getRefSource().getValue())
+						.withValueType(PropertyValueType.STRING)
+						.build());
+			}
+			if (legNo > 0) {
+				legProperties.add(new PropertyToBuilder()
+						.withGlobalOrderId(globalOrderIdLegAttributes++)
+						.withName("Currency")
+						.withValue(leg.getSettleCurrency().getValue())
+						.withValueType(PropertyValueType.STRING)
+						.build());				
+				if (leg.getSettleCurrency().getValue().equals(order.getTermCurrency().getValue())) {
+					Logger.info("Leg #" + legNo + " has same settle currency like term currency (" + order.getTermCurrency().getValue() + ")");
+				} else {
+					Logger.info("Leg #" + legNo + " has different settle currency (" +  leg.getSettleCurrency().getValue() + ")" +
+							" like term currency (" + order.getTermCurrency().getValue() + ")");
+					legProperties.add(new PropertyToBuilder()
+							.withGlobalOrderId(globalOrderIdLegAttributes++)
+							.withName("Currency Conversion Method")
+							.withValue("Reset Level")
+							.withValueType(PropertyValueType.STRING)
+							.build());
+					legProperties.add(new PropertyToBuilder()
+							.withGlobalOrderId(globalOrderIdLegAttributes++)
+							.withName("Currency Conversion Index")
+							.withValue("FX_" + leg.getSettleCurrency().getValue() + "." + order.getTermCurrency().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build());
+					legProperties.add(new PropertyToBuilder()
+							.withGlobalOrderId(globalOrderIdLegAttributes++)
+							.withName("Currency FX Ref Source")
+							.withValue(leg.getFxIndexRefSource().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build());					
+				}
+			}
+			if (legNo == 0) {
+				resetProperties.add(new PropertyToBuilder()
+						.withGlobalOrderId(globalOrderIdLegAttributes + order.getLegs().size()*5)
+						.withName("Payment Date Offset")
+						.withValue(formatDateForEndur(leg.getPaymentDate()))
+						.withValueType(PropertyValueType.STRING)
+						.build());
+			}
+			
+			legBuilder.withLegProperties(legProperties);			
+			legBuilder.withResetProperties(resetProperties);
+			legs.add(legBuilder.build());
 		}
-		logger.info("Finished creation of action plan for reference order  #" + referenceOrder.getOrderId() + ", fill #" + fill.getId());
+		globalOrderIdLegAttributes++;
+		String templateReference;
+		if (order.getContractType().getId() == DefaultReference.CONTRACT_TYPE_REFERENCE_FIXING.getEntity().id()) {
+			templateReference =  templateReferenceOrderFixing;
+		} else if (order.getContractType().getId() == DefaultReference.CONTRACT_TYPE_REFERENCE_AVERAGE.getEntity().id()) {
+			templateReference = templateReferenceOrderAveraging;
+		} else {
+			String msg = "Unknown contract type '" + order.getContractType().getValue() + "'(" +  order.getContractType().getId() + ")"
+					+ " on Reference Order #" + order.getOrderId();
+			Logger.error(msg);
+			throw new RuntimeException (msg);
+		}		
+		
+		@SuppressWarnings("unchecked")
+		TransactionTo actionPlan = new TransactionToBuilder()
+				.withProcessingInstruction(new ProcessingInstructionToBuilder()
+						.withInitialization(new InitializationToBuilder()
+								.withByTemplate(new InitializationByTemplateToBuilder()
+										.withTemplateReference(templateReference).build())
+								.build())
+						.withDebugShow(Arrays.asList(new DebugShowToBuilder().withGlobalOrderId(22).build()))
+						.withTransactionProcessing(Arrays.asList(new TransactionProcessingToBuilder().withGlobalOrderId("MAX").withStatus("Validated").build()))
+						.build())
+				.withTransactionProperties(Arrays.asList(
+						new PropertyToBuilder()
+							.withGlobalOrderId(1)
+							.withName("Buy Sell")
+							.withValue(order.getBuySell().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(2)
+							.withName("Reference String")
+							.withValue(order.getReference())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(3)
+							.withName("Internal Business Unit")
+							.withValue(order.getInternalBu().getName())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(4)
+							.withName("Internal Portfolio")
+							.withValue(order.getIntPortfolio().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(5)
+							.withName("External Business Unit")
+							.withValue(order.getExternalBu().getName())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(globalOrderIdLegAttributes++)
+							.withName("Form")
+							.withValue(order.getMetalForm().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(globalOrderIdLegAttributes++)
+							.withName("Loco")
+							.withValue(order.getMetalLocation().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(globalOrderIdLegAttributes++)
+							.withName("Metal Price Spread")
+							.withValue(Double.toString(order.getMetalPriceSpread()))
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(globalOrderIdLegAttributes++)
+							.withName("FX Rate Spread")
+							.withValue(Double.toString(order.getFxRateSpread()))
+							.withValueType(PropertyValueType.STRING)
+							.build(),							
+						new PropertyToBuilder()
+							.withGlobalOrderId(globalOrderIdLegAttributes++)
+							.withName("CB Rate")
+							.withValue(Double.toString(order.getContangoBackwardation()))
+							.withValueType(PropertyValueType.STRING)
+							.build()						
+						) // transaction property list
+					) // withTransactionProperties
+				.withLegs(legs)
+				.build();
 		return actionPlan;
 	}
 	
-	private String createReferenceAveragingOrderDealCreationPlan(ReferenceOrder referenceOrder, Fill fill) {
-		String actionPlan=null;
-		logger.info("Deciding if same or different currency deal action plan has to be created");
-//		if (isSameCurrency(referenceOrder, fill)) {
-//			actionPlan = createReferenceFixingOrderWithSameCurrencyDealCreationPlan (referenceOrder, fill);
-//		} else {
-//			actionPlan = createReferenceFixingOrderWithDifferentCurrencyDealCreationPlan (referenceOrder, fill);
-//		}
-		
-		return actionPlan;
-	}
-
-	private String createReferenceFixingOrderDealCreationPlan(ReferenceOrder referenceOrder, Fill fill) {
-		String actionPlan=null;
-		logger.info("Deciding if same or different currency deal action plan has to be created");
-//		if (isSameCurrency(referenceOrder, fill)) {
-//			actionPlan = createReferenceAveragingOrderWithSameCurrencyDealCreationPlan (referenceOrder, fill);
-//		} else {
-//			actionPlan = createReferenceAveragingOrderWithDifferentCurrencyDealCreationPlan (referenceOrder, fill);
-//		}
-		return actionPlan;
-	}
-
-//	private boolean isSameCurrency(ReferenceOrder order, Fill fill) {
-//		
-//	}
-
-	private String createLimitOrderDealCreationPlan(LimitOrder limitOrder, Fill fill) {
-		logger.info("Order Type is LimitOrder, creating limit order deal creation action plan");
-		String actionPlan;
+	private TransactionTo createLimitOrderDealCreationPlan(LimitOrder limitOrder, Fill fill) {
+		Logger.info("Order Type is LimitOrder, creating limit order deal creation action plan");
+		TransactionTo actionPlan;
 		if (isPassThru(limitOrder, fill)) {
 			actionPlan = createLimitOrderPassThruDealCreationPlan (limitOrder, fill);
 		} else {
 			actionPlan = createLimitOrderNonPassThruDealCreationPlan (limitOrder, fill);
 		}
-		logger.info("Finished creation of action plan for limit order  #" + limitOrder.getOrderId() + ", fill #" + fill.getId());
+		Logger.info("Finished creation of action plan for limit order  #" + limitOrder.getOrderId() + ", fill #" + fill.getId());
 		return actionPlan;
 	}
 
-	private String createLimitOrderPassThruDealCreationPlan(LimitOrder order, Fill fill) {
-		StringBuilder actionPlan = new StringBuilder();
-		actionPlan.append("loadTemplate(").append(templateLimitOrderForwardFixed).append(")");
-		actionPlan.append("\nsetTranField(Buy Sell, ").append(order.getBuySell().getValue()).append(")");
-		actionPlan.append("\nsetTranField(Reference String, ").append(order.getReference()).append(")");
-		actionPlan.append("\nsetTranField(Internal Business Unit, ").append(order.getInternalBu().getName()).append(")");
-		actionPlan.append("\nsetTranField(Internal Portfolio, ").append(order.getIntPortfolio().getValue()).append(")");
-		actionPlan.append("\nsetTranField(External Business Unit, ").append(order.getExternalBu().getName()).append(")");
-		actionPlan.append("\nsetTranField(Pass Through Internal Business Unit, ").append(fill.getTrader().getDefaultInternalBu().getName()).append(")");
-		actionPlan.append("\nsetTranField(Pass Through Internal Legal Entity, ").append(fill.getTrader().getDefaultInternalBu().getLegalEntity().getName()).append(")");
-		String passThruPortfolio = getPassThruPortfolio (order, fill);
-		actionPlan.append("\nsetTranField(Pass Through Internal Portfolio, ").append(passThruPortfolio).append(")");
-		actionPlan.append("\nsetTranField(Fx Base Currency Unit, ").append(order.getBaseCurrency().getValue()).append(")");
-		actionPlan.append("\nsetTranField(Ticker, ").append(order.getTicker().getValue()).append(")");
-		actionPlan.append("\nsetTranField(FX Dealt Amount,").append(fill.getFillQuantity()).append(")");
-		actionPlan.append("\nsetTranField(Trade Price, ").append(fill.getFillPrice()).append(")");
-		actionPlan.append("\nsetTranField(Settle Date, ").append(formatDateForEndur(order.getSettleDate())).append(")"); 
-		actionPlan.append("\nsetTranField(Fx Term Settle Date, ").append(formatDateForEndur(order.getSettleDate())).append(")"); // What is the term settle date?
-		actionPlan.append("\nsetTranField(Cashflow Type, ").append(order.getPriceType().getValue()).append(")");
-		actionPlan.append("\nsetTranField(FX Date, ").append(formatDateForEndur(order.getSettleDate())).append(")"); // What is the FX Date?
-		actionPlan.append("\nsetTranField(Form, ").append(order.getMetalForm().getValue()).append(")");
-		actionPlan.append("\nsetTranField(Loco, ").append(order.getMetalLocation().getValue()).append(")");
-		actionPlan.append("\ndebugShowToUser()");
-		actionPlan.append("\nprocess(Validated)");
-		return actionPlan.toString();
+	private TransactionTo createLimitOrderPassThruDealCreationPlan(LimitOrder order, Fill fill) {
+		String passThruPortfolio = getPassThruPortfolio (order, fill);		
+		
+		@SuppressWarnings("unchecked")
+		TransactionTo actionPlan = new TransactionToBuilder()
+				.withProcessingInstruction(new ProcessingInstructionToBuilder()
+						.withInitialization(new InitializationToBuilder()
+								.withByTemplate(new InitializationByTemplateToBuilder()
+										.withTemplateReference(templateLimitOrderForwardFixed).build())
+								.build())
+						.withDebugShow(Arrays.asList(new DebugShowToBuilder().withGlobalOrderId(19).build()))
+						.withTransactionProcessing(Arrays.asList(new TransactionProcessingToBuilder().withGlobalOrderId("MAX").withStatus("Validated").build()))
+						.build())
+				.withTransactionProperties(Arrays.asList(
+						new PropertyToBuilder()
+							.withGlobalOrderId(1)
+							.withName("Buy Sell")
+							.withValue(order.getBuySell().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(2)
+							.withName("Reference String")
+							.withValue(order.getReference())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(3)
+							.withName("Internal Business Unit")
+							.withValue(order.getInternalBu().getName())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(4)
+							.withName("Internal Portfolio")
+							.withValue(order.getIntPortfolio().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(5)
+							.withName("External Business Unit")
+							.withValue(order.getExternalBu().getName())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(6)
+							.withName("Pass Through Internal Business Unit")
+							.withValue(fill.getTrader().getDefaultInternalBu().getName())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(7)
+							.withName("Pass Through Internal Legal Entity")
+							.withValue(fill.getTrader().getDefaultInternalBu().getLegalEntity().getName())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(8)
+							.withName("Pass Through Internal Portfolio")
+							.withValue(passThruPortfolio)
+							.withValueType(PropertyValueType.STRING)
+							.build(),							
+						new PropertyToBuilder()
+							.withGlobalOrderId(9)
+							.withName("Fx Base Currency Unit")
+							.withValue(order.getBaseCurrency().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(10)
+							.withName("Ticker")
+							.withValue(order.getTicker().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(11)
+							.withName("FX Dealt Amount")
+							.withValue(Double.toString(fill.getFillQuantity()))
+							.withValueType(PropertyValueType.FLOAT)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(12)
+							.withName("Trade Price")
+							.withValue(Double.toString(fill.getFillPrice()))
+							.withValueType(PropertyValueType.FLOAT)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(13)
+							.withName("Settle Date")
+							.withValue(formatDateForEndur(order.getSettleDate()))
+							.withValueType(PropertyValueType.DATE)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(14)
+							.withName("Fx Term Settle Date")
+							.withValue(formatDateForEndur(order.getSettleDate()))
+							.withValueType(PropertyValueType.DATE)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(15)
+							.withName("Cashflow Type")
+							.withValue(order.getPriceType().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(16)
+							.withName("FX Date")
+							.withValue(formatDateForEndur(order.getSettleDate()))
+							.withValueType(PropertyValueType.DATE)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(17)
+							.withName("Form")
+							.withValue(order.getMetalForm().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(18)
+							.withName("Loco")
+							.withValue(order.getMetalLocation().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build()
+						) // transaction property list
+					) // withTransactionProperties
+				.build();
+		return actionPlan;
 	}
 
-	private String createLimitOrderNonPassThruDealCreationPlan(LimitOrder order, Fill fill) {
-		StringBuilder actionPlan = new StringBuilder();
-		actionPlan.append("loadTemplate(").append(templateLimitOrderForwardFixed).append(")");
-		actionPlan.append("\nsetTranField(Buy Sell, ").append(order.getBuySell().getValue()).append(")");
-		actionPlan.append("\nsetTranField(Reference String, ").append(order.getReference()).append(")");
-		actionPlan.append("\nsetTranField(Internal Business Unit, ").append(order.getInternalBu().getName()).append(")");
-		actionPlan.append("\nsetTranField(Internal Portfolio, ").append(order.getIntPortfolio().getValue()).append(")");
-		actionPlan.append("\nsetTranField(External Business Unit, ").append(order.getExternalBu().getName()).append(")");
-		actionPlan.append("\nsetTranField(Fx Base Currency Unit, ").append(order.getBaseCurrency().getValue()).append(")");
-		actionPlan.append("\nsetTranField(Ticker, ").append(order.getTicker().getValue()).append(")");
-		actionPlan.append("\nsetTranField(FX Dealt Amount,").append(fill.getFillQuantity()).append(")");
-		actionPlan.append("\nsetTranField(Trade Price, ").append(fill.getFillPrice()).append(")");
-		actionPlan.append("\nsetTranField(Settle Date, ").append(formatDateForEndur(order.getSettleDate())).append(")"); 
-		actionPlan.append("\nsetTranField(Fx Term Settle Date, ").append(formatDateForEndur(order.getSettleDate())).append(")"); // What is the term settle date?
-		actionPlan.append("\nsetTranField(Cashflow Type, ").append(order.getPriceType().getValue()).append(")");
-		actionPlan.append("\nsetTranField(FX Date, ").append(formatDateForEndur(order.getSettleDate())).append(")"); // What is the FX Date?
-		actionPlan.append("\nsetTranField(Form, ").append(order.getMetalForm().getValue()).append(")");
-		actionPlan.append("\nsetTranField(Loco, ").append(order.getMetalLocation().getValue()).append(")");
-		actionPlan.append("\ndebugShowToUser()");
-		actionPlan.append("\nprocess(Validated)");
-		return actionPlan.toString();
+	private TransactionTo createLimitOrderNonPassThruDealCreationPlan(LimitOrder order, Fill fill) {
+		@SuppressWarnings("unchecked")
+		TransactionTo actionPlan = new TransactionToBuilder()
+				.withProcessingInstruction(new ProcessingInstructionToBuilder()
+						.withInitialization(new InitializationToBuilder()
+								.withByTemplate(new InitializationByTemplateToBuilder()
+										.withTemplateReference(templateLimitOrderForwardFixed).build())
+								.build())
+						.withDebugShow(Arrays.asList(new DebugShowToBuilder().withGlobalOrderId(16).build()))
+						.withTransactionProcessing(Arrays.asList(new TransactionProcessingToBuilder().withGlobalOrderId("MAX").withStatus("Validated").build()))
+						.build())
+				.withTransactionProperties(Arrays.asList(
+						new PropertyToBuilder()
+							.withGlobalOrderId(1)
+							.withName("Buy Sell")
+							.withValue(order.getBuySell().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(2)
+							.withName("Reference String")
+							.withValue(order.getReference())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(3)
+							.withName("Internal Business Unit")
+							.withValue(order.getInternalBu().getName())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(4)
+							.withName("Internal Portfolio")
+							.withValue(order.getIntPortfolio().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(5)
+							.withName("External Business Unit")
+							.withValue(order.getExternalBu().getName())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(6)
+							.withName("Fx Base Currency Unit")
+							.withValue(order.getBaseCurrency().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(7)
+							.withName("Ticker")
+							.withValue(order.getTicker().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(8)
+							.withName("FX Dealt Amount")
+							.withValue(Double.toString(fill.getFillQuantity()))
+							.withValueType(PropertyValueType.FLOAT)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(9)
+							.withName("Trade Price")
+							.withValue(Double.toString(fill.getFillPrice()))
+							.withValueType(PropertyValueType.FLOAT)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(10)
+							.withName("Settle Date")
+							.withValue(formatDateForEndur(order.getSettleDate()))
+							.withValueType(PropertyValueType.DATE)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(11)
+							.withName("Fx Term Settle Date")
+							.withValue(formatDateForEndur(order.getSettleDate()))
+							.withValueType(PropertyValueType.DATE)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(12)
+							.withName("Cashflow Type")
+							.withValue(order.getPriceType().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(13)
+							.withName("FX Date")
+							.withValue(formatDateForEndur(order.getSettleDate()))
+							.withValueType(PropertyValueType.DATE)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(14)
+							.withName("Form")
+							.withValue(order.getMetalForm().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build(),
+						new PropertyToBuilder()
+							.withGlobalOrderId(15)
+							.withName("Loco")
+							.withValue(order.getMetalLocation().getValue())
+							.withValueType(PropertyValueType.STRING)
+							.build()
+						) // transaction property list
+					) // withTransactionProperties
+				.build();
+		return actionPlan;
 	}
-	
-	private String createReferenceFixingOrderWithSameCurrencyDealCreationPlan(ReferenceOrder order,
-			Fill fill) {
-		StringBuilder actionPlan = new StringBuilder();
-		actionPlan.append("loadTemplate(").append(templateReferenceOrderFixingSameCurrency).append(")");
-		actionPlan.append("\nsetTranField(Buy Sell, ").append(order.getBuySell().getValue()).append(")");
-		actionPlan.append("\nsetTranField(Reference String, ").append(order.getReference()).append(")");
-		actionPlan.append("\nsetTranField(Internal Business Unit, ").append(order.getInternalBu().getName()).append(")");
-		actionPlan.append("\nsetTranField(Internal Portfolio, ").append(order.getIntPortfolio().getValue()).append(")");
-		actionPlan.append("\nsetTranField(External Business Unit, ").append(order.getExternalBu().getName()).append(")");
-		//TODO: Leg treatment?
-		order.getLegs().get(0).getFxIndexRefSource();
-		order.getLegs().get(0).getRefSource();
-		order.getLegs().get(0).getSettleCurrency();
-		int legNo=0;
-		for (ReferenceOrderLeg leg : order.getLegs()) {
-			IndexEntity projIndex = derivedDataService.getReferenceOrderLegIndexFromTickerRefSourceRule(order, leg);
-			actionPlan.append("\nsetLegField(").append(legNo).append(", Projection Index, ").append(projIndex.getId()).append(")");
-			actionPlan.append("\nsetLegField(").append(legNo).append(", Start Date, ")
-				.append(formatDateForEndur(order.getLegs().get(0).getFixingStartDate())).append(")");
-			actionPlan.append("\nsetLegField(").append(legNo).append(", Maturity Date, ")
-				.append(formatDateForEndur(order.getLegs().get(0).getFixingEndDate())).append(")");
-			actionPlan.append("\nsetLegField(0, NotnldpSwap, ").append(leg.getNotional()).append(")");
-			actionPlan.append("\nsetLegField(1, Unit, TOz)");
-			actionPlan.append("\nsetResetDefinitionField(1, Reference Source, LME AM)");
-			actionPlan.append("\nsetLegField(1, Currency, USD)");	
-			legNo++;
-		}
-		// TODO: other legs?
 		
-		actionPlan.append("\nsetResetDefinitionField(0, Payment Date Offset, ")
-			.append(formatDateForEndur(order.getLegs().get(0).getPaymentDate())).append(")");
-		actionPlan.append("\nsetTranField(Form, ").append(order.getMetalForm().getValue()).append(")");
-		actionPlan.append("\nsetTranField(Loco, ").append(order.getMetalLocation().getValue()).append(")");
-		actionPlan.append("\nsetTranField(Metal Price Spread, ").append(order.getMetalPriceSpread()).append(")");
-		actionPlan.append("\nsetTranField(FX Rate Spread, ").append(order.getFxRateSpread()).append(")");
-		actionPlan.append("\nsetTranField(CB Rate, ").append(order.getContangoBackwardation()).append(")");
-		actionPlan.append("\ndebugShowToUser()");
-		actionPlan.append("\nprocess(Validated)");		
-		
-		return actionPlan.toString();
-	}
-
-	
-	
 	private String getPassThruPortfolio(Order order, Fill fill) {
 		String orderPortfolioName = order.getIntPortfolio().getValue();
 		String orderPortfolioWithoutRegion = orderPortfolioName.substring(3);

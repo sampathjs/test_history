@@ -1,48 +1,29 @@
 package com.matthey.pmm.toms.service.impl;
 
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
-import com.matthey.pmm.toms.enums.v1.DefaultReferenceType;
-import com.matthey.pmm.toms.model.CacheInvalidate;
 import com.matthey.pmm.toms.model.DatabaseFile;
 import com.matthey.pmm.toms.model.Email;
-import com.matthey.pmm.toms.model.Reference;
-import com.matthey.pmm.toms.model.ReferenceOrder;
-import com.matthey.pmm.toms.repository.CacheInvalidateRepository;
 import com.matthey.pmm.toms.repository.DatabaseFileRepository;
 import com.matthey.pmm.toms.repository.EmailRepository;
-import com.matthey.pmm.toms.repository.ReferenceRepository;
-import com.matthey.pmm.toms.service.TomsCacheService;
 import com.matthey.pmm.toms.service.TomsEmailService;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.DatabaseFileConverter;
 import com.matthey.pmm.toms.service.conversion.EmailConverter;
-import com.matthey.pmm.toms.service.exception.IllegalDateFormatException;
 import com.matthey.pmm.toms.transport.DatabaseFileTo;
 import com.matthey.pmm.toms.transport.EmailTo;
 import com.matthey.pmm.toms.transport.ImmutableDatabaseFileTo;
