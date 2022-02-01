@@ -18,7 +18,8 @@
         "integer",
         "float",
         "boolean",
-        "date"
+        "date",
+        "date_time"
       ],
       "description": "the type of the value"
     },
