@@ -1,8 +1,8 @@
 package com.matthey.pmm.tradebooking.items;
 
-import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.matthey.pmm.tradebooking.InitializationByCloneTo;
 import com.matthey.pmm.tradebooking.TransactionTo;
+import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transaction;
@@ -13,13 +13,13 @@ import org.apache.logging.log4j.Logger;
 public class InitializationByCloneItem extends TransactionItem<InitializationByCloneTo, TransactionTo, Void, Transaction> {
     private static Logger logger = null;
 
-	private static Logger getLogger () {
-		if (logger == null) {
-			logger = LogManager.getLogger(InitializationByCloneItem.class);
-		}
-		return logger;
-	}
-    
+    private static Logger getLogger() {
+        if (logger == null) {
+            logger = LogManager.getLogger(InitializationByCloneItem.class);
+        }
+        return logger;
+    }
+
     @Builder
     public InitializationByCloneItem(int order, InitializationByCloneTo initializationByClone, TransactionTo transaction, Session ocSession, LogTable logTable) {
         super(order, initializationByClone, transaction, ocSession, logTable, Void.class);

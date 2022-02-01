@@ -1,8 +1,8 @@
 package com.matthey.pmm.tradebooking.items;
 
-import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.matthey.pmm.tradebooking.LegTo;
 import com.matthey.pmm.tradebooking.PropertyTo;
+import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Leg;
@@ -14,13 +14,13 @@ import org.apache.logging.log4j.Logger;
 public class LegPropertyItem extends TransactionItem<PropertyTo, LegTo, Transaction, Transaction> {
     private static Logger logger = null;
 
-	private static Logger getLogger () {
-		if (logger == null) {
-			logger = LogManager.getLogger(LegPropertyItem.class);
-		}
-		return logger;
-	}
-    
+    private static Logger getLogger() {
+        if (logger == null) {
+            logger = LogManager.getLogger(LegPropertyItem.class);
+        }
+        return logger;
+    }
+
     @Builder
     public LegPropertyItem(int order, PropertyTo property, LegTo leg, Session ocSession, LogTable logTable) {
         super(order, property, leg, ocSession, logTable, Transaction.class);
@@ -30,7 +30,7 @@ public class LegPropertyItem extends TransactionItem<PropertyTo, LegTo, Transact
     public Transaction apply(Transaction input) {
         getLogger().info("Processing command #" + order + " - setting a leg value");
         getLogger().info("On Leg #'" + context.getLegId() + " setting the field '" + item.getName() + "' to new value '" + item.getValue() + "'");
-        ensureLegCount (input, context.getLegId(), getLogger());
+        ensureLegCount(input, context.getLegId(), getLogger());
         Leg leg = input.getLeg(context.getLegId());
         Field field = leg.getField(item.getName());
         if (field == null) {

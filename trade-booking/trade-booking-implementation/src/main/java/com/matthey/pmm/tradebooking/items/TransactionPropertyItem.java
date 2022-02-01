@@ -1,8 +1,8 @@
 package com.matthey.pmm.tradebooking.items;
 
-import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.matthey.pmm.tradebooking.PropertyTo;
 import com.matthey.pmm.tradebooking.TransactionTo;
+import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.Field;
 import com.olf.openrisk.trading.Transaction;
@@ -13,13 +13,13 @@ import org.apache.logging.log4j.Logger;
 public class TransactionPropertyItem extends TransactionItem<PropertyTo, TransactionTo, Transaction, Transaction> {
     private static Logger logger = null;
 
-	private static Logger getLogger () {
-		if (logger == null) {
-			logger = LogManager.getLogger(TransactionPropertyItem.class);
-		}
-		return logger;
-	}
-    
+    private static Logger getLogger() {
+        if (logger == null) {
+            logger = LogManager.getLogger(TransactionPropertyItem.class);
+        }
+        return logger;
+    }
+
     @Builder
     public TransactionPropertyItem(int order, PropertyTo property, TransactionTo transaction, Session ocSession, LogTable logTable) {
         super(order, property, transaction, ocSession, logTable, Transaction.class);
