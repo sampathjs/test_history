@@ -446,7 +446,7 @@ public class EndurTradeBooking {
 						new PropertyToBuilder()
 							.withGlobalOrderId(9)
 							.withName("Fx Base Currency Unit")
-							.withValue(order.getBaseCurrency().getValue())
+							.withValue(order.getBaseQuantityUnit().getValue())
 							.withValueType(PropertyValueType.STRING)
 							.build(),
 						new PropertyToBuilder()
@@ -554,7 +554,7 @@ public class EndurTradeBooking {
 						new PropertyToBuilder()
 							.withGlobalOrderId(6)
 							.withName("Fx Base Currency Unit")
-							.withValue(order.getBaseCurrency().getValue())
+							.withValue(order.getBaseQuantityUnit().getValue())
 							.withValueType(PropertyValueType.STRING)
 							.build(),
 						new PropertyToBuilder()
