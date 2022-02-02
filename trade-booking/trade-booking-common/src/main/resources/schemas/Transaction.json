@@ -23,7 +23,7 @@
       ],
       "description": "the type of the value"
     },
-    "property_change_type": {
+    "change_type": {
       "type": "string",
       "default": "add",
       "enum": [
@@ -61,7 +61,7 @@
           "$ref": "#/$defs/property_value_type"
         },
         "change_type": {
-          "$ref": "#/$defs/property_change_type"
+          "$ref": "#/$defs/change_type"
         },
         "global_order_id": {
           "$ref": "#/$defs/property_global_order_id"
@@ -143,6 +143,9 @@
             "items": {
               "$ref": "#/$defs/property"
             }
+          },
+          "change_type": {
+            "$ref": "#/$defs/change_type"
           }
         },
         "additionalProperties": false,
