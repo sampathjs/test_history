@@ -1,8 +1,8 @@
 package com.matthey.pmm.tradebooking.items;
 
-import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.matthey.pmm.tradebooking.InitializationByTemplateTo;
 import com.matthey.pmm.tradebooking.TransactionTo;
+import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.Transaction;
@@ -11,14 +11,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class InitializationByTemplateItem extends TransactionItem<InitializationByTemplateTo, TransactionTo, Void, Transaction> {
-    private static  Logger logger = null;
-    
-	private static Logger getLogger () {
-		if (logger == null) {
-			logger = LogManager.getLogger(InitializationByTemplateItem.class);
-		}
-		return logger;
-	}
+    private static Logger logger = null;
+
+    private static Logger getLogger() {
+        if (logger == null) {
+            logger = LogManager.getLogger(InitializationByTemplateItem.class);
+        }
+        return logger;
+    }
 
     @Builder
     public InitializationByTemplateItem(int order, InitializationByTemplateTo initializationByTemplate, TransactionTo transaction, Session ocSession, LogTable logTable) {
