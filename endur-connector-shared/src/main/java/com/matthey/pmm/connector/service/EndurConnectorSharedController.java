@@ -122,7 +122,7 @@ public class EndurConnectorSharedController {
         			+ " for client '" + clientName + "' and is waiting for being processed and the overwrite flag is set to false");
         } 
         try {
-            Files.write(inputFile.toPath(), fileName.getBytes(StandardCharsets.UTF_8), 
+            Files.write(inputFile.toPath(), fileContent.getBytes(StandardCharsets.UTF_8), 
             		StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         } catch (IOException ex) {
         	String msg = "Internal error while processing Trade Booking Request: File Operation Exception";
