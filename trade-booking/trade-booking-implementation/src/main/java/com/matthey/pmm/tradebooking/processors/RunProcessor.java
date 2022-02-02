@@ -66,7 +66,8 @@ public class RunProcessor {
 			runLogUserTable.insertRows(runLogTable);
 			processLogUserTable.insertRows(processLogTable);
 			int dealCounter = 0;
-			boolean overallSuccess = true;			
+			boolean overallSuccess = true;
+			int failedDealCounter = 0;
 			
 	    	for (String fileNameToProcess : filesToProcess) {
 	    		runLogTable.setString (COL_STATUS, 0, "Processing deal #" + dealCounter);
@@ -95,6 +96,7 @@ public class RunProcessor {
 	    			processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Finished Successfully");
 	    			processLogTable.setInt(COL_DEAL_TRACKING_NUM, dealCounter, fileProcessor.getLatestDealTrackingNum());
 	    		} else {
+	    			failedDealCounter++;
 		    		runLogTable.setString (COL_STATUS, 0, "Processing deal #" + dealCounter + " failed");
 	    			processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Failed. " + failReason);
 	    			getLogger().error("Processing of ' " + fileNameToProcess + "' failed");	    			
@@ -107,7 +109,12 @@ public class RunProcessor {
 	    	if (overallSuccess) {
 	    		runLogTable.setString (COL_STATUS, 0, "Finished processing of all deals of run successfully");
 	    	} else {
-	    		runLogTable.setString (COL_STATUS, 0, "Finished processing of all deals of run. Some deals failed to be booked.");	    		
+	    		if (failedDealCounter < dealCounter) {
+		    		runLogTable.setString (COL_STATUS, 0, "Finished processing of all deals of run. " + failedDealCounter + " of "
+		    			+ dealCounter + " deals failed to be booked.");
+	    		} else {
+		    		runLogTable.setString (COL_STATUS, 0, "Finished processing of all deals of run. All deals failed to be booked.");	    			    				    			
+	    		}
 	    	}
 	    	runLogTable.setDate(COL_END_DATE, 0, new Date());
 			runLogUserTable.updateRows(runLogTable, COL_RUN_ID);	
