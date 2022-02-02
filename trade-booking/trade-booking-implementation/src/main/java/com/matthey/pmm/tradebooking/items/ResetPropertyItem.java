@@ -1,5 +1,7 @@
 package com.matthey.pmm.tradebooking.items;
 
+import com.matthey.pmm.tradebooking.LegTo;
+import com.matthey.pmm.tradebooking.PropertyTo;
 import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.Field;
