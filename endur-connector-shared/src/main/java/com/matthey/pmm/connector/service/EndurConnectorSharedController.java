@@ -113,7 +113,8 @@ public class EndurConnectorSharedController {
 		} catch (OException e) {
 			throw new RuntimeException ("Internal error while processing Trade Booking Request: Const Repository Operation Failed");
 		}
-        File inputFile = new File(baseDir, fileName);
+        File inputDirectory = new File(baseDir, clientName);
+        File inputFile = new File (inputDirectory, fileName);
         inputFile.getParentFile().mkdirs();
         if (inputFile.exists() && !overwrite) {
         	throw new TradeBookingRequestAlreadyExists("The file '" + fileName + "' has already been submitted"
