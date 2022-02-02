@@ -114,7 +114,7 @@ public abstract class FillControllerImpl implements TomsFillService {
     	// validation checks
     	validator.validateFillFields(this.getClass(), "updateLimitOrderFill", "newOrderFill", newOrderFill, limitOrder.get(), false, fillConverter.toTo(existingFill.get()));
 
-    	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
+    	Fill persisted = fillConverter.toManagedEntity(newOrderFill);
 		limitOrder.get().setLastUpdate(new Date());
 		limitOrder.get().onPreUpdate();
    		if (limitOrder.get().getFillPercentage() >= 0.999999) {
@@ -186,12 +186,13 @@ public abstract class FillControllerImpl implements TomsFillService {
     	// validation checks
     	validator.validateFillFields(this.getClass(), "updateReferenceOrderFill", "newOrderFill", newOrderFill, referenceOrder.get(), false, fillConverter.toTo(existingFill.get()));
 
-    	Fill persisted = fillConverter.toManagedEntity(newOrderFill);		
+    	Fill updatedEntity = fillConverter.toManagedEntity(newOrderFill);
+    	fillRepo.save(updatedEntity);
 		referenceOrder.get().setLastUpdate(new Date());
 		referenceOrder.get().onPreUpdate();
 		referenceOrder.get().setVersion(referenceOrder.get().getVersion()+1);
 		referenceOrderRepo.save(referenceOrder.get());
-		return persisted.getId();
+		return updatedEntity.getId();
     }
 
 

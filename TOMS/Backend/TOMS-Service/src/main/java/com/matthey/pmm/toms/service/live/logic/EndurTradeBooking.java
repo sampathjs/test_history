@@ -452,7 +452,7 @@ public class EndurTradeBooking {
 						new PropertyToBuilder()
 							.withGlobalOrderId(10)
 							.withName("Ticker")
-							.withValue(order.getTicker().getValue())
+							.withValue(toEndurTicker(order.getTicker().getValue()))
 							.withValueType(PropertyValueType.STRING)
 							.build(),
 						new PropertyToBuilder()
@@ -560,7 +560,7 @@ public class EndurTradeBooking {
 						new PropertyToBuilder()
 							.withGlobalOrderId(7)
 							.withName("Ticker")
-							.withValue(order.getTicker().getValue())
+							.withValue(toEndurTicker(order.getTicker().getValue()))
 							.withValueType(PropertyValueType.STRING)
 							.build(),
 						new PropertyToBuilder()
@@ -617,6 +617,10 @@ public class EndurTradeBooking {
 		return actionPlan;
 	}
 		
+	private String toEndurTicker(String ticker) {
+		return ticker.substring(0, 3) + "[TOz]" + ticker.substring(3);
+	}
+	
 	private String getPassThruPortfolio(Order order, Fill fill) {
 		String orderPortfolioName = order.getIntPortfolio().getValue();
 		String orderPortfolioWithoutRegion = orderPortfolioName.substring(3);

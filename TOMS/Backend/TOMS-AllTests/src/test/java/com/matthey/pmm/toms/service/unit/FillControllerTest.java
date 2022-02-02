@@ -255,10 +255,12 @@ public class FillControllerTest {
 		Optional<Fill> newFill = fillRepo.findById(newFillId);
 		assertThat(newFill).isNotEmpty();
 		assertThat(newFill.get().getFillQuantity()).isEqualTo(TestFill.TEST_FILL_FOR_INSERT.getEntity().fillQuantity());
+		assertThat(newFill.get().getFillStatus().getId()).isIn(DefaultReference.FILL_STATUS_FAILED.getEntity().id(),
+				                                               DefaultReference.FILL_STATUS_COMPLETED.getEntity().id());
 		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().id());
 		assertThat(order).isNotEmpty();
-		// + 2 because the mock controller is going to simulate the endur side backend directly, resulting in version incremented by 2		
-		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().version()+2);
+		// + 3 because the mock controller is going to simulate the endur side backend directly, resulting in version incremented by 3		
+		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().version()+3);
 		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(newFillId);
 	}
 	
@@ -269,10 +271,12 @@ public class FillControllerTest {
 		Optional<Fill> newFill = fillRepo.findById(newFillId);
 		assertThat(newFill).isNotEmpty();
 		assertThat(newFill.get().getFillQuantity()).isEqualTo(TestFill.TEST_FILL_FOR_INSERT.getEntity().fillQuantity());
+		assertThat(newFill.get().getFillStatus().getId()).isIn(DefaultReference.FILL_STATUS_FAILED.getEntity().id(),
+															   DefaultReference.FILL_STATUS_COMPLETED.getEntity().id());
 		Optional<ReferenceOrder> order = refOrderRepo.findLatestByOrderId(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().id());
 		assertThat(order).isNotEmpty();
-		// + 2 because the mock controller is going to simulate the endur side backend directly, resulting in version incremented by 2
-		assertThat(order.get().getVersion()).isEqualTo(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().version()+2);
+		// + 3 because the mock controller is going to simulate the endur side backend directly, resulting in version incremented by 3
+		assertThat(order.get().getVersion()).isEqualTo(TestReferenceOrder.TEST_IN_STATUS_CONFIRMED.getEntity().version()+3);
 		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(newFillId);
 	}
 	

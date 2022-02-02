@@ -4,6 +4,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -99,7 +100,7 @@ public class MockApplication implements WebMvcConfigurer {
 //    public void configurePathMatch(PathMatchConfigurer configurer) {
 //        configurer.setUseSuffixPatternMatch(false);
 //	}
-        
+            
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry
@@ -112,6 +113,10 @@ public class MockApplication implements WebMvcConfigurer {
         registry.addResourceHandler("/**")
         	.addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
 
+        registry.addResourceHandler("/h2-console**")
+    		.addResourceLocations(CLASSPATH_RESOURCE_LOCATIONS);
+
+        
         registry
     		.addResourceHandler("/*.png")
     		.addResourceLocations("classpath:/");
