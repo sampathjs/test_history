@@ -7,6 +7,24 @@
         <version>1.0.0</version>
     </parent>
     <artifactId>TOMS-Service</artifactId>
+	<profiles>
+	  	<profile>
+		<!-- 
+			This is used to apply the build of the UI in case the buildUi property is not already defined.
+			You can provide a customised maven settings.xml for eclipse only such that buildUi is set to "none"
+			skipping the build of the UI while using eclipse or any other DevEnvironment
+		-->	  		  	
+	  	 	<id>build-ui-fallback</id>
+		    <activation>
+    		  <property>
+        		<name>!buildUi</name>
+      		  </property>
+    		</activation>
+    		<properties>
+   				<buildUi>prepare-package</buildUi>
+    		</properties>
+		</profile>
+	</profiles>    
     <properties>
         <java.version>1.11</java.version>
         <mockito.version>3.3.3</mockito.version>
@@ -414,7 +432,7 @@
 		      <executions>
 		        <execution>
 		          <id>copy .env</id>
-		          <phase>clean</phase>
+		          <phase>${buildUi}</phase>
 		          <goals>
 		            <goal>copy-resources</goal>
 		          </goals>
@@ -441,14 +459,14 @@
 			            <goals>
 			                <goal>install-node-and-npm</goal>
 			            </goals>
-			            <phase>generate-resources</phase>
+			            <phase>${buildUi}</phase>
 			        </execution>
 	                <execution>
 	                    <id>npm install</id>
 	                    <goals>
 	                        <goal>npm</goal>
 	                    </goals>
-			            <phase>generate-resources</phase>
+			            <phase>${buildUi}</phase>
 	                    <configuration>
 	                        <arguments>install react-scripts --save</arguments>
 	                    </configuration>
@@ -458,7 +476,7 @@
 	                    <goals>
 	                        <goal>npm</goal>
 	                    </goals>
-			            <phase>generate-resources</phase>
+			            <phase>${buildUi}</phase>
 	                    <configuration>
 	                        <arguments>run build</arguments>
 	                    </configuration>
@@ -476,7 +494,7 @@
 		      <executions>
 		        <execution>
 		          <id>copy frontend to src/main/resources</id>
-		          <phase>process-resources</phase>
+		          <phase>${buildUi}</phase>
 		          <goals>
 		            <goal>copy-resources</goal>
 		          </goals>
@@ -495,7 +513,7 @@
 		        </execution>
 		        <execution>
 		          <id>copy frontend index.html to src/main/resources/templates</id>
-		          <phase>process-resources</phase>
+		          <phase>${buildUi}</phase>
 		          <goals>
 		            <goal>resources</goal>
 		          </goals>
