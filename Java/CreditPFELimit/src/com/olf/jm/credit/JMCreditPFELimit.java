@@ -185,7 +185,9 @@ public class JMCreditPFELimit extends AbstractExposureCalculator2<Table, Table> 
 			}
 			
 			clientData.setName("Credid PFE WorkSheet");
-			int matDateforDeal = transaction.getField(EnumTransactionFieldId.MaturityDate).getValueAsInt();
+			int matDateforDeal = insType == EnumInsType.FxInstrument.getValue()
+					? transaction.getField(EnumTransactionFieldId.FxDate).getValueAsInt()
+					: transaction.getField(EnumTransactionFieldId.MaturityDate).getValueAsInt();
 			double[] rowExposure = getExposureForDeal(session, vaRByTransResult, partyAgreementUDSR, extLe, matDateforDeal);
 			clientData.addColumn("mtm_info", EnumColType.Table);
 			clientData.addColumn("var_info", EnumColType.Table);

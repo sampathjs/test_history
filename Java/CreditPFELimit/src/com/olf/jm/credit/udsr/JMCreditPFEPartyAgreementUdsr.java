@@ -155,14 +155,14 @@ public class JMCreditPFEPartyAgreementUdsr extends AbstractSimulationResult2 {
 		baseMtMForNetting.select(baseMtMtemp, "*", "[IN.party_agreement_id] != 0 AND [IN.ins_type] ==" + EnumInsType.MetalBasisSwap.getValue());
 		
 		Table baseMTMNettedOnZeroLeg = tf.createTable("baseMTMNettedOnZeroLeg");
-		baseMTMNettedOnZeroLeg.selectDistinct(baseMtMForNetting, "deal_num", "[IN.deal_num] >= 0");
+		baseMTMNettedOnZeroLeg.selectDistinct(baseMtMForNetting, "deal_num, tran_num", "[IN.deal_num] >= 0");
 		baseMTMNettedOnZeroLeg.addColumn("param_seq_num", EnumColType.Int);
-		baseMTMNettedOnZeroLeg.select(baseMtMForNetting, "base_mtm", "[IN.deal_num] == [OUT.deal_num]", "SUM(base_mtm)");
+		baseMTMNettedOnZeroLeg.select(baseMtMForNetting, "base_mtm", "[IN.deal_num] == [OUT.deal_num] AND [IN.tran_num] == [OUT.tran_num]", "SUM(base_mtm)");
 		
 		creditPFEPAData.select(baseMtMForNetting, "param_seq_num, param_currency",
 				"[IN.deal_num] == [OUT.deal_num] AND [IN.tran_num] == [OUT.tran_num]");
 		creditPFEPAData.select(baseMTMNettedOnZeroLeg, "base_mtm",
-				"[IN.deal_num] == [OUT.deal_num] AND [IN.param_seq_num] == [OUT.param_seq_num]");
+				"[IN.deal_num] == [OUT.deal_num] AND [IN.tran_num] == [OUT.tran_num] AND [IN.param_seq_num] == [OUT.param_seq_num]");
 	}
 
 	@Override
