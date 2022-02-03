@@ -72,11 +72,21 @@ public class FileProcessor {
 
         val logTable = new LogTable(session, runId, dealCounter, fullPath);
         try {
-            return Optional.of(fullPath)
+            Optional<Transaction> tran = Optional.of(fullPath)
                     .flatMap(this::toTransctionTo)
                     .flatMap(toTransactionItemsList(session, fullPath, logTable))
-                    .flatMap(toTransaction(fullPath))
-                    .isPresent();
+                    .flatMap(toTransaction(fullPath));
+            if (tran.isPresent()) {
+            	tran.get().close();
+            }
+            return tran.isPresent();
+        } catch (Throwable t) {
+            getLogger().error("Error while executing action plan (booking trade) for transaction in file '" + fullPath + "': " + t.toString());
+            StringWriter sw = new StringWriter(4000);
+            PrintWriter pw = new PrintWriter(sw);
+            t.printStackTrace(pw);
+            getLogger().error(sw.toString());
+            return false;
         } finally {
             getLogger().info("Persisting log table to database");
             logTable.persistToDatabase();

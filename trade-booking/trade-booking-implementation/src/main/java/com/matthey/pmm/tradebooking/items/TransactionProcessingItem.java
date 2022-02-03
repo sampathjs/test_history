@@ -4,7 +4,6 @@ import com.matthey.pmm.tradebooking.TransactionProcessingTo;
 import com.matthey.pmm.tradebooking.TransactionTo;
 import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
-import com.olf.openrisk.internal.OpenRiskException;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Transaction;
 import lombok.Builder;
@@ -39,7 +38,7 @@ public class TransactionProcessingItem extends TransactionItem<TransactionProces
         }
         try {
             input.process(newStatusEnum);
-        } catch (OpenRiskException ex) {
+        } catch (Throwable ex) {
             String errorMsg = "Error while processing transaction to status '" + item.getStatus() + "': " + ex.toString() + "\n";
             logException(ex, getLogger(), errorMsg);
             throw ex;
