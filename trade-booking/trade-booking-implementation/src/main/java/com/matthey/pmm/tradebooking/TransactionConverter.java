@@ -17,6 +17,8 @@ public class TransactionConverter implements Function<TransactionTo, List<? exte
 
     private final LogTable logTable;
     private final Session session;
+    
+    private final boolean debugEnabled;
 
     private static Logger getLogger() {
         if (logger == null) {
@@ -25,9 +27,10 @@ public class TransactionConverter implements Function<TransactionTo, List<? exte
         return logger;
     }
 
-    public TransactionConverter(final Session session, final LogTable logTable) {
+    public TransactionConverter(final Session session, final LogTable logTable, boolean debugEnabled) {
         this.session = session;
         this.logTable = logTable;
+        this.debugEnabled = debugEnabled;
     }
 
     @Override
@@ -92,7 +95,7 @@ public class TransactionConverter implements Function<TransactionTo, List<? exte
         val debugProcessingInstructions = transaction.getProcessingInstruction().getDebugShow();
         if (debugProcessingInstructions != null)
             debugProcessingInstructions.forEach(ds ->
-                    result.add(DebugItem.builder().debugShowTo(ds).transaction(transaction).ocSession(session)
+                    result.add(DebugItem.builder().debugShowTo(ds).transaction(transaction).ocSession(session).debugEnabled(debugEnabled)
                             .logTable(logTable).order(TransactionItemsUtils.toGlobalOrder(ds.getGlobalOrderId(), orderingState)).build())
             );
     }

@@ -114,7 +114,7 @@ public class FileProcessor {
                                                                                                                   String fullPath,
                                                                                                                   LogTable logTable) {
         return transactionTo -> {
-            val converter = new TransactionConverter(session, logTable);
+            val converter = new TransactionConverter(session, logTable, executeDebugCommands);
             try {
                 getLogger().info("Converting parsed JSON object");
                 val transactionItems = Optional.of(transactionTo).map(converter);
