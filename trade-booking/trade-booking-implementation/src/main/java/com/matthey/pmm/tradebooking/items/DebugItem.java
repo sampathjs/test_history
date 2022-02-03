@@ -4,6 +4,7 @@ import com.matthey.pmm.tradebooking.DebugShowTo;
 import com.matthey.pmm.tradebooking.TransactionTo;
 import com.matthey.pmm.tradebooking.processors.LogTable;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.staticdata.LicenseType;
 import com.olf.openrisk.trading.Transaction;
 import lombok.Builder;
 import org.apache.logging.log4j.LogManager;

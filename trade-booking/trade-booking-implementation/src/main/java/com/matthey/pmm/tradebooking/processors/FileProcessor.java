@@ -8,6 +8,7 @@ import com.matthey.pmm.tradebooking.TransactionItemsListExecutor;
 import com.matthey.pmm.tradebooking.TransactionTo;
 import com.matthey.pmm.tradebooking.items.TransactionItem;
 import com.olf.openrisk.application.Session;
+import com.olf.openrisk.staticdata.LicenseType;
 import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
 import lombok.val;
@@ -52,6 +53,13 @@ public class FileProcessor {
         this.dealCounter = dealCounter;
         try {
             executeDebugCommands = Boolean.parseBoolean(constRepo.getStringValue("executeDebugCommands", "false"));
+            LicenseType[] types = session.getUser().getLicenseTypes();
+            for (int i=0; i < types.length; i++) {
+            	if (types[i].getName().equalsIgnoreCase("Server")) {
+                    getLogger().info("Running as server user - skipping debug commands"); 
+                    executeDebugCommands = false;
+            	}
+            }
         } catch (Exception ex) {
             getLogger().error("Could not read or parse Const Repo entry " + constRepo.getContext()
                     + "\\" + constRepo.getSubcontext() + "\\executeDebugCommands that is expected to contain the String"
