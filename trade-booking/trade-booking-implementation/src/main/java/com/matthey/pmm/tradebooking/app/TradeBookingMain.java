@@ -21,7 +21,7 @@ import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFact
 import org.apache.logging.log4j.core.config.builder.api.LayoutComponentBuilder;
 import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
-import com.matthey.pmm.tradebooking.processors.RunProcessor;
+import com.matthey.pmm.tradebooking.processors.RunRemoteProcessor;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
@@ -65,7 +65,7 @@ public class TradeBookingMain extends AbstractGenericScript {
         	}
         	List<String> files = params.getTable("Files", 0).getRows().stream().map(x -> x.getString("filename")).collect(Collectors.toList());
         	getLogger().info("Processing the following files: " + files);
-        	RunProcessor runProcessor = new RunProcessor(session, constRepo, params.getString("Client", 0), files);
+        	RunRemoteProcessor runProcessor = new RunRemoteProcessor(session, constRepo, params.getString("Client", 0), files);
         	runProcessor.processRun();
         	return null;    		
     	} catch (Exception ex) {

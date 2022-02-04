@@ -7,11 +7,16 @@ import com.olf.openrisk.application.Session;
 import com.olf.openrisk.trading.EnumTranStatus;
 import com.olf.openrisk.trading.Transaction;
 import lombok.Builder;
+
+import java.util.function.IntConsumer;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class TransactionProcessingItem extends TransactionItem<TransactionProcessingTo, TransactionTo, Transaction, Transaction> {
     private static Logger logger = null;
+    
+    private IntConsumer dealTrackingNumConsumer;
 
     private static Logger getLogger() {
         if (logger == null) {
@@ -21,8 +26,10 @@ public class TransactionProcessingItem extends TransactionItem<TransactionProces
     }
 
     @Builder
-    public TransactionProcessingItem(int order, TransactionProcessingTo transactionProcessing, TransactionTo transaction, Session ocSession, LogTable logTable) {
+    public TransactionProcessingItem(int order, TransactionProcessingTo transactionProcessing, TransactionTo transaction, Session ocSession, LogTable logTable,
+    		IntConsumer dealTrackingNumConsumer) {
         super(order, transactionProcessing, transaction, ocSession, logTable, Transaction.class);
+        this.dealTrackingNumConsumer = dealTrackingNumConsumer;
     }
 
     @Override
@@ -41,10 +48,15 @@ public class TransactionProcessingItem extends TransactionItem<TransactionProces
         } catch (Throwable ex) {
             String errorMsg = "Error while processing transaction to status '" + item.getStatus() + "': " + ex.toString() + "\n";
             logException(ex, getLogger(), errorMsg);
+            dealTrackingNumConsumer.accept(-1);
             throw ex;
         }
         String msg = "Successfully processed deal to new status '" + item.getStatus() + "'";
+        int newDealTrackingNum = input.getDealTrackingId();    
         getLogger().info(msg);
+        getLogger().info("New deal tracking #" + newDealTrackingNum);
+        dealTrackingNumConsumer.accept(newDealTrackingNum);
+        
         logTable.addLogEntry(order, true, msg);
         return input;
     }

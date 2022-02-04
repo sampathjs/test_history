@@ -32,8 +32,8 @@ public class FileProcessor {
 
     private final Session session;
 
-    private Transaction newDeal = null;
-
+    private int latestDealTrackingNum;
+    
     private final int runId;
     private final int dealCounter;
 
@@ -51,6 +51,7 @@ public class FileProcessor {
         this.session = session;
         this.runId = runId;
         this.dealCounter = dealCounter;
+        latestDealTrackingNum = -1;
         try {
             executeDebugCommands = Boolean.parseBoolean(constRepo.getStringValue("executeDebugCommands", "false"));
             LicenseType[] types = session.getUser().getLicenseTypes();
@@ -98,7 +99,11 @@ public class FileProcessor {
     }
 
     public int getLatestDealTrackingNum() {
-        return newDeal != null ? newDeal.getDealTrackingId() : -1;
+        return latestDealTrackingNum;
+    }
+    
+    public void setLatestDealTrackingNum (int latestDealTrackingNum) {
+    	this.latestDealTrackingNum = latestDealTrackingNum; 
     }
 
     private Optional<TransactionTo> toTransctionTo(String fullPath) {
@@ -124,7 +129,7 @@ public class FileProcessor {
                                                                                                                   String fullPath,
                                                                                                                   LogTable logTable) {
         return transactionTo -> {
-            val converter = new TransactionConverter(session, logTable, executeDebugCommands);
+            val converter = new TransactionConverter(session, logTable, executeDebugCommands, this::setLatestDealTrackingNum);
             try {
                 getLogger().info("Converting parsed JSON object");
                 val transactionItems = Optional.of(transactionTo).map(converter);
@@ -150,7 +155,6 @@ public class FileProcessor {
                         .map(executor)
                         // this is not really nice...
                         .map(transaction -> {
-                            newDeal = transaction;
                             return transaction;
                         });
                 getLogger().info("Successfully executed action plan");

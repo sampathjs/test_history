@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.IntConsumer;
 
 public class TransactionConverter implements Function<TransactionTo, List<? extends TransactionItem<?, ?, ?, ?>>> {
     private static Logger logger = null;
@@ -19,6 +20,8 @@ public class TransactionConverter implements Function<TransactionTo, List<? exte
     private final Session session;
     
     private final boolean debugEnabled;
+    
+    private final IntConsumer dealTrackingNumConsumer;
 
     private static Logger getLogger() {
         if (logger == null) {
@@ -27,10 +30,12 @@ public class TransactionConverter implements Function<TransactionTo, List<? exte
         return logger;
     }
 
-    public TransactionConverter(final Session session, final LogTable logTable, boolean debugEnabled) {
+    public TransactionConverter(final Session session, final LogTable logTable, boolean debugEnabled,
+    		final IntConsumer dealTrackingNumConsumer) {
         this.session = session;
         this.logTable = logTable;
         this.debugEnabled = debugEnabled;
+        this.dealTrackingNumConsumer = dealTrackingNumConsumer;
     }
 
     @Override
@@ -86,7 +91,9 @@ public class TransactionConverter implements Function<TransactionTo, List<? exte
         transactionProcessing.forEach(tp ->
                 result.add(
                         TransactionProcessingItem.builder().transactionProcessing(tp).transaction(transaction).ocSession(session)
-                                .logTable(logTable).order(TransactionItemsUtils.toGlobalOrder(tp.getGlobalOrderId(), orderingState)).build())
+                                .logTable(logTable).order(TransactionItemsUtils.toGlobalOrder(tp.getGlobalOrderId(), orderingState))
+                                .dealTrackingNumConsumer(dealTrackingNumConsumer)
+                                .build())
         );
     }
 

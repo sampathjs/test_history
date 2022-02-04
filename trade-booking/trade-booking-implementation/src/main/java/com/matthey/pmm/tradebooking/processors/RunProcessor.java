@@ -99,7 +99,7 @@ public class RunProcessor {
 	    			failedDealCounter++;
 		    		runLogTable.setString (COL_STATUS, 0, "Processing deal #" + dealCounter + " failed");
 	    			processLogTable.setString(COL_OVERALL_STATUS, dealCounter, "Failed. " + failReason);
-	    			getLogger().error("Processing of ' " + fileNameToProcess + "' failed");	    			
+	    			getLogger().error("Processing of ' " + fileNameToProcess + "' failed");
 	    		}
 	    		processLogTable.setDate(COL_LAST_UPDATE, dealCounter, new Date());
 				runLogUserTable.updateRows(runLogTable, COL_RUN_ID);
