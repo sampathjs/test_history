@@ -22,6 +22,7 @@ import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 import com.matthey.pmm.tradebooking.processors.FileProcessor;
 import com.matthey.pmm.tradebooking.processors.RunRemoteProcessor;
+import com.matthey.pmm.tradebooking.processors.RunWorkerProcessor;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.AbstractGenericScript;
@@ -60,66 +61,8 @@ public class TradeBookingWorkerMain extends AbstractGenericScript {
     public Table execute(final Session session, final ConstTable params) {
     	init(session);
     	try {
-    		String sql = getSqlForUnprocessedProcessLogRows();
-    		try (UserTable runLogUserTable = session.getIOFactory().getUserTable(RunRemoteProcessor.USER_TABLE_RUN_LOG);
-    			 UserTable processLogUserTable = session.getIOFactory().getUserTable(RunRemoteProcessor.USER_TABLE_PROCESS_LOG);
-    			 Table itemToProcess = session.getIOFactory().runSQL(sql)) {
-    			for (int row=itemToProcess.getRowCount()-1; row >= 0; row--) {
-    				int runId = itemToProcess.getInt(RunRemoteProcessor.COL_RUN_ID, row);
-    				int dealCounter = itemToProcess.getInt(RunRemoteProcessor.COL_DEAL_COUNTER, row);
-    				String fullPath = itemToProcess.getString(RunRemoteProcessor.COL_INPUT_FILE_PATH, row);
-    				try (Table runLogTable = getRunLogTable(session, runId);) {
-    					FileProcessor fileProcessor = new FileProcessor(session, constRepo, runId, dealCounter);
-        	    		getLogger().info("Processing file '" + fullPath + "' now.");
-        	    		int failedDealCounter = getFailedDealCountForRun(session, runId);
-        	    		int openDealsForRun = getOpenDealsForRun (session, runId);
-        	    		boolean success;
-        	    		String failReason = "";
-        	    		
-        	    		try {
-        		    		success = fileProcessor.processFile(fullPath);
-        	    		} catch (Throwable t) {
-        	    			success = false;
-        	    			getLogger().error("Error while processing file '" + fullPath + "': " + t.toString());
-        	        		StringWriter sw = new StringWriter(4000);
-        	        		PrintWriter pw = new PrintWriter(sw);
-        	        		t.printStackTrace(pw);
-        	        		getLogger().error(sw.toString());
-        	        		failReason = t.toString();
-        	    		}
-        	    		boolean overallSuccess = success && (failedDealCounter == 0);
-        	    		if (overallSuccess) {
-        		    		runLogTable.setString (RunRemoteProcessor.COL_STATUS, 0, "Processing deal #" + dealCounter + " finished successfully");
-        	    			getLogger().info("Processing of ' " + fullPath + "' finished successfully");
-        	    			itemToProcess.setString(RunRemoteProcessor.COL_OVERALL_STATUS, row, "Finished Successfully");
-        	    			itemToProcess.setInt(RunRemoteProcessor.COL_DEAL_TRACKING_NUM, row, fileProcessor.getLatestDealTrackingNum());
-        	    		} else {
-        	    			failedDealCounter++;
-        		    		runLogTable.setString (RunRemoteProcessor.COL_STATUS, 0, "Processing deal #" + dealCounter + " failed");
-        		    		itemToProcess.setString (RunRemoteProcessor.COL_OVERALL_STATUS, row, "Failed. " + failReason);
-        	    			getLogger().error("Processing of ' " + fullPath + "' failed");
-        	    		}
-        	    		if (openDealsForRun == 1) {
-        	    			getLogger().error("All deals for run #" + runId + " have been processed.");
-        	    	    	if (overallSuccess) {
-        	    	    		runLogTable.setString (RunRemoteProcessor.COL_STATUS, 0, "Finished processing of all deals of run successfully");
-        	    	    	} else {
-        	    	    		if (failedDealCounter < dealCounter) {
-        	    		    		runLogTable.setString (RunRemoteProcessor.COL_STATUS, 0, "Finished processing of all deals of run. " + failedDealCounter + " of "
-        	    		    			+ dealCounter + " deals failed to be booked.");
-        	    	    		} else {
-        	    		    		runLogTable.setString (RunRemoteProcessor.COL_STATUS, 0, "Finished processing of all deals of run. All deals failed to be booked.");	    			    				    			
-        	    	    		}
-        	    	    	}
-        	    		}
-        		    	runLogTable.setDate(RunRemoteProcessor.COL_END_DATE, 0, new Date());
-        				runLogUserTable.updateRows(runLogTable, RunRemoteProcessor.COL_RUN_ID);	
-        	    		itemToProcess.setDate(RunRemoteProcessor.COL_LAST_UPDATE, row, new Date());
-        				runLogUserTable.updateRows(runLogTable, RunRemoteProcessor.COL_RUN_ID);
-        				processLogUserTable.updateRows(itemToProcess, RunRemoteProcessor.COL_RUN_ID + ", " + RunRemoteProcessor.COL_DEAL_COUNTER);
-    				}
-    			}
-    		}
+    		RunWorkerProcessor processor = new RunWorkerProcessor(session, constRepo, ""); 
+    		processor.processRun();
     		return null;    		
     	} catch (Exception ex) {
     		getLogger().error("Deal Booking Process Failed: " + ex.toString() + "\n " + ex.getMessage());
@@ -129,55 +72,8 @@ public class TradeBookingWorkerMain extends AbstractGenericScript {
     		logger.error(sw.toString());
     		throw ex;
     	}
-    }	
-	private int getOpenDealsForRun(Session session, int runId) {
-		String sql = "\nSELECT COUNT (l." + RunRemoteProcessor.COL_OVERALL_STATUS + ")"
-				+ "\nFROM " + RunRemoteProcessor.USER_TABLE_PROCESS_LOG + " l"
-				+ "\nWHERE l." + RunRemoteProcessor.COL_RUN_ID + " = " + runId
-				+ "\n AND l." + RunRemoteProcessor.COL_OVERALL_STATUS + " = '" + RunRemoteProcessor.JOB_LOG_INIT_STATUS + "'"
-				;
-		getLogger().info("Executing SQL to number of onprocessed deals for run: " + sql);
-		try (Table sqlResult =  session.getIOFactory().runSQL(sql)) {
-			getLogger().info ("Number of unprocessed rows: " + sqlResult.getInt(0, 0));
-			return sqlResult.getInt(0, 0);
-		}
-	}
+    }
 
-	private int getFailedDealCountForRun(Session session, int runId) {
-		String sql = "\nSELECT COUNT (l." + RunRemoteProcessor.COL_OVERALL_STATUS + ")" 
-				+ "\nFROM " + RunRemoteProcessor.USER_TABLE_PROCESS_LOG + " l"
-				+ "\nWHERE l." + RunRemoteProcessor.COL_RUN_ID + " = " + runId
-				+ "\n AND l." + RunRemoteProcessor.COL_OVERALL_STATUS + " LIKE 'Failed.%'" 
-				;
-		getLogger().info("Executing SQL to get number of failed bookings for run: " + sql);
-		try (Table sqlResult =  session.getIOFactory().runSQL(sql)) {
-			getLogger().info ("Number of failed runs: " + sqlResult.getInt(0, 0));
-			return sqlResult.getInt(0, 0);
-		}
-	}
-
-	private Table getRunLogTable(Session session, int runId) {
-		String sql = "\nSELECT * FROM " + RunRemoteProcessor.USER_TABLE_RUN_LOG 
-				+ "\nWHERE " + RunRemoteProcessor.COL_RUN_ID + " = " + runId 
-				;
-		getLogger().info("Executing SQL to get run log table row for run: " + sql);
-		return session.getIOFactory().runSQL(sql);
-	}
-
-	private String getSqlForUnprocessedProcessLogRows() {
-		String sql = "\nSELECT j." + RunRemoteProcessor.COL_RUN_ID
-				+	 "\n  ,j." + RunRemoteProcessor.COL_DEAL_COUNTER
-				+    "\n  ,j." + RunRemoteProcessor.COL_INPUT_FILE_PATH
-				+    "\n  ,j." + RunRemoteProcessor.COL_OVERALL_STATUS
-				+    "\n  ,j." + RunRemoteProcessor.COL_DEAL_TRACKING_NUM
-				+    "\n  ,j." + RunRemoteProcessor.COL_LAST_UPDATE
-				+    "\nFROM " + RunRemoteProcessor.USER_TABLE_PROCESS_LOG + " j"
-				+    "\nWHERE j." + RunRemoteProcessor.COL_OVERALL_STATUS + " = '" + RunRemoteProcessor.JOB_LOG_INIT_STATUS + "'"
-				+    "\n  AND j." + RunRemoteProcessor.COL_DEAL_TRACKING_NUM + " = -1"
-				+    "\nORDER BY j." + RunRemoteProcessor.COL_RUN_ID + ", j." + RunRemoteProcessor.COL_DEAL_COUNTER
-				;
-		return sql;
-	}
 
 	/**
 	 * Inits plugin log by retrieving logger settings from constants repository.

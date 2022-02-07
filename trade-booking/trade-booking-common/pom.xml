@@ -131,6 +131,47 @@
                     </execution>
                 </executions>
             </plugin>
+		    <plugin>
+		      <artifactId>maven-resources-plugin</artifactId>
+		      <executions>
+		        <execution>
+		          <id>Copy generated .jar file to COMMON_JARS (x64) folder</id>
+		          <phase>install</phase>
+		          <goals>
+		            <goal>copy-resources</goal>
+		          </goals>
+		          <configuration>
+		            <outputDirectory>../../COMMON_JARS/x64/bin/scbin/</outputDirectory>
+		            <resources>          
+		              <resource>
+		                <directory>${basedir}/target</directory>
+                		<includes>
+                    		<include>*.jar</include>
+                		</includes>		                
+		              </resource>
+		            </resources>              
+		          </configuration>            
+		        </execution>
+		        <execution>
+		          <id>Copy generated .jar file to COMMON_JARS (x86) folder</id>
+		          <phase>install</phase>
+		          <goals>
+		            <goal>copy-resources</goal>
+		          </goals>
+		          <configuration>
+		            <outputDirectory>../../COMMON_JARS/x86/bin/scbin/</outputDirectory>
+		            <resources>          
+		              <resource>
+		                <directory>${basedir}/target</directory>
+                		<includes>
+                    		<include>*.jar</include>
+                		</includes>		                
+		              </resource>
+		            </resources>              
+		          </configuration>            
+		        </execution>		        
+		      </executions>
+		    </plugin>            
         </plugins>
     </build>
 </project>
