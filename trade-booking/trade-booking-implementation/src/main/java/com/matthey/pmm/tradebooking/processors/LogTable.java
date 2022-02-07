@@ -14,15 +14,15 @@ import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableRow;
 
 public class LogTable {
-    private static final String USER_TABLE_TRADE_LOG = "USER_jm_builder_trade_log";
+    public static final String USER_TABLE_TRADE_LOG = "USER_jm_builder_trade_log";
     
-	private static final String COL_MESSAGE = "message";
-	private static final String COL_STATUS = "status";
-	private static final String COL_LINE_TEXT = "command";
-	private static final String COL_LINE_NUMBER = "step_no";
-	private static final String COL_RUN_ID = "run_id";
-	private static final String COL_DEAL_COUNTER = "deal_counter";
-	private static final String COL_LAST_UPDATE = "last_update";
+    public static final String COL_MESSAGE = "message";
+    public static final String COL_STATUS = "status";
+    public static final String COL_LINE_TEXT = "command";
+    public static final String COL_LINE_NUMBER = "step_no";
+    public static final String COL_RUN_ID = "run_id";
+    public static final String COL_DEAL_COUNTER = "deal_counter";
+    public static final String COL_LAST_UPDATE = "last_update";
 	
 	private static Logger logger = null;
 	private final Table logTable;

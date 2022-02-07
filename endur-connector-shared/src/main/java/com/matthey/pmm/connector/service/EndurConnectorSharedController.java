@@ -27,7 +27,7 @@ import com.matthey.pmm.connector.service.exception.TradeBookingRequestErrorWhile
 import com.matthey.pmm.connector.service.exception.TradeBookingRequestFileOperationException;
 import com.matthey.pmm.connector.service.exception.TradeBookingRequestIllegalJsonData;
 import com.matthey.pmm.tradebooking.TransactionTo;
-import com.matthey.pmm.tradebooking.processors.RunProcessor;
+import com.matthey.pmm.tradebooking.processors.RunRemoteProcessor;
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.openlink.util.constrepository.ConstRepository;
@@ -81,7 +81,7 @@ public class EndurConnectorSharedController {
     		@RequestBody String tradeBookingActionPlan) {
         ConstRepository constRepo = initConstRepo(CONTEXT, SUBCONTEXT); 
         File inputFile = saveFileToLocalFolder(clientName, fileName, tradeBookingActionPlan, overwrite, constRepo);
-        RunProcessor rp = new RunProcessor(session, constRepo, clientName, Arrays.asList(inputFile.getPath()));
+        RunRemoteProcessor rp = new RunRemoteProcessor(session, constRepo, clientName, Arrays.asList(inputFile.getPath()));
         try {
         	boolean success = rp.processRun();
         	if (!success) {

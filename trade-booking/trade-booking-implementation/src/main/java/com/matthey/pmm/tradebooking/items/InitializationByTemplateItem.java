@@ -27,7 +27,7 @@ public class InitializationByTemplateItem extends TransactionItem<Initialization
 
     @Override
     public Transaction apply(Void input) {
-        getLogger().info("Processing command #" + order + " - init by creating from template");
+        getLogger().info("Processing command #" + order + " - init by creation from template");
         String sql = "SELECT tran_num FROM ab_tran WHERE reference = '" + item.getTemplateReference() + "' AND current_flag = 1";
         int tranNum;
         try (Table sqlResult = ocSession.getIOFactory().runSQL(sql)) {

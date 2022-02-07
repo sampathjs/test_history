@@ -32,8 +32,8 @@ public class FileProcessor {
 
     private final Session session;
 
-    private Transaction newDeal = null;
-
+    private int latestDealTrackingNum;
+    
     private final int runId;
     private final int dealCounter;
 
@@ -51,6 +51,7 @@ public class FileProcessor {
         this.session = session;
         this.runId = runId;
         this.dealCounter = dealCounter;
+        latestDealTrackingNum = -1;
         try {
             executeDebugCommands = Boolean.parseBoolean(constRepo.getStringValue("executeDebugCommands", "false"));
             LicenseType[] types = session.getUser().getLicenseTypes();
@@ -72,11 +73,21 @@ public class FileProcessor {
 
         val logTable = new LogTable(session, runId, dealCounter, fullPath);
         try {
-            return Optional.of(fullPath)
+            Optional<Transaction> tran = Optional.of(fullPath)
                     .flatMap(this::toTransctionTo)
                     .flatMap(toTransactionItemsList(session, fullPath, logTable))
-                    .flatMap(toTransaction(fullPath))
-                    .isPresent();
+                    .flatMap(toTransaction(fullPath));
+            if (tran.isPresent()) {
+            	tran.get().close();
+            }
+            return tran.isPresent();
+        } catch (Throwable t) {
+            getLogger().error("Error while executing action plan (booking trade) for transaction in file '" + fullPath + "': " + t.toString());
+            StringWriter sw = new StringWriter(4000);
+            PrintWriter pw = new PrintWriter(sw);
+            t.printStackTrace(pw);
+            getLogger().error(sw.toString());
+            return false;
         } finally {
             getLogger().info("Persisting log table to database");
             logTable.persistToDatabase();
@@ -88,7 +99,11 @@ public class FileProcessor {
     }
 
     public int getLatestDealTrackingNum() {
-        return newDeal != null ? newDeal.getDealTrackingId() : -1;
+        return latestDealTrackingNum;
+    }
+    
+    public void setLatestDealTrackingNum (int latestDealTrackingNum) {
+    	this.latestDealTrackingNum = latestDealTrackingNum; 
     }
 
     private Optional<TransactionTo> toTransctionTo(String fullPath) {
@@ -114,7 +129,7 @@ public class FileProcessor {
                                                                                                                   String fullPath,
                                                                                                                   LogTable logTable) {
         return transactionTo -> {
-            val converter = new TransactionConverter(session, logTable);
+            val converter = new TransactionConverter(session, logTable, executeDebugCommands, this::setLatestDealTrackingNum);
             try {
                 getLogger().info("Converting parsed JSON object");
                 val transactionItems = Optional.of(transactionTo).map(converter);
@@ -140,7 +155,6 @@ public class FileProcessor {
                         .map(executor)
                         // this is not really nice...
                         .map(transaction -> {
-                            newDeal = transaction;
                             return transaction;
                         });
                 getLogger().info("Successfully executed action plan");
