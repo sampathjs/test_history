@@ -33,6 +33,8 @@ public class RunWorkerProcessor extends AbstractRunProcessor {
 		    		boolean success;
 		    		String failReason = "";
 		    		
+		    		processLogTable.setString (COL_OVERALL_STATUS, row, "Processing Started");
+		    		processLogUserTable.updateRows(processLogTable, COL_RUN_ID + ", " + COL_DEAL_COUNTER);		    		
 		    		try {
 			    		success = fileProcessor.processFile(fullPath);
 		    		} catch (Throwable t) {

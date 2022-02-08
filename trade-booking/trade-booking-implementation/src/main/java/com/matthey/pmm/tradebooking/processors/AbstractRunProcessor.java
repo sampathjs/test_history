@@ -13,6 +13,17 @@ import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
 
+/**
+ * This class contains the relevant shared logic for the following areas:
+ * <ul>
+ *   <li> The subclass {@link RunProcessor} that is doing deal booking locally and that is used by the manual task to book deals</li>
+ *   <li> The subclass {@link RunRemoteProcessor} that is initialising asynchronous deal booking and that is used by the REST interface</li>
+ *   <li> The subclass {@link RunWorkerProcessor} that is booking the deal initiated by the remote processor asynchronously and that is run as workflow in regular intervals</li> 
+ * </ul>
+ * @author jwaechter
+ * @version 1.0
+ */
+
 public abstract class AbstractRunProcessor {
 	public static final String JOB_LOG_INIT_STATUS = "Not Started";
 	public static final String USER_TABLE_RUN_LOG = "USER_jm_builder_run_log";
