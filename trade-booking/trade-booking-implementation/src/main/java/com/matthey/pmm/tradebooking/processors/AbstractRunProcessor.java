@@ -62,7 +62,6 @@ public abstract class AbstractRunProcessor {
 		this.constRepo = constRepo;
 		this.runId = getMaxCurrentRunId()+1;
 		runLogTable = setupRunLogTable();
-		processLogTable = setupProcessLogTable();
 	}
 	
 	public AbstractRunProcessor(final Session session, ConstRepository constRepo) {
