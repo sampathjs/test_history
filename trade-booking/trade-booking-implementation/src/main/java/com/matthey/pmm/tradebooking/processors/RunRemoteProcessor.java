@@ -17,6 +17,7 @@ public class RunRemoteProcessor extends AbstractRunProcessor {
 			final String client, final List<String> filesToProcess) {
 		super(session, constRepo, client);
 		this.filesToProcess = new ArrayList<>(filesToProcess);
+		processLogTable = setupProcessLogTable();
 		try {
 			timeoutInSeconds = Integer.parseInt(constRepo.getStringValue("timeout", "300"));
 		} catch (NumberFormatException e) {
