@@ -2,80 +2,35 @@ package com.matthey.pmm.endur.database.model;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "ab_tran")
-public class AbTran {
+@Table(schema = DbConstants.SCHEMA_NAME, name = "currency")
+public class Currency {
 
     @Id
-    private long tranNum;
-
-    private long tranGroup;
-    private long dealTrackingNum;
-    private long tranType;
-    private long tranStatus;
-    private long assetType;
-    private long insNum;
-    private long insType;
-    private long insClass;
-    private long toolset;
-    private short buySell;
-    private String reference;
-    private long internalBunit;
-    private long internalLentity;
-    private long externalBunit;
-    private long externalLentity;
-    private long internalPortfolio;
-    private long externalPortfolio;
-    private long internalContact;
-    private long externalContact;
-    private String book;
-    private LocalDateTime tradeDate;
-    private LocalDateTime inputDate;
-    private LocalDateTime settleDate;
-    private float position;
-    private float price;
-    private float rate;
-    private long currency;
-    private long cflowType;
-    private long versionNumber;
-    private float proceeds;
-    private float mvalue;
-    private long personnelId;
-    private LocalDateTime lastUpdate;
-    private long insSubType;
-    private long brokerId;
-    private LocalDateTime startDate;
-    private LocalDateTime maturityDate;
-    private LocalDateTime perpetualPosDate;
-    private LocalDateTime tradeTime;
-    private long offsetTranNum;
-    private long offsetTranType;
-    private long tradeFlag;
-    private long currentFlag;
-    private long fxYldBasis1;
-    private long fxYldBasis2;
-    private short unit;
-    private long lockUserId;
-    private long lockType;
-    private long idx_group;
-    private long idxSubgroup;
-    private long templateTran_num;
-    private long otcClearing_brokerId;
-    private long baseInsType;
-    private long longTradingStrategy;
-    private long extTradingStrategy;
-    private long passThruId;
-    private long regulatory_reporting;
-    private long altTranStatus;
-    private long marketPxIndexId;
-
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tran_num", referencedColumnName = "tran_num")
-    private Set<AbTranInfo> abTranInfos = new HashSet<>();
+    private long id_number;
+    private String name;
+    private long default_index;
+    private long spot_index;
+    private long convention;
+    private long holiday_id;
+    private long base_unit;
+    private long round;
+    private String description;
+    private long round_type;
+    private long euro;
+    private float euro_conversion;
+    private long currency_zone;
+    private short euro_scenario_flag;
+    private long advance_release_days;
+    private long user_id;
+    private LocalDateTime last_update;
+    private short precious_metal;
+    private short auto_conversion_flag;
+    private long version_number;
 }
