@@ -297,16 +297,6 @@
             </exclusions>
         </dependency>
 		<dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                    <groupId>org.springframework.boot</groupId>
-                </exclusion>
-            </exclusions>
-		</dependency>
-		<dependency>
         	<groupId>org.springframework.boot</groupId>
         	<artifactId>spring-boot-starter-aop</artifactId>
             <exclusions>
@@ -326,16 +316,6 @@
                 </exclusion>
             </exclusions>
        	</dependency>
-		<dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-starter-thymeleaf</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                    <groupId>org.springframework.boot</groupId>
-                </exclusion>
-            </exclusions>
-		</dependency>       	
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -426,6 +406,17 @@
         </plugins>
       </pluginManagement>
       <plugins>
+			<plugin>
+            	<groupId>org.springframework.boot</groupId>
+            	<artifactId>spring-boot-maven-plugin</artifactId>
+            	<executions>
+                	<execution>
+                    	<goals>
+                        	<goal>repackage</goal>
+                    	</goals>
+	                </execution>
+    	        </executions>
+	        </plugin>	      
 		    <plugin>
 		      <artifactId>maven-resources-plugin</artifactId>
 		      <version>2.6</version>
@@ -490,7 +481,6 @@
 			</plugin>
 		    <plugin>
 		      <artifactId>maven-resources-plugin</artifactId>
-		      <version>2.6</version>
 		      <executions>
 		        <execution>
 		          <id>copy frontend to src/main/resources</id>
@@ -509,7 +499,7 @@
 		                </excludes>
 		              </resource>
 		            </resources>              
-		          </configuration>            
+		          </configuration>
 		        </execution>
 		        <execution>
 		          <id>copy frontend index.html to src/main/resources/templates</id>
@@ -529,8 +519,86 @@
 		            </resources>              
 		          </configuration>            
 		        </execution>
+		        <execution>
+		          <id>Copy far .jar file to builds folder</id>
+		          <phase>install</phase>
+		          <goals>
+		            <goal>copy-resources</goal>
+		          </goals>
+		          <configuration>
+		            <outputDirectory>../../../Builds/TOMS/Toms_Endur_API/TOMS-service</outputDirectory>
+		            <resources>          
+		              <resource>
+		                <directory>${basedir}/target</directory>
+                		<includes>
+                    		<include>TOMS-Service*-exec.jar</include>
+                		</includes>		                
+		              </resource>
+		              <resource>
+		                <directory>${basedir}/../Resources</directory>
+                		<includes>
+                    		<include>mssql-jdbc_auth*.dll</include>
+                    		<include>application.properties</include>
+                    		<include>toms-service.exe</include>
+                    		<include>toms-service.xml</include>
+                		</includes>		                
+		              </resource>
+		            </resources>              
+		          </configuration>            
+		        </execution>		        
 		      </executions>
 		    </plugin>
+		    <plugin>
+			    <artifactId>maven-clean-plugin</artifactId>
+			    <version>3.1.0</version>
+			    <configuration>
+			      <filesets>
+			        <fileset>
+			          <directory>../../../Builds/TOMS/Toms_Endur_API</directory>
+			          <includes>
+			            <include>**</include>
+			          </includes>
+			          <followSymlinks>false</followSymlinks>
+			        </fileset>
+			      </filesets>
+			    </configuration>
+		    </plugin>
+		    <plugin>
+		      <artifactId>maven-antrun-plugin</artifactId>
+		      <version>1.8</version>
+		      <executions>
+		         <execution>
+		            <phase>install</phase>
+		            <goals>
+		               <goal>run</goal>
+		            </goals>
+		            <configuration>
+		               <target>
+		                  <echo message="Unzipping service-wrapper.zip" />
+		                  <unzip src="../../../Resources/service-wrapper.zip" dest="../../../Builds/TOMS/Toms_Endur_API/TOMS-service/" />
+		               </target>
+		            </configuration>
+		         </execution>
+		      </executions>
+		    </plugin>
+			<plugin>
+		        <groupId>com.coderplus.maven.plugins</groupId>
+		        <artifactId>copy-rename-maven-plugin</artifactId>
+		        <version>1.0</version>
+		        <executions>
+		          <execution>
+		            <id>Rename service-wrapper.exe to toms-service.exe</id>
+		            <phase>install</phase>
+		            <goals>
+		              <goal>rename</goal>
+		            </goals>
+		            <configuration>
+		              <sourceFile>../../../Builds/TOMS/Toms_Endur_API/TOMS-service/service-wrapper.exe</sourceFile>
+		              <destinationFile>../../../Builds/TOMS/Toms_Endur_API/TOMS-service/toms-service.exe</destinationFile>
+		            </configuration>
+		          </execution>
+		        </executions>
+		    </plugin>		    
   	  </plugins>
     </build>
 </project>
