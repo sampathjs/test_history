@@ -444,6 +444,9 @@ public class CheckDates extends AbstractTradeProcessListener {
 	            ++workDays;
 	        }
 	    } while (startCal.getTimeInMillis() < endCal.getTimeInMillis()); //excluding end date
+	    if (endDate.before(startDate)) {
+	    	workDays = -1 * workDays;
+	    }
 
 	    return workDays;
 	}
