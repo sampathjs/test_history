@@ -78,5 +78,28 @@
             <column name="last_update" type="datetime"/>
         </createTable>
 
+        <createTable tableName="currency">
+            <column name="ame" type="varchar"/>
+            <column name="id_number" type="int"/>
+            <column name="default_index" type="int"/>
+            <column name="spot_index" type="int"/>
+            <column name="convention" type="int"/>
+            <column name="holiday_id" type="int"/>
+            <column name="base_unit" type="int"/>
+            <column name="round" type="int"/>
+            <column name="description" type="varchar"/>
+            <column name="round_type" type="int"/>
+            <column name="euro" type="int"/>
+            <column name="euro_conversion" type="float"/>
+            <column name="currency_zone" type="int"/>
+            <column name="euro_scenario_flag" type="tinyint"/>
+            <column name="advance_release_days" type="int"/>
+            <column name="user_id" type="int"/>
+            <column name="last_update" type="datetime"/>
+            <column name="precious_metal" type="tinyint"/>
+            <column name="auto_conversion_flag" type="tinyint"/>
+            <column name="version_number" type="int"/>
+        </createTable>
+
     </changeSet>
 </databaseChangeLog>
