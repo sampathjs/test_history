@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet author="fintark" id="Endur Core Schema Init">
+
+        <createTable tableName="ab_tran" schemaName="dbo">
+            <column name="tran_num" type="int"/>
+            <column name="tran_group" type="int"/>
+            <column name="deal_tracking_num" type="int"/>
+            <column name="tran_type" type="tinyint"/>
+            <column name="tran_status" type="tinyint"/>
+            <column name="asset_type" type="tinyint"/>
+            <column name="ins_num" type="int"/>
+            <column name="ins_type" type="int"/>
+            <column name="ins_class" type="tinyint"/>
+            <column name="toolset" type="tinyint"/>
+            <column name="buy_sell" type="smallint"/>
+            <column name="reference" type="varchar"/>
+            <column name="internal_bunit" type="int"/>
+            <column name="internal_lentity" type="int"/>
+            <column name="external_bunit" type="int"/>
+            <column name="external_lentity" type="int"/>
+            <column name="internal_portfolio" type="int"/>
+            <column name="external_portfolio" type="int"/>
+            <column name="internal_contact" type="int"/>
+            <column name="external_contact" type="int"/>
+            <column name="book" type="varchar"/>
+            <column name="trade_date" type="datetime"/>
+            <column name="input_date" type="datetime"/>
+            <column name="settle_date" type="datetime"/>
+            <column name="position" type="float"/>
+            <column name="price" type="float"/>
+            <column name="rate" type="float"/>
+            <column name="currency" type="int"/>
+            <column name="cflow_type" type="int"/>
+            <column name="version_number" type="int"/>
+            <column name="proceeds" type="float"/>
+            <column name="mvalue" type="float"/>
+            <column name="personnel_id" type="int"/>
+            <column name="last_update" type="datetime"/>
+            <column name="ins_sub_type" type="int"/>
+            <column name="broker_id" type="int"/>
+            <column name="start_date" type="datetime"/>
+            <column name="maturity_date" type="datetime"/>
+            <column name="perpetual_pos_date" type="datetime"/>
+            <column name="trade_time" type="datetime"/>
+            <column name="offset_tran_num" type="int"/>
+            <column name="offset_tran_type" type="tinyint"/>
+            <column name="trade_flag" type="tinyint"/>
+            <column name="current_flag" type="tinyint"/>
+            <column name="fx_yld_basis_1" type="tinyint"/>
+            <column name="fx_yld_basis_2" type="tinyint"/>
+            <column name="unit" type="smallint"/>
+            <column name="lock_user_id" type="int"/>
+            <column name="lock_type" type="int"/>
+            <column name="idx_group" type="int"/>
+            <column name="idx_subgroup" type="int"/>
+            <column name="template_tran_num" type="int"/>
+            <column name="otc_clearing_broker_id" type="int"/>
+            <column name="base_ins_type" type="int"/>
+            <column name="int_trading_strategy" type="int"/>
+            <column name="ext_trading_strategy" type="int"/>
+            <column name="pass_thru_id" type="int"/>
+            <column name="regulatory_reporting" type="int"/>
+            <column name="alt_tran_status" type="int"/>
+            <column name="market_px_index_id" type="int"/>
+        </createTable>
+
+        <createTable tableName="ab_tran_info">
+            <column name="tran_num" type="int"/>
+            <column name="type_id" type="int"/>
+            <column name="value" type="varchar"/>
+            <column name="personnel_id" type="int"/>
+            <column name="last_update" type="datetime"/>
+        </createTable>
+
+    </changeSet>
+</databaseChangeLog>
