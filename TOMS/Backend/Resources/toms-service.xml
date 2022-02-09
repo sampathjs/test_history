@@ -1,0 +1,13 @@
+<service>
+    <id>TomsService</id>
+    <name>TOMS Service</name>
+    <description>This runs TOMS Service (Backend) which is going to enable Order Management</description>
+    <env name="TOMS_LOG_DIR" value="\\Weazfil01\endur\DEV03\outdir\Logs\TOMS" />
+    <env name="JAVA_11_HOME" value="jdk-11.0.6+10" />	
+    <env name="MSSQL_JDBC_DRIVER_LOCATION" value=".\" />
+    <env name="PATH" value="%PATH%;%MSSQL_JDBC_DRIVER_LOCATION%"/>
+    <executable>%JAVA_11_HOME%\bin\java</executable>
+    <arguments>-jar toms-service-1.0.0.jar</arguments>
+    <startmode>Manual</startmode>
+    <log mode="reset" />
+</service>
