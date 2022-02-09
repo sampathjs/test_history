@@ -101,5 +101,17 @@
             <column name="version_number" type="int"/>
         </createTable>
 
+        <createTable tableName="idx_unit">
+            <column name="unit_id" type="int"/>
+            <column name="unit_label" type="varchar"/>
+            <column name="unit_type_id" type="int"/>
+            <column name="user_id" type="int"/>
+            <column name="last_update" type="datetime"/>
+            <column name="version_number" type="int"/>
+            <column name="mass_type_id" type="int"/>
+            <column name="kilogram_mass_unit" type="int"/>
+            <column name="m3_volume_unit" type="int"/>
+        </createTable>
+
     </changeSet>
 </databaseChangeLog>

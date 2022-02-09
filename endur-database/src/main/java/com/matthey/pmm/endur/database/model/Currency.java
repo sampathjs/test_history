@@ -13,24 +13,24 @@ import java.time.LocalDateTime;
 public class Currency {
 
     @Id
-    private long id_number;
+    private long idNumber;
     private String name;
-    private long default_index;
-    private long spot_index;
+    private long defaultIndex;
+    private long spotIndex;
     private long convention;
-    private long holiday_id;
-    private long base_unit;
+    private long holidayId;
+    private long baseUnit;
     private long round;
     private String description;
-    private long round_type;
+    private long roundType;
     private long euro;
-    private float euro_conversion;
+    private float euroConversion;
     private long currency_zone;
-    private short euro_scenario_flag;
-    private long advance_release_days;
-    private long user_id;
-    private LocalDateTime last_update;
-    private short precious_metal;
-    private short auto_conversion_flag;
-    private long version_number;
+    private short euro_scenarioFlag;
+    private long advanceReleaseDays;
+    private long userId;
+    private LocalDateTime lastUpdate;
+    private short preciousMetal;
+    private short autoConversionFlag;
+    private long versionNumber;
 }
