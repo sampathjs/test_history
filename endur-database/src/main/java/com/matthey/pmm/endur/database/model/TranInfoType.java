@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "tranInfoTypes")
-public class TranInfoTypes {
+@Table(schema = DbConstants.SCHEMA_NAME, name = "tran_info_types")
+public class TranInfoType {
 
     @Id
     private int typeId;

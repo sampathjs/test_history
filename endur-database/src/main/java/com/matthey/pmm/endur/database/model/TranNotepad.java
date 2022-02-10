@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "tranNotepad")
+@Table(schema = DbConstants.SCHEMA_NAME, name = "tran_notepad")
 public class TranNotepad {
 
     @Id

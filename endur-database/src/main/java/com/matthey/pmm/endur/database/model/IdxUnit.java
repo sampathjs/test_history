@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "idxUnit")
+@Table(schema = DbConstants.SCHEMA_NAME, name = "idx_unit")
 public class IdxUnit {
 
     @Id

@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "abTran")
+@Table(schema = DbConstants.SCHEMA_NAME, name = "ab_tran")
 public class AbTran {
 
     @Id
@@ -26,12 +26,31 @@ public class AbTran {
     private long toolset;
     private short buySell;
     private String reference;
-    private long internalBunit;
-    private long internalLentity;
-    private long externalBunit;
-    private long externalLentity;
-    private long internalPortfolio;
-    private long externalPortfolio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "internal_bunit")
+    private Party internalBunit;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "internal_lentity")
+    private Party internalLentity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "external_bunit")
+    private Party externalBunit;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "external_lentity")
+    private Party externalLentity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "internal_portfolio")
+    private Portfolio internalPortfolio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "external_portfolio")
+    private Portfolio externalPortfolio;
+
     private long internalContact;
     private long externalContact;
     private String book;
@@ -41,12 +60,21 @@ public class AbTran {
     private float position;
     private float price;
     private float rate;
-    private long currency;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "currency")
+    private Currency currency;
+
     private long cflowType;
     private long versionNumber;
     private float proceeds;
     private float mvalue;
-    private long personnelId;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "personnel_id")
+    private Personnel personnel;
+
     private LocalDateTime lastUpdate;
     private long insSubType;
     private long brokerId;
@@ -76,6 +104,6 @@ public class AbTran {
     private long marketPxIndexId;
 
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tranNum", referencedColumnName = "tranNum")
+    @JoinColumn(name = "tran_num", referencedColumnName = "tran_num")
     private Set<AbTranInfo> abTranInfos = new HashSet<>();
 }

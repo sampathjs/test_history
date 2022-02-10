@@ -4,16 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "abTranInfo")
+@Table(schema = DbConstants.SCHEMA_NAME, name = "ab_tran_info")
 @IdClass(AbTranInfo.AbTranInfoPrimaryKey.class)
 public class AbTranInfo {
 
@@ -22,15 +19,22 @@ public class AbTranInfo {
     @Data
     public static class AbTranInfoPrimaryKey implements Serializable {
         private long tranNum;
-        private long typeId;
+        private TranInfoType tranInfoType;
     }
 
     @Id
     private long tranNum;
     @Id
-    private long typeId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "type_id")
+    private TranInfoType tranInfoType;
+
     private String value;
-    private long personnelId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "personnel_id")
+    private Personnel personnel;
+
     private LocalDateTime lastUpdate;
 
 }
