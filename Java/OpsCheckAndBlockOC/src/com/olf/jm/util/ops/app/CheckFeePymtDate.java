@@ -1,20 +1,23 @@
 package com.olf.jm.util.ops.app;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+
 import com.olf.embedded.application.Context;
 import com.olf.embedded.application.EnumScriptCategory;
 import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
-import com.olf.embedded.trading.TradeProcessListener.PreProcessingInfo;
+import com.olf.jm.logging.Logging;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumFeeFieldId;
-import com.olf.openrisk.trading.EnumFieldGroup;
-import com.olf.openrisk.trading.EnumTranStatusInternalProcessing;
-import com.olf.openrisk.trading.FieldGroup;
-import com.olf.openrisk.trading.Transaction;
+import com.olf.openrisk.trading.EnumLegFieldId;
 import com.olf.openrisk.trading.EnumTranStatus;
+import com.olf.openrisk.trading.EnumTranStatusInternalProcessing;
+import com.olf.openrisk.trading.Transaction;
 import com.openlink.util.constrepository.ConstRepository;
-import com.olf.jm.logging.Logging;
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class CheckFeePymtDate extends AbstractTradeProcessListener {
@@ -37,6 +40,10 @@ public class CheckFeePymtDate extends AbstractTradeProcessListener {
 			String popUpMsg = ""; 
 			for(PreProcessingInfo<EnumTranStatus> procInfo : infoArray) {
 				Transaction tran = procInfo.getTransaction();
+				LocalDate currentDate =   toLocalDate( context.getTradingDate());
+				LocalDate receiptDate = null;
+				
+				
 				int numOfLegs = tran.getLegs().getCount();
 				for(int i=0; i< numOfLegs; i++){
 					
@@ -54,6 +61,15 @@ public class CheckFeePymtDate extends AbstractTradeProcessListener {
 								stopDealProcessing=true;					
 							}
 						}
+						 if(tran.getLeg(i).isPhysicalCommodity()) {
+							 receiptDate =toLocalDate (tran.getLeg(i).getValueAsDateTime(EnumLegFieldId.StartDate));
+							 if(!isDateAfterStartOfCurrentMonth(receiptDate,  currentDate)) {
+									return PreProcessResult.failed("Fee can not be updated For last Month Receipt date");
+								}
+						 }
+						
+						
+						
 					}
 				}		 
 
@@ -72,6 +88,16 @@ public class CheckFeePymtDate extends AbstractTradeProcessListener {
 			Logging.close();
 		}
 	}
+	
+	 private LocalDate toLocalDate(Date date) {
+	        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	    }
+	    
+	  private boolean isDateAfterStartOfCurrentMonth(LocalDate receiptDate, LocalDate currentDate) { 
+	        int yearDiff = currentDate.getYear() - receiptDate.getYear();
+	        int monthDiff = currentDate.getMonthValue() - receiptDate.getMonthValue(); 
+	        return (yearDiff * 12 + monthDiff) < 1;
+	    }
 	
 	@Override
 	public PreProcessResult preProcessInternalTarget(Context context,
