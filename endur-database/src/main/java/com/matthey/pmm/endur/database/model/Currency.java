@@ -25,8 +25,8 @@ public class Currency {
     private long roundType;
     private long euro;
     private float euroConversion;
-    private long currency_zone;
-    private short euro_scenarioFlag;
+    private long currencyZone;
+    private short euroScenarioFlag;
     private long advanceReleaseDays;
     private long userId;
     private LocalDateTime lastUpdate;

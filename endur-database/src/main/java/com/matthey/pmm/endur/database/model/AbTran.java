@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "ab_tran")
+@Table(schema = DbConstants.SCHEMA_NAME, name = "abTran")
 public class AbTran {
 
     @Id
@@ -63,19 +63,19 @@ public class AbTran {
     private short unit;
     private long lockUserId;
     private long lockType;
-    private long idx_group;
+    private long idxGroup;
     private long idxSubgroup;
-    private long templateTran_num;
-    private long otcClearing_brokerId;
+    private long templateTranNum;
+    private long otcClearingBrokerId;
     private long baseInsType;
     private long longTradingStrategy;
     private long extTradingStrategy;
     private long passThruId;
-    private long regulatory_reporting;
+    private long regulatoryReporting;
     private long altTranStatus;
     private long marketPxIndexId;
 
     @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tran_num", referencedColumnName = "tran_num")
+    @JoinColumn(name = "tranNum", referencedColumnName = "tranNum")
     private Set<AbTranInfo> abTranInfos = new HashSet<>();
 }

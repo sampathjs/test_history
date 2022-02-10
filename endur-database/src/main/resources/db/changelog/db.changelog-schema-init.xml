@@ -113,5 +113,148 @@
             <column name="m3_volume_unit" type="int"/>
         </createTable>
 
+        <createTable tableName="party">
+            <column name="party_id" type="int"/>
+            <column name="int_ext" type="int"/>
+            <column name="party_class" type="int"/>
+            <column name="party_status" type="int"/>
+            <column name="short_name" type="varchar"/>
+            <column name="long_name" type="varchar"/>
+            <column name="inputter_id" type="int"/>
+            <column name="authoriser_id" type="int"/>
+            <column name="last_update" type="datetime"/>
+            <column name="party_version" type="int"/>
+            <column name="default_portfolio_id" type="int"/>
+            <column name="agency_activities" type="int"/>
+            <column name="linked_party_id" type="int"/>
+        </createTable>
+
+        <createTable tableName="personnel">
+            <column name="id_number" type="int"/>
+            <column name="name" type="varchar"/>
+            <column name="title" type="varchar"/>
+            <column name="first_name" type="varchar"/>
+            <column name="last_name" type="varchar"/>
+            <column name="phone" type="varchar"/>
+            <column name="fax" type="varchar"/>
+            <column name="personnel_type" type="int"/>
+            <column name="status" type="int"/>
+            <column name="password_date" type="datetime"/>
+            <column name="authoriser" type="int"/>
+            <column name="last_update" type="datetime"/>
+            <column name="personnel_version" type="int"/>
+            <column name="employee_id" type="varchar"/>
+            <column name="email" type="varchar"/>
+            <column name="addr1" type="varchar"/>
+            <column name="addr2" type="varchar"/>
+            <column name="city" type="varchar"/>
+            <column name="state_id" type="int"/>
+            <column name="country" type="int"/>
+            <column name="mail_code" type="varchar"/>
+            <column name="tsv_group_id" type="int"/>
+            <column name="priority_user" type="int"/>
+            <column name="password_never_expires" type="int"/>
+            <column name="short_alias_name" type="varchar"/>
+            <column name="time_zone" type="int"/>
+            <column name="photo_node_id" type="int"/>
+            <column name="signature_node_id" type="int"/>
+            <column name="citizenship_country" type="int"/>
+            <column name="residence_country" type="int"/>
+            <column name="dpa_group_id" type="int"/>
+        </createTable>
+
+        <createTable tableName="portfolio">
+            <column name="id_number" type="int"/>
+            <column name="name" type="varchar"/>
+            <column name="long_name" type="varchar"/>
+            <column name="portfolio_type" type="int"/>
+            <column name="restricted" type="int"/>
+            <column name="authoriser_id" type="int"/>
+            <column name="last_update" type="datetime"/>
+            <column name="portfolio_version" type="int"/>
+            <column name="requires_strategy" type="int"/>
+        </createTable>
+
+        <createTable tableName="tran_info_types">
+            <column name="type_id" type="int"/>
+            <column name="type_name" type="varchar"/>
+            <column name="data_type" type="int"/>
+            <column name="personnel_id" type="int"/>
+            <column name="last_update" type="datetime"/>
+            <column name="ins_or_tran" type="tinyint"/>
+            <column name="required_flag" type="tinyint"/>
+            <column name="default_value" type="varchar"/>
+            <column name="pick_list_id" type="int"/>
+            <column name="offset_info_id" type="int"/>
+            <column name="sec_group_id" type="int"/>
+            <column name="audit_flag" type="int"/>
+            <column name="display_order" type="int"/>
+            <column name="read_only" type="tinyint"/>
+            <column name="save_to_db" type="tinyint"/>
+            <column name="multi_select_flag" type="tinyint"/>
+            <column name="user_table_name" type="varchar"/>
+            <column name="tran_num_col_name" type="varchar"/>
+            <column name="user_id_col_name" type="varchar"/>
+            <column name="tran_db_version_col_name" type="varchar"/>
+            <column name="date_modified_col_name" type="varchar"/>
+            <column name="udw_definition_id" type="int"/>
+            <column name="user_table_value_col_name" type="varchar"/>
+            <column name="ins_num_col_name" type="varchar"/>
+            <column name="param_seq_num_col_name" type="varchar"/>
+            <column name="user_table_value_format_str" type="varchar"/>
+        </createTable>
+
+        <createTable tableName="account">
+            <column name="account_id" type="int"/>
+            <column name="account_type" type="int"/>
+            <column name="account_name" type="varchar"/>
+            <column name="account_number" type="varchar"/>
+            <column name="holder_id" type="int"/>
+            <column name="description" type="varchar"/>
+            <column name="user_id" type="int"/>
+            <column name="last_update" type="datetime"/>
+            <column name="account_version" type="int"/>
+            <column name="account_status" type="int"/>
+            <column name="account_class" type="int"/>
+            <column name="on_bal_sheet_flag" type="tinyint"/>
+            <column name="allow_multi_units" type="tinyint"/>
+            <column name="linked_account_id" type="int"/>
+            <column name="portfolio_id" type="int"/>
+            <column name="clearing_flag" type="int"/>
+            <column name="account_legal_name" type="varchar"/>
+            <column name="account_country" type="int"/>
+            <column name="treasury_manager" type="int"/>
+            <column name="business_unit_owner" type="int"/>
+            <column name="date_opened" type="datetime"/>
+            <column name="date_closed" type="datetime"/>
+            <column name="general_ledger_account" type="varchar"/>
+            <column name="base_currency" type="int"/>
+            <column name="sweep_enabled_flag" type="int"/>
+            <column name="nostro_memo_flag" type="int"/>
+            <column name="plink_account_id" type="int"/>
+            <column name="account_iban" type="varchar"/>
+            <column name="bal_reporting_type_id" type="int"/>
+            <column name="bal_reconcile_flag" type="int"/>
+            <column name="auto_balance_flag" type="int"/>
+            <column name="last_stmt_end_date" type="datetime"/>
+            <column name="next_stmt_end_date_seq" type="int"/>
+            <column name="stmt_holiday" type="int"/>
+            <column name="stmt_date_adjust_method" type="int"/>
+            <column name="stmt_format" type="int"/>
+        </createTable>
+
+        <createTable tableName="tran_notepad">
+            <column name="tran_num" type="int"/>
+            <column name="note_type" type="int"/>
+            <column name="line_num" type="int"/>
+            <column name="line_text" type="varchar"/>
+            <column name="user_id" type="int"/>
+            <column name="comment_num" type="int"/>
+            <column name="comment_date" type="datetime"/>
+            <column name="time_stamp" type="datetime"/>
+            <column name="ins_num" type="int"/>
+            <column name="comment_end_date" type="datetime"/>
+        </createTable>
+
     </changeSet>
 </databaseChangeLog>

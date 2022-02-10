@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "idx_unit")
+@Table(schema = DbConstants.SCHEMA_NAME, name = "idxUnit")
 public class IdxUnit {
 
     @Id
@@ -18,8 +18,8 @@ public class IdxUnit {
     private long unitTypeId;
     private long userId;
     private LocalDateTime lastUpdate;
-    private long version_number;
+    private long versionNumber;
     private long massTypeId;
     private long kilogramMassUnit;
-    private long m3_volumeUnit;
+    private long m3VolumeUnit;
 }

@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "ab_tran_info")
+@Table(schema = DbConstants.SCHEMA_NAME, name = "abTranInfo")
 @IdClass(AbTranInfo.AbTranInfoPrimaryKey.class)
 public class AbTranInfo {
 
