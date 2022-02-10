@@ -9,6 +9,9 @@ import com.olf.embedded.application.ScriptCategory;
 import com.olf.embedded.generic.PreProcessResult;
 import com.olf.embedded.trading.AbstractTradeProcessListener;
 import com.olf.jm.logging.Logging;
+import com.olf.openjvs.OCalendar;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.enums.DATE_FORMAT;
 import com.olf.openrisk.staticdata.EnumFieldType;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
@@ -27,7 +30,6 @@ import com.openlink.util.constrepository.ConstRepository;
  * @author Gary Moore
  *
  */
-
 /* History
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | Rev | Date        | Change Id     | Author             | Description                                                                  |
@@ -39,12 +41,25 @@ import com.openlink.util.constrepository.ConstRepository;
  *                                                                           PBI000000000306 - Block if metal is not setup on from account |
  * | 004 | 21-Jul-2021 | EPI-1810      | Prashanth          | WO0000000004514 - Block if intermediate accounts/ settlement Instruction     |
  *                                                          | linked to account do not have access to metal                                |
+ * | 002 | 13-Dec-2021 | EPI-2000      | RodriR02           | fix for WO0000000134399 - Trade getting booked with prior month              |
+ *                                                                           settle date post metal statement run						   |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 
 @ScriptCategory({ EnumScriptCategory.OpsSvcTrade })
 public class ValidateStrategyFields extends AbstractTradeProcessListener {
-
+private ConstRepository constRep;
+	
+	/** context of constants repository */
+	private static final String CONST_REPO_CONTEXT = "MetalsTransfer";
+	
+	/** sub context of constants repository */
+	private static final String CONST_REPO_SUBCONTEXT = "ValidateStrategyFields"; 
+	
+	private static final String BLOCK_BUNIT =  "block_bunit";
+	
+	private static String blockBunitValue;
+	
     /** List of tran info fields to check */
     private static ArrayList<String> infoFields = new ArrayList<>();
     static {
@@ -76,7 +91,8 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
     public PreProcessResult preProcess(Context context, EnumTranStatus targetStatus, PreProcessingInfo<EnumTranStatus>[] infoArray,
             Table clientData) {
         try{
-	        Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
+        	init();
+//	        Logging.init(context, this.getClass(), "MetalsTransfer", "UI");
 	        for (PreProcessingInfo<EnumTranStatus> info : infoArray) {
 	            Transaction tran = info.getTransaction();
 	            try {
@@ -187,7 +203,9 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
 			sb.append("Metal " + metal + " is not setup for PMM account " + getAccName(sdf, intFromAccountId)
 					+ " Or Settlement Instruction " + getSIName(context, sdf, intFromAccountId) + "\n");
 		}
-
+        if (!blockBunitValue.equalsIgnoreCase("")) {
+        	validateSettleDate(context, tran.getField(EnumTransactionFieldId.SettleDate).getValueAsString(), sb);
+        }
 		
 		if (sb.length() > 0) {
 			throw new RuntimeException("Some fields have not been entered.\n\n" + sb.toString());
@@ -312,5 +330,98 @@ public class ValidateStrategyFields extends AbstractTradeProcessListener {
 		}
 		return accountExcluded;
 	}
-    
+	/**
+	 * Method to retrieve the latest Month for whichi Metal transfers statement
+	 * has been run.
+	 * 
+	 * Block Backdated SAP transfer if the metal statement is already run for Business unit present in
+	 * User_const_reporsitory for context 'SAP' and subcontext 'BackDatedSAPTransfer' 
+	 * 
+	 * @return Table - containing the Month and Year for which latest metal
+	 *         transfer statements has been run.
+	 * 
+	 */
+	private int getLastMetalStmtRunDate(Context context) {
+		Table metalStmtRun = null;
+		int jdStmtRunDate = 0;
+		try {
+			Logging.info("\n Block Backdated SAP transfer if the metal statement is already run for Business unit : " + blockBunitValue 
+					+". Please check the entry in User_const_reporsitory for context 'SAP' and subcontext 'BackDatedSAPTransfer' ");
+			
+			String sql =  " SELECT TOP 1 statement_period " 
+						+ " FROM USER_jm_monthly_metal_statement"	
+						+ " WHERE internal_bunit = " + context.getStaticDataFactory().getId(EnumReferenceTable.Party, blockBunitValue)	
+						+ " ORDER BY metal_statement_production_date  DESC";
+				
+			Logging.debug("Running SQL \n. " + sql);
+			metalStmtRun = context.getIOFactory().runSQL(sql);
+			if (metalStmtRun.getRowCount() < 1) {
+				String message = "\n could not retrieve latest metal statement run date from USER_jm_monthly_metal_statement";
+				Logging.error(message);
+			}
+
+			String StmtRunDate = metalStmtRun.getString(0, 0);
+			jdStmtRunDate = OCalendar.parseString(StmtRunDate);
+			Logging.info("\n Latets Metal Statement Run date " + jdStmtRunDate);
+
+		} catch (Exception exp) {
+			String message = "Error While loading data from USER_jm_monthly_metal_statement" + exp.getMessage();
+			Logging.error(message);
+		}
+		return jdStmtRunDate;
+	}
+	/**
+	 * Method to check if a transfer is backdated. A transfer is backdated if
+	 * valueDate is less than than Approval date and Metal transfers statement
+	 * has been run for that month.
+	 * 
+	 * @param String
+	 *            the value Date
+	 * @param String
+	 *            the Approval Date
+	 * @param Table
+	 *            table containing the latest month for which Metal statement
+	 *            was run
+	 * 
+	 */
+	private void isBackdated(String valueDate, int jdStmtRunDate, StringBuilder sb) throws OException {
+		int jdValueDate = OCalendar.parseString(valueDate);
+		int valueDateSOM = OCalendar.getSOM(jdValueDate);
+		int stmtRunDateSOM = OCalendar.getSOM(jdStmtRunDate);
+		if (valueDateSOM <= stmtRunDateSOM) {
+			String message = "Settle Date " + valueDate + " will not be permitted \nsince the latest Metal statement with run date " 
+					+ OCalendar.formatDateInt(jdStmtRunDate, DATE_FORMAT.DATE_FORMAT_DMLY_NOSLASH)
+					+ "\nhas already runned for the month \n";
+			sb.append(message);
+		}
+
+	}
+	public void validateSettleDate(Context context, String firstValue, StringBuilder sb) {
+		try {
+			int metalStmtRun = getLastMetalStmtRunDate(context);
+			if (metalStmtRun != 0) {
+				isBackdated(firstValue, metalStmtRun, sb);
+			}
+		} catch (Exception exp) {
+			String message = "Error validating backdated transfers " + exp.getMessage();
+			Logging.error(message);
+		}
+
+	}
+	/**
+	 * Initialise logging 
+	 * @throws Exception 
+	 * 
+	 * @throws OException
+	 */
+	private void init() {
+		try {
+			constRep = new ConstRepository(CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			Logging.init(this.getClass(), CONST_REPO_CONTEXT, CONST_REPO_SUBCONTEXT);
+			blockBunitValue = constRep.getStringValue(BLOCK_BUNIT, "").trim();
+		} catch (Exception e) {
+			Logging.error("Error initialising logging. " + e.getMessage());
+		} 
+	}
+
 }
