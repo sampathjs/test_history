@@ -410,7 +410,6 @@ private ConstRepository constRep;
 	}
 	/**
 	 * Initialise logging 
-	 * @throws Exception 
 	 * 
 	 * @throws OException
 	 */
