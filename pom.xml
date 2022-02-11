@@ -2,95 +2,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.matthey.pmm</groupId>
-    <artifactId>TOMS</artifactId>
+    <artifactId>ProjectAggregator</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
     <modules>
-        <module>TOMS-Common</module>
-        <module>TOMS-EndurConnector</module>
-        <module>TOMS-MockService</module>
-        <module>TOMS-Service</module>
-        <module>TOMS-TestData</module>
-        <module>TOMS-DataBase</module>
-        <module>TOMS-ServiceShared</module>
-        <module>TOMS-AllTests</module>
+        <module>trade-booking</module>
+        <module>TOMS\Backend</module>
     </modules>
     <properties>
-        <io.springfox.version>2.9.2</io.springfox.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <log4j2.version>2.17.0</log4j2.version>
     </properties>
     <dependencyManagement>
         <dependencies>
-<!--       		<dependency>
-         		<groupId>com.google.guava</groupId>
-         		<artifactId>guava</artifactId>
-         		<version>29.0-jre</version>    		
-      		</dependency> -->
-            <dependency>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>3.0.2</version>            
-            </dependency>
-            <dependency>
-                <groupId>com.google.errorprone</groupId>
-                <artifactId>error_prone_annotations</artifactId>
-                <version>2.3.4</version>
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-core</artifactId>
-                <version>${io.springfox.version}</version>             
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-spi</artifactId>
-                <version>${io.springfox.version}</version>                
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-spring-web</artifactId>
-                <version>${io.springfox.version}</version>             
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${io.springfox.version}</version>             
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${io.springfox.version}</version>             
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.8.1</version>            
-            </dependency>
-            <dependency>
-                <groupId>org.immutables</groupId>
-                <artifactId>value</artifactId>
-                <version>2.8.3</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>2.10.3</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        	<dependency>
-	            <groupId>org.apache.logging.log4j</groupId>
-    	        <artifactId>log4j-bom</artifactId>
-        	    <version>2.17.0</version>
-	            <scope>import</scope>
-    	        <type>pom</type>
-        	</dependency>   
-      	    <dependency>
-        		<groupId>org.liquibase</groupId>
-	        	<artifactId>liquibase-core</artifactId>
-	        	<version>3.8.8</version>	        
-	   		</dependency>        	        
         </dependencies>
     </dependencyManagement>
     <build>
@@ -151,26 +75,6 @@
                         </execution>
                     </executions>
                 </plugin>
-     	        <plugin>
-         	       <groupId>com.github.ekryd.sortpom</groupId>
-           	       <artifactId>sortpom-maven-plugin</artifactId>
-              	   <version>2.4.0</version>
-                   <executions>
-                   	  <execution>
-                       <phase>validate</phase>
-                       <goals>
-                          <goal>sort</goal>
-                       </goals>
-                      </execution>
-                    </executions>
-                 	<configuration>
-                    	<createBackupFile>false</createBackupFile>
-                    	<nrOfIndentSpace>4</nrOfIndentSpace>
-                    	<expandEmptyElements>false</expandEmptyElements>
-                    	<sortProperties>true</sortProperties>
-                    	<sortDependencies>scope,groupId,artifactId</sortDependencies>
-                	</configuration>
-            	</plugin>
             	<plugin>
 	                <groupId>org.apache.maven.plugins</groupId>
     	            <artifactId>maven-surefire-plugin</artifactId>
@@ -193,16 +97,6 @@
 						<generateHtml>true</generateHtml>
 						<generateJson>false</generateJson>								
 					</configuration>
-				    <executions>
-					    <execution>
-                            <id>Clover setup</id>
-							<phase>pre-site</phase>
-                            <goals>
-                                <goal>setup</goal>
-								<goal>aggregate</goal>
-                            </goals>
-                        </execution>
-					</executions>
       			</plugin>   
          	</plugins>
         </pluginManagement>

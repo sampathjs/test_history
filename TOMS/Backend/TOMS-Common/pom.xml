@@ -99,7 +99,7 @@
                 <configuration>
                     <release>8</release>
                 </configuration>
-            </plugin>
+            </plugin>			
         </plugins>
       </pluginManagement>
     </build>
