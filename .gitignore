@@ -1,6 +1,7 @@
 **/build
 **/Builds
 **/target
+**/JM_JARS
 **/*.class
 **/*.olfversion
 **/.settings

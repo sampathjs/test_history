@@ -20,9 +20,4 @@
             <outputDirectory>/trade_booking</outputDirectory>
         </fileSet>
     </fileSets>
-    <dependencySets>
-        <dependencySet>
-            <outputDirectory>/dependencies</outputDirectory>
-        </dependencySet>
-    </dependencySets>
 </assembly>

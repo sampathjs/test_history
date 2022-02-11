@@ -32,3 +32,4 @@ build/
 **/target/**
 /endur-connector-shared.iml
 .idea/**
+/target/

@@ -38,6 +38,11 @@
             <version>1.9.4</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+        </dependency>        
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.22</version>
@@ -126,25 +131,48 @@
                                 <dependency>com.fasterxml.jackson*</dependency>
                                 <dependency>com.matthey.pmm*</dependency>
                                 <dependency>commons-beanutils</dependency>
+                                <dependency>org.apache.commons*</dependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <attach>false</attach>
+                            <descriptors>
+                                <descriptor>jmjars.xml</descriptor>
+                            </descriptors>
+		                    <finalName>jmjars</finalName>
+		                    <appendAssemblyId>false</appendAssemblyId>
+		                    <outputDirectory>target</outputDirectory>                        
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>             
 		    <plugin>
 		      <artifactId>maven-resources-plugin</artifactId>
 		      <executions>
 		        <execution>
-		          <id>Copy generated .jar file to COMMON_JARS (x64) folder</id>
+		          <id>Copy generated .jar file and runtime dependencies to JM_JARS folder</id>
 		          <phase>install</phase>
 		          <goals>
 		            <goal>copy-resources</goal>
 		          </goals>
 		          <configuration>
-		            <outputDirectory>../../COMMON_JARS/x64/bin/scbin/</outputDirectory>
+		            <outputDirectory>../../JM_JARS</outputDirectory>
 		            <resources>          
 		              <resource>
-		                <directory>${basedir}/target</directory>
+		                <directory>${basedir}/target/jmjars</directory>
                 		<includes>
                     		<include>*.jar</include>
                 		</includes>		                
@@ -152,24 +180,6 @@
 		            </resources>              
 		          </configuration>            
 		        </execution>
-		        <execution>
-		          <id>Copy generated .jar file to COMMON_JARS (x86) folder</id>
-		          <phase>install</phase>
-		          <goals>
-		            <goal>copy-resources</goal>
-		          </goals>
-		          <configuration>
-		            <outputDirectory>../../COMMON_JARS/x86/bin/scbin/</outputDirectory>
-		            <resources>          
-		              <resource>
-		                <directory>${basedir}/target</directory>
-                		<includes>
-                    		<include>*.jar</include>
-                		</includes>		                
-		              </resource>
-		            </resources>              
-		          </configuration>            
-		        </execution>		        
 		      </executions>
 		    </plugin>            
         </plugins>
