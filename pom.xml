@@ -8,6 +8,7 @@
     <modules>
         <module>trade-booking</module>
         <module>TOMS\Backend</module>
+        <module>endur-connector</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

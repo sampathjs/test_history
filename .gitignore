@@ -1,5 +1,6 @@
 **/build
 **/Builds
+**/target
 **/*.class
 **/*.olfversion
 **/.settings
