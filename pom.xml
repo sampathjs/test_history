@@ -6,6 +6,7 @@
     <version>1.0.0</version>
     <packaging>pom</packaging>
     <modules>
+        <module>AggregatorInit</module>
         <module>trade-booking</module>
         <module>TOMS\Backend</module>
         <module>endur-connector</module>
@@ -20,7 +21,7 @@
     </dependencyManagement>
     <build>
         <pluginManagement>
-            <plugins>
+            <plugins>			
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
@@ -98,7 +99,7 @@
 						<generateHtml>true</generateHtml>
 						<generateJson>false</generateJson>								
 					</configuration>
-      			</plugin>   
+      			</plugin>				
          	</plugins>
         </pluginManagement>
     </build>
