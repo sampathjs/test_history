@@ -79,7 +79,7 @@ public class ITSMReport implements IScript {
 	private boolean isUserTypeSupport() throws OException {
 		Table tempTable1 = Util.NULL_TABLE;
 		tempTable1 = Table.tableNew();
-		String sql = "Select * from country where id_number ="+countryIDStr;
+		String sql = "SELECT * FROM country WHERE id_number ="+countryIDStr;
 		int ret1 = DBaseTable.execISql(tempTable1, sql);
 		if (ret1 != OLF_RETURN_CODE.OLF_RETURN_SUCCEED.toInt()) {
 			Logging.error(DBUserTable.dbRetrieveErrorInfo(ret1, "Failed to get party portfolio"));
@@ -261,25 +261,26 @@ public class ITSMReport implements IScript {
 
 	private String getUserTypeSQL() {
  
-		String sql  = " WITH version_data AS (       Select max(ph.personnel_version) max_personnel_version, ph.id_number   from personnel_history ph"
-					+  "  WHERE      ph.last_update < '"+endDate+"'  group by id_number      )   "
-					+  "  SELECT   ph.id_number personnel_id, ps.name user_status ,pt.name user_type FROM  personnel p   "
-					+  "   JOIN personnel_history ph on (ph.id_number = p.id_number  )   "
-					+  "    JOIN personnel_status ps  "
-					+  "  ON (  ps.id_number =ph.status ) JOIN personnel_type pt ON (pt.id_number =ph.personnel_type and p.fax <> 'Server User')  "  
-					+  "  JOIN  version_data vd on (vd.max_personnel_version = ph.personnel_version AND vd.id_number =ph.id_number)  ";
+		String sql  = "  WITH version_data AS ( "
+					+  " SELECT MAX(ph.personnel_version) max_personnel_version, ph.id_number FROM personnel_history ph"
+					+  " WHERE  ph.last_update < '"+endDate+"'  group by id_number )   "
+					+  " SELECT ph.id_number personnel_id, ps.name user_status ,pt.name user_type FROM  personnel p   "
+					+  " JOIN personnel_history ph ON (ph.id_number = p.id_number  )   "
+					+  " JOIN personnel_status ps  "
+					+  " ON (  ps.id_number =ph.status ) JOIN personnel_type pt ON (pt.id_number =ph.personnel_type AND p.fax <> 'Server User')  "  
+					+  " JOIN  version_data vd ON (vd.max_personnel_version = ph.personnel_version AND vd.id_number =ph.id_number)  ";
 				
 			return sql;
 	}
 	
 	private String getSecurityGroupSQL() {
 		String sql = " WITH version_data AS ( "+						   
-				     " Select max(ugh.version_number) max_personnel_version, ugh.user_number   from users_to_groups_history ugh "+								 
-				     " WHERE      ugh.last_update < '"+endDate+"' group by ugh.user_number   )    "+
-				     " SELECT  distinct ugh.user_number personnel_id ,g.name   security_groups "+
+				     " SELECT max(ugh.version_number) max_personnel_version, ugh.user_number   FROM users_to_groups_history ugh "+								 
+				     " WHERE  ugh.last_update < '"+endDate+"' group by ugh.user_number )    "+
+				     " SELECT  distinct ugh.user_number personnel_id ,g.name  security_groups "+
 				     " FROM  users_to_groups_history ugh   "+
 				     " JOIN  groups g  ON (g.id_number =ugh.group_number ) "+
-				     " JOIN  version_data vd on (vd.max_personnel_version = ugh.version_number and ugh.user_number =vd.user_number    )  ";
+				     " JOIN  version_data vd ON (vd.max_personnel_version = ugh.version_number AND ugh.user_number =vd.user_number    )  ";
 						  
 						      
 			return sql;
@@ -288,14 +289,14 @@ public class ITSMReport implements IScript {
 
 	private String getLicenceTypeSQL() {
 		String sql = " WITH version_data AS ( "+						   
-			     " Select max(ph.personnel_version) max_personnel_version,ph.id_number personnel_id, ph.personnel_type  from personnel_history  ph "+								 
-			     " JOIN pers_license_types_link_h plt_h on (plt_h.personnel_id = ph.id_number AND plt_h.personnel_version = ph.personnel_version)    "+
-			     " WHERE ph.last_update < '"+endDate+"' group by ph.id_number, ph.personnel_type   )    "+			     
-   				 " SELECT  distinct a.personnel_id personnel_id, plt.type_name "+
-				  " FROM   pers_license_types_link_h a   "+
-				  " Join   personnel_license_type plt ON(a.license_type = plt.type_id) "+
-				  " JOIN   personnel p1 ON(p1.id_number = a.personnel_id)"+
-				  " JOIN   version_data vd ON(a.personnel_id = vd.personnel_id AND  vd.max_personnel_version =a.personnel_version )";
+			     	 " SELECT max(ph.personnel_version) max_personnel_version,ph.id_number personnel_id, ph.personnel_type  FROM personnel_history  ph "+								 
+			     	 " JOIN pers_license_types_link_h plt_h ON (plt_h.personnel_id = ph.id_number AND plt_h.personnel_version = ph.personnel_version)  "+
+			     	 " WHERE ph.last_update < '"+endDate+"' group by ph.id_number, ph.personnel_type   )    "+			     
+			     	 " SELECT  distinct a.personnel_id personnel_id, plt.type_name "+
+			     	 " FROM   pers_license_types_link_h a   "+
+			     	 " JOIN   personnel_license_type plt ON(a.license_type = plt.type_id) "+
+			     	 " JOIN   personnel p1 ON(p1.id_number = a.personnel_id)"+
+			     	 " JOIN   version_data vd ON(a.personnel_id = vd.personnel_id AND  vd.max_personnel_version =a.personnel_version )";
 			 
 		return sql;
 		 
@@ -349,8 +350,8 @@ public class ITSMReport implements IScript {
 	}
 
 	private String getAdditionalSQL() {
-	 String sql = " Select distinct p1.id_number personnel_id,'' license_type"+
-			 	  " FROM personnel p1 WHERE p1.id_number not in ("+
+	 String sql = " SELECT distinct p1.id_number personnel_id,'' license_type"+
+			 	  " FROM personnel p1 WHERE p1.id_number NOT IN  ("+
 			      " SELECT a.personnel_id FROM   pers_license_types_link a  )";
 	 return sql;
 	}
@@ -399,15 +400,14 @@ public class ITSMReport implements IScript {
 
 	private String getBussSQL() {
 		String sql =  "  WITH version_data AS (    "+
-				"   Select distinct max(ph.version_number) max_personnel_version, ph.party_id, ph.personnel_id   from party_personnel_history ph WHERE   "+
-				//"  ph.last_update > '"+start_date+"'  AND  ph.last_update <='"+end_date+"'"+
-				"   ph.last_update <'"+endDate+"'"+
-					" AND link_status=1  group by   ph.personnel_id,ph.party_id    "+
-				"   )  SELECT DISTINCT  a.personnel_id    ,prt.short_name  "+
-				 "FROM   party_personnel_history a     "+
-				 "JOIN   version_data vd  on (vd. max_personnel_version = a.version_number  and vd.party_id =a.party_id and  a.personnel_id  = vd.personnel_id )        "+
-				 "JOIN   party prt on (  prt.party_id = a.party_id and  prt.party_class = 1 )     "+ 
-				 " group by  a.personnel_id,prt.short_name ";
+					"   SELECT distinct max(ph.version_number) max_personnel_version, ph.party_id, ph.personnel_id   FROM party_personnel_history ph "+
+					"   WHERE ph.last_update <'"+endDate+"'"+
+					"   AND link_status=1  group by   ph.personnel_id,ph.party_id )   "+
+					"   SELECT DISTINCT  a.personnel_id    ,prt.short_name  "+
+					"   FROM   party_personnel_history a     "+
+					"   JOIN   version_data vd  ON (vd. max_personnel_version = a.version_number  AND vd.party_id =a.party_id AND  a.personnel_id  = vd.personnel_id ) "+
+					"   JOIN   party prt ON (  prt.party_id = a.party_id AND  prt.party_class = 1 )     "+ 
+					"   GROUP BY  a.personnel_id,prt.short_name ";
 		return sql;
 	}
 
@@ -415,73 +415,74 @@ public class ITSMReport implements IScript {
 
 	private String getMainDataSQL() {
 		
-		String sql = "  WITH version_data AS (    "+
-				"   Select max(ph.personnel_version) max_personnel_version, ph.id_number   from personnel_history ph WHERE   "+
-			    "  ph.last_update > '"+startDate+"'  AND "+
-				"  ph.last_update <'"+endDate+"'"+
-				"   group by id_number    "+
-				"   ) ,Recent_Authorized_User_data AS (    "+
-				"  select   p.id_number,ps.name user_status ,pt.name user_type   "+
-				"   from  personnel p   "+
-				"   JOIN personnel_status ps ON ( ps.id_number =p.status)   "+
-				"  JOIN personnel_type pt ON (pt.id_number =p.personnel_type and p.fax <> 'Server User')  "+
-				"  JOIN  personnel_history ph ON(ph.last_update >='"+endDate_Param+"' AND ph.id_number =p.id_number and ph.personnel_version =1)   "+
-				"    )   ,   Recent_UnAuthorized_User_data AS (    "+
-				"  select   p.id_number,ps.name user_status ,pt.name user_type      from  personnel p      JOIN personnel_status ps ON (    "+
-				"   ps.id_number =p.status)     JOIN personnel_type pt ON (pt.id_number =p.personnel_type and p.fax <> 'Server User')   "+
-				"   JOIN  personnel_history ph ON(ph.last_update >='"+endDate_Param+"' AND ph.id_number =p.id_number and ph.personnel_version <>1)   "+
-				"  ) ,  version_data_outside AS ( Select max(ph.personnel_version) max_personnel_version, ph.id_number   from personnel_history ph WHERE   "+
-				"  ph.last_update <='"+startDate+"'   "+
-				"  AND  ph.id_number not in ( Select vd.id_number from version_data vd )   "+
-				"  AND  ph.id_number   in ( Select vd.id_number from Recent_UnAuthorized_User_data vd ) group by id_number    "+ 
-				"   )   ,    Authorized_User_data as (   "+
-				"  select   p.id_number,ps.name user_status ,pt.name user_type "+ 
-				"    from  personnel p   "+
-				"   JOIN personnel_status ps ON (ps.id_number =1 AND ps.id_number =p.status AND    p.personnel_type =2 and p.status =1 )   "+
-				"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type and p.fax <> 'Server User')  "+
-				"   where p.id_number not in (Select   id_number from Recent_Authorized_User_data )  "+
-				"  )  ,    Recent_Updated_User_Data as (   "+
-				"   Select   p.id_number,  ps.name user_status ,pt.name user_type "+
-				"   FROM  personnel p   "+
-//				"   JOIN personnel_status ps ON (ps.id_number <>1 AND ps.id_number =p.status AND    p.personnel_type <>2 and p.status <>1 )   "+
-				"   JOIN personnel_status ps ON (  ps.id_number =p.status )   "+
-				"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type and p.fax <> 'Server User')    "+
-				"   JOIN version_data vd on ( vd.id_number = p.id_number )    "+				  
-				"   ) , Recent_UnAuthorized_Outside_User_Data AS (  "+
-				"      Select   p.id_number,  ps.name user_status ,pt.name user_type    FROM  personnel p "+
-				"       JOIN personnel_status ps ON (  ps.id_number =p.status )      JOIN personnel_type pt ON (pt.id_number =p.personnel_type and    "+
-				"  		 p.fax <> 'Server User')        JOIN version_data_outside vd on ( vd.id_number = p.id_number )  "+
-				"  ) ,	  session_data AS (  "+
-				"     SELECT max(si.end_time) last_login_date,p.id_number personnel_id  "+
-				"         FROM    personnel p    "+
-				"  		Join sysaudit_activity_log si ON (si.personnel_id =p.id_number and si.action_id =15  )  "+
-				"  		GROUP BY p.id_number  "+
-				"  ) ,  combind_personal_data AS (  "+
-				"     SELECT aud.id_number,aud.user_type,aud.user_status  "+
-				"         FROM    Authorized_User_data aud    "+
-				"  	    Union   "+
-				"  	SELECT rud.id_number,rud.user_type,rud.user_status  "+
-				"     FROM    Recent_Updated_User_Data rud    "+				      
-				"  	    Union   "+
-				"  	SELECT ruad.id_number,ruad.user_type,ruad.user_status    "+    
-				"     FROM    Recent_UnAuthorized_Outside_User_Data ruad    )"+				      
-				"  SELECT p.name ADID,p.id_number personnel_id,	p.first_name  ,	p.last_name,   "+
-			    " cntr.name country_name,   "+
-				"  CASE WHEN (     cntr.name='Support' ) THEN  'Yes' ELSE 'No' END as Repository_Access ,"+
-				"  CASE WHEN (     si.last_login_date  IS NULL ) THEN 'User not logged in last Six Months' ELSE CONVERT(VARCHAR(30),  CONVERT(DATE, si.last_login_date),106) END as last_login_date ,p.phone , p.fax   "+
-				"   FROM personnel p   "+
-				"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type AND pt.id_number >0)   "+
-				"    JOIN combind_personal_data cpd  ON (cpd.id_number = p.id_number)    "+
-				"  JOIN personnel_status ps ON (ps.id_number =p.status)  "+		   
-				"    JOIN country cntr ON (cntr.id_number =p.country )    "+
-				"  LEFT OUTER JOIN  session_data si ON(si.personnel_id = p.id_number)  "+
-				"  WHERE p.id_number NOT IN (23891, 22840, 23291 )";
-			if(isSuportUser){
-				sql = sql+" AND cntr.id_number in ("+countryIDStr+") "; 
+		String sql = 	"   WITH version_data AS (    "+
+						"   SELECT max(ph.personnel_version) max_personnel_version, ph.id_number   FROM personnel_history ph WHERE   "+
+					    "   ph.last_update > '"+startDate+"'  AND ph.last_update <'"+endDate+"'"+
+						"   GROUP BY id_number ) ,  "+
+						"   Recent_Authorized_User_data AS (    "+
+						"   SELECT   p.id_number,ps.name user_status ,pt.name user_type   "+
+						"   FROM  personnel p   "+
+						"   JOIN personnel_status ps ON ( ps.id_number =p.status)   "+
+						"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type AND p.fax <> 'Server User')  "+
+						"   JOIN  personnel_history ph ON(ph.last_update >='"+endDate_Param+"' "+
+						"   AND ph.id_number =p.id_number AND ph.personnel_version =1)  )   ,  "+
+						"   Recent_UnAuthorized_User_data AS (    "+
+						"   SELECT   p.id_number,ps.name user_status ,pt.name user_type      FROM  personnel p    "+
+						"   JOIN personnel_status ps ON ( ps.id_number =p.status)"+
+						"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type AND p.fax <> 'Server User')   "+
+						"   JOIN  personnel_history ph ON(ph.last_update >='"+endDate_Param+"' AND ph.id_number =p.id_number AND ph.personnel_version <>1)  ) , "+
+						"   Version_data_outside AS ( SELECT max(ph.personnel_version) max_personnel_version, ph.id_number   FROM personnel_history ph    "+
+						"   WHERE ph.last_update <='"+startDate+"'   "+
+						"   AND  ph.id_number NOT IN  ( SELECT vd.id_number FROM version_data vd )   "+
+						"   AND  ph.id_number   IN  ( SELECT vd.id_number FROM Recent_UnAuthorized_User_data vd ) group by id_number  ), "+ 
+						"   Authorized_User_data AS (   "+
+						"   SELECT   p.id_number,ps.name user_status ,pt.name user_type "+ 
+						"   FROM  personnel p   "+
+						"   JOIN personnel_status ps ON (ps.id_number =1 AND ps.id_number =p.status AND    p.personnel_type =2 AND p.status =1 )   "+
+						"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type AND p.fax <> 'Server User')  "+
+						"   WHERE p.id_number NOT IN  (SELECT   id_number FROM Recent_Authorized_User_data ))  ,  "+
+						"   Recent_Updated_User_Data AS (   "+
+						"   SELECT   p.id_number,  ps.name user_status ,pt.name user_type "+
+						"   FROM  personnel p   "+
+		//				"   JOIN personnel_status ps ON (ps.id_number <>1 AND ps.id_number =p.status AND    p.personnel_type <>2 AND p.status <>1 )   "+
+						"   JOIN personnel_status ps ON (  ps.id_number =p.status )   "+
+						"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type AND p.fax <> 'Server User')    "+
+						"   JOIN version_data vd ON ( vd.id_number = p.id_number ) ) ,    "+				  
+						"   Recent_UnAuthorized_Outside_User_Data AS (  "+
+						"   SELECT   p.id_number,  ps.name user_status ,pt.name user_type    FROM  personnel p "+
+						"   JOIN personnel_status ps ON (  ps.id_number =p.status ) "+
+						"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type AND p.fax <> 'Server User') ) ,  "+
+						"  	JOIN Version_data_outside vd on ( vd.id_number = p.id_number )  "+
+						"   Session_data AS (  "+
+						"   SELECT max(si.end_time) last_login_date,p.id_number personnel_id  "+
+						"   FROM    personnel p    "+
+						"  	JOIN sysaudit_activity_log si ON (si.personnel_id =p.id_number AND si.action_id =15  )  "+
+						"  	GROUP BY p.id_number ) ,"+
+						"   Combind_personal_data AS (  "+
+						"   SELECT aud.id_number,aud.user_type,aud.user_status  "+
+						"   FROM    Authorized_User_data aud    "+
+						"  	    UNION   "+
+						"  	SELECT rud.id_number,rud.user_type,rud.user_status  "+
+						"   FROM    Recent_Updated_User_Data rud    "+				      
+						"  	    UNION   "+
+						"  	SELECT ruad.id_number,ruad.user_type,ruad.user_status    "+    
+						"   FROM    Recent_UnAuthorized_Outside_User_Data ruad    )"+				      
+						"   SELECT p.name ADID,p.id_number personnel_id,	p.first_name  ,	p.last_name, cntr.name country_name,    "+ 
+						"   CASE WHEN (     cntr.name='Support' ) THEN  'Yes' ELSE 'No' END AS Repository_Access ,"+
+						"   CASE WHEN (     si.last_login_date  IS NULL ) THEN 'User not logged in last Six Months' ELSE CONVERT(VARCHAR(30),  CONVERT(DATE, si.last_login_date),106) END AS last_login_date ,p.phone , p.fax   "+
+						"   FROM personnel p   "+
+						"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type AND pt.id_number >0)   "+
+						"   JOIN Combind_personal_data cpd  ON (cpd.id_number = p.id_number)    "+
+						"   JOIN personnel_status ps ON (ps.id_number =p.status)  "+		   
+						"   JOIN country cntr ON (cntr.id_number =p.country )    "+
+						"   LEFT OUTER JOIN  Session_data si ON(si.personnel_id = p.id_number)  "+
+						"   WHERE p.id_number NOT IN (23891, 22840, 23291 )";
+		if(isSuportUser){
+			sql = sql+" AND cntr.id_number IN  ("+countryIDStr+") ";
 			}else{
 				countryIDStr = "20250";
-				sql = sql+" AND cntr.id_number not in ("+countryIDStr+") ";
-			}
+				sql = sql+" AND cntr.id_number NOT IN  ("+countryIDStr+") ";
+				}
 				
 			 
 		return sql;
