@@ -2,9 +2,7 @@ package com.matthey.pmm.endur.database.model;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
@@ -27,7 +25,11 @@ public class Account {
     private short onBalSheetFlag;
     private short allowMultiUnits;
     private int linkedAccountId;
-    private int portfolioId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "portfolio_id")
+    private Portfolio portfolio;
+    
     private int clearingFlag;
     private String accountLegalName;
     private int accountCountry;

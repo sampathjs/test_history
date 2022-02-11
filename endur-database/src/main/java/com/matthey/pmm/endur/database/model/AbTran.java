@@ -13,17 +13,17 @@ import java.util.Set;
 public class AbTran {
 
     @Id
-    private long tranNum;
+    private int tranNum;
 
-    private long tranGroup;
-    private long dealTrackingNum;
-    private long tranType;
-    private long tranStatus;
-    private long assetType;
-    private long insNum;
-    private long insType;
-    private long insClass;
-    private long toolset;
+    private int tranGroup;
+    private int dealTrackingNum;
+    private int tranType;
+    private int tranStatus;
+    private int assetType;
+    private int insNum;
+    private int insType;
+    private int insClass;
+    private int toolset;
     private short buySell;
     private String reference;
 
@@ -51,8 +51,8 @@ public class AbTran {
     @JoinColumn(name = "external_portfolio")
     private Portfolio externalPortfolio;
 
-    private long internalContact;
-    private long externalContact;
+    private int internalContact;
+    private int externalContact;
     private String book;
     private LocalDateTime tradeDate;
     private LocalDateTime inputDate;
@@ -65,8 +65,8 @@ public class AbTran {
     @JoinColumn(name = "currency")
     private Currency currency;
 
-    private long cflowType;
-    private long versionNumber;
+    private int cflowType;
+    private int versionNumber;
     private float proceeds;
     private float mvalue;
 
@@ -76,32 +76,32 @@ public class AbTran {
     private Personnel personnel;
 
     private LocalDateTime lastUpdate;
-    private long insSubType;
-    private long brokerId;
+    private int insSubType;
+    private int brokerId;
     private LocalDateTime startDate;
     private LocalDateTime maturityDate;
     private LocalDateTime perpetualPosDate;
     private LocalDateTime tradeTime;
-    private long offsetTranNum;
-    private long offsetTranType;
-    private long tradeFlag;
-    private long currentFlag;
-    private long fxYldBasis1;
-    private long fxYldBasis2;
+    private int offsetTranNum;
+    private int offsetTranType;
+    private int tradeFlag;
+    private int currentFlag;
+    private int fxYldBasis1;
+    private int fxYldBasis2;
     private short unit;
-    private long lockUserId;
-    private long lockType;
-    private long idxGroup;
-    private long idxSubgroup;
-    private long templateTranNum;
-    private long otcClearingBrokerId;
-    private long baseInsType;
-    private long longTradingStrategy;
-    private long extTradingStrategy;
-    private long passThruId;
-    private long regulatoryReporting;
-    private long altTranStatus;
-    private long marketPxIndexId;
+    private int lockUserId;
+    private int lockType;
+    private int idxGroup;
+    private int idxSubgroup;
+    private int templateTranNum;
+    private int otcClearingBrokerId;
+    private int baseInsType;
+    private int longTradingStrategy;
+    private int extTradingStrategy;
+    private int passThruId;
+    private int regulatoryReporting;
+    private int altTranStatus;
+    private int marketPxIndexId;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "tran_num", referencedColumnName = "tran_num")

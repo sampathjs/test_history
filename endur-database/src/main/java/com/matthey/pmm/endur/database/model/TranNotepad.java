@@ -2,9 +2,7 @@ package com.matthey.pmm.endur.database.model;
 
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Data
@@ -13,7 +11,9 @@ import java.time.LocalDateTime;
 public class TranNotepad {
 
     @Id
-    private int tranNum;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tran_num")
+    private AbTran abTran;
     private int noteType;
     private int lineNum;
     private String lineText;
