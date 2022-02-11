@@ -70,7 +70,7 @@
             <column name="market_px_index_id" type="int"/>
         </createTable>
 
-        <createTable tableName="ab_tran_info" schemaName="dbo">
+        <createTable tableName="ab_tran_info">
             <column name="tran_num" type="int"/>
             <column name="type_id" type="int"/>
             <column name="value" type="varchar"/>
@@ -78,7 +78,7 @@
             <column name="last_update" type="datetime"/>
         </createTable>
 
-        <createTable tableName="currency" schemaName="dbo">
+        <createTable tableName="currency">
             <column name="ame" type="varchar"/>
             <column name="id_number" type="int"/>
             <column name="default_index" type="int"/>
@@ -101,7 +101,7 @@
             <column name="version_number" type="int"/>
         </createTable>
 
-        <createTable tableName="idx_unit" schemaName="dbo">
+        <createTable tableName="idx_unit">
             <column name="unit_id" type="int"/>
             <column name="unit_label" type="varchar"/>
             <column name="unit_type_id" type="int"/>
@@ -113,7 +113,7 @@
             <column name="m3_volume_unit" type="int"/>
         </createTable>
 
-        <createTable tableName="party" schemaName="dbo">
+        <createTable tableName="party">
             <column name="party_id" type="int"/>
             <column name="int_ext" type="int"/>
             <column name="party_class" type="int"/>
@@ -129,7 +129,7 @@
             <column name="linked_party_id" type="int"/>
         </createTable>
 
-        <createTable tableName="personnel" schemaName="dbo">
+        <createTable tableName="personnel">
             <column name="id_number" type="int"/>
             <column name="name" type="varchar"/>
             <column name="title" type="varchar"/>
@@ -163,7 +163,7 @@
             <column name="dpa_group_id" type="int"/>
         </createTable>
 
-        <createTable tableName="portfolio" schemaName="dbo">
+        <createTable tableName="portfolio">
             <column name="id_number" type="int"/>
             <column name="name" type="varchar"/>
             <column name="long_name" type="varchar"/>
@@ -175,7 +175,7 @@
             <column name="requires_strategy" type="int"/>
         </createTable>
 
-        <createTable tableName="tran_info_types" schemaName="dbo">
+        <createTable tableName="tran_info_types">
             <column name="type_id" type="int"/>
             <column name="type_name" type="varchar"/>
             <column name="data_type" type="int"/>
@@ -204,7 +204,7 @@
             <column name="user_table_value_format_str" type="varchar"/>
         </createTable>
 
-        <createTable tableName="account" schemaName="dbo">
+        <createTable tableName="account">
             <column name="account_id" type="int"/>
             <column name="account_type" type="int"/>
             <column name="account_name" type="varchar"/>
@@ -243,7 +243,7 @@
             <column name="stmt_format" type="int"/>
         </createTable>
 
-        <createTable tableName="tran_notepad" schemaName="dbo">
+        <createTable tableName="tran_notepad">
             <column name="tran_num" type="int"/>
             <column name="note_type" type="int"/>
             <column name="line_num" type="int"/>
