@@ -9,10 +9,18 @@ import javax.persistence.Table;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "USER_JM_negative_threshold")
-public class UserJmNegativeThreshold {
+@Table(schema = DbConstants.SCHEMA_NAME, name = "USER_jm_tax_sub_type_transfers")
+public class UserJmTaxSubTypeTransfers {
 
     @Id
-    private float value;
+    private String active;
+    private String from_account_country;
+    private String to_account_country;
+    private String to_account_region;
+    private String to_bu_internal;
+    private String metal;
+    private String lbma;
+    private String lppm;
+    private String tax_subtype;
 
 }

@@ -1,26 +1,25 @@
-package com.matthey.pmm.endur.database.model;
+package com.matthey.pmm.metal.transfers.model;
 
+import com.matthey.pmm.endur.database.model.DbConstants;
 import lombok.Data;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "portfolio")
-public class Portfolio {
+@Table(schema = DbConstants.SCHEMA_NAME, name = "USER_jm_loco")
+public class UserJmLoco {
 
     @Id
-    private int idNumber;
-    private String name;
-    private String longName;
-    private int portfolioType;
-    private int restricted;
-    private int authoriserId;
-    private LocalDateTime lastUpdate;
-    private int portfolioVersion;
-    private int requiresStrategy;
+    private int loco_id;
+    private String loco_name;
+    private String is_transfer_loco;
+    private String int_BU;
+    private String is_PMM;
+    private String default_form;
+    private String country;
+    private int is_pmm_id;
 
 }

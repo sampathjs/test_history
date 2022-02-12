@@ -9,17 +9,9 @@ import javax.persistence.Table;
 
 @Data
 @Entity
-@Table(schema = DbConstants.SCHEMA_NAME, name = "USER_jm_loco")
-public class UserJmLoco {
+@Table(schema = DbConstants.SCHEMA_NAME, name = "USER_jm_form")
+public class UserJmForm {
 
     @Id
-    private int loco_id;
-    private String loco_name;
-    private String is_transfer_loco;
-    private String int_BU;
-    private String is_PMM;
-    private String default_form;
-    private String country;
-    private int is_pmm_id;
-
+    private String form;
 }
