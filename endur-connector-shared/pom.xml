@@ -260,6 +260,19 @@
                 	<artifactId>maven-surefire-plugin</artifactId>
                 	<version>2.22.2</version>
             	</plugin>
+				<plugin>
+					<groupId>org.openclover</groupId>
+					<artifactId>clover-maven-plugin</artifactId>
+					<version>4.4.1</version>
+					<configuration>
+						<snapshot>${user.home}/.clover/atlassian-plugins-clover.snapshot</snapshot>
+						<singleCloverDatabase>true</singleCloverDatabase>
+						<generatePdf>true</generatePdf>
+						<generateXml>true</generateXml>
+						<generateHtml>true</generateHtml>
+						<generateJson>false</generateJson>								
+					</configuration>
+				</plugin>            	
             </plugins>
         </pluginManagement>	
         <plugins>
