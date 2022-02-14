@@ -13,13 +13,13 @@ import javax.persistence.Table;
 public class UserJmLoco {
 
     @Id
-    private int loco_id;
-    private String loco_name;
-    private String is_transfer_loco;
-    private String int_BU;
-    private String is_PMM;
-    private String default_form;
+    private int locoId;
+    private String locoName;
+    private String isTransferLoco;
+    private String intBu;
+    private String isPmm;
+    private String defaultForm;
     private String country;
-    private int is_pmm_id;
+    private int isPmmId;
 
 }

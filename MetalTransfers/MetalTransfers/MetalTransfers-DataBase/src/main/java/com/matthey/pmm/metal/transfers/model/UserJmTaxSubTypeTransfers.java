@@ -14,13 +14,13 @@ public class UserJmTaxSubTypeTransfers {
 
     @Id
     private String active;
-    private String from_account_country;
-    private String to_account_country;
-    private String to_account_region;
-    private String to_bu_internal;
+    private String fromAccountCountry;
+    private String toAccountCountry;
+    private String toAccountRegion;
+    private String toBuInternal;
     private String metal;
     private String lbma;
     private String lppm;
-    private String tax_subtype;
+    private String taxSubtype;
 
 }
