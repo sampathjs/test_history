@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
 		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet author="fintark" id="Endur Core Schema Init">
+    <changeSet author="Boris Liberman" id="Endur Core Schema Init">
 
         <createTable tableName="ab_tran" schemaName="dbo">
             <column name="tran_num" type="int">

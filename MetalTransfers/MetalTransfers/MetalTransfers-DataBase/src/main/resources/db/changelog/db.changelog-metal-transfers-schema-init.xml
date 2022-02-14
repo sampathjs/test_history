@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
 		http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
-    <changeSet author="fintark" id="Metal Transfers Schema Init">
+    <changeSet author="Boris Liberman" id="Metal Transfers Schema Init">
 
         <createTable tableName="USER_jm_loco" schemaName="dbo">
             <column name="loco_id" type="int">
