@@ -1,9 +1,9 @@
-package com.matthey.pmm.endur.database.repository;
+package com.matthey.pmm.metal.transfers.repository;
 
-import com.matthey.pmm.endur.database.model.AbTran;
+import com.matthey.pmm.metal.transfers.model.UserJmForm;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AbTranRepository extends JpaRepository<AbTran, Integer> {
+public interface UserJmFormRepository extends JpaRepository<UserJmForm, String> {
 }

@@ -8,7 +8,9 @@
     <changeSet author="fintark" id="Metal Transfers Schema Init">
 
         <createTable tableName="USER_jm_loco" schemaName="dbo">
-            <column name="loco_id" type="int"/>
+            <column name="loco_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="loco_name" type="varchar"/>
             <column name="is_transfer_loco" type="varchar"/>
             <column name="int_BU" type="varchar"/>
@@ -18,13 +20,15 @@
             <column name="is_pmm_id" type="int"/>
         </createTable>
         <createTable tableName="USER_jm_form" schemaName="dbo">
-            <column name="form" type="varchar"/>
+            <column name="form" type="varchar">
+                <constraints primaryKey="true"/>
+            </column>
         </createTable>
-        <createTable tableName="USER_JM_negative_threshold" schemaName="dbo">
-            <column name="value" type="float"/>
-        </createTable>
+
         <createTable tableName="USER_jm_tax_sub_type_transfers" schemaName="dbo">
-            <column name="active" type="varchar"/>
+            <column name="active" type="varchar">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="from_account_country" type="varchar"/>
             <column name="to_account_country" type="varchar"/>
             <column name="to_account_region" type="varchar"/>
@@ -33,6 +37,11 @@
             <column name="lbma" type="varchar"/>
             <column name="lppm" type="varchar"/>
             <column name="tax_subtype" type="varchar"/>
+        </createTable>
+        <createTable tableName="USER_JM_negative_threshold">
+            <column name="value" type="float">
+                <constraints primaryKey="true"/>
+            </column>
         </createTable>
 
     </changeSet>
