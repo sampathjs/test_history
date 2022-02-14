@@ -183,6 +183,9 @@
                             <descriptors>
                                 <descriptor>assembly.xml</descriptor>
                             </descriptors>
+                            <finalName>endur-connector</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <outputDirectory>target</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -239,6 +242,29 @@
                             <rules>
                                 <dependencyConvergence />
                             </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>Copy generated .jar file and runtime dependencies to endur-connector folder</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>../Builds/endur-connector</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/target/endur-connector/endur-connector</directory>
+                                    <includes>
+                                        <include>*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
                         </configuration>
                     </execution>
                 </executions>

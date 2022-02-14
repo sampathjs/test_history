@@ -35,6 +35,10 @@
     <dependencySets>
         <dependencySet>
             <outputDirectory>/endur-connector</outputDirectory>
+  	        <excludes>
+				<exclude>com.matthey.pmm:trade-booking-common</exclude>
+				<exclude>com.matthey.pmm:trade-booking-implementation</exclude>
+            </excludes>
         </dependencySet>
     </dependencySets>
 </assembly>
