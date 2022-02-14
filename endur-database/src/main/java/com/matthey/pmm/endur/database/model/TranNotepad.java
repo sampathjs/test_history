@@ -14,6 +14,7 @@ public class TranNotepad {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tran_num")
     private AbTran abTran;
+    @Id
     private int noteType;
     private int lineNum;
     private String lineText;

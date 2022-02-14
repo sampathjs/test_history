@@ -8,7 +8,9 @@
     <changeSet author="fintark" id="Endur Core Schema Init">
 
         <createTable tableName="ab_tran" schemaName="dbo">
-            <column name="tran_num" type="int"/>
+            <column name="tran_num" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="tran_group" type="int"/>
             <column name="deal_tracking_num" type="int"/>
             <column name="tran_type" type="tinyint"/>
@@ -71,8 +73,12 @@
         </createTable>
 
         <createTable tableName="ab_tran_info" schemaName="dbo">
-            <column name="tran_num" type="int"/>
-            <column name="type_id" type="int"/>
+            <column name="tran_num" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="value" type="varchar"/>
             <column name="personnel_id" type="int"/>
             <column name="last_update" type="datetime"/>
@@ -80,7 +86,9 @@
 
         <createTable tableName="currency" schemaName="dbo">
             <column name="ame" type="varchar"/>
-            <column name="id_number" type="int"/>
+            <column name="id_number" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="default_index" type="int"/>
             <column name="spot_index" type="int"/>
             <column name="convention" type="int"/>
@@ -102,7 +110,9 @@
         </createTable>
 
         <createTable tableName="idx_unit" schemaName="dbo">
-            <column name="unit_id" type="int"/>
+            <column name="unit_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="unit_label" type="varchar"/>
             <column name="unit_type_id" type="int"/>
             <column name="user_id" type="int"/>
@@ -114,7 +124,9 @@
         </createTable>
 
         <createTable tableName="party" schemaName="dbo">
-            <column name="party_id" type="int"/>
+            <column name="party_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="int_ext" type="int"/>
             <column name="party_class" type="int"/>
             <column name="party_status" type="int"/>
@@ -130,7 +142,9 @@
         </createTable>
 
         <createTable tableName="personnel" schemaName="dbo">
-            <column name="id_number" type="int"/>
+            <column name="id_number" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="name" type="varchar"/>
             <column name="title" type="varchar"/>
             <column name="first_name" type="varchar"/>
@@ -164,7 +178,9 @@
         </createTable>
 
         <createTable tableName="portfolio" schemaName="dbo">
-            <column name="id_number" type="int"/>
+            <column name="id_number" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="name" type="varchar"/>
             <column name="long_name" type="varchar"/>
             <column name="portfolio_type" type="int"/>
@@ -176,7 +192,9 @@
         </createTable>
 
         <createTable tableName="tran_info_types" schemaName="dbo">
-            <column name="type_id" type="int"/>
+            <column name="type_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="type_name" type="varchar"/>
             <column name="data_type" type="int"/>
             <column name="personnel_id" type="int"/>
@@ -205,7 +223,9 @@
         </createTable>
 
         <createTable tableName="account" schemaName="dbo">
-            <column name="account_id" type="int"/>
+            <column name="account_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="account_type" type="int"/>
             <column name="account_name" type="varchar"/>
             <column name="account_number" type="varchar"/>
@@ -244,8 +264,12 @@
         </createTable>
 
         <createTable tableName="tran_notepad" schemaName="dbo">
-            <column name="tran_num" type="int"/>
-            <column name="note_type" type="int"/>
+            <column name="tran_num" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="note_type" type="int">
+                <constraints primaryKey="true"/>
+            </column>
             <column name="line_num" type="int"/>
             <column name="line_text" type="varchar"/>
             <column name="user_id" type="int"/>
