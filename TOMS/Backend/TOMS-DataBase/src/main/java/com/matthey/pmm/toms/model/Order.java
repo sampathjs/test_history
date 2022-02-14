@@ -100,7 +100,7 @@ public abstract class Order {
 	private Reference baseCurrency;
 	
 	@Column(name="base_quantity", nullable = false)
-	private Double baseQuantity;
+	private double baseQuantity;
 
 	@OneToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="base_quantity_unit_reference_id", nullable = false)
@@ -189,7 +189,7 @@ public abstract class Order {
 			final Party internalBu, final Party externalBu, 
 			final Party internalLe, final Party externalLe, final Reference intPortfolio,
 			final Reference extPortfolio, final Reference buySell, final Reference baseCurrency,
-			final Double baseQuantity, final Reference baseQuantityUnit, 
+			final double baseQuantity, final Reference baseQuantityUnit, 
 			final Reference termCurrency, 
 			final String reference, final Reference metalForm, final Reference metalLocation,
 			final OrderStatus orderStatus, final Date createdAt, 
@@ -275,14 +275,14 @@ public abstract class Order {
         			fp += f.getFillQuantity();    				
     			}
     		}
-    		if ((double)baseQuantity != 0.0d) {
+    		if (baseQuantity != 0.0d) {
 				fp = fp / baseQuantity;    			
     		} else {
     			fp = 1.0;
     		}
     		fillPercentage = fp;
     	} else {
-    		fillPercentage = (double)baseQuantity == 0.0d ? 0.0d : 1.0d;
+    		fillPercentage = baseQuantity == 0.0d ? 0.0d : 1.0d;
     	}
 	}
 	
@@ -374,11 +374,11 @@ public abstract class Order {
 		this.baseCurrency = baseCurrency;
 	}
 
-	public Double getBaseQuantity() {
+	public double getBaseQuantity() {
 		return baseQuantity;
 	}
 
-	public void setBaseQuantity(Double baseQuantity) {
+	public void setBaseQuantity(double baseQuantity) {
 		this.baseQuantity = baseQuantity;
 	}
 

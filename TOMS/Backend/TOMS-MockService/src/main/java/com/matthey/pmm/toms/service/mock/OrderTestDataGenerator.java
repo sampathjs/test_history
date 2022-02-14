@@ -173,7 +173,7 @@ public class OrderTestDataGenerator {
 
 	public Order createTestLimitOrder() {
 		Logger.info("Creating new Test Limit Order");
-		LimitOrder newTestOrder = new LimitOrder(null, 1, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+		LimitOrder newTestOrder = new LimitOrder(null, 1, null, null, null, null, null, null, null, null, 0.0d, null, null, null, null, null,
 				null, null, null, null, null, 0.0d, null, null, Arrays.asList(), Arrays.asList(), Arrays.asList(), null, null, null, null, null, null, null, null, null, null, null);
 		fillOrderFields(newTestOrder);
 		newTestOrder.setOrderTypeName(refConverter.toManagedEntity(DefaultReference.ORDER_TYPE_LIMIT_ORDER.getEntity()));		

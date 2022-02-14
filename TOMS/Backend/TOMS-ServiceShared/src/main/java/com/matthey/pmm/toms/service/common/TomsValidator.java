@@ -72,6 +72,7 @@ import com.matthey.pmm.toms.service.exception.IllegalValueException;
 import com.matthey.pmm.toms.service.exception.IllegalVersionException;
 import com.matthey.pmm.toms.service.exception.InvalidBelongsToException;
 import com.matthey.pmm.toms.service.exception.MissingLegException;
+import com.matthey.pmm.toms.service.exception.PartFillableException;
 import com.matthey.pmm.toms.service.exception.TickerFxRefSourceRuleCheckException;
 import com.matthey.pmm.toms.service.exception.TickerPortfolioRuleCheckException;
 import com.matthey.pmm.toms.service.exception.TickerRefSourceRuleCheckException;
@@ -547,7 +548,7 @@ public class TomsValidator {
 	    			+ " as there is already fill #" + fillForTradeId.get(0).getId() + " for this trade ID ", Long.toString(orderFill.idTrade()));
 	    	}			
 		}
-    	
+		    	
     	if (orderFill.idFillStatus() == DefaultReference.FILL_STATUS_FAILED.getEntity().id()) {
     		if (orderFill.errorMessage() == null) {
     			throw new IllegalValueException(clazz, method, "errorMessage", "not null", "null");
@@ -559,7 +560,6 @@ public class TomsValidator {
     			throw new IllegalValueException(clazz, method, "errorMessage", "null", "not null");
     		}
     	}
-
     	
     	if (!isNew) {
     		Optional<ProcessTransition> transition = processTransitionRepo.findByReferenceCategoryIdAndFromStatusIdAndToStatusId(
@@ -582,8 +582,19 @@ public class TomsValidator {
     			verifyUnchangedStates (clazz, method, argument, processTransitionConverter.toTo(transition.get()), oldOrderFillTo, orderFill);
     		}
     	}
-
     	
+    	if (order instanceof LimitOrder) {
+    		LimitOrder limitOrder = (LimitOrder)order;
+    		if (limitOrder.getYesNoPartFillable().getId() == DefaultReference.YES_NO_NO.getEntity().id()) {
+    			if (limitOrder.getFills().size() >= 1 && isNew) { // there are already existing fills
+    				throw new PartFillableException(clazz, method, argument, "Only a single fill is allowed for orders that are not partially fillable");
+    			}
+    			if (Math.abs(Math.abs(orderFill.fillQuantity()) - Math.abs(limitOrder.getBaseQuantity())) > EPSILON) {
+    				throw new PartFillableException(clazz, method, argument, "The single allowed fill for orders that are not partially fillable"
+    					+	" has to match the base quantity of the order");
+    			}
+    		}
+    	}    	
 	}
 	
 	public void validateCommentFields(Class clazz, String method,
@@ -825,7 +836,7 @@ public class TomsValidator {
 				Arrays.asList(DefaultReferenceType.CCY_METAL, DefaultReferenceType.CCY_CURRENCY),
 				clazz, method , argument + ".idMetalCurrency", false);
     	
-    	if (order.baseQuantity() != null && order.baseQuantity() <= 0) {
+    	if (order.baseQuantity() <= 0) {
     		throw new IllegalValueException(clazz, method, argument + ".quantity", " > 0", "" + order.baseQuantity());
     	}
 

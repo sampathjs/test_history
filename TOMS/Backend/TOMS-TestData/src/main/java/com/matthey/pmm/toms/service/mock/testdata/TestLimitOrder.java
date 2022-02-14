@@ -166,7 +166,7 @@ public enum TestLimitOrder {
 			DefaultReference.YES_NO_YES, 440.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE2, 
 			DefaultReference.METAL_XRU, null, null, 1.0d, null, null
 			),			
-	TEST_ORDER_FOR_FILL_TEST(110013, 1, TestBunit.JM_PMM_UK, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+	TEST_ORDER_FOR_FILL_TEST_PART_FILLABLE(110013, 1, TestBunit.JM_PMM_UK, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
 			DefaultReference.PORTFOLIO_UK_RUTHENIUM, null, DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
 			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
@@ -175,9 +175,9 @@ public enum TestLimitOrder {
 			DefaultReference.PRICE_TYPE_SPOT, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
 			// limit order fields
 			"2000-01-15", "2001-04-28", null, 1200.00d,
-			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
+			DefaultReference.YES_NO_YES, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
 			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, null, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_3),
-			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
+			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),	
 	TEST_FOR_CONVERSION_ALL_OPTIONAL_ATTRIBUTES_NULL(110014, 1, TestBunit.JM_PMM_UK, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
 			null, null, DefaultReference.BUY_SELL_BUY,
 			DefaultReference.METAL_XPT, 1000d, DefaultReference.QUANTITY_TOZ, 
@@ -188,6 +188,18 @@ public enum TestLimitOrder {
 			// limit order fields
 			"2000-01-15", null, null, 1200.00d,
 			null, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
+			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, null, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_3),
+			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),
+	TEST_ORDER_FOR_FILL_TEST_NOT_PART_FILLABLE(110015, 1, TestBunit.JM_PMM_UK, TestBunit.ANGLO_PLATINUM_MARKETING___BU, 
+			DefaultReference.PORTFOLIO_UK_RUTHENIUM, null, DefaultReference.BUY_SELL_BUY,
+			DefaultReference.METAL_XPT, 100d, DefaultReference.QUANTITY_TOZ, 
+			DefaultReference.CCY_GBP, "TEST_ORDER_1B", DefaultReference.METAL_FORM_SPONGE, DefaultReference.METAL_LOCATION_VALLEY_FORGE,
+			DefaultOrderStatus.LIMIT_ORDER_CONFIRMED, DefaultReference.CONTRACT_TYPE_LIMIT_RELATIVE, DefaultReference.TICKER_XRUUSD,
+			TestUser.ANDREW_BAYNES, "2000-01-01 08:00:00", "2005-03-02 08:00:00", TestUser.ANDREW_BAYNES,
+			DefaultReference.PRICE_TYPE_SPOT, Arrays.asList(TestCreditCheck.TEST_CREDIT_CHECK_1),
+			// limit order fields
+			"2000-01-15", "2001-04-28", null, 1200.00d,
+			DefaultReference.YES_NO_NO, 1150.00d, DefaultReference.STOP_TRIGGER_TYPE_SAMPLE1, 
 			DefaultReference.METAL_XPT, DefaultReference.VALIDATION_TYPE_EXPIRY_DATE, null, 1.0d, Arrays.asList(TestFill.TEST_LIMIT_ORDER_FILL_3),
 			Arrays.asList(TestOrderComment.TEST_COMMENT_1, TestOrderComment.TEST_COMMENT_2)),	
 	;

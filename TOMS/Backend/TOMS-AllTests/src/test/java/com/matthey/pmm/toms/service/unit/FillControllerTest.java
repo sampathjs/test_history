@@ -38,6 +38,7 @@ import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.exception.IllegalIdException;
 import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
+import com.matthey.pmm.toms.service.exception.PartFillableException;
 import com.matthey.pmm.toms.service.mock.MockFillController;
 import com.matthey.pmm.toms.service.mock.testdata.TestFill;
 import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
@@ -250,19 +251,25 @@ public class FillControllerTest {
 	
 	@Test
 	@Transactional
-	public void testPostLimitOrderFill() {
-		long newFillId = submitNewFill (TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity(), TestFill.TEST_FILL_FOR_INSERT.getEntity());
+	public void testPostLimitOrderFillPartFillable() {
+		long newFillId = submitNewFill (TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_PART_FILLABLE.getEntity(), TestFill.TEST_FILL_FOR_INSERT.getEntity());
 		Optional<Fill> newFill = fillRepo.findById(newFillId);
 		assertThat(newFill).isNotEmpty();
 		assertThat(newFill.get().getFillQuantity()).isEqualTo(TestFill.TEST_FILL_FOR_INSERT.getEntity().fillQuantity());
 		assertThat(newFill.get().getFillStatus().getId()).isIn(DefaultReference.FILL_STATUS_FAILED.getEntity().id(),
 				                                               DefaultReference.FILL_STATUS_COMPLETED.getEntity().id());
-		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().id());
+		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_PART_FILLABLE.getEntity().id());
 		assertThat(order).isNotEmpty();
 		// + 3 because the mock controller is going to simulate the endur side backend directly, resulting in version incremented by 3		
-		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().version()+3);
+		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_PART_FILLABLE.getEntity().version()+3);
 		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(newFillId);
 	}
+	
+	@Test
+	@Transactional
+	public void testPostSecondLimitOrderFillNotPartFillableFails() {
+		assertThatThrownBy(() -> { submitNewFill (TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_NOT_PART_FILLABLE.getEntity(), TestFill.TEST_FILL_FOR_INSERT.getEntity());  })
+			.isInstanceOf(PartFillableException.class);	}
 	
 	@Test
 	@Transactional
@@ -282,19 +289,39 @@ public class FillControllerTest {
 	
 	@Test
 	@Transactional
-	public void testUpdateLimitOrderFill () {
-		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().id());
+	public void testUpdateLimitOrderFillPartFillable () {
+		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_PART_FILLABLE.getEntity().id());
 		assertThat(order.get().getFillPercentage()).isEqualTo(0);		
 		FillTo newFillStatus = ImmutableFillTo.builder()
 				.from(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity())
 				.idFillStatus(DefaultReference.FILL_STATUS_COMPLETED.getEntity().id())
 				.build();
-		updateFill(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity(), TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity(), newFillStatus);
+		updateFill(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_PART_FILLABLE.getEntity(), TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity(), newFillStatus);
 		Optional<Fill> updatedFill = fillRepo.findById(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity().id());
-		order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().id());
+		order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_PART_FILLABLE.getEntity().id());
 		assertThat(updatedFill).isNotEmpty();
 		assertThat(order).isNotEmpty();
-		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST.getEntity().version()+1);		
+		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_PART_FILLABLE.getEntity().version()+1);		
+		assertThat(updatedFill.get().getFillStatus().getId()).isEqualTo(newFillStatus.idFillStatus());
+		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity().id());
+		assertThat(order.get().getFillPercentage()).isGreaterThan(0);
+	}
+	
+	@Test
+	@Transactional
+	public void testUpdateLimitOrderFillNotPartFillable () {
+		Optional<LimitOrder> order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_NOT_PART_FILLABLE.getEntity().id());
+		assertThat(order.get().getFillPercentage()).isEqualTo(0);		
+		FillTo newFillStatus = ImmutableFillTo.builder()
+				.from(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity())
+				.idFillStatus(DefaultReference.FILL_STATUS_COMPLETED.getEntity().id())
+				.build();
+		updateFill(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_NOT_PART_FILLABLE.getEntity(), TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity(), newFillStatus);
+		Optional<Fill> updatedFill = fillRepo.findById(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity().id());
+		order = limitOrderRepo.findLatestByOrderId(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_NOT_PART_FILLABLE.getEntity().id());
+		assertThat(updatedFill).isNotEmpty();
+		assertThat(order).isNotEmpty();
+		assertThat(order.get().getVersion()).isEqualTo(TestLimitOrder.TEST_ORDER_FOR_FILL_TEST_NOT_PART_FILLABLE.getEntity().version()+1);		
 		assertThat(updatedFill.get().getFillStatus().getId()).isEqualTo(newFillStatus.idFillStatus());
 		assertThat(order.get().getFills().stream().map(x -> x.getId()).collect(Collectors.toList())).contains(TestFill.TEST_LIMIT_ORDER_FILL_3.getEntity().id());
 		assertThat(order.get().getFillPercentage()).isGreaterThan(0);

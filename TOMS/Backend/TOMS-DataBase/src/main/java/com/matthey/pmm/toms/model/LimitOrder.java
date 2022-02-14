@@ -116,7 +116,7 @@ public class LimitOrder extends Order{
 			final int version, final Party internalBu, final Party externalBu, 
 			final Party internalLe, final Party externalLe, final Reference intPortfolio,
 			final Reference extPortfolio, final Reference buySell, final Reference baseCurrency,
-			final Double baseQuantity, final Reference baseQuantityUnit, 
+			final double baseQuantity, final Reference baseQuantityUnit, 
 			final Reference termCurrency, 
 			final String reference, final Reference metalForm, final Reference metalLocation,			
 			final OrderStatus orderStatus, final Date createdAt, 

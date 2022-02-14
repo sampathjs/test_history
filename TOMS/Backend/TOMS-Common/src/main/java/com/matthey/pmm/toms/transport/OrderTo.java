@@ -168,12 +168,11 @@ public abstract class OrderTo {
 		required = false)
 	public abstract String displayStringBaseCurrency();
     
-    @Nullable
     @Auxiliary
 	@ApiModelProperty(value = "The quantity of the base currency (idBaseCurrency) in the provided base quantity unit (idBaseQuantityUnit)",
 		allowEmptyValue = true,
 		required = false)
-    public abstract Double baseQuantity();
+    public abstract double baseQuantity();
 
     @Auxiliary
     @Nullable
