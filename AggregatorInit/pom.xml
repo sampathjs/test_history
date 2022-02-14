@@ -24,7 +24,7 @@
 					<configuration>
 						<filesets>
 							<fileset>
-								<directory>../JM_JARS</directory>
+								<directory>../Builds</directory>
 								<includes>
 									<include>**</include>
 								</includes>

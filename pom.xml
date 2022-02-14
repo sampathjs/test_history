@@ -9,6 +9,7 @@
         <module>AggregatorInit</module>
         <module>trade-booking</module>
         <module>TOMS\Backend</module>
+		<module>group-metal-management</module>
         <module>endur-connector</module>
     </modules>
     <properties>

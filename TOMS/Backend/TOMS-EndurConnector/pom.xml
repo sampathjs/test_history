@@ -153,7 +153,53 @@
                 <configuration>
                     <release>8</release>
                 </configuration>
-            </plugin>			
-        </plugins>
+            </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <version>3.3.0</version>
+            <executions>
+                <execution>
+                	<id>Generate dependencies for endur-connector</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>single</goal>
+                    </goals>
+                    <configuration>
+                        <attach>false</attach>
+                        <descriptors>
+                            <descriptor>endurconnector.xml</descriptor>
+                        </descriptors>
+                  <finalName>endur-connector</finalName>
+                  <appendAssemblyId>false</appendAssemblyId>
+                  <outputDirectory>target</outputDirectory>                        
+                    </configuration>
+                </execution>                    
+            </executions>
+        </plugin>
+	    <plugin>
+	      <artifactId>maven-resources-plugin</artifactId>
+	      <executions>
+	        <execution>
+	          <id>Copy generated .jar file and runtime dependencies to endur-connector folder</id>
+	          <phase>install</phase>
+	          <goals>
+	            <goal>copy-resources</goal>
+	          </goals>
+	          <configuration>
+	            <outputDirectory>../../../Builds/endur-connector</outputDirectory>
+	            <resources>          
+	              <resource>
+	                <directory>${basedir}/target/endur-connector</directory>
+               		<includes>
+                   		<include>*.jar</include>
+               		</includes>		                
+	              </resource>
+	            </resources>              
+	          </configuration>            
+	        </execution>
+	      </executions>
+	    </plugin>                   
+      </plugins>
     </build>
 </project>
