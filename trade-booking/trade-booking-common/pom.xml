@@ -169,7 +169,7 @@
 		            <goal>copy-resources</goal>
 		          </goals>
 		          <configuration>
-		            <outputDirectory>../../JM_JARS</outputDirectory>
+		            <outputDirectory>../../Builds/JM_JARS</outputDirectory>
 		            <resources>          
 		              <resource>
 		                <directory>${basedir}/target/jmjars</directory>
