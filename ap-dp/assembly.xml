@@ -23,6 +23,7 @@
     <dependencySets>
         <dependencySet>
             <outputDirectory>/dependencies</outputDirectory>
+			<scope>runtime</scope>
         </dependencySet>
     </dependencySets>
 </assembly>
