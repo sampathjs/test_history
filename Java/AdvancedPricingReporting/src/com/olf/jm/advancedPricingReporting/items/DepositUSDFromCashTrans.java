@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 import java.util.Date;
@@ -40,7 +36,8 @@ public class DepositUSDFromCashTrans extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		return new EnumColType[] {EnumFinalBalanceSection.DEPOSIT_USD.getColumnType()};
+		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.DEPOSIT_USD.getColumnType()};
+		return columnTypes;
 	}
 
 	/* (non-Javadoc)
@@ -48,7 +45,8 @@ public class DepositUSDFromCashTrans extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		return new String[] {EnumFinalBalanceSection.DEPOSIT_USD.getColumnName()};
+		String[] columns = new String[] {EnumFinalBalanceSection.DEPOSIT_USD.getColumnName()};
+		return columns;
 	}
 
 	/* (non-Javadoc)
@@ -97,7 +95,7 @@ public class DepositUSDFromCashTrans extends ItemBase {
 	 * @return the total usd account
 	 */
 	private Table getUsdAccountForBu(int externalBu, Date reportDate) {
-		StringBuilder sql = new StringBuilder();
+		StringBuffer sql = new StringBuffer();
 	
 		String reportDateString = context.getCalendarFactory().getDateDisplayString(reportDate, EnumDateFormat.DlmlyDash);
 				

@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items.tables;
 
 import com.olf.openrisk.table.EnumColType;
@@ -22,13 +18,13 @@ public enum EnumUserJmApDpBalances implements TableColumn {
 	TOTAL_BALANCE("todaysdollar_balance", EnumColType.Double, EnumFormatType.FMT_2DP);
 	
     /** The column name. */
-    private final String columnName;
+    private String columnName;
     
     /** The column type. */
-    private final EnumColType columnType;
+    private EnumColType columnType;
     
     /** The column formatting type */
-    private final EnumFormatType formatType;
+    private EnumFormatType formatType;
     
     /**
      * Instantiates a new enum transfer data.

@@ -1,8 +1,0 @@
-"ap_dp",29,""
-"jproject_classpath",8,"ap_dp/jproject.classpath"
-"ap_dp/TradePriceUpdater.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.TradePriceUpdater",0
-"ap_dp/PricingWindowChecker.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.PricingWindowChecker",0
-"ap_dp/YearEndReport.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.YearEndReport",0
-"ap_dp/MonthlyInterestBooker.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.MonthlyInterestBooker",0
-"ap_dp/DpDispatchDealPostProcessor.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.DpDispatchDealPostProcessor",0
-"ap_dp/DpFxDealProcessor.java",7,"ap_dp.com.matthey.pmm.apdp.scripts.DpFxDealProcessor",0

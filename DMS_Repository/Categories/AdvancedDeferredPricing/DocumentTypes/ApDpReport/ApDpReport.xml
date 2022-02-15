@@ -1,305 +1,365 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ApReport>
   <AP_Dispatch_Deals>
-    <metal_name datatype="str">Palladium</metal_name>
-    <metal_short_name datatype="str">XPD</metal_short_name>
-    <tier1_ap_value datatype="str">-24,148.42</tier1_ap_value>
-    <tier2_ap_value datatype="str">0.00</tier2_ap_value>
-    <average_price datatype="str">1,929.00</average_price>
-    <market_price datatype="str">1,880.65</market_price>
-    <price_diff datatype="str">-48.35</price_diff>
-    <loss_gain datatype="str">-20,175.84</loss_gain>
-    <total_weight_toz datatype="str">-417.2873</total_weight_toz>
-    <total_weight_gms datatype="str">-12,979.10</total_weight_gms>
-    <total_disp_ap_deal datatype="str">0.00</total_disp_ap_deal>
-    <total_ap_deal datatype="str">804,947.20</total_ap_deal>
-    <tier1_ap_percent datatype="str">3.00</tier1_ap_percent>
-    <tier2_ap_percent datatype="str">6.00</tier2_ap_percent>
-    <tier1_ap_min_vol datatype="str">0.00</tier1_ap_min_vol>
-    <tier1_ap_max_vol datatype="str">1,000.00</tier1_ap_max_vol>
-    <tier2_ap_min_vol datatype="str">1,000.00</tier2_ap_min_vol>
-    <tier2_ap_max_vol datatype="str">10,000.00</tier2_ap_max_vol>
-    <tier1_ap_vol_used datatype="str">417.29</tier1_ap_vol_used>
-    <tier2_ap_vol_used datatype="str">0.00</tier2_ap_vol_used>
-    <report_data datatype="table">
-      <DispatchData>
-        <deal_num datatype="int">1162067</deal_num>
-        <trade_date datatype="str">05-Jun-2020</trade_date>
-        <reference datatype="str">4/6 BFAP/UK</reference>
-        <match_date datatype="str" />
-        <volume_in_toz datatype="str">-417.2873</volume_in_toz>
-        <volume_in_gms datatype="str">-12,979.10</volume_in_gms>
-        <trade_price datatype="str">1,929.00</trade_price>
-        <settlement_value datatype="str">804,947.20</settlement_value>
-        <type datatype="str">FX UnMatched</type>
-      </DispatchData>
-    </report_data>
-  </AP_Dispatch_Deals>
-  <AP_Dispatch_Deals>
     <metal_name datatype="str">Platinum</metal_name>
     <metal_short_name datatype="str">XPT</metal_short_name>
-    <tier1_ap_value datatype="str">-10,320.41</tier1_ap_value>
+    <tier1_ap_value datatype="str">-92,856.60</tier1_ap_value>
     <tier2_ap_value datatype="str">0.00</tier2_ap_value>
-    <average_price datatype="str">820.55</average_price>
-    <market_price datatype="str">806.67</market_price>
-    <price_diff datatype="str">-13.88</price_diff>
-    <loss_gain datatype="str">-5,819.16</loss_gain>
-    <total_weight_toz datatype="str">-419.2476</total_weight_toz>
-    <total_weight_gms datatype="str">-13,040.07</total_weight_gms>
-    <total_disp_ap_deal datatype="str">0.00</total_disp_ap_deal>
-    <total_ap_deal datatype="str">344,014.53</total_ap_deal>
+    <average_price datatype="str">941.03</average_price>
+    <market_price datatype="str">920.00</market_price>
+    <price_diff datatype="str">-21.03</price_diff>
+    <loss_gain datatype="str">-69,171.52</loss_gain>
+    <total_weight_toz datatype="str">-3,289.183</total_weight_toz>
+    <total_weight_gms datatype="str">-102,305.10</total_weight_gms>
+    <total_disp_ap_deal datatype="str">-94,030.00</total_disp_ap_deal>
+    <total_ap_deal datatype="str">3,095,230.08</total_ap_deal>
     <tier1_ap_percent datatype="str">3.00</tier1_ap_percent>
-    <tier2_ap_percent datatype="str">6.00</tier2_ap_percent>
+    <tier2_ap_percent datatype="str">4.00</tier2_ap_percent>
     <tier1_ap_min_vol datatype="str">0.00</tier1_ap_min_vol>
-    <tier1_ap_max_vol datatype="str">1,000.00</tier1_ap_max_vol>
-    <tier2_ap_min_vol datatype="str">1,000.00</tier2_ap_min_vol>
+    <tier1_ap_max_vol datatype="str">1,500.00</tier1_ap_max_vol>
+    <tier2_ap_min_vol datatype="str">1,500.00</tier2_ap_min_vol>
     <tier2_ap_max_vol datatype="str">10,000.00</tier2_ap_max_vol>
-    <tier1_ap_vol_used datatype="str">419.25</tier1_ap_vol_used>
+    <tier1_ap_vol_used datatype="str">3,289.18</tier1_ap_vol_used>
     <tier2_ap_vol_used datatype="str">0.00</tier2_ap_vol_used>
     <report_data datatype="table">
       <DispatchData>
-        <deal_num datatype="int">1169102</deal_num>
-        <trade_date datatype="str">12-Jun-2020</trade_date>
-        <reference datatype="str">HK AP XPT 10 kg</reference>
+        <deal_num datatype="int">259234</deal_num>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <reference datatype="str">NA233845</reference>
         <match_date datatype="str" />
-        <volume_in_toz datatype="str">-52.8984</volume_in_toz>
-        <volume_in_gms datatype="str">-1,645.33</volume_in_gms>
-        <trade_price datatype="str">818.30</trade_price>
-        <settlement_value datatype="str">43,286.76</settlement_value>
+        <volume_in_toz datatype="str">-186.689</volume_in_toz>
+        <volume_in_gms datatype="str">-5,806.68</volume_in_gms>
+        <trade_price datatype="str">940.30</trade_price>
+        <settlement_value datatype="str">175,543.67</settlement_value>
         <type datatype="str">FX UnMatched</type>
       </DispatchData>
       <DispatchData>
-        <deal_num datatype="int">1173628</deal_num>
-        <trade_date datatype="str">18-Jun-2020</trade_date>
-        <reference datatype="str">18/6BFAP</reference>
+        <deal_num datatype="int">259234</deal_num>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <reference datatype="str">NA233845</reference>
+        <match_date datatype="str">17-Oct-2017</match_date>
+        <volume_in_toz datatype="str">-100.000</volume_in_toz>
+        <volume_in_gms datatype="str">-3,110.35</volume_in_gms>
+        <trade_price datatype="str">940.30</trade_price>
+        <settlement_value datatype="str">94,030.00</settlement_value>
+        <type datatype="str">FX Matched</type>
+      </DispatchData>
+      <DispatchData>
+        <deal_num datatype="int">259239</deal_num>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <reference datatype="str">NA233845</reference>
         <match_date datatype="str" />
-        <volume_in_toz datatype="str">-12.6912</volume_in_toz>
-        <volume_in_gms datatype="str">-394.74</volume_in_gms>
-        <trade_price datatype="str">824.30</trade_price>
-        <settlement_value datatype="str">10,461.36</settlement_value>
+        <volume_in_toz datatype="str">-1,494.958</volume_in_toz>
+        <volume_in_gms datatype="str">-46,498.43</volume_in_gms>
+        <trade_price datatype="str">940.30</trade_price>
+        <settlement_value datatype="str">1,405,709.01</settlement_value>
         <type datatype="str">FX UnMatched</type>
       </DispatchData>
       <DispatchData>
-        <deal_num datatype="int">1174370</deal_num>
-        <trade_date datatype="str">18-Jun-2020</trade_date>
-        <reference datatype="str">HK AP XPT</reference>
+        <deal_num datatype="int">259240</deal_num>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <reference datatype="str">NA233846</reference>
         <match_date datatype="str" />
-        <volume_in_toz datatype="str">-257.2056</volume_in_toz>
-        <volume_in_gms datatype="str">-8,000.00</volume_in_gms>
-        <trade_price datatype="str">815.30</trade_price>
-        <settlement_value datatype="str">209,699.73</settlement_value>
+        <volume_in_toz datatype="str">-1,607.536</volume_in_toz>
+        <volume_in_gms datatype="str">-50,000.00</volume_in_gms>
+        <trade_price datatype="str">941.80</trade_price>
+        <settlement_value datatype="str">1,513,977.40</settlement_value>
         <type datatype="str">FX UnMatched</type>
       </DispatchData>
       <DispatchData>
-        <deal_num datatype="int">1177892</deal_num>
-        <trade_date datatype="str">24-Jun-2020</trade_date>
-        <reference datatype="str">Deal24/6</reference>
-        <match_date datatype="str" />
-        <volume_in_toz datatype="str">-96.4524</volume_in_toz>
-        <volume_in_gms datatype="str">-3,000.00</volume_in_gms>
-        <trade_price datatype="str">835.30</trade_price>
-        <settlement_value datatype="str">80,566.69</settlement_value>
-        <type datatype="str">FX UnMatched</type>
+        <deal_num datatype="int">259279</deal_num>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <reference datatype="str">Arclee dispatch</reference>
+        <match_date datatype="str">17-Oct-2017</match_date>
+        <volume_in_toz datatype="str">100.000</volume_in_toz>
+        <volume_in_gms datatype="str">3,110.35</volume_in_gms>
+        <trade_price datatype="str">-940.30</trade_price>
+        <settlement_value datatype="str">-94,030.00</settlement_value>
+        <type datatype="str">DISPATCH</type>
       </DispatchData>
     </report_data>
   </AP_Dispatch_Deals>
   <AP_Dispatch_Deals>
     <metal_name datatype="str">Rhodium</metal_name>
     <metal_short_name datatype="str">XRH</metal_short_name>
-    <tier1_ap_value datatype="str">-112,029.07</tier1_ap_value>
+    <tier1_ap_value datatype="str">-148,246.65</tier1_ap_value>
     <tier2_ap_value datatype="str">0.00</tier2_ap_value>
-    <average_price datatype="str">7,743.33</average_price>
-    <market_price datatype="str">8,000.00</market_price>
-    <price_diff datatype="str">256.67</price_diff>
-    <loss_gain datatype="str">123,781.80</loss_gain>
-    <total_weight_toz datatype="str">-482.2605</total_weight_toz>
-    <total_weight_gms datatype="str">-15,000.00</total_weight_gms>
+    <average_price datatype="str">1,273.32</average_price>
+    <market_price datatype="str">1,280.00</market_price>
+    <price_diff datatype="str">6.68</price_diff>
+    <loss_gain datatype="str">25,924.03</loss_gain>
+    <total_weight_toz datatype="str">-3,880.843</total_weight_toz>
+    <total_weight_gms datatype="str">-120,707.80</total_weight_gms>
     <total_disp_ap_deal datatype="str">0.00</total_disp_ap_deal>
-    <total_ap_deal datatype="str">3,734,303.81</total_ap_deal>
+    <total_ap_deal datatype="str">4,941,547.43</total_ap_deal>
     <tier1_ap_percent datatype="str">3.00</tier1_ap_percent>
-    <tier2_ap_percent datatype="str">6.00</tier2_ap_percent>
+    <tier2_ap_percent datatype="str">4.00</tier2_ap_percent>
     <tier1_ap_min_vol datatype="str">0.00</tier1_ap_min_vol>
-    <tier1_ap_max_vol datatype="str">1,000.00</tier1_ap_max_vol>
-    <tier2_ap_min_vol datatype="str">1,000.00</tier2_ap_min_vol>
+    <tier1_ap_max_vol datatype="str">1,500.00</tier1_ap_max_vol>
+    <tier2_ap_min_vol datatype="str">1,500.00</tier2_ap_min_vol>
     <tier2_ap_max_vol datatype="str">10,000.00</tier2_ap_max_vol>
-    <tier1_ap_vol_used datatype="str">482.26</tier1_ap_vol_used>
+    <tier1_ap_vol_used datatype="str">3,880.84</tier1_ap_vol_used>
     <tier2_ap_vol_used datatype="str">0.00</tier2_ap_vol_used>
     <report_data datatype="table">
       <DispatchData>
-        <deal_num datatype="int">1141928</deal_num>
-        <trade_date datatype="str">14-May-2020</trade_date>
-        <reference datatype="str">14/5 BFAP</reference>
+        <deal_num datatype="int">259253</deal_num>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <reference datatype="str">NA333440</reference>
         <match_date datatype="str" />
-        <volume_in_toz datatype="str">-160.7535</volume_in_toz>
-        <volume_in_gms datatype="str">-5,000.00</volume_in_gms>
-        <trade_price datatype="str">7,250.00</trade_price>
-        <settlement_value datatype="str">1,165,462.88</settlement_value>
+        <volume_in_toz datatype="str">-1,000.000</volume_in_toz>
+        <volume_in_gms datatype="str">-31,103.50</volume_in_gms>
+        <trade_price datatype="str">1,272.00</trade_price>
+        <settlement_value datatype="str">1,272,000.00</settlement_value>
         <type datatype="str">FX UnMatched</type>
       </DispatchData>
       <DispatchData>
-        <deal_num datatype="int">1177162</deal_num>
-        <trade_date datatype="str">23-Jun-2020</trade_date>
-        <reference datatype="str">23/6BFAP</reference>
+        <deal_num datatype="int">259254</deal_num>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <reference datatype="str">NA333441</reference>
         <match_date datatype="str" />
-        <volume_in_toz datatype="str">-160.7535</volume_in_toz>
-        <volume_in_gms datatype="str">-5,000.00</volume_in_gms>
-        <trade_price datatype="str">7,990.00</trade_price>
-        <settlement_value datatype="str">1,284,420.47</settlement_value>
+        <volume_in_toz datatype="str">-1,355.455</volume_in_toz>
+        <volume_in_gms datatype="str">-42,159.39</volume_in_gms>
+        <trade_price datatype="str">1,273.52</trade_price>
+        <settlement_value datatype="str">1,726,203.12</settlement_value>
         <type datatype="str">FX UnMatched</type>
       </DispatchData>
       <DispatchData>
-        <deal_num datatype="int">1177877</deal_num>
-        <trade_date datatype="str">24-Jun-2020</trade_date>
-        <reference datatype="str">24/6BFAP</reference>
+        <deal_num datatype="int">259255</deal_num>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <reference datatype="str">NA333442</reference>
         <match_date datatype="str" />
-        <volume_in_toz datatype="str">-160.7535</volume_in_toz>
-        <volume_in_gms datatype="str">-5,000.00</volume_in_gms>
-        <trade_price datatype="str">7,990.00</trade_price>
-        <settlement_value datatype="str">1,284,420.47</settlement_value>
+        <volume_in_toz datatype="str">-1,525.388</volume_in_toz>
+        <volume_in_gms datatype="str">-47,444.91</volume_in_gms>
+        <trade_price datatype="str">1,274.00</trade_price>
+        <settlement_value datatype="str">1,943,344.31</settlement_value>
         <type datatype="str">FX UnMatched</type>
       </DispatchData>
     </report_data>
   </AP_Dispatch_Deals>
   <AP_Buy_Sell_FX_Deals>
-    <metal_name datatype="str">Palladium</metal_name>
-    <metal_short_name datatype="str">XPD</metal_short_name>
-    <total_sell datatype="str">193,640.00</total_sell>
-    <total_buy datatype="str">-193,640.00</total_buy>
-    <loss_gain datatype="str">0.00</loss_gain>
-    <total_weight_toz datatype="str">0.0000</total_weight_toz>
+    <metal_name datatype="str">Platinum</metal_name>
+    <metal_short_name datatype="str">XPT</metal_short_name>
+    <total_sell datatype="str">-47,015.00</total_sell>
+    <total_buy datatype="str">47,000.00</total_buy>
+    <loss_gain datatype="str">-15.00</loss_gain>
+    <total_weight_toz datatype="str">0.00</total_weight_toz>
     <total_weight_gms datatype="str">0.00</total_weight_gms>
     <report_data datatype="table">
       <FXBuySellDeal>
-        <fixed_date datatype="str">25-Jun-2020</fixed_date>
-        <deal_num datatype="int">1179135</deal_num>
-        <volume_in_toz datatype="str">100.0000</volume_in_toz>
-        <volume_in_gms datatype="str">3,110.35</volume_in_gms>
-        <fixed_price_toz datatype="str">1,936.40</fixed_price_toz>
-        <buy_settle_value datatype="str">-193,640.00</buy_settle_value>
-        <sell_settle_value datatype="str">0.00</sell_settle_value>
-        <type datatype="str">FX Buy</type>
-        <reference datatype="str">HK DP XPD</reference>
+        <fixed_date datatype="str">17-Oct-2017</fixed_date>
+        <deal_num datatype="int">259234</deal_num>
+        <volume_in_toz datatype="str">-50.00</volume_in_toz>
+        <volume_in_gms datatype="str">-1,555.17</volume_in_gms>
+        <fixed_price_toz datatype="str">940.30</fixed_price_toz>
+        <buy_settle_value datatype="str">0.00</buy_settle_value>
+        <sell_settle_value datatype="str">-47,015.00</sell_settle_value>
+        <type datatype="str">FX Sell</type>
+        <reference datatype="str">NA233845</reference>
       </FXBuySellDeal>
       <FXBuySellDeal>
-        <fixed_date datatype="str">25-Jun-2020</fixed_date>
-        <deal_num datatype="int">1179136</deal_num>
-        <volume_in_toz datatype="str">-100.0000</volume_in_toz>
-        <volume_in_gms datatype="str">-3,110.35</volume_in_gms>
-        <fixed_price_toz datatype="str">-1,936.40</fixed_price_toz>
+        <fixed_date datatype="str">17-Oct-2017</fixed_date>
+        <deal_num datatype="int">259283</deal_num>
+        <volume_in_toz datatype="str">50.00</volume_in_toz>
+        <volume_in_gms datatype="str">1,555.17</volume_in_gms>
+        <fixed_price_toz datatype="str">940.00</fixed_price_toz>
+        <buy_settle_value datatype="str">47,000.00</buy_settle_value>
+        <sell_settle_value datatype="str">0.00</sell_settle_value>
+        <type datatype="str">FX Buy</type>
+        <reference datatype="str">BUY XPT Closeout</reference>
+      </FXBuySellDeal>
+    </report_data>
+  </AP_Buy_Sell_FX_Deals>
+  <AP_Buy_Sell_FX_Deals>
+    <metal_name datatype="str">Rhodium</metal_name>
+    <metal_short_name datatype="str">XRH</metal_short_name>
+    <total_sell datatype="str">-279,840.00</total_sell>
+    <total_buy datatype="str">282,040.00</total_buy>
+    <loss_gain datatype="str">2,200.00</loss_gain>
+    <total_weight_toz datatype="str">0.00</total_weight_toz>
+    <total_weight_gms datatype="str">0.00</total_weight_gms>
+    <report_data datatype="table">
+      <FXBuySellDeal>
+        <fixed_date datatype="str">17-Oct-2017</fixed_date>
+        <deal_num datatype="int">259253</deal_num>
+        <volume_in_toz datatype="str">-220.00</volume_in_toz>
+        <volume_in_gms datatype="str">-6,842.76</volume_in_gms>
+        <fixed_price_toz datatype="str">1,272.00</fixed_price_toz>
         <buy_settle_value datatype="str">0.00</buy_settle_value>
-        <sell_settle_value datatype="str">193,640.00</sell_settle_value>
+        <sell_settle_value datatype="str">-279,840.00</sell_settle_value>
         <type datatype="str">FX Sell</type>
-        <reference datatype="str">HK DP XPD</reference>
+        <reference datatype="str">NA333440</reference>
+      </FXBuySellDeal>
+      <FXBuySellDeal>
+        <fixed_date datatype="str">17-Oct-2017</fixed_date>
+        <deal_num datatype="int">259284</deal_num>
+        <volume_in_toz datatype="str">220.00</volume_in_toz>
+        <volume_in_gms datatype="str">6,842.76</volume_in_gms>
+        <fixed_price_toz datatype="str">1,282.00</fixed_price_toz>
+        <buy_settle_value datatype="str">282,040.00</buy_settle_value>
+        <sell_settle_value datatype="str">0.00</sell_settle_value>
+        <type datatype="str">FX Buy</type>
+        <reference datatype="str">BUY XRH Closeout</reference>
       </FXBuySellDeal>
     </report_data>
   </AP_Buy_Sell_FX_Deals>
   <Deferred_Pricing>
     <metal_name datatype="str">Palladium</metal_name>
     <metal_short_name datatype="str">XPD</metal_short_name>
-    <market_price datatype="str">1,880.65</market_price>
-    <tier1_dp_percent_value datatype="str">-28,209.75</tier1_dp_percent_value>
+    <market_price datatype="str">816.00</market_price>
+    <tier1_dp_percent_value datatype="str">-84,918.23</tier1_dp_percent_value>
     <tier2_dp_percent_value datatype="str">0.00</tier2_dp_percent_value>
     <total_dispatched datatype="str">0.00</total_dispatched>
-    <total_unfixed datatype="str">0.00</total_unfixed>
-    <total_weight_toz datatype="str">-500.0000</total_weight_toz>
-    <total_weight_gms datatype="str">-15,551.75</total_weight_gms>
-    <total_dp_value datatype="str">940,325.00</total_dp_value>
+    <total_unfixed datatype="str">-2,830,607.71</total_unfixed>
+    <total_weight_toz datatype="str">3,468.882</total_weight_toz>
+    <total_weight_gms datatype="str">107,894.29</total_weight_gms>
+    <total_dp_value datatype="str">-2,830,607.71</total_dp_value>
     <tier1_dp_percent datatype="str">3.00</tier1_dp_percent>
-    <tier2_dp_percent datatype="str">6.00</tier2_dp_percent>
+    <tier2_dp_percent datatype="str">4.00</tier2_dp_percent>
     <tier1_dp_min_vol datatype="str">0.00</tier1_dp_min_vol>
-    <tier1_dp_max_vol datatype="str">1,000.00</tier1_dp_max_vol>
-    <tier2_dp_min_vol datatype="str">1,000.00</tier2_dp_min_vol>
+    <tier1_dp_max_vol datatype="str">1,500.00</tier1_dp_max_vol>
+    <tier2_dp_min_vol datatype="str">1,500.00</tier2_dp_min_vol>
     <tier2_dp_max_vol datatype="str">10,000.00</tier2_dp_max_vol>
-    <tier1_dp_vol_used datatype="str">500.00</tier1_dp_vol_used>
+    <tier1_dp_vol_used datatype="str">3,468.88</tier1_dp_vol_used>
     <tier2_dp_vol_used datatype="str">0.00</tier2_dp_vol_used>
     <report_data datatype="table">
       <DeferredPriceData>
-        <trade_date datatype="str">25-Jun-2020</trade_date>
-        <deal_num datatype="int">1179135</deal_num>
-        <reference datatype="str">HK DP XPD</reference>
-        <volume_in_toz datatype="str">-100.0000</volume_in_toz>
-        <volume_in_gms datatype="str">-3,110.35</volume_in_gms>
-        <trade_price datatype="str">1,936.40</trade_price>
-        <fixed_date datatype="str">25-Jun-2020</fixed_date>
-        <settlement_value datatype="str">193,640.00</settlement_value>
-        <type datatype="str">FX Matched</type>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <deal_num datatype="int">259241</deal_num>
+        <reference datatype="str">ND308482</reference>
+        <volume_in_toz datatype="str">766.515</volume_in_toz>
+        <volume_in_gms datatype="str">23,841.28</volume_in_gms>
+        <trade_price datatype="str">0.00</trade_price>
+        <fixed_date datatype="str" />
+        <settlement_value datatype="str">0.00</settlement_value>
+        <type datatype="str">FX Unmatched</type>
       </DeferredPriceData>
       <DeferredPriceData>
-        <trade_date datatype="str">25-Jun-2020</trade_date>
-        <deal_num datatype="int">1179136</deal_num>
-        <reference datatype="str">HK DP XPD</reference>
-        <volume_in_toz datatype="str">-100.0000</volume_in_toz>
-        <volume_in_gms datatype="str">-3,110.35</volume_in_gms>
-        <trade_price datatype="str">1,936.40</trade_price>
-        <fixed_date datatype="str">25-Jun-2020</fixed_date>
-        <settlement_value datatype="str">193,640.00</settlement_value>
-        <type datatype="str">FX Matched</type>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <deal_num datatype="int">259242</deal_num>
+        <reference datatype="str">ND308483</reference>
+        <volume_in_toz datatype="str">1,574.803</volume_in_toz>
+        <volume_in_gms datatype="str">48,981.85</volume_in_gms>
+        <trade_price datatype="str">0.00</trade_price>
+        <fixed_date datatype="str" />
+        <settlement_value datatype="str">0.00</settlement_value>
+        <type datatype="str">FX Unmatched</type>
       </DeferredPriceData>
       <DeferredPriceData>
-        <trade_date datatype="str">25-Jun-2020</trade_date>
-        <deal_num datatype="int">1179145</deal_num>
-        <reference datatype="str">HK DP XPD</reference>
-        <volume_in_toz datatype="str">-100.0000</volume_in_toz>
-        <volume_in_gms datatype="str">-3,110.35</volume_in_gms>
-        <trade_price datatype="str">1,936.40</trade_price>
-        <fixed_date datatype="str">25-Jun-2020</fixed_date>
-        <settlement_value datatype="str">193,640.00</settlement_value>
-        <type datatype="str">FX Matched</type>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <deal_num datatype="int">259243</deal_num>
+        <reference datatype="str">ND308484</reference>
+        <volume_in_toz datatype="str">1,127.564</volume_in_toz>
+        <volume_in_gms datatype="str">35,071.16</volume_in_gms>
+        <trade_price datatype="str">0.00</trade_price>
+        <fixed_date datatype="str" />
+        <settlement_value datatype="str">0.00</settlement_value>
+        <type datatype="str">FX Unmatched</type>
+      </DeferredPriceData>
+    </report_data>
+  </Deferred_Pricing>
+  <Deferred_Pricing>
+    <metal_name datatype="str">Iridium</metal_name>
+    <metal_short_name datatype="str">XIR</metal_short_name>
+    <market_price datatype="str">970.00</market_price>
+    <tier1_dp_percent_value datatype="str">-117,791.21</tier1_dp_percent_value>
+    <tier2_dp_percent_value datatype="str">0.00</tier2_dp_percent_value>
+    <total_dispatched datatype="str">0.00</total_dispatched>
+    <total_unfixed datatype="str">-3,926,373.76</total_unfixed>
+    <total_weight_toz datatype="str">4,047.808</total_weight_toz>
+    <total_weight_gms datatype="str">125,900.90</total_weight_gms>
+    <total_dp_value datatype="str">-3,926,373.76</total_dp_value>
+    <tier1_dp_percent datatype="str">3.00</tier1_dp_percent>
+    <tier2_dp_percent datatype="str">4.00</tier2_dp_percent>
+    <tier1_dp_min_vol datatype="str">0.00</tier1_dp_min_vol>
+    <tier1_dp_max_vol datatype="str">1,500.00</tier1_dp_max_vol>
+    <tier2_dp_min_vol datatype="str">1,500.00</tier2_dp_min_vol>
+    <tier2_dp_max_vol datatype="str">10,000.00</tier2_dp_max_vol>
+    <tier1_dp_vol_used datatype="str">4,047.81</tier1_dp_vol_used>
+    <tier2_dp_vol_used datatype="str">0.00</tier2_dp_vol_used>
+    <report_data datatype="table">
+      <DeferredPriceData>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <deal_num datatype="int">259256</deal_num>
+        <reference datatype="str">ND444330</reference>
+        <volume_in_toz datatype="str">1,345.445</volume_in_toz>
+        <volume_in_gms datatype="str">41,848.02</volume_in_gms>
+        <trade_price datatype="str">0.00</trade_price>
+        <fixed_date datatype="str" />
+        <settlement_value datatype="str">0.00</settlement_value>
+        <type datatype="str">FX Unmatched</type>
       </DeferredPriceData>
       <DeferredPriceData>
-        <trade_date datatype="str">25-Jun-2020</trade_date>
-        <deal_num datatype="int">1179146</deal_num>
-        <reference datatype="str">HK DP XPD</reference>
-        <volume_in_toz datatype="str">-200.0000</volume_in_toz>
-        <volume_in_gms datatype="str">-6,220.70</volume_in_gms>
-        <trade_price datatype="str">1,936.40</trade_price>
-        <fixed_date datatype="str">25-Jun-2020</fixed_date>
-        <settlement_value datatype="str">387,280.00</settlement_value>
-        <type datatype="str">FX Matched</type>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <deal_num datatype="int">259257</deal_num>
+        <reference datatype="str">ND444331</reference>
+        <volume_in_toz datatype="str">1,574.803</volume_in_toz>
+        <volume_in_gms datatype="str">48,981.85</volume_in_gms>
+        <trade_price datatype="str">0.00</trade_price>
+        <fixed_date datatype="str" />
+        <settlement_value datatype="str">0.00</settlement_value>
+        <type datatype="str">FX Unmatched</type>
+      </DeferredPriceData>
+      <DeferredPriceData>
+        <trade_date datatype="str">17-Oct-2017</trade_date>
+        <deal_num datatype="int">259258</deal_num>
+        <reference datatype="str">ND444332</reference>
+        <volume_in_toz datatype="str">1,127.560</volume_in_toz>
+        <volume_in_gms datatype="str">35,071.04</volume_in_gms>
+        <trade_price datatype="str">0.00</trade_price>
+        <fixed_date datatype="str" />
+        <settlement_value datatype="str">0.00</settlement_value>
+        <type datatype="str">FX Unmatched</type>
       </DeferredPriceData>
     </report_data>
   </Deferred_Pricing>
   <Total_Margin_and_Final_Balance>
-    <dp_metal_name datatype="str">XPD</dp_metal_name>
+    <dp_metal_name datatype="str">XPD,XIR</dp_metal_name>
     <ap_metal_name datatype="str">XPT,XRH</ap_metal_name>
-    <dollar_balance datatype="str">314,324.43</dollar_balance>
+    <dollar_balance datatype="str">100,000.00</dollar_balance>
     <deposit_usd datatype="str">0.00</deposit_usd>
     <deposit_hkd datatype="str">0.00</deposit_hkd>
     <squared_metal_position>
-      <metal_short_name datatype="str" />
-      <squared_metal_value datatype="str">0.00</squared_metal_value>
+      <metal_short_name datatype="str">XPT</metal_short_name>
+      <squared_metal_value datatype="str">15.00</squared_metal_value>
     </squared_metal_position>
-    <collected_dp_metal datatype="str">-968,200.00</collected_dp_metal>
-    <collected_ap_metal datatype="str">0.00</collected_ap_metal>
-    <daily_interest datatype="str">-26.12</daily_interest>
-    <todays_balance datatype="str">-653,875.57</todays_balance>
-    <tier1_percent_value_ datatype="str">-200,702.65</tier1_percent_value_>
+    <squared_metal_position>
+      <metal_short_name datatype="str">XRH</metal_short_name>
+      <squared_metal_value datatype="str">-2,200.00</squared_metal_value>
+    </squared_metal_position>
+    <collected_dp_metal datatype="str">0.00</collected_dp_metal>
+    <collected_ap_metal datatype="str">-94,030.00</collected_ap_metal>
+    <todays_balance datatype="str">3,785.00</todays_balance>
+    <tier1_percent_value_ datatype="str">-487,060.18</tier1_percent_value_>
     <tier2_percent_value_ datatype="str">0.00</tier2_percent_value_>
     <deferred_pricing_short>
       <metal_short_name datatype="str">XPD</metal_short_name>
-      <deferred_short datatype="str">940,325.00</deferred_short>
+      <deferred_short datatype="str">-2,830,607.71</deferred_short>
     </deferred_pricing_short>
-    <total_margin datatype="str">739,622.35</total_margin>
-    <difference datatype="str">85,746.79</difference>
+    <deferred_pricing_short>
+      <metal_short_name datatype="str">XIR</metal_short_name>
+      <deferred_short datatype="str">-3,926,373.76</deferred_short>
+    </deferred_pricing_short>
+    <total_margin datatype="str">-7,244,041.65</total_margin>
+    <difference datatype="str">-7,240,256.65</difference>
   </Total_Margin_and_Final_Balance>
   <ReportHeader>
     <internal_party_id datatype="int">20007</internal_party_id>
     <internal_short_name datatype="str">JM PMM HK</internal_short_name>
     <internal_address_line_1 datatype="str">Johnson Matthey Pacific Ltd</internal_address_line_1>
     <internal_address_line_2 datatype="str"> Units 2-6, 8th Floor</internal_address_line_2>
-    <internal_address_line_3 datatype="str">909 Cheung Sha Wan Road</internal_address_line_3>
-    <internal_address_line_4 datatype="str" />
+	<internal_address_line_3 datatype="str">909 Cheung Sha Wan Road</internal_address_line_3>
+    <internal_address_line_4 datatype="str"/>
     <internal_city datatype="str">Kowloon</internal_city>
     <internal_country datatype="str">Hong Kong</internal_country>
     <internal_phone datatype="str">(852) 27380380</internal_phone>
     <internal_fax datatype="str">(852) 27362345</internal_fax>
     <internal_description datatype="str">Johnson Matthey Pacific Ltd, Units 2-6, 8th Floor</internal_description>
-    <external_party_id datatype="int">21427</external_party_id>
-    <external_short_name datatype="str">BILLION FORTUNE - BU</external_short_name>
-    <external_address_line_1 datatype="str">Billion Fortune Trading (International) Limited</external_address_line_1>
-    <external_address_line_2 datatype="str">Flat/09B BLK A 11/F</external_address_line_2>
-    <external_address_line_3 datatype="str">Focal Industrial Ctr,</external_address_line_3>
-    <external_address_line_4 datatype="str">21 Man Lok St., Hung Hom</external_address_line_4>
+    <external_party_id datatype="int">21315</external_party_id>
+    <external_short_name datatype="str">ARCLEE JEWELRY INT'L GROUP (HK) LTD- BU</external_short_name>
+    <external_address_line_1 datatype="str">Arclee Jewelry Int'l Group (HK) Ltd</external_address_line_1>
+    <external_address_line_2 datatype="str"> Attn: Mr Wu</external_address_line_2>
+	<external_address_line_3 datatype="str">1 Hok Yuen Street East</external_address_line_3>
+    <external_address_line_4 datatype="str">Hung Hom</external_address_line_4>
     <external_city datatype="str">Kowloon</external_city>
     <external_country datatype="str">Hong Kong</external_country>
     <external_phone datatype="str" />
@@ -307,20 +367,20 @@
     <external_description datatype="str" />
     <dp_prices>
       <metal datatype="str">XPD</metal>
-      <price datatype="str">1880.65</price>
+      <price datatype="str">816.00</price>
+    </dp_prices>
+    <dp_prices>
+      <metal datatype="str">XIR</metal>
+      <price datatype="str">970.00</price>
     </dp_prices>
     <ap_prices>
-      <metal datatype="str">XPD</metal>
-      <price datatype="str">1880.65</price>
-    </ap_prices>
-    <ap_prices>
       <metal datatype="str">XPT</metal>
-      <price datatype="str">806.67</price>
+      <price datatype="str">920.00</price>
     </ap_prices>
     <ap_prices>
       <metal datatype="str">XRH</metal>
-      <price datatype="str">8000.00</price>
+      <price datatype="str">1280.00</price>
     </ap_prices>
-    <date datatype="str">28-Oct-2020 11:33:38 PM</date>
+    <date datatype="dateTime">20180202T152943</date>
   </ReportHeader>
 </ApReport>

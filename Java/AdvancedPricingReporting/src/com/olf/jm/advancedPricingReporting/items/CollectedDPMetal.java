@@ -1,11 +1,8 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingData;
+import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPricingSection;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumFinalBalanceSection;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumFxDealData;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumFxDealSection;
@@ -13,15 +10,11 @@ import com.olf.jm.advancedPricingReporting.reports.Report;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.jm.advancedPricingReporting.sections.ApBuySellFxDealSection;
 import com.olf.jm.advancedPricingReporting.sections.DeferredPricingSection;
-import com.olf.jm.logging.Logging;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
-
-import java.time.LocalDate;
-
-import static com.matthey.pmm.ScriptHelper.fromDate;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -50,7 +43,8 @@ public class CollectedDPMetal extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		return new EnumColType[] {EnumFinalBalanceSection.COLLECTED_DP_METAL.getColumnType()};
+		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.COLLECTED_DP_METAL.getColumnType()};
+		return columnTypes;
 	}
 
 	/* (non-Javadoc)
@@ -58,7 +52,8 @@ public class CollectedDPMetal extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		return new String[] {EnumFinalBalanceSection.COLLECTED_DP_METAL.getColumnName()};
+		String[] columns = new String[] {EnumFinalBalanceSection.COLLECTED_DP_METAL.getColumnName()};
+		return columns;
 	}
 
 	/* (non-Javadoc)
@@ -81,23 +76,13 @@ public class CollectedDPMetal extends ItemBase {
 			throw new RuntimeException(errorMessage);			
 		}
 		
-		LocalDate currentDate = fromDate(reportParameters.getReportDate());
 		if(deals.getRowCount() >0) {
 			double collectedDp = 0;
 			for(int row = 0; row< deals.getRowCount(); row++) {
 				Table dealData = deals.getTable(EnumFxDealSection.REPORT_DATA.getColumnName(), row);
 				
 				if(dealData != null && dealData.getRowCount() >0) {
-					ConstTable fxMatched = dealData.createConstView("*",
-																	"([" +
-																	EnumFxDealData.TYPE.getColumnName() +
-																	"] == 'FX Matched')" +
-																	" and " +
-																	"([" +
-																	EnumFxDealData.FIXED_DATE.getColumnName() +
-																	"] == '" +
-																	currentDate +
-																	"')");
+					ConstTable fxMatched = dealData.createConstView("*", "["+EnumFxDealData.TYPE.getColumnName()+"] == 'FX Matched'");
 					
 					if(fxMatched != null && fxMatched.getRowCount() >0) {
 						int columnId = fxMatched.getColumnId(EnumDeferredPricingData.SETTLEMENT_VALUE.getColumnName());

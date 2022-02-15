@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -41,7 +37,8 @@ public class DPMetalName extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		return new EnumColType[] {EnumFinalBalanceSection.DP_METAL_NAME.getColumnType()};
+		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.DP_METAL_NAME.getColumnType()};
+		return columnTypes;
 	}
 
 	/* (non-Javadoc)
@@ -49,7 +46,8 @@ public class DPMetalName extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		return new String[] {EnumFinalBalanceSection.DP_METAL_NAME.getColumnName()};
+		String[] columns = new String[] {EnumFinalBalanceSection.DP_METAL_NAME.getColumnName()};
+		return columns;
 	}
 
 	/* (non-Javadoc)

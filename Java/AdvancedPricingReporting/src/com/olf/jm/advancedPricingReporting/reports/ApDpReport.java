@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.reports;
 
 import java.util.ArrayList;
@@ -29,10 +25,10 @@ import com.olf.openrisk.table.Table;
 public class ApDpReport implements Report {
 	
 	/** The context. */
-	private final Context context;
+	private Context context;
 	
 	/** The report sections. */
-	private final List<ReportSection> reportSections;
+	private List<ReportSection> reportSections;
 	
 	/** The report data. */
 	private Table reportData;	
@@ -45,7 +41,7 @@ public class ApDpReport implements Report {
 	public ApDpReport(Context currentContext){
 		context = currentContext;
 	
-		reportSections = new ArrayList<>();
+		reportSections = new ArrayList<ReportSection>();	
 		
 		buildReportSections();
 		

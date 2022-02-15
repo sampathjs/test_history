@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items.tables;
 
 import com.olf.openrisk.table.EnumColType;
@@ -15,18 +11,19 @@ import com.olf.openrisk.table.EnumColType;
 
 public enum EnumArgumentTable implements TableColumn {
 
-	START_DATE("start_date", EnumColType.Date, EnumFormatType.FMT_NONE),
-	END_DATE("end_date", EnumColType.Date, EnumFormatType.FMT_NONE),
-	EXTERNAL_BU_LIST("external_bu_list", EnumColType.Table, EnumFormatType.FMT_NONE);
+
+	RUN_DATE("rundate", EnumColType.Date, EnumFormatType.FMT_NONE),	
+	BU_LIST("externalByList", EnumColType.Table, EnumFormatType.FMT_NONE);
 	
     /** The column name. */
-    private final String columnName;
+    private String columnName;
     
     /** The column type. */
-    private final EnumColType columnType;
+    private EnumColType columnType;
     
     /** The column formatting type */
-    private final EnumFormatType formatType;
+    private EnumFormatType formatType;
+    
 
     /**
      * Instantiates a new enum transfer data.
@@ -60,4 +57,6 @@ public enum EnumArgumentTable implements TableColumn {
 	public boolean applyToleranceCheck() {
 		return false;
 	}
+	
+	
 }

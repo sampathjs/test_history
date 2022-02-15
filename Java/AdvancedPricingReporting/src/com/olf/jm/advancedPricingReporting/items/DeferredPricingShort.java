@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -44,7 +40,8 @@ public class DeferredPricingShort extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		return new EnumColType[] {EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnType()};
+		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnType()};
+		return columnTypes;
 	}
 
 	/* (non-Javadoc)
@@ -52,7 +49,8 @@ public class DeferredPricingShort extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		return new String[] {EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName()};
+		String[] columns = new String[] {EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName()};
+		return columns;
 	}
 
 	/* (non-Javadoc)
@@ -76,7 +74,7 @@ public class DeferredPricingShort extends ItemBase {
 			throw new RuntimeException(errorMessage);			
 		}
 
-		TableColumnHelper<EnumDeferredPriceShortSection> tableHelper = new TableColumnHelper<>();
+		TableColumnHelper<EnumDeferredPriceShortSection> tableHelper = new TableColumnHelper<EnumDeferredPriceShortSection>();
 		Table dpShort = tableHelper.buildTable(context, EnumDeferredPriceShortSection.class, EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName());
 
 		

@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:53
- */
-
 package com.olf.jm.advancedpricing.fieldnotification;
 
 import com.olf.openrisk.staticdata.Field;
@@ -48,7 +44,7 @@ public abstract class AbstractFieldReset {
 				Logging.info("Field " + fieldName + " is null");
 			}
 		} catch( Exception e) {
-			throw new RuntimeException("Error resetting fields " + fieldName + ". Error " + e.getMessage());
+			throw new RuntimeException("Error resetting fiels " + fieldName + ". Error " + e.getMessage());
 		}
 	}
 }

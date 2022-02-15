@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 import java.util.Arrays;
@@ -51,7 +47,8 @@ public class MetalPricesForToday extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		return new EnumColType[] {EnumColType.Table, EnumColType.Table, EnumColType.Date};
+		EnumColType[] columnTypes = new EnumColType[] {EnumColType.Table, EnumColType.Table, EnumColType.DateTime};
+		return columnTypes;
 	}
 
 	/* (non-Javadoc)
@@ -59,7 +56,8 @@ public class MetalPricesForToday extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		return new String[] {"dp_prices", "ap_prices", "date"};
+		String[] columns = new String[] {"dp_prices", "ap_prices", "date"};
+		return columns;
 	}
 
 	/* (non-Javadoc)
@@ -93,7 +91,7 @@ public class MetalPricesForToday extends ItemBase {
 			
 			String[] metals = deferredDeals.getColumnValuesAsString(EnumDeferredPricingSection.METAL_SHORT_NAME.getColumnName());
 			
-			String[] unique = new HashSet<>(Arrays.asList(metals)).toArray(new String[0]);
+			String[] unique = new HashSet<String>(Arrays.asList(metals)).toArray(new String[0]);
 			
 			for(String metal : unique) {
 				double dpPrice = priceFactory.getSpotRate(metal);
@@ -123,7 +121,7 @@ public class MetalPricesForToday extends ItemBase {
 			
 			String[] metals = dispatchDeals.getColumnValuesAsString(EnumDispatchDealSection.METAL_SHORT_NAME.getColumnName());
 			
-			String[] unique = new HashSet<>(Arrays.asList(metals)).toArray(new String[0]);
+			String[] unique = new HashSet<String>(Arrays.asList(metals)).toArray(new String[0]);
 			
 			for(String metal : unique) {
 				double dpPrice = priceFactory.getSpotRate(metal);

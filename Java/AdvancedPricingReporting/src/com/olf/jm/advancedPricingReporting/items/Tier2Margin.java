@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -30,7 +26,7 @@ import com.olf.jm.logging.Logging;
 public class Tier2Margin extends ItemBase {
 
 	/**
-	 * Instantiates a new six percent margin.
+	 * Instantiates a new six precent margin.
 	 *
 	 * @param currentContext the current context
 	 * @param report the report
@@ -44,7 +40,8 @@ public class Tier2Margin extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		return new EnumColType[] {EnumFinalBalanceSection.TIER_2_VALUE.getColumnType()};
+		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.TIER_2_VALUE.getColumnType()};
+		return columnTypes;
 	}
 
 	/* (non-Javadoc)
@@ -52,7 +49,8 @@ public class Tier2Margin extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		return new String[] {EnumFinalBalanceSection.TIER_2_VALUE.getColumnName()};
+		String[] columns = new String[] {EnumFinalBalanceSection.TIER_2_VALUE.getColumnName()};
+		return columns;
 	}
 
 	/* (non-Javadoc)

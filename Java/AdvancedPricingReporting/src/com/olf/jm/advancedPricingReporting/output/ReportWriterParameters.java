@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.output;
 
 
@@ -11,7 +7,7 @@ package com.olf.jm.advancedPricingReporting.output;
  */
 
 /**
- * The Interface ReportWriterParameters. Defines the parameters that control the output generation
+ * The Interface ReportWriterParameters. Defines the parmeters that control the output generation
  */
 public interface ReportWriterParameters {
 

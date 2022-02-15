@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:53
- */
-
 package com.olf.jm.advancedpricing.persistence;
 
 import com.olf.openrisk.application.Session;

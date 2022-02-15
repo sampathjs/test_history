@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 
@@ -84,7 +80,7 @@ public abstract class ItemBase implements SectionItem {
 
 		Logging.debug("About to run SQL. \n" + sql);
 
-		Table data;
+		Table data = null;
 		try {
 			data = iof.runSQL(sql);
 		} catch (Exception e) {

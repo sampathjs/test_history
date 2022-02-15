@@ -1,12 +1,11 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
+
+import java.util.Date;
 
 import com.olf.embedded.application.Context;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDispatchDealData;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumDispatchDealSection;
+import com.olf.jm.advancedPricingReporting.items.tables.EnumFxDealSection;
 import com.olf.jm.advancedPricingReporting.items.tables.TableColumnHelper;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
 import com.olf.jm.advancedPricingReporting.util.MarginFactory;
@@ -14,15 +13,16 @@ import com.olf.jm.advancedPricingReporting.util.MarginFactory.EnumPricingType;
 import com.olf.jm.advancedPricingReporting.util.MarginFactory.MarginResults;
 import com.olf.jm.advancedPricingReporting.util.MathUtils;
 import com.olf.jm.advancedPricingReporting.util.PriceFactory;
-import com.olf.jm.logging.Logging;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.calendar.EnumDateFormat;
 import com.olf.openrisk.table.ConstTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
 import com.openlink.util.constrepository.ConstRepository;
-
-import java.util.Date;
+import com.openlink.util.constrepository.ConstantNameException;
+import com.openlink.util.constrepository.ConstantTypeException;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -87,8 +87,8 @@ public class ApDispatchedDeals extends ItemBase {
 
 			
 			// Load the HK conversion factor
-			double hkConversionFactor = MathUtils.getHkTozToGmsConversionFactor();
-			double totalWeightGms = hkConversionFactor * MathUtils.round(totalWeight,TableColumnHelper.TOZ_DECIMAL_PLACES);
+			double hkConversionFacort = MathUtils.getHkTozToGmsConversionFactor();
+			double totalWeightGms = hkConversionFacort * MathUtils.round(totalWeight,TableColumnHelper.TOZ_DECIMAL_PLACES);
 			toPopulate.setDouble(EnumDispatchDealSection.TOTAL_WEIGHT_GMS.getColumnName(), row, MathUtils.gmsRounding(totalWeightGms, 2));			
 
 			// Calculate the total settlement value
@@ -118,7 +118,7 @@ public class ApDispatchedDeals extends ItemBase {
 				double totalDealValue = dispatchDeals.calcAsDouble(0, EnumColumnOperation.Sum);
 				toPopulate.setDouble(EnumDispatchDealSection.TOTAL_DISP_AP_DEAL.getColumnName(), row, totalDealValue);
 			} catch (Exception e) {
-				String errorMessage = "Error calculating the total dispatch deal value. " + e.getLocalizedMessage();
+				String errorMessage = "Error calcualting the total dispatch deal value. " + e.getLocalizedMessage();
 				Logging.error(errorMessage);
 				throw new RuntimeException(errorMessage);
 			}
@@ -133,7 +133,7 @@ public class ApDispatchedDeals extends ItemBase {
 	 */
 	@Override
 	public Table format(Table reportSectionToFormat) {
-		TableColumnHelper<EnumDispatchDealSection> columnHelper = new TableColumnHelper<>();
+		TableColumnHelper<EnumDispatchDealSection> columnHelper = new TableColumnHelper<EnumDispatchDealSection>();
 		
 		columnHelper.formatTableForOutput(EnumDispatchDealSection.class, reportSectionToFormat);
 		
@@ -186,7 +186,7 @@ public class ApDispatchedDeals extends ItemBase {
 	private Table formatSubReport(Table reportSectionToFormat) {
 
 		
-		TableColumnHelper<EnumDispatchDealData> columnHelper = new TableColumnHelper<>();
+		TableColumnHelper<EnumDispatchDealData> columnHelper = new TableColumnHelper<EnumDispatchDealData>();
 		
 		columnHelper.formatTableForOutput(EnumDispatchDealData.class, reportSectionToFormat);
 
@@ -198,6 +198,12 @@ public class ApDispatchedDeals extends ItemBase {
 
 	/**
 	 * Calculate weighted average. used the absolute price and weight to avoid the situation where the total weight is 0
+	 *
+	 * @param metalSectionDetails table containing the FX and dispatch details
+	 * @return the weighted average price
+	 * @throws OException 
+	 * @throws ConstantNameException 
+	 * @throws ConstantTypeException 
 	 */
 	private double calculateWeightedAverage(Table metalSectionDetails)  {
 		
@@ -217,13 +223,26 @@ public class ApDispatchedDeals extends ItemBase {
 
 			String value = constRep.getStringValue("zeroToleranceLevel", "0.01");
 			
-			toleranceThreshold = Double.parseDouble(value);
+			toleranceThreshold = new Double(value).doubleValue();
 		} catch (Exception e) {
 			Logging.error("Error reading the tolerance threshold." + e.getMessage());
 			throw new RuntimeException("Error reading the tolerance threshold." + e.getMessage());
 		}
 		
 		if(totalWeight<= toleranceThreshold &&  totalWeight >= (toleranceThreshold * -1.0)) {
+			/*try(ConstTable dispatchDeals = metalSectionDetails.createConstView("*", 
+					"[" +EnumDispatchDealData.TYPE.getColumnName() + "] == 'FX Matched'")) {
+				columnId = metalSectionDetails.getColumnId(EnumDispatchDealData.VOLUME_IN_TOZ.getColumnName());
+				totalWeight = metalSectionDetails.calcAsDouble(columnId, EnumColumnOperation.Sum);
+				
+				columnId = metalSectionDetails.getColumnId(EnumDispatchDealData.SETTLEMENT_VALUE.getColumnName());
+				 totalSettleValue = metalSectionDetails.calcAsDouble(columnId, EnumColumnOperation.Sum);
+			} catch (Exception e) {
+				String errorMessage = "Error calcualting the total dispatch deal value. " + e.getLocalizedMessage();
+				Logging.error(errorMessage);
+				throw new RuntimeException(errorMessage);
+			}
+			*/
 			return 0.0;
 		}
 		return Math.abs(totalSettleValue) / Math.abs(totalWeight);
@@ -242,6 +261,9 @@ public class ApDispatchedDeals extends ItemBase {
 		PriceFactory priceFactory = new PriceFactory(context);
 		
 		double marketPrice = priceFactory.getSpotRate(metal);
+		if(marketPrice == Double.NaN) {
+			throw new RuntimeException("Error loading market price.");
+		}	
 		
 		toPopulate.setDouble(EnumDispatchDealSection.MARKET_PRICE.getColumnName(), row, marketPrice);
 		
@@ -263,17 +285,17 @@ public class ApDispatchedDeals extends ItemBase {
 		}
 		
 		// Load the HK conversion factor
-		double hkConversionFactor = MathUtils.getHkTozToGmsConversionFactor();
+		double hkConversionFacort = MathUtils.getHkTozToGmsConversionFactor();
 		
-		try(Table dispatchDeals = loadDispatchDeals(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFactor)) {
-			aggregateDispatchData(dispatchDeals, sectionData);
+		try(Table dispatchDeals = loadDispatchDeals(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFacort)) {
+			aggrigateDispatchData(dispatchDeals, sectionData);
 		}
 		
-		try( Table fxSellDeals = loadFxUnmatchedDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFactor)) {
+		try( Table fxSellDeals = loadFxUnmatchedDetails(reportParameters.getExternalBu(),metal, hkConversionFacort)) {
 			sectionData.appendRows(fxSellDeals);
 		}
 
-		try( Table fxSellDeals = loadFXMatchedDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFactor)) {
+		try( Table fxSellDeals = loadFXMatchedDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFacort)) {
 			sectionData.appendRows(fxSellDeals);
 		}
 		
@@ -289,8 +311,11 @@ public class ApDispatchedDeals extends ItemBase {
 	/**
 	 * Aggregate dispatch data. Dispatch deals can contain multiple entries in the table, combine these into a single entry based on the deal 
 	 * number, calculate the average price based on the aggregated totals.
+	 *
+	 * @param sellDeals the sell deals loaded from the database
+	 * @param sectionData the section to populate with data
 	 */
-	private void aggregateDispatchData(Table dispatchDeals, Table sectionData) {
+	private void aggrigateDispatchData(Table dispatchDeals, Table sectionData) {
 		Table dealNumbers = dispatchDeals.getDistinctValues(EnumDispatchDealData.DEAL_NUM.getColumnName());
 		
 		for(int i = 0; i < dealNumbers.getRowCount(); i++) {
@@ -331,7 +356,7 @@ public class ApDispatchedDeals extends ItemBase {
 	@Override
 	public EnumColType[] getDataTypes() {
 		
-		TableColumnHelper<EnumDispatchDealSection> columnHelper = new TableColumnHelper<>();
+		TableColumnHelper<EnumDispatchDealSection> columnHelper = new TableColumnHelper<EnumDispatchDealSection>();
 
 		return columnHelper.getColumnTypes(EnumDispatchDealSection.class);
 	}
@@ -341,7 +366,7 @@ public class ApDispatchedDeals extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		TableColumnHelper<EnumDispatchDealSection> columnHelper = new TableColumnHelper<>();
+		TableColumnHelper<EnumDispatchDealSection> columnHelper = new TableColumnHelper<EnumDispatchDealSection>();
 
 		return columnHelper.getColumnNames(EnumDispatchDealSection.class);
 	}
@@ -354,50 +379,30 @@ public class ApDispatchedDeals extends ItemBase {
 	 * @return the table
 	 */
 	private Table loadMetalsToProcess(int customerId, Date matchDate) {
+		
+		StringBuffer sql = new StringBuffer();
+		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		
-		String sql = " SELECT id_number,\n" +
-					 "  		name,\n" +
-					 "  		description\n" +
-					 " FROM   currency c\n" +
-					 " WHERE  id_number IN\n" +
-					 " (\n" +
-					 " SELECT metal_type\n" +
-					 " FROM user_jm_ap_sell_deals ap\n" +
-					 " JOIN ab_tran ab \n" +
-					 "  ON ab.deal_tracking_num = ap.deal_num \n" +
-					 "     AND tran_status = 3 \n" +
-					 "     AND current_flag = 1 \n" +
-					 "     AND trade_date <= '" + matchDateString + "' \n" +
-					 " JOIN ab_tran_info_view abt \n" +
-					 "  ON abt.tran_num = ab.tran_num \n" +
-					 "     AND type_name = 'Pricing Type' \n" +
-					 "     AND value = 'AP' \n" +
-					 " WHERE  customer_id = " +
-					 customerId +
-					 "\n" +
-					 " AND    match_status IN ('N' , 'P')\n" +
-					 " UNION\n" +
-					 " SELECT metal_type\n" +
-					 " FROM   user_jm_ap_buy_dispatch_deals ap\n" +
-					 " JOIN ab_tran ab \n" +
-					 "  ON ab.deal_tracking_num = ap.deal_num \n" +
-					 "     AND tran_status = 3 \n" +
-					 "     AND current_flag = 1 \n" +
-					 "     AND trade_date <= '" + matchDateString + "' \n" +
-					 " JOIN ab_tran_info_view abt \n" +
-					 "  ON abt.tran_num = ab.tran_num \n" +
-					 "     AND type_name = 'Pricing Type' \n" +
-					 "     AND value = 'AP' \n" +
-					 " WHERE  customer_id = " +
-					 customerId +
-					 "\n" +
-					 " AND    match_status = 'M'\n" +
-					 " AND    match_date = '" +
-					 matchDateString +
-					 "'\n" +
-					 " )\n";
-		return runSQL(sql);
+		sql.append(" SELECT id_number,\n"); 
+		sql.append("  		name,\n"); 
+		sql.append("  		description\n"); 
+		sql.append(" FROM   currency c\n"); 
+		sql.append(" WHERE  id_number IN\n"); 
+		sql.append(" (\n");  
+		sql.append(" SELECT metal_type\n");
+		sql.append(" FROM   user_jm_ap_sell_deals\n"); 
+		sql.append(" WHERE  customer_id = ").append(customerId).append("\n"); 
+		sql.append(" AND    match_status IN ('N' , 'P')\n"); 
+		sql.append(" UNION\n");  
+		sql.append(" SELECT metal_type\n");  
+		sql.append(" FROM   user_jm_ap_buy_dispatch_deals\n"); 
+		sql.append(" WHERE  customer_id = ").append(customerId).append("\n");  
+		sql.append(" AND    match_status = 'M'\n"); 
+		sql.append(" AND    match_date = '").append(matchDateString).append("'\n");
+		sql.append(" )\n"); 
+		
+		return runSQL(sql.toString());
 	}
 	
 	/**
@@ -409,7 +414,8 @@ public class ApDispatchedDeals extends ItemBase {
 	 * @return the table
 	 */
 	private Table loadDispatchDeals(int customerId, Date matchDate, int metalType, double hkUnitConversion) {
-		StringBuilder sql = new StringBuilder();
+		StringBuffer sql = new StringBuffer();
+		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		
 		sql.append(" SELECT apb.deal_num, \n");
@@ -418,30 +424,21 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append("    apl.match_date, \n");
 		sql.append("    match_volume                                                    AS volume_in_toz,\n"); 
 		sql.append("     ROUND( match_volume, " + TableColumnHelper.TOZ_DECIMAL_PLACES + " ) * ").append(hkUnitConversion).append("                                    AS volume_in_gms, \n");
-		sql.append("   ( Cast(Isnull(tp.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS trade_price, \n");
-		sql.append("   match_volume * -1.0 * ( Cast(Isnull(tp.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS settlement_value, \n");
+		sql.append("   ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS trade_price, \n");
+		sql.append("   match_volume * -1.0 * ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS settlement_value, \n");
 		sql.append("   'DISPATCH'                                                      AS type\n"); 
 		sql.append(" FROM   user_jm_ap_buy_dispatch_deals apb \n");
 		sql.append("    JOIN user_jm_ap_buy_sell_link apl \n");
 		sql.append("     ON apl.buy_deal_num = apb.deal_num \n");
-		sql.append("       AND apl.match_date <= '").append(matchDateString).append("'\n");
 		sql.append("    JOIN USER_jm_ap_sell_deals aps \n");
 		sql.append("     ON apl.sell_deal_num = aps.deal_num AND aps.match_status != 'E' \n");
-		sql.append("    LEFT JOIN ab_tran_info_view tp \n");
-		sql.append("          ON tp.tran_num = (SELECT tran_num\n");
-		sql.append("                             FROM   ab_tran \n");
-		sql.append("                             WHERE  deal_tracking_num = apl.sell_deal_num\n");
-		sql.append("                                    AND current_flag = 1 \n");
-		sql.append("                                    AND tran_status = 3)\n");
-		sql.append("             AND tp.type_name = 'Trade Price'\n");
-		sql.append("    JOIN ab_tran_info_view pt \n");
-		sql.append("          ON pt.tran_num = (SELECT tran_num\n");
+		sql.append("    LEFT JOIN ab_tran_info_view abt \n");
+		sql.append("          ON abt.tran_num = (SELECT tran_num\n"); 
 		sql.append("                             FROM   ab_tran \n");
 		sql.append("                             WHERE  deal_tracking_num = apl.sell_deal_num\n"); 
 		sql.append("                                    AND current_flag = 1 \n");
 		sql.append("                                    AND tran_status = 3)\n"); 
-		sql.append("             AND pt.type_name = 'Pricing Type'\n");
-		sql.append("             AND pt.value = 'AP'\n");
+		sql.append("             AND type_name = 'Trade Price'\n"); 
 		sql.append("   LEFT JOIN unit_conversion uc2 \n");
 		sql.append("        ON uc2.src_unit_id = (SELECT Iif(unit1 != 0, unit1, unit2) AS\n"); 
 		sql.append("                                      deal_unit \n");
@@ -459,12 +456,68 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append("       AND current_flag = 1 \n");
 		sql.append("       AND tran_status = 3 \n");
 		sql.append("       AND ins_type = 48010 \n");
-		sql.append("       AND trade_date <= '").append(matchDateString).append("'\n");
+		/*
+		sql.append("   JOIN parameter p \n");
+		sql.append("     ON ab.ins_num = p.ins_num \n");
+		sql.append("        AND settlement_type = 2\n"); 
+		sql.append("   JOIN idx_def idx \n");
+		sql.append("     ON p.proj_index = idx.index_id\n"); 
+		sql.append("        AND db_status = 1 \n");
+		sql.append("    JOIN idx_subgroup idxs \n");
+		sql.append("      ON idxs.id_number = idx.idx_subgroup\n"); 
+		sql.append("   JOIN currency c \n");
+		sql.append("     ON c.NAME = code \n");
+		sql.append("      AND apb.metal_type = c.id_number\n"); 
+		*/
 		sql.append(" WHERE  apb.match_status = 'M' \n");
 		sql.append("    AND apb.metal_type = ").append(metalType).append("\n");
 		sql.append("    AND apb.match_date = '").append(matchDateString).append("'\n");
 		sql.append("    AND apb.customer_id = ").append(customerId).append("\n");
 	     
+		/* Old SQL to get price from param info field
+		sql.append(" SELECT deal_num,\n");
+		sql.append("    trade_date,\n");
+		sql.append("    reference,\n");
+		sql.append("    match_date,\n");
+		sql.append("    volume_in_toz,\n");
+		sql.append("     (volume_in_toz * -1.0) / factor  AS volume_in_gms,\n");
+		sql.append("    Cast(Isnull(dp_price.value, 0.0) AS FLOAT) AS trade_price,\n");
+		sql.append("    volume_in_toz * -1.0 * Cast(Isnull(dp_price.value, 0.0) AS FLOAT) AS settlement_value,\n");
+		sql.append("    'DISPATCH' as type\n");
+		sql.append(" FROM   user_jm_ap_buy_dispatch_deals apb\n");
+		sql.append("    JOIN ab_tran ab\n");
+		sql.append("      ON ab.deal_tracking_num = apb.deal_num\n");
+		sql.append("         AND current_flag = 1\n");
+		sql.append("         AND tran_status = 3\n");
+		sql.append("         AND ins_type = 48010\n");
+		sql.append("    JOIN unit_conversion uc\n");
+		sql.append("      ON src_unit_id = 55\n");
+		sql.append("         AND dest_unit_id = 51\n");
+		sql.append("    JOIN parameter p\n");
+		sql.append("      ON ab.ins_num = p.ins_num\n");
+		sql.append("         AND settlement_type = 2\n");
+		sql.append("    JOIN idx_def idx\n");
+		sql.append("      ON p.proj_index = idx.index_id\n");
+		sql.append("         AND db_status = 1\n");
+		sql.append("    JOIN idx_subgroup idxs\n");
+		sql.append("      ON idxs.id_number = idx.idx_subgroup\n");
+		sql.append("    JOIN currency c\n");
+		sql.append("      ON c.name = code\n");
+		sql.append("         AND metal_type = c.id_number\n");
+		sql.append("    LEFT JOIN (SELECT ins_num,\n");
+		sql.append("                      param_seq_num,\n");
+		sql.append("                      value\n");
+		sql.append("               FROM   ins_parameter_info ipi\n");
+		sql.append("                      JOIN tran_info_types tit\n");
+		sql.append("                         ON ipi.type_id = tit.type_id\n");
+		sql.append("                           AND type_name = 'DP Price') dp_price\n");
+		sql.append("           ON dp_price.ins_num = p.ins_num\n");
+		sql.append("              AND dp_price.param_seq_num = p.param_seq_num\n");
+		sql.append(" WHERE  match_status = 'M'\n");
+		sql.append("    AND metal_type = ").append(metalType).append("\n");
+		sql.append("    AND match_date = '").append(matchDateString).append("'\n");
+		sql.append("    AND apb.customer_id = ").append(customerId).append("\n");
+		*/
 		return runSQL(sql.toString());
 	}
 	
@@ -475,47 +528,36 @@ public class ApDispatchedDeals extends ItemBase {
 	 * @param metalType the metal type
 	 * @return the table
 	 */
-	private Table loadFxUnmatchedDetails(int customerId, Date matchDate, int metalType, double hkUnitConversion) {
-		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
-		String sql = " SELECT deal_num,\n" +
-					 "    trade_date,\n" +
-					 "    reference,\n" +
-					 "    cast('1900-01-01 00:00:00.000' as DATETIME)        AS match_date,\n" +
-					 "    volume_left_in_toz  * -1.0              AS volume_in_toz,\n" +
-					 "    (ROUND(volume_left_in_toz, " +
-					 TableColumnHelper.TOZ_DECIMAL_PLACES +
-					 ") * " +
-					 hkUnitConversion +
-					 ")  * -1.0     AS volume_in_gms,\n" +
-					 "    (Cast(Isnull(tp.value, 0.0) AS FLOAT)  / Isnull(uc2.factor,1.0))  AS trade_price,\n" +
-					 "    volume_left_in_toz * (Cast(Isnull(tp.value, 0.0) AS FLOAT)  / Isnull(uc2.factor,1.0))  AS settlement_value,\n" +
-					 "    'FX UnMatched' as type\n" +
-					 " FROM   user_jm_ap_sell_deals aps\n" +
-					 "    JOIN ab_tran ab\n" +
-					 "      ON ab.deal_tracking_num = aps.deal_num\n" +
-					 "         AND current_flag = 1\n" +
-					 "         AND tran_status = 3\n" +
-					 "         AND trade_date <= '" + matchDateString + "'\n" +
-					 "       LEFT JOIN ab_tran_info_view tp \n" +
-					 "              ON tp.tran_num = ab.tran_num \n" +
-					 "                 AND tp.type_name = 'Trade Price' \n" +
-					 "       JOIN ab_tran_info_view pt \n" +
-					 "              ON pt.tran_num = ab.tran_num \n" +
-					 "                 AND pt.type_name = 'Pricing Type' \n" +
-					 "                 AND pt.value = 'AP' \n" +
-					 "    LEFT JOIN unit_conversion uc2 \n" +
-					 "           ON uc2.src_unit_id = (\n" +
-					 "              SELECT IIF( unit1 != 0 , unit1, unit2) AS deal_unit \n" +
-					 "              FROM fx_tran_aux_data WHERE tran_num = ab.tran_num )\n" +
-					 "              AND uc2.dest_unit_id = 55  \n" +
-					 " WHERE  match_status IN ( 'N', 'P' )\n" +
-					 "    AND metal_type = " +
-					 metalType +
-					 "\n" +
-					 "    AND aps.customer_id = " +
-					 customerId +
-					 "\n";
-		return runSQL(sql);
+	private Table loadFxUnmatchedDetails(int customerId, int metalType, double hkUnitConversion) {
+		StringBuffer sql = new StringBuffer();
+		
+		sql.append(" SELECT deal_num,\n");
+		sql.append("    trade_date,\n");
+		sql.append("    reference,\n");
+		sql.append("    cast('1900-01-01 00:00:00.000' as DATETIME)        AS match_date,\n");
+		sql.append("    volume_left_in_toz  * -1.0              AS volume_in_toz,\n");
+		sql.append("    (ROUND(volume_left_in_toz, " +TableColumnHelper.TOZ_DECIMAL_PLACES + ") * ").append(hkUnitConversion).append(")  * -1.0     AS volume_in_gms,\n");
+		sql.append("    (Cast(Isnull(value, 0.0) AS FLOAT)  / Isnull(uc2.factor,1.0))  AS trade_price,\n");
+		sql.append("    volume_left_in_toz * (Cast(Isnull(value, 0.0) AS FLOAT)  / Isnull(uc2.factor,1.0))  AS settlement_value,\n");
+		sql.append("    'FX UnMatched' as type\n");
+		sql.append(" FROM   user_jm_ap_sell_deals aps\n");
+		sql.append("    JOIN ab_tran ab\n");
+		sql.append("      ON ab.deal_tracking_num = aps.deal_num\n");
+		sql.append("         AND current_flag = 1\n");
+		sql.append("         AND tran_status = 3\n");
+		sql.append("    LEFT JOIN ab_tran_info_view abt\n");
+		sql.append("           ON abt.tran_num = ab.tran_num\n");
+		sql.append("              AND type_name = 'Trade Price'\n");
+		sql.append("    LEFT JOIN unit_conversion uc2 \n");
+		sql.append("           ON uc2.src_unit_id = (\n");
+		sql.append("              SELECT IIF( unit1 != 0 , unit1, unit2) AS deal_unit \n");
+		sql.append("              FROM fx_tran_aux_data WHERE tran_num = ab.tran_num )\n");
+		sql.append("              AND uc2.dest_unit_id = 55  \n");
+		sql.append(" WHERE  match_status IN ( 'N', 'P' )\n");
+		sql.append("    AND metal_type = ").append(metalType).append("\n");
+		sql.append("    AND aps.customer_id = ").append(customerId).append("\n");
+		
+		return runSQL(sql.toString());
 	}
 	
 	
@@ -528,7 +570,7 @@ public class ApDispatchedDeals extends ItemBase {
 	 * @return the table
 	 */
 	Table loadFXMatchedDetails(int customerId, Date matchDate, int metalType, double hkUnitConversion) {
-		StringBuilder sql = new StringBuilder();
+		StringBuffer sql = new StringBuffer();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 		
@@ -538,8 +580,8 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append("    link.match_date								                       AS match_date,\n");
 		sql.append("    link.match_volume * -1.0                                           AS volume_in_toz,\n");
 		sql.append("    (ROUND(link.match_volume, " + TableColumnHelper.TOZ_DECIMAL_PLACES + ") * ").append(hkUnitConversion).append(") * -1.0  AS volume_in_gms,\n");
-		sql.append("    ( Cast(Isnull(tp.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) )    AS trade_price,\n");
-		sql.append("    link.match_volume * ( Cast(Isnull(tp.value, 0.0) AS FLOAT) / \n");
+		sql.append("    ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) )    AS trade_price,\n");
+		sql.append("    link.match_volume * ( Cast(Isnull(value, 0.0) AS FLOAT) / \n");
 		sql.append("                          Isnull(uc2.factor, 1.0) )                    AS settlement_value,\n");
 		sql.append("    'FX Matched'                                                       AS type\n");
 		sql.append(" FROM   user_jm_ap_sell_deals aps\n");
@@ -547,14 +589,9 @@ public class ApDispatchedDeals extends ItemBase {
 		sql.append("      ON ab.deal_tracking_num = aps.deal_num\n");
 		sql.append("         AND current_flag = 1\n");
 		sql.append("         AND tran_status = 3\n");
-		sql.append("         AND trade_date <= '").append(matchDateString).append("'\n");
-		sql.append("       LEFT JOIN ab_tran_info_view tp \n");
-		sql.append("              ON tp.tran_num = ab.tran_num \n");
-		sql.append("                 AND tp.type_name = 'Trade Price' \n");
-		sql.append("       JOIN ab_tran_info_view pt \n");
-		sql.append("              ON pt.tran_num = ab.tran_num \n");
-		sql.append("                 AND pt.type_name = 'Pricing Type' \n");
-		sql.append("                 AND pt.value = 'AP' \n");
+		sql.append("    LEFT JOIN ab_tran_info_view abt\n");
+		sql.append("           ON abt.tran_num = ab.tran_num\n");
+		sql.append("              AND type_name = 'Trade Price'\n");
 		sql.append("    LEFT JOIN unit_conversion uc2\n");
 		sql.append("           ON uc2.src_unit_id = (SELECT Iif(unit1 != 0, unit1, unit2) AS\n");
 		sql.append("                                        deal_unit\n");

@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -24,7 +20,7 @@ import com.olf.jm.logging.Logging;
 public class ApprovedTradeLimit  extends ItemBase {
 
 	/** The Constant columnsWithLimits. Defines the columns which have limits*/
-	private final static EnumDailySummarySection[] columnsWithLimits = new EnumDailySummarySection[] {
+	private final static EnumDailySummarySection columnsWithLimits[] = new EnumDailySummarySection[] {
 		EnumDailySummarySection.AG_AP_TOZ,
 		EnumDailySummarySection.AU_AP_TOZ,
 		EnumDailySummarySection.IR_AP_TOZ,

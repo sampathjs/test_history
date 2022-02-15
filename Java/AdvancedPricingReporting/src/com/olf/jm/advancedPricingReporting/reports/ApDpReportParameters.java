@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.reports;
 
 import java.util.Date;
@@ -17,13 +13,13 @@ import java.util.Date;
 public class ApDpReportParameters implements ReportParameters {
 	
 	/** The internal bu. */
-	private final int internalBU;
+	private int internalBU;
 	
 	/** The external bu. */
-	private final int externalBU;
+	private int externalBU;	
 	
 	/** The date to extract data for */
-	private final Date reportDate;
+	private Date reportDate;
 	
 	/**
 	 * Instantiates a new ap report parameters.

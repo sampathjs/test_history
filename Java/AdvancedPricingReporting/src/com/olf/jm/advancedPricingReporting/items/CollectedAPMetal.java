@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -44,7 +40,8 @@ public class CollectedAPMetal extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		return new EnumColType[] {EnumFinalBalanceSection.COLLECTED_AP_METAL.getColumnType()};
+		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.COLLECTED_AP_METAL.getColumnType()};
+		return columnTypes;
 	}
 
 	/* (non-Javadoc)
@@ -52,7 +49,8 @@ public class CollectedAPMetal extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		return new String[] {EnumFinalBalanceSection.COLLECTED_AP_METAL.getColumnName()};
+		String[] columns = new String[] {EnumFinalBalanceSection.COLLECTED_AP_METAL.getColumnName()};
+		return columns;
 	}
 
 	/* (non-Javadoc)

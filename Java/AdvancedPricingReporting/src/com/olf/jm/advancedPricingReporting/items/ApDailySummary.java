@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 import java.util.Date;
@@ -104,7 +100,7 @@ public class ApDailySummary extends ItemBase {
 						continue;
 					}
 					
-					EnumDailySummarySection column;
+					EnumDailySummarySection column = null;
 					switch (metal) {
 					case "XAG":
 						column = EnumDailySummarySection.AG_AP_TOZ;

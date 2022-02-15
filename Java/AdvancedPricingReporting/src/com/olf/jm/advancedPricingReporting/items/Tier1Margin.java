@@ -1,7 +1,3 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -31,7 +27,7 @@ import com.olf.jm.logging.Logging;
 public class Tier1Margin extends ItemBase {
 
 	/**
-	 * Instantiates a new three percent margin.
+	 * Instantiates a new three precent margin.
 	 *
 	 * @param currentContext the current context
 	 * @param report the report
@@ -45,7 +41,8 @@ public class Tier1Margin extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		return new EnumColType[] {EnumFinalBalanceSection.TIER_1_VALUE.getColumnType()};
+		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.TIER_1_VALUE.getColumnType()};
+		return columnTypes;
 	}
 
 	/* (non-Javadoc)
@@ -53,7 +50,8 @@ public class Tier1Margin extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		return new String[] {EnumFinalBalanceSection.TIER_1_VALUE.getColumnName()};
+		String[] columns = new String[] {EnumFinalBalanceSection.TIER_1_VALUE.getColumnName()};
+		return columns;
 	}
 
 	/* (non-Javadoc)
@@ -88,6 +86,9 @@ public class Tier1Margin extends ItemBase {
 					total += lossGain;
 				}
 			}
+			//columnId = dispatchDeals.getColumnId(EnumDispatchDealSection.LOSS_GAIN.getColumnName());
+			//total += dispatchDeals.calcAsDouble(columnId, EnumColumnOperation.Sum);
+			
 		}
 
 		Table deferredDeals = reportData.getTable(DeferredPricingSection.sectionName(), 0);

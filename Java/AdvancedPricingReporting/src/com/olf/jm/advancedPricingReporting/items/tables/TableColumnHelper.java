@@ -1,11 +1,10 @@
-/*
- * File updated 05/02/2021, 17:52
- */
-
 package com.olf.jm.advancedPricingReporting.items.tables;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import com.olf.embedded.application.Context;
-import com.olf.jm.logging.Logging;
+import com.olf.openjvs.OException;
 import com.olf.openrisk.table.ColumnFormatterAsDateTime;
 import com.olf.openrisk.table.ColumnFormatterAsDouble;
 import com.olf.openrisk.table.EnumColType;
@@ -14,9 +13,9 @@ import com.olf.openrisk.table.EnumFormatDouble;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.table.TableFormatter;
 import com.openlink.util.constrepository.ConstRepository;
-
-import java.util.ArrayList;
-import java.util.Arrays;
+import com.openlink.util.constrepository.ConstantNameException;
+import com.openlink.util.constrepository.ConstantTypeException;
+import com.olf.jm.logging.Logging;
 
 
 /*
@@ -35,7 +34,7 @@ public class TableColumnHelper<T extends  Enum<T>> {
 	public final static int TOZ_DECIMAL_PLACES = 4;
 	public final static int GMS_DECIMAL_PLACES = 2;
 	
-	private final double toleranceThreshold;
+	private double toleranceThreshold = 0.01;
 	
 	public TableColumnHelper() {
 		try {
@@ -43,7 +42,7 @@ public class TableColumnHelper<T extends  Enum<T>> {
 
 			String value = constRep.getStringValue("zeroToleranceLevel", "0.01");
 			
-			toleranceThreshold = Double.parseDouble(value);
+			toleranceThreshold = new Double(value).doubleValue();
 
 		} catch (Exception e) {
 			Logging.error("Error reading the tolerance threshold." + e.getMessage());
@@ -106,12 +105,12 @@ public class TableColumnHelper<T extends  Enum<T>> {
 	 */
 	public String[] getColumnNames(Class<T> columnEnumeration ) {
 		
-		ArrayList<String> columnName = new ArrayList<>();
+		ArrayList<String> columnName = new ArrayList<String>();
 		
 		for(Enum<T> column : columnEnumeration.getEnumConstants() ) {
 			columnName.add(((TableColumn)column).getColumnName());
 		}
-		return columnName.toArray(new String[0]);
+		return columnName.toArray(new String[columnName.size()]);
 		
 	}
 	
@@ -123,7 +122,7 @@ public class TableColumnHelper<T extends  Enum<T>> {
 	 */
 	public String[] getColumnNamesToFormat(Class<T> columnEnumeration ) {
 		
-		ArrayList<String> columnName = new ArrayList<>();
+		ArrayList<String> columnName = new ArrayList<String>();
 		
 		for(Enum<T> column : columnEnumeration.getEnumConstants() ) {
 			if(((TableColumn)column).getColumnType() == EnumColType.Double || 
@@ -132,7 +131,7 @@ public class TableColumnHelper<T extends  Enum<T>> {
 			columnName.add(((TableColumn)column).getColumnName());
 			}
 		}
-		return columnName.toArray(new String[0]);
+		return columnName.toArray(new String[columnName.size()]);
 		
 	}	
 	
@@ -144,12 +143,12 @@ public class TableColumnHelper<T extends  Enum<T>> {
 	 */
 	public EnumColType[] getColumnTypes(Class<T> columnEnumeration ) {
 		
-		ArrayList<EnumColType> columnType = new ArrayList<>();
+		ArrayList<EnumColType> columnType = new ArrayList<EnumColType>();
 		
 		for(Enum<T> column : columnEnumeration.getEnumConstants() ) {
 			columnType.add(((TableColumn)column).getColumnType());
 		}
-		return columnType.toArray(new EnumColType[0]);
+		return columnType.toArray( new EnumColType[columnType.size()]);
 		
 	}	
 	
