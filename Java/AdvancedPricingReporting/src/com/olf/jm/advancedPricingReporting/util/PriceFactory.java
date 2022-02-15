@@ -1,9 +1,16 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.util;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import com.olf.embedded.application.Context;
+import com.olf.openrisk.io.IOFactory;
 import com.olf.openrisk.market.EnumElementType;
 import com.olf.openrisk.market.EnumGptField;
 import com.olf.openrisk.market.ForwardCurve;
@@ -12,6 +19,8 @@ import com.olf.openrisk.market.GridPoints;
 import com.olf.openrisk.market.Market;
 import com.olf.openrisk.market.MarketFactory;
 import com.olf.jm.logging.Logging;
+import com.olf.openrisk.table.Table;
+import org.apache.commons.text.StringSubstitutor;
 
 /*
  * History:
@@ -82,7 +91,9 @@ public class PriceFactory {
 			}};	
 	
 	/** The market. */
-	private Market market;
+	private final Market market;
+	
+	private final IOFactory ioFactory;
 	
 	/**
 	 * Instantiates a new price factory.
@@ -90,12 +101,13 @@ public class PriceFactory {
 	 * @param context the current script context
 	 */
 	public 	PriceFactory( Context context) {
+		this.ioFactory = context.getIOFactory();
 		MarketFactory mf = context.getMarketFactory();
 		
 		market = mf.getMarket();		
 		
 		if(market == null) {
-			String errorMessage = "Error initilising PriceFactory, error loading market context";
+			String errorMessage = "Error initialising PriceFactory, error loading market context";
 			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}else {
@@ -114,7 +126,7 @@ public class PriceFactory {
 	public double getSpotRate(String metal) {
 		
 		if(metal == null || metal.length() == 0) {
-			Logging.warn("no metal specificed returning 0.");
+			Logging.warn("no metal specified returning 0.");
 			return 0.0;
 		}
 	
@@ -174,5 +186,32 @@ public class PriceFactory {
 			}
 		}
 		return spotPrice;
-	}	
+	}
+
+	public double getHistoricalPrice(String metal, LocalDate date) {
+		//language=TSQL
+		String sqlTemplate = "SELECT ihp.price\n" +
+							 "    FROM idx_historical_prices ihp\n" +
+							 "             JOIN idx_def id\n" +
+							 "                  ON ihp.index_id = id.index_version_id\n" +
+							 "             JOIN ref_source rs\n" +
+							 "                  ON ihp.ref_source = rs.id_number\n" +
+							 "    WHERE id.index_name = '${indexName}'\n" +
+							 "      AND reset_date = '${date}'\n" +
+							 "      AND rs.name = '${refSource}'";
+		Map<String, Object> variables = ImmutableMap.of("date",
+														date,
+														"indexName",
+														metal + ".USD",
+														"refSource",
+														"LME AM");
+		String sql = new StringSubstitutor(variables).replace(sqlTemplate);
+		
+		try (Table rawData = ioFactory.runSQL(sql)) {
+			return rawData.getDouble(0, 0);
+		} catch (Exception e) {
+			Logging.warn("cannot retrieve historical price for " + metal + " at " + date + ", use spot rate instead");
+			return getSpotRate(metal);
+		}
+	}
 }

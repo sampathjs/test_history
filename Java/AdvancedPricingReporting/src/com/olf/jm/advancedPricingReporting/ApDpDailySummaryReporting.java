@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting;
 
 
@@ -24,7 +28,6 @@ import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
 
 
-// TODO: Auto-generated Javadoc
 /*
  * History:
  * 2017-07-23 - V0.1 - scurran - Initial Version
@@ -39,9 +42,6 @@ import com.olf.jm.logging.Logging;
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class ApDpDailySummaryReporting extends AbstractGenericScript {
 
-	/** The const repository used to initialise the logging classes. */
-	private ConstRepository constRep;
-	
 	/** The Constant CONST_REPOSITORY_CONTEXT. */
 	private static final String CONST_REPOSITORY_CONTEXT = "Util";
 	
@@ -85,11 +85,6 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 		        put(EnumDailySummarySection.END_CASH_BALANCE, "End Cash  balance");
 		    }});
 	
-
-
-
-	
-	
 	/**
 	 * Execute.
 	 *
@@ -106,7 +101,7 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 		try {
 			init();
 		} catch (Exception e) {
-			throw new RuntimeException("Error initilising logging. "  + e.getLocalizedMessage());
+			throw new RuntimeException("Error initialising logging. "  + e.getLocalizedMessage());
 		}
 
 		try {
@@ -120,14 +115,14 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 				
 			report.generateReport(parameters);
 				
-			ConstTable reprotData = report.getReportData();
+			ConstTable reportData = report.getReportData();
 				
-			generateReportOutput((Table)reprotData, context);
+			generateReportOutput((Table)reportData, context);
 				
 			String displayResults = "true";
-			displayResults = constRep.getStringValue("Display Results Data Table", displayResults);
+			displayResults = new ConstRepository(CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT).getStringValue("Display Results Data Table", displayResults);
 			if(displayResults.compareToIgnoreCase("true") == 0) {
-				context.getDebug().viewTable(reprotData);
+				context.getDebug().viewTable(reportData);
 			}
 			return context.getTableFactory().createTable("returnT");
 		} catch (Exception e) {
@@ -141,13 +136,13 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 	}
 	
 	/**
-	 * Generate report output. Write the report data to an excel file inthe default reporting directory for today
+	 * Generate report output. Write the report data to an excel file in the default reporting directory for today
 	 *
-	 * @param reprotData the  data to output
+	 * @param reportData the  data to output
 	 * @param context the script context
 	 * @throws OException error on writing the excel file
 	 */
-	private void generateReportOutput(Table reprotData, Context context) throws OException {
+	private void generateReportOutput(Table reportData, Context context) throws OException {
 
 		Logging.info("Writing data to file");
 		
@@ -157,7 +152,7 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 
 		String fileName = context.getIOFactory().getReportDirectory() + "\\HK_AP_DP_Daily_Customer_Report_Summary_" +sdf.format(cal.getTime()) + ".xlsx";
 		
-		Table data = reprotData.getTable(0, 0);
+		Table data = reportData.getTable(0, 0);
 		
 		
 		removeNonReportedMetals(data, context);
@@ -202,30 +197,16 @@ public class ApDpDailySummaryReporting extends AbstractGenericScript {
 		approvedTradeLimit.removeNonReportedMetals(data);
 	}
 	
-
-	
 	/**
-	 * Initilise the logging framework.
+	 * Initialise the logging framework.
 	 *
 	 * @throws Exception the exception
 	 */
 	private void init() throws Exception {
-		constRep = new ConstRepository(CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
-
-		String logLevel = "Error";
-		String logFile = getClass().getSimpleName() + ".log";
-		String logDir = null;
-
 		try {
-			logLevel = constRep.getStringValue("logLevel", logLevel);
-			logFile = constRep.getStringValue("logFile", logFile);
-			logDir = constRep.getStringValue("logDir", logDir);
-
 			Logging.init(this.getClass(), CONST_REPOSITORY_CONTEXT, CONST_REPOSITORY_SUBCONTEXT);
 		} catch (Exception e) {
 			throw new Exception("Error initialising logging. " + e.getMessage());
 		}
-
 	}
-
 }

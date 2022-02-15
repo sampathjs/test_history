@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.output;
 
 
@@ -7,7 +11,7 @@ package com.olf.jm.advancedPricingReporting.output;
  */
 
 /**
- * The Interface ReportWritter. Interface to report writer classes used to output the report data
+ * The Interface ReportWriter. Interface to report writer classes used to output the report data
  */
 public interface ReportWriter {
 

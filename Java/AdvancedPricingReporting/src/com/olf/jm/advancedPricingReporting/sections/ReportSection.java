@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.sections;
 
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
@@ -10,7 +14,7 @@ import com.olf.openrisk.table.Table;
 
 /**
  * The Interface ReportSection. Defines a section in the output report, contains method to
- * initilise the table structure and populate with data
+ * initialise the table structure and populate with data
  */
 public interface ReportSection {
 
@@ -25,7 +29,7 @@ public interface ReportSection {
 	/**
 	 * Builds the section table structure.
 	 *
-	 * @return an empty table with the column names and datatypes defined.
+	 * @return an empty table with the column names and data types defined.
 	 */
 	Table  buildSectionTableStructure();
 	
@@ -44,8 +48,6 @@ public interface ReportSection {
 	
 	/**
 	 * Format the section data so that it can be used in the output module.
-	 * @param reportSectionToFormat 
-	 * @return the formatted section
 	 */
 	Table formatForReporting(Table reportSectionToFormat);
 }

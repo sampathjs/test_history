@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items;
 
 import java.util.Date;
@@ -52,7 +56,7 @@ public class ApBuySellFxDeals extends ItemBase {
 			// Add dummy row
 			toPopulate.addRows(1);
 			
-			TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<EnumFxDealSection>();
+			TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<>();
 			Table dummy = columnHelper.buildTable(context, EnumFxDealSection.class, "FXBuySellDeal");
 			toPopulate.setTable(EnumFxDealSection.REPORT_DATA.getColumnName(), 0, dummy);
 			Logging.info("No data to process for customer " + reportParameters.getExternalBu()
@@ -94,8 +98,8 @@ public class ApBuySellFxDeals extends ItemBase {
 			
 			
 			// Load the HK conversion factor
-			double hkConversionFacort = MathUtils.getHkTozToGmsConversionFactor();
-			double totalWeightGms = hkConversionFacort * MathUtils.round(totalWeightToz,3);
+			double hkConversionFactor = MathUtils.getHkTozToGmsConversionFactor();
+			double totalWeightGms = hkConversionFactor * MathUtils.round(totalWeightToz,3);
 			toPopulate.setDouble(EnumFxDealSection.TOTAL_WEIGHT_GMS.getColumnName(), row, MathUtils.gmsRounding(totalWeightGms, 2));			
 			
 		}
@@ -106,7 +110,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	 */
 	@Override
 	public Table format(Table reportSectionToFormat) {
-		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<EnumFxDealSection>();
+		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<>();
 		
 		columnHelper.formatTableForOutput(EnumFxDealSection.class, reportSectionToFormat);
 		
@@ -129,7 +133,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	private Table formatSubReport(Table reportSectionToFormat) {
 
 		
-		TableColumnHelper<EnumFxDealData> columnHelper = new TableColumnHelper<EnumFxDealData>();
+		TableColumnHelper<EnumFxDealData> columnHelper = new TableColumnHelper<>();
 		
 		columnHelper.formatTableForOutput(EnumFxDealData.class, reportSectionToFormat);
 
@@ -154,13 +158,13 @@ public class ApBuySellFxDeals extends ItemBase {
 		}
 		
 		// Load the HK conversion factor
-		double hkConversionFacort = MathUtils.getHkTozToGmsConversionFactor();
+		double hkConversionFactor = MathUtils.getHkTozToGmsConversionFactor();
 		
-		try( Table fxSellDeals = loadFxSellDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFacort)) {
+		try( Table fxSellDeals = loadFxSellDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFactor)) {
 			aggregateSellData(fxSellDeals, sectionData);
 		}
 
-		try( Table fxBuyDeals = loadFXBuyDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFacort)) {
+		try( Table fxBuyDeals = loadFXBuyDetails(reportParameters.getExternalBu(), reportParameters.getReportDate(), metal, hkConversionFactor)) {
 			sectionData.appendRows(fxBuyDeals);
 		}
 		
@@ -225,7 +229,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	@Override
 	public EnumColType[] getDataTypes() {
 		
-		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<EnumFxDealSection>();
+		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<>();
 
 		return columnHelper.getColumnTypes(EnumFxDealSection.class);
 	}
@@ -235,7 +239,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<EnumFxDealSection>();
+		TableColumnHelper<EnumFxDealSection> columnHelper = new TableColumnHelper<>();
 
 		return columnHelper.getColumnNames(EnumFxDealSection.class);
 	}
@@ -249,7 +253,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	 */
 	private Table loadMetalsToProcess(int customerId, Date matchDate) {
 		
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(matchDate, EnumDateFormat.DlmlyDash);
 
@@ -262,6 +266,10 @@ public class ApBuySellFxDeals extends ItemBase {
 		sql.append("     AND tran_status = 3 \n");
 		sql.append("     AND current_flag = 1 \n");
 		sql.append("     AND ins_type = 26001 \n");
+		sql.append(" JOIN ab_tran_info_view abt \n");
+		sql.append("  ON abt.tran_num = ab.tran_num \n");
+		sql.append("     AND type_name = 'Pricing Type' \n");
+		sql.append("     AND value = 'AP' \n");
 		sql.append(" JOIN currency c \n");
 		sql.append("  ON metal_type = c.id_number \n");
 		sql.append(" WHERE  match_date = '").append(matchDateString).append("' \n");
@@ -279,7 +287,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	 * @return the table containing FX Sell deal data.
 	 */
 	private Table loadFxSellDetails(int externalBu, Date reportDate, int metal, double hkUnitConversion) {
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(reportDate, EnumDateFormat.DlmlyDash);
 		
@@ -287,9 +295,9 @@ public class ApBuySellFxDeals extends ItemBase {
 		sql.append("        sell_deal_num                                                   AS deal_num, \n");
 		sql.append("        Abs(match_volume) * -1                                          AS volume_in_toz, \n");
 		sql.append("        ").append(hkUnitConversion).append(" * ROUND(( Abs(match_volume) * -1 )," + TableColumnHelper.TOZ_DECIMAL_PLACES+ ")  AS volume_in_gms, \n");
-		sql.append("        ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS trade_price, \n");
+		sql.append("        ( Cast(Isnull(tp.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS trade_price, \n");
 		sql.append("        0.0                                                             AS buy_settle_value, \n");
-		sql.append("        ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) *  Abs(match_volume) AS sell_settle_value, \n");
+		sql.append("        ( Cast(Isnull(tp.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) *  Abs(match_volume) AS sell_settle_value, \n");
 		sql.append("        'FX Sell'                                                       AS type, \n");
 		sql.append("        ab.reference                                                    AS reference \n");
 		sql.append(" FROM   user_jm_ap_buy_sell_link \n");
@@ -299,9 +307,13 @@ public class ApBuySellFxDeals extends ItemBase {
 		sql.append("             AND tran_status = 3 \n");
 		sql.append("             AND current_flag = 1 \n");
 		sql.append("             AND ins_type = 26001 \n");
-		sql.append("       LEFT JOIN ab_tran_info_view abt \n");
-		sql.append("              ON abt.tran_num = ab.tran_num \n");
-		sql.append("                 AND type_name = 'Trade Price' \n");
+		sql.append("       LEFT JOIN ab_tran_info_view tp \n");
+		sql.append("              ON tp.tran_num = ab.tran_num \n");
+		sql.append("                 AND tp.type_name = 'Trade Price' \n");
+		sql.append("       JOIN ab_tran_info_view pt \n");
+		sql.append("              ON pt.tran_num = ab.tran_num \n");
+		sql.append("                 AND pt.type_name = 'Pricing Type' \n");
+		sql.append("                 AND pt.value = 'AP' \n");
 		sql.append("       LEFT JOIN unit_conversion uc2 \n");
 		sql.append("               ON uc2.src_unit_id = (SELECT Iif(unit1 != 0, unit1, unit2) AS \n");
 		sql.append("                                            deal_unit \n");
@@ -334,7 +346,7 @@ public class ApBuySellFxDeals extends ItemBase {
 	 */
 	private Table loadFXBuyDetails(int externalBu, Date reportDate, int metal, double hkUnitConversion) {
 
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(reportDate, EnumDateFormat.DlmlyDash);
 
@@ -342,8 +354,8 @@ public class ApBuySellFxDeals extends ItemBase {
 		sql.append("        deal_num, \n");
 		sql.append("        match_volume AS volume_in_toz,\n");
 		sql.append("        ROUND(match_volume, " + TableColumnHelper.TOZ_DECIMAL_PLACES + ")  * ").append(hkUnitConversion).append(" AS  volume_in_gms, \n");
-		sql.append("        ( Cast(Isnull(value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS  trade_price, \n");
-		sql.append("        (match_volume *  ( Cast(Isnull(value, 0.0) AS FLOAT)) / Isnull(uc2.factor, 1.0) ) * -1 AS buy_settle_value, \n");
+		sql.append("        ( Cast(Isnull(tp.value, 0.0) AS FLOAT) / Isnull(uc2.factor, 1.0) ) AS  trade_price, \n");
+		sql.append("        (match_volume *  ( Cast(Isnull(tp.value, 0.0) AS FLOAT)) / Isnull(uc2.factor, 1.0) ) * -1 AS buy_settle_value, \n");
 		sql.append("        0.0 AS sell_settle_value, \n");
 		sql.append("       	'FX Buy' AS type, \n");
 		sql.append("        ab.reference   AS reference \n");
@@ -359,9 +371,13 @@ public class ApBuySellFxDeals extends ItemBase {
 		sql.append("                                     FROM   fx_tran_aux_data \n");
 		sql.append("                                     WHERE  tran_num = ab.tran_num)\n");
 		sql.append("                  AND uc2.dest_unit_id = 55 \n");
-		sql.append("        LEFT JOIN ab_tran_info_view abt \n");
-		sql.append("               ON abt.tran_num = ab.tran_num \n");
-		sql.append("                  AND type_name = 'Trade Price' \n");
+		sql.append("       LEFT JOIN ab_tran_info_view tp \n");
+		sql.append("              ON tp.tran_num = ab.tran_num \n");
+		sql.append("                 AND tp.type_name = 'Trade Price' \n");
+		sql.append("       JOIN ab_tran_info_view pt \n");
+		sql.append("              ON pt.tran_num = ab.tran_num \n");
+		sql.append("                 AND pt.type_name = 'Pricing Type' \n");
+		sql.append("                 AND pt.value = 'AP' \n");
 		sql.append("        LEFT JOIN   USER_jm_ap_buy_sell_link link \n");
 		sql.append("               ON link.buy_deal_num = deal_num  \n");
 		sql.append("               AND ap.match_date = link.match_date  \n");

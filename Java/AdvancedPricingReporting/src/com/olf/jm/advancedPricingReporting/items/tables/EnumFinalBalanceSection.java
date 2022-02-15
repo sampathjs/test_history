@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items.tables;
 
 import com.olf.openrisk.table.EnumColType;
@@ -17,6 +21,7 @@ public enum EnumFinalBalanceSection implements TableColumn {
 	SQUARED_METAL_POSITION("squared_metal_position", EnumColType.Table, EnumFormatType.FMT_NONE),
 	COLLECTED_DP_METAL("collected_dp_metal", EnumColType.Double, EnumFormatType.FMT_2DP),
 	COLLECTED_AP_METAL("collected_ap_metal", EnumColType.Double, EnumFormatType.FMT_2DP),	
+	DAILY_INTEREST("daily_interest", EnumColType.Double, EnumFormatType.FMT_2DP),
 	TODAYS_BALANCE("todays_balance", EnumColType.Double, EnumFormatType.FMT_2DP),
 	TIER_1_VALUE("tier1_percent_value ", EnumColType.Double, EnumFormatType.FMT_2DP),
 	TIER_2_VALUE("tier2_percent_value ", EnumColType.Double, EnumFormatType.FMT_2DP),
@@ -27,13 +32,13 @@ public enum EnumFinalBalanceSection implements TableColumn {
 	DP_METAL_NAME("dp_metal_name",EnumColType.String, EnumFormatType.FMT_NONE);
 	
     /** The column name. */
-    private String columnName;
+    private final String columnName;
     
     /** The column type. */
-    private EnumColType columnType;
+    private final EnumColType columnType;
     
     /** The column formatting type */
-    private EnumFormatType formatType;
+    private final EnumFormatType formatType;
     
     /**
      * Instantiates a new enum transfer data.

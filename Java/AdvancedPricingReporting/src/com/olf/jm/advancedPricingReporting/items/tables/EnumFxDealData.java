@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items.tables;
 
 import com.olf.openrisk.table.EnumColType;
@@ -22,16 +26,16 @@ public enum EnumFxDealData implements TableColumn {
 	REFERENCE("reference", EnumColType.String, EnumFormatType.FMT_NONE);
 	
     /** The column name. */
-    private String columnName;
+    private final String columnName;
     
     /** The column type. */
-    private EnumColType columnType;
+    private final EnumColType columnType;
     
     /** The column formatting type */
-    private EnumFormatType formatType;
+    private final EnumFormatType formatType;
     
     /** Apply zero tolerance check to value */
-    private boolean toleranceCheck;    
+    private final boolean toleranceCheck;
     
     /**
      * Instantiates a new enum transfer data.

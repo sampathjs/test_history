@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -34,8 +38,7 @@ public class TotalMargin extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.TOTAL_MARGIN.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.TOTAL_MARGIN.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -43,8 +46,7 @@ public class TotalMargin extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.TOTAL_MARGIN.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.TOTAL_MARGIN.getColumnName()};
 	}
 
 	/* (non-Javadoc)

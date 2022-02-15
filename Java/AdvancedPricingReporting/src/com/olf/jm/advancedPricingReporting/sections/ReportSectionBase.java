@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.sections;
 
 import java.util.ArrayList;
@@ -38,7 +42,7 @@ public abstract class ReportSectionBase implements ReportSection {
 		
 		report = null;
 		
-		sectionItems = new ArrayList<SectionItem>();
+		sectionItems = new ArrayList<>();
 		
 		addSectionItems();
 	}
@@ -54,7 +58,7 @@ public abstract class ReportSectionBase implements ReportSection {
 		
 		this.report = report;
 		
-		sectionItems = new ArrayList<SectionItem>();
+		sectionItems = new ArrayList<>();
 		
 		addSectionItems();
 	}	

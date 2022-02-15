@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items;
 
 import java.util.Arrays;
@@ -47,7 +51,7 @@ public class PartyAddress extends ItemBase {
 		REGISTERED_OFFICE(20004);
 		
 		/** The id. */
-		private int id;
+		private final int id;
 		
 		/**
 		 * Instantiates a new enum party address type.
@@ -71,14 +75,14 @@ public class PartyAddress extends ItemBase {
 
 	public enum EnumPartyType {
 		INTERNAL,
-		EXTERNAL;
+		EXTERNAL
 	}
 	
 	/** The address type. */
-	private EnumPartyAddressType addressType;
+	private final EnumPartyAddressType addressType;
 	
 	/** The party type. */
-	private EnumPartyType partyType;
+	private final EnumPartyType partyType;
 	
 	/**
 	 * Instantiates a new party address.
@@ -110,7 +114,7 @@ public class PartyAddress extends ItemBase {
 	@Override
 	public String[] getColumnNames() {
 		
-		String outputColumns[] = Arrays.copyOf(columns, columns.length);
+		String[] outputColumns = Arrays.copyOf(columns, columns.length);
 		String columnPrefix = EXTERNAL_PREFIX;
 		if(partyType == EnumPartyType.INTERNAL) {
 			columnPrefix = INTERNAL_PREFIX;
@@ -130,9 +134,9 @@ public class PartyAddress extends ItemBase {
 	public void addData(Table toPopulate, ReportParameters reportParameters) {
 		super.addData(toPopulate, reportParameters);
 		
-		int partyId =0;
+		int partyId;
 		
-		String partyIdColumn = "";
+		String partyIdColumn;
 
 		if(partyType == EnumPartyType.INTERNAL) {
 			partyId = reportParameters.getInternalBu();
@@ -157,7 +161,7 @@ public class PartyAddress extends ItemBase {
 	 * @return formatted what clause that can be used in a table select
 	 */
 	private String buildWhatColumnClause() {
-		StringBuffer whatClause = new StringBuffer();
+		StringBuilder whatClause = new StringBuilder();
 		
 		String[] outputName = getColumnNames();
 		
@@ -180,18 +184,18 @@ public class PartyAddress extends ItemBase {
 	 * @return the table
 	 */
 	private Table loadPartyData(int partyId, int addressType) {
-		StringBuffer sql = new StringBuffer();
-		
-		sql.append(" select  p.party_id as party_id, short_name, long_name, addr1 as address_line_1, addr2 as address_line_2, ");
-		sql.append(" pa.addr_reference_name as address_line_3, ");
-		sql.append(" pa.irs_terminal_num as address_line_4, ");
-		sql.append(" city, name as country,  phone, fax, description ");
-		sql.append(" from party p ");
-		sql.append(" join party_address pa on p.party_id = pa.party_id  and address_type = ").append(addressType);
-		sql.append(" join country c on c.id_number = pa.country");
-		sql.append(" where p.party_id = ").append(partyId);
-		
-		return runSQL(sql.toString());
+		String sql =
+				" select  p.party_id as party_id, short_name, long_name, addr1 as address_line_1, addr2 as address_line_2, " +
+				" pa.addr_reference_name as address_line_3, " +
+				" pa.irs_terminal_num as address_line_4, " +
+				" city, name as country,  phone, fax, description " +
+				" from party p " +
+				" join party_address pa on p.party_id = pa.party_id  and address_type = " +
+				addressType +
+				" join country c on c.id_number = pa.country" +
+				" where p.party_id = " +
+				partyId;
+		return runSQL(sql);
 		
 	}
 

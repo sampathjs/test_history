@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -30,8 +34,7 @@ public class DepositHKD extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.DEPOSIT_HKD.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.DEPOSIT_HKD.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -39,8 +42,7 @@ public class DepositHKD extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.DEPOSIT_HKD.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.DEPOSIT_HKD.getColumnName()};
 	}
 
 	/* (non-Javadoc)

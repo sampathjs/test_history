@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
@@ -32,7 +36,7 @@ public interface SectionItem {
 	/**
 	 * Adds the data for this item to the report section.
 	 *
-	 * @param toPopulate the table to populat ewith item data
+	 * @param toPopulate the table to populate with item data
 	 * @param reportParameters the report parameters
 	 */
 	void addData(Table toPopulate, ReportParameters reportParameters);

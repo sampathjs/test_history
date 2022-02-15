@@ -1,13 +1,18 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.output;
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import com.olf.embedded.application.Context;
+import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
+import com.olf.jm.logging.Logging;
+import com.olf.openjvs.DocGen;
+import com.olf.openjvs.OException;
+import com.olf.openjvs.enums.OLFDOC_OUTPUT_TYPE_ENUM;
+import com.olf.openrisk.staticdata.BusinessUnit;
+import com.olf.openrisk.staticdata.EnumReferenceObject;
+import com.olf.openrisk.staticdata.StaticDataFactory;
 
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Source;
@@ -16,16 +21,13 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-
-import com.olf.embedded.application.Context;
-import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
-import com.olf.openjvs.DocGen;
-import com.olf.openjvs.OException;
-import com.olf.openjvs.enums.OLFDOC_OUTPUT_TYPE_ENUM;
-import com.olf.openrisk.staticdata.BusinessUnit;
-import com.olf.openrisk.staticdata.EnumReferenceObject;
-import com.olf.openrisk.staticdata.StaticDataFactory;
-import com.olf.jm.logging.Logging;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 /*
@@ -34,28 +36,24 @@ import com.olf.jm.logging.Logging;
  */
 
 /**
- * The Class DmsReportWritter. Outputs the report data using DMS
+ * The Class DmsReportWriter. Outputs the report data using DMS
  */
 public class DmsReportWriter implements ReportWriter {
 
 	/** The writer parameters. */
-	private ReportWriterParameters writerParameters;
+	private final ReportWriterParameters writerParameters;
 	
 	/** The report parameters. */
-	private ReportParameters reportParameters;
+	private final ReportParameters reportParameters;
 	
 	/** The context. */
-	private Context context;
+	private final Context context;
 	
 	/**
 	 * Instantiates a new dms report writer.
-	 *
-	 * @param writerParameters the writer parameters
-	 * @param reportParameters the report parameters
-	 * @param context the context
 	 */
-	public DmsReportWriter(ReportWriterParameters writterParameters, ReportParameters reportParameters, Context context) {
-		this.writerParameters = writterParameters;
+	public DmsReportWriter(ReportWriterParameters writerParameters, ReportParameters reportParameters, Context context) {
+		this.writerParameters = writerParameters;
 		this.reportParameters = reportParameters;		
 		this.context = context;
 		
@@ -90,11 +88,11 @@ public class DmsReportWriter implements ReportWriter {
 	 */
 	private void writeXMLToFile(String xml) {
 		try {
-			Files.write(Paths.get(getFileName() + ".xml"), prettyFormat(xml, "4").getBytes(), StandardOpenOption.CREATE_NEW);
+			Files.write(Paths.get(getFileName() + ".xml"), prettyFormat(xml).getBytes());
 		} catch (Exception e) {
 			String errorMessage = "Error generating xml output. " + e.getMessage();
 			Logging.error(errorMessage);
-			throw new RuntimeException(errorMessage);
+			throw new RuntimeException(errorMessage, e);
 		}	
 	}
 	
@@ -102,11 +100,10 @@ public class DmsReportWriter implements ReportWriter {
 	 * Pretty format xml string.
 	 *
 	 * @param input the xml to format
-	 * @param indent the indentation to use
 	 * @return the formatted xml
 	 * @throws TransformerException the transformer exception
 	 */
-	private String prettyFormat(String input, String indent)
+	private String prettyFormat(String input)
 			throws TransformerException {
 		Source xmlInput = new StreamSource(new StringReader(input));
 		StringWriter stringWriter = new StringWriter();
@@ -116,7 +113,7 @@ public class DmsReportWriter implements ReportWriter {
 		Transformer transformer = transformerFactory.newTransformer();
 		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty(
-				"{http://xml.apache.org/xslt}indent-amount", indent);
+				"{http://xml.apache.org/xslt}indent-amount", "4");
 		transformer.transform(xmlInput, new StreamResult(stringWriter));
 
 		String pretty = stringWriter.toString();
@@ -136,20 +133,17 @@ public class DmsReportWriter implements ReportWriter {
 	
 	/**
 	 * Gets the output file name. Output filename format
-	 * 
-	 * AdvancedDeferredPricingReport_[External BU short name]_[run time dd-MM-yyyy_HHmmss].pdf
-	 * 
-	 * @return the file name
 	 */
 	private String getFileName() {
-		
-		Calendar cal = Calendar.getInstance();
-		
-		DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy_HHmmss");
-		
-		int externalBU = reportParameters.getExternalBu();
-		
-		return writerParameters.getOutputLocation() + "\\AdvancedDeferredPricingReport_" + getBuName(externalBU) + "_" + sdf.format(cal.getTime());
+		DateFormat reportingDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		DateFormat runDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+		return writerParameters.getOutputLocation() +
+			   "\\AdvancedDeferredPricingReport_" +
+			   getBuName(reportParameters.getExternalBu()) +
+			   "_" +
+			   reportingDateFormat.format(reportParameters.getReportDate()) +
+			   "_" +
+			   runDateFormat.format(new Date());
 	}
 	
 	/**

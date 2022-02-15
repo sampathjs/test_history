@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -33,8 +37,7 @@ public class Difference extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.DIFFERENCE.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.DIFFERENCE.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -42,8 +45,7 @@ public class Difference extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.DIFFERENCE.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.DIFFERENCE.getColumnName()};
 	}
 
 	/* (non-Javadoc)

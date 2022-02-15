@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.util;
 
 import java.util.Date;
@@ -27,7 +31,7 @@ public class MarginFactory {
 		DP("DP");
 		
 		/** The label used in the db */
-		private String dbName;
+		private final String dbName;
 		
 		/**
 		 * Instantiates a new enum pricing type.
@@ -51,7 +55,7 @@ public class MarginFactory {
 	/**
 	 * The Class MarginResults. Stores the margin calculation results. 
 	 */
-	public class MarginResults {
+	public static class MarginResults {
 		
 		/** The margin calculated. */
 		private double value; 
@@ -65,7 +69,7 @@ public class MarginFactory {
 		/** The max vol. */
 		private double maxVol;
 		
-		/** The volume used in calcualtion. */
+		/** The volume used in calculation. */
 		private double volumeUsed;
 		
 		
@@ -187,7 +191,7 @@ public class MarginFactory {
 	}
 	
 	/**
-	 * Calculate tier weight to use in the calcualtion.
+	 * Calculate tier weight to use in the calculation.
 	 *
 	 * @param totalWeight the total section weight
 	 * @param lowerLimit the lower limit
@@ -205,7 +209,7 @@ public class MarginFactory {
 		double tierWeight = 0.0;
 		
 		if(totalWeight < lowerLimit ) {
-			//Below threashold
+			//Below threshold
 			tierWeight = 0.0;			
 		} else if(totalWeight <= upperLimit) {
 			tierWeight = totalWeight - lowerLimit;
@@ -223,7 +227,7 @@ public class MarginFactory {
 	 * @param customerId the customer id
 	 */
 	private void loadMarginData(Context context, Date reportDate, int customerId) {
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String reportDateString = context.getCalendarFactory().getDateDisplayString(reportDate, EnumDateFormat.DlmlyDash);
 		

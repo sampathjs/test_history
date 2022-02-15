@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -19,7 +23,7 @@ import com.olf.openrisk.table.Table;
 public class JmHkDailySummaryTotals  extends ItemBase {
 
 	/** The Constant columnsToSum. */
-	private final static EnumDailySummarySection columnsToSum[] = new EnumDailySummarySection[] {
+	private final static EnumDailySummarySection[] columnsToSum = new EnumDailySummarySection[] {
 			EnumDailySummarySection.AU_AP_TOZ,
 			EnumDailySummarySection.PT_AP_TOZ,
 			EnumDailySummarySection.PD_AP_TOZ,
@@ -27,7 +31,12 @@ public class JmHkDailySummaryTotals  extends ItemBase {
 			EnumDailySummarySection.AU_DP_TOZ,
 			EnumDailySummarySection.PT_DP_TOZ,
 			EnumDailySummarySection.PD_DP_TOZ,
-			EnumDailySummarySection.RH_DP_TOZ};
+			EnumDailySummarySection.RH_DP_TOZ,
+			EnumDailySummarySection.AU_DP_SETTLE_VALUE,
+			EnumDailySummarySection.PT_DP_SETTLE_VALUE,
+			EnumDailySummarySection.PD_DP_SETTLE_VALUE,		
+			EnumDailySummarySection.IR_DP_SETTLE_VALUE,		
+	};
 	
 	/**
 	 * Instantiates a new jm hk daily summary totals.
@@ -65,7 +74,7 @@ public class JmHkDailySummaryTotals  extends ItemBase {
 		int newRow = toPopulate.addRows(1);
 		toPopulate.setString(EnumDailySummarySection.CUSTOMER_NAME.getColumnName(), newRow, "JM HK Total");
 		for(EnumDailySummarySection columnToSum : columnsToSum) {
-			Double total = sumColumn(columnToSum, toPopulate);
+			double total = sumColumn(columnToSum, toPopulate);
 			
 			toPopulate.setDouble(columnToSum.getColumnName(), newRow, total);
 		}	
@@ -81,9 +90,7 @@ public class JmHkDailySummaryTotals  extends ItemBase {
 	private double sumColumn(EnumDailySummarySection column, Table toPopulate) {
 		int columnId = toPopulate.getColumnId(column.getColumnName());
 		
-		double total = toPopulate.calcAsDouble(columnId, EnumColumnOperation.Sum);
-
-		return total;
+		return toPopulate.calcAsDouble(columnId, EnumColumnOperation.Sum);
 	}
 
 }

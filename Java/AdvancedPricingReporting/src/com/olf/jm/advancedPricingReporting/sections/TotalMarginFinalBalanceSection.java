@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.sections;
 
 import com.olf.embedded.application.Context;
@@ -5,6 +9,7 @@ import com.olf.jm.advancedPricingReporting.items.APMetalName;
 import com.olf.jm.advancedPricingReporting.items.CollectedAPMetal;
 import com.olf.jm.advancedPricingReporting.items.CollectedDPMetal;
 import com.olf.jm.advancedPricingReporting.items.DPMetalName;
+import com.olf.jm.advancedPricingReporting.items.DailyInterest;
 import com.olf.jm.advancedPricingReporting.items.DeferredPricingShort;
 import com.olf.jm.advancedPricingReporting.items.DepositHKD;
 import com.olf.jm.advancedPricingReporting.items.DepositUSDFromCashTrans;
@@ -45,7 +50,7 @@ public class TotalMarginFinalBalanceSection extends ReportSectionBase {
 		super(context, report);
 		
 		if(report == null) {
-			String errorMessage = "Error initilising the balance section, report is null.";
+			String errorMessage = "Error initialising the balance section, report is null.";
 			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);
 		}
@@ -66,6 +71,7 @@ public class TotalMarginFinalBalanceSection extends ReportSectionBase {
 		sectionItems.add(new SquaredMetalPosition(context, report));
 		sectionItems.add(new CollectedDPMetal(context, report));
 		sectionItems.add(new CollectedAPMetal(context, report));	
+		sectionItems.add(new DailyInterest(context, report));
 		sectionItems.add(new TodaysBalance(context));
 		sectionItems.add(new Tier1Margin(context, report));
 		sectionItems.add(new Tier2Margin(context, report));
@@ -87,15 +93,15 @@ public class TotalMarginFinalBalanceSection extends ReportSectionBase {
 	 */
 	@Override
 	public Table formatForReporting(Table reportSectionToFormat) {
-		TableColumnHelper<EnumFinalBalanceSection> columnHelper = new TableColumnHelper<EnumFinalBalanceSection>();
+		TableColumnHelper<EnumFinalBalanceSection> columnHelper = new TableColumnHelper<>();
 		
 		columnHelper.formatTableForOutput(EnumFinalBalanceSection.class, reportSectionToFormat);
 		
-		TableColumnHelper<EnumDeferredPriceShortSection> columnHelperSubTable = new TableColumnHelper<EnumDeferredPriceShortSection>();		
+		TableColumnHelper<EnumDeferredPriceShortSection> columnHelperSubTable = new TableColumnHelper<>();
 		Table formatted = columnHelperSubTable.formatTableForOutput(EnumDeferredPriceShortSection.class, reportSectionToFormat.getTable(EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName(), 0));		
 		reportSectionToFormat.setTable(EnumFinalBalanceSection.DEFERRED_PRICING_SHORT.getColumnName(), 0, formatted);
 		
-		TableColumnHelper<EnumSquaredMetalPositionSection> columnHelperSubTable2 = new TableColumnHelper<EnumSquaredMetalPositionSection>();		
+		TableColumnHelper<EnumSquaredMetalPositionSection> columnHelperSubTable2 = new TableColumnHelper<>();
 		Table formatted2 = columnHelperSubTable2.formatTableForOutput(EnumSquaredMetalPositionSection.class, reportSectionToFormat.getTable(EnumFinalBalanceSection.SQUARED_METAL_POSITION.getColumnName(), 0));		
 		reportSectionToFormat.setTable(EnumFinalBalanceSection.SQUARED_METAL_POSITION.getColumnName(), 0, formatted2);
 		

@@ -1,19 +1,22 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items;
 
-import java.util.Date;
-
 import com.olf.embedded.application.Context;
-import com.olf.jm.advancedPricingReporting.items.tables.EnumDeferredPriceShortSection;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumFinalBalanceSection;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumSquaredMetalPositionSection;
 import com.olf.jm.advancedPricingReporting.items.tables.EnumUserJmApDpBalances;
 import com.olf.jm.advancedPricingReporting.reports.ReportParameters;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.calendar.EnumDateFormat;
 import com.olf.openrisk.io.UserTable;
 import com.olf.openrisk.table.EnumColType;
 import com.olf.openrisk.table.EnumColumnOperation;
 import com.olf.openrisk.table.Table;
-import com.olf.jm.logging.Logging;
+
+import java.util.Date;
 
 
 /*
@@ -25,7 +28,7 @@ import com.olf.jm.logging.Logging;
  * The Class TodaysBalance. Item to calculate the total balance for today and write the result to the balance user table.
  * 
  *  Item is dependent on the following items 
- *  DOLLAR_BALANCE,DEPOSIT_USD,DEPOSIT_HKD,SQUATED_METAL_POSITION,COLLECTED_AP_METAL and COLLECTED_DP_METAL
+ *  DOLLAR_BALANCE,DEPOSIT_USD,DEPOSIT_HKD,SQUARED_METAL_POSITION,COLLECTED_AP_METAL and COLLECTED_DP_METAL
  */
 public class TodaysBalance extends ItemBase {
 
@@ -43,8 +46,7 @@ public class TodaysBalance extends ItemBase {
 	 */
 	@Override
 	public EnumColType[] getDataTypes() {
-		EnumColType[] columnTypes = new EnumColType[] {EnumFinalBalanceSection.TODAYS_BALANCE.getColumnType()};
-		return columnTypes;
+		return new EnumColType[] {EnumFinalBalanceSection.TODAYS_BALANCE.getColumnType()};
 	}
 
 	/* (non-Javadoc)
@@ -52,8 +54,7 @@ public class TodaysBalance extends ItemBase {
 	 */
 	@Override
 	public String[] getColumnNames() {
-		String[] columns = new String[] {EnumFinalBalanceSection.TODAYS_BALANCE.getColumnName()};
-		return columns;
+		return new String[] {EnumFinalBalanceSection.TODAYS_BALANCE.getColumnName()};
 	}
 
 	/* (non-Javadoc)
@@ -71,7 +72,7 @@ public class TodaysBalance extends ItemBase {
 		totalBalance += toPopulate.getDouble(EnumFinalBalanceSection.DOLLAR_BALANCE.getColumnName(), 0);
 		totalBalance += toPopulate.getDouble(EnumFinalBalanceSection.DEPOSIT_USD.getColumnName(), 0);
 		totalBalance += toPopulate.getDouble(EnumFinalBalanceSection.DEPOSIT_HKD.getColumnName(), 0);
-		//totalBalance += toPopulate.getDouble(EnumFinalBalanceSection.SQUATED_METAL_POSITION.getColumnName(), 0);
+		totalBalance += toPopulate.getDouble(EnumFinalBalanceSection.DAILY_INTEREST.getColumnName(), 0);
 		
 		Table squaredMetalPos = toPopulate.getTable(EnumFinalBalanceSection.SQUARED_METAL_POSITION.getColumnName(), 0);
 		int columnId = squaredMetalPos.getColumnId(EnumSquaredMetalPositionSection.SQUARED_METAL_VALUE.getColumnName());
@@ -98,7 +99,7 @@ public class TodaysBalance extends ItemBase {
 		Table updateData = loadCurrentBalanceEntry(reportParameters);	
 		
 		if(updateData == null || updateData.getRowCount() != 1) {
-			String errorMessage = "Error updateing the balance table with the current balance, unable to load user table.";
+			String errorMessage = "Error updating the balance table with the current balance, unable to load user table.";
 			Logging.error(errorMessage);
 			throw new RuntimeException(errorMessage);			
 		}
@@ -121,7 +122,7 @@ public class TodaysBalance extends ItemBase {
 		int externalBu = reportParameters.getExternalBu();
 		Date reportDate = reportParameters.getReportDate();
 		
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		
 		String matchDateString = context.getCalendarFactory().getDateDisplayString(reportDate, EnumDateFormat.DlmlyDash);
 		

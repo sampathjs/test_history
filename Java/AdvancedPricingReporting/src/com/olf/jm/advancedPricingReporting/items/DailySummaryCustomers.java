@@ -1,3 +1,7 @@
+/*
+ * File updated 05/02/2021, 17:52
+ */
+
 package com.olf.jm.advancedPricingReporting.items;
 
 import com.olf.embedded.application.Context;
@@ -15,7 +19,7 @@ import com.olf.openrisk.table.Table;
 
 /**
  * The Class DailySummaryCustomers. Item to set the customer details on the daily summary report. The customers are pulled from
- * the user table user_jm_ap_dp_margin_percn. If the customer has a margin % recored it will be reported.
+ * the user table user_jm_ap_dp_margin_percn. If the customer has a margin % recorded it will be reported.
  */
 public class DailySummaryCustomers extends ItemBase {
 
@@ -65,16 +69,17 @@ public class DailySummaryCustomers extends ItemBase {
 	 * @return the table
 	 */
 	private Table loadPartyData() {
-		StringBuffer sql = new StringBuffer();
 		
-
-		sql.append(" SELECT DISTINCT customer_id as " +EnumDailySummarySection.CUSTOMER_ID.getColumnName() + ", ");
-		sql.append("         short_name as " +  EnumDailySummarySection.CUSTOMER_NAME.getColumnName());
-		sql.append(" FROM   user_jm_ap_dp_margin_percn ");
-		sql.append(" JOIN party ");
-		sql.append("  ON customer_id = party_id ");
 		
-		return runSQL(sql.toString());
+		String sql = " SELECT DISTINCT customer_id as " +
+					 EnumDailySummarySection.CUSTOMER_ID.getColumnName() +
+					 ", " +
+					 "         short_name as " +
+					 EnumDailySummarySection.CUSTOMER_NAME.getColumnName() +
+					 " FROM   user_jm_ap_dp_margin_percn " +
+					 " JOIN party " +
+					 "  ON customer_id = party_id ";
+		return runSQL(sql);
 		
 	}
 
