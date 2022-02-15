@@ -172,7 +172,7 @@
 		            <outputDirectory>../../Builds/JM_JARS</outputDirectory>
 		            <resources>          
 		              <resource>
-		                <directory>${basedir}/target/jmjars</directory>
+		                <directory>${basedir}/target/jmjars/dependencies</directory>
                 		<includes>
                     		<include>*.jar</include>
                 		</includes>		                

@@ -7,10 +7,18 @@
     <packaging>pom</packaging>
     <modules>
         <module>AggregatorInit</module>
+		<module>endur-common</module>
+		<module>endur-scripts</module>
+		<module>ejm-endur-api</module>
         <module>trade-booking</module>
+		<module>BoltOns\LimitsReporting</module> 
+		<module>mtm-reporting</module>
+		<module>jde-corrections</module>		
+		<module>MetalRentals\metal-rentals</module>
         <module>TOMS\Backend</module>
 		<module>group-metal-management</module>
         <module>endur-connector</module>
+        <module>JmJarsAggregator</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

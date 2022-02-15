@@ -39,11 +39,6 @@
                 <type>pom</type>
                 <scope>import</scope>                
             </dependency>
-<!--             <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>29.0-jre</version>
-            </dependency> -->
             <dependency>
                 <groupId>net.bytebuddy</groupId>
                 <artifactId>byte-buddy</artifactId>
@@ -416,7 +411,7 @@
                     	</goals>
 	                </execution>
     	        </executions>
-	        </plugin>	      
+	        </plugin>
 		    <plugin>
 		      <artifactId>maven-resources-plugin</artifactId>
 		      <version>2.6</version>
@@ -520,7 +515,7 @@
 		          </configuration>            
 		        </execution>
 		        <execution>
-		          <id>Copy far .jar file to builds folder</id>
+		          <id>Copy fat .jar file to builds folder</id>
 		          <phase>install</phase>
 		          <goals>
 		            <goal>copy-resources</goal>

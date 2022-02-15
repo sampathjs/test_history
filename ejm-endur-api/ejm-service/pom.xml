@@ -70,6 +70,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+			<version>29.0-jre</version>
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
@@ -217,23 +218,106 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <version>3.0.0-M3</version>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.3.0.RELEASE</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>exec</classifier>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            </plugin>        
         </plugins>
-	  </pluginManagement>        
+	  </pluginManagement>
+	  <plugins>
+        <plugin>
+               <groupId>org.springframework.boot</groupId>
+               <artifactId>spring-boot-maven-plugin</artifactId>
+               <version>2.2.2.RELEASE</version>
+               <executions>
+                   <execution>
+                       <goals>
+                           <goal>repackage</goal>
+                       </goals>
+                       <configuration>
+                           <classifier>exec</classifier>
+                       </configuration>
+                   </execution>
+               </executions>
+           </plugin>
+	    <plugin>
+	      <artifactId>maven-resources-plugin</artifactId>
+	      <executions>
+	        <execution>
+	          <id>Copy fat .jar file to builds folder</id>
+	          <phase>install</phase>
+	          <goals>
+	            <goal>copy-resources</goal>
+	          </goals>
+	          <configuration>
+	            <outputDirectory>../../Builds/ejm-service</outputDirectory>
+	            <resources>          
+	              <resource>
+	                <directory>${basedir}/target</directory>
+               		<includes>
+                   		<include>ejm-service*-exec.jar</include>
+               		</includes>		                
+	              </resource>
+	              <resource>
+	                <directory>${basedir}/deployment</directory>
+               		<includes>
+                   		<include>application.properties</include>
+                   		<include>eJMService.xml</include>
+               		</includes>		                
+	              </resource>
+	            </resources>              
+	          </configuration>            
+	        </execution>		        
+	      </executions>
+	    </plugin>            
+	    <plugin>
+		    <artifactId>maven-clean-plugin</artifactId>
+		    <version>3.1.0</version>
+		    <configuration>
+		      <filesets>
+		        <fileset>
+		          <directory>../../Builds/ejm-service</directory>
+		          <includes>
+		            <include>**</include>
+		          </includes>
+		          <followSymlinks>false</followSymlinks>
+		        </fileset>
+		      </filesets>
+		    </configuration>
+	    </plugin>            
+	    <plugin>
+	      <artifactId>maven-antrun-plugin</artifactId>
+	      <version>1.8</version>
+	      <executions>
+	         <execution>
+	            <phase>install</phase>
+	            <goals>
+	               <goal>run</goal>
+	            </goals>
+	            <configuration>
+	               <target>
+	                  <echo message="Unzipping service-wrapper.zip" />
+	                  <unzip src="../../Resources/service-wrapper.zip" dest="../../Builds/ejm-service" />
+	               </target>
+	            </configuration>
+	         </execution>
+	      </executions>
+	    </plugin>            
+		<plugin>
+	        <groupId>com.coderplus.maven.plugins</groupId>
+	        <artifactId>copy-rename-maven-plugin</artifactId>
+	        <version>1.0</version>
+	        <executions>
+	          <execution>
+	            <id>Rename service-wrapper.exe to eJMService.exe</id>
+	            <phase>install</phase>
+	            <goals>
+	              <goal>rename</goal>
+	            </goals>
+	            <configuration>
+	              <sourceFile>../../Builds/ejm-service/service-wrapper.exe</sourceFile>
+	              <destinationFile>../../Builds/ejm-service/eJMService.exe</destinationFile>
+	            </configuration>
+	          </execution>
+	        </executions>
+	    </plugin>
+	  </plugins>     
     </build>
 </project>

@@ -26,6 +26,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <version>29.0-jre</version>
         </dependency>
         <dependency>
             <groupId>com.matthey.pmm</groupId>
@@ -73,6 +74,23 @@
         </dependency>
     </dependencies>
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.openclover</groupId>
+                    <artifactId>clover-maven-plugin</artifactId>
+                    <version>4.4.1</version>
+                    <configuration>
+                        <snapshot>${user.home}/.clover/atlassian-plugins-clover.snapshot</snapshot>
+                        <singleCloverDatabase>true</singleCloverDatabase>
+                        <generatePdf>true</generatePdf>
+                        <generateXml>true</generateXml>
+                        <generateHtml>true</generateHtml>
+                        <generateJson>false</generateJson>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -89,6 +107,9 @@
                             <descriptors>
                                 <descriptor>assembly.xml</descriptor>
                             </descriptors>
+                            <finalName>jmjars</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <outputDirectory>target</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
@@ -102,6 +123,29 @@
                         <exclude>**/scripts/*</exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>Copy generated .jar file and runtime dependencies to JM_JARS folder</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>../Builds/JM_JARS</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/target/jmjars/dependencies</directory>
+                                    <includes>
+                                        <include>*.jar</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

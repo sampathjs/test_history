@@ -14,11 +14,6 @@
     </properties>
     <dependencyManagement>
         <dependencies>
-<!--             <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>29.0-jre</version>
-            </dependency> -->
             <dependency>
                 <groupId>net.bytebuddy</groupId>
                 <artifactId>byte-buddy</artifactId>
@@ -81,15 +76,6 @@
             <groupId>com.google.errorprone</groupId>
             <artifactId>error_prone_annotations</artifactId>
         </dependency>
-<!-- >        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency> 
-		<dependency>
-  			<groupId>com.fasterxml.jackson.datatype</groupId>
-  			<artifactId>jackson-datatype-guava</artifactId>
-  			<version>2.12.3</version>
-		</dependency> -->
         <dependency>
             <groupId>com.matthey.pmm</groupId>
             <artifactId>TOMS-common</artifactId>
