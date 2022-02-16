@@ -20,10 +20,4 @@
             <outputDirectory>/jde_corrections</outputDirectory>
         </fileSet>
     </fileSets>
-    <dependencySets>
-        <dependencySet>
-        	<scope>runtime</scope>		
-            <outputDirectory>/dependencies</outputDirectory>
-        </dependencySet>
-    </dependencySets>
 </assembly>

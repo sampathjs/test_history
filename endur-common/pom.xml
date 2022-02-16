@@ -69,23 +69,23 @@
         </dependency>
     </dependencies>
     <build>
-		<dependencyManagement>
-			<plugins>
-	            <plugin>
-					<groupId>org.openclover</groupId>
-					<artifactId>clover-maven-plugin</artifactId>
-					<version>4.4.1</version>
-					<configuration>
-						<snapshot>${user.home}/.clover/atlassian-plugins-clover.snapshot</snapshot>
-						<singleCloverDatabase>true</singleCloverDatabase>
-						<generatePdf>true</generatePdf>
-						<generateXml>true</generateXml>
-						<generateHtml>true</generateHtml>
-						<generateJson>false</generateJson>
-					</configuration>
-				</plugin>
-			</plugins>
-		</dependencyManagement>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.openclover</groupId>
+                    <artifactId>clover-maven-plugin</artifactId>
+                    <version>4.4.1</version>
+                    <configuration>
+                        <snapshot>${user.home}/.clover/atlassian-plugins-clover.snapshot</snapshot>
+                        <singleCloverDatabase>true</singleCloverDatabase>
+                        <generatePdf>true</generatePdf>
+                        <generateXml>true</generateXml>
+                        <generateHtml>true</generateHtml>
+                        <generateJson>false</generateJson>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>com.github.ekryd.sortpom</groupId>
@@ -171,7 +171,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M5</version>
-            </plugin>			
+            </plugin>
         </plugins>
     </build>
 </project>

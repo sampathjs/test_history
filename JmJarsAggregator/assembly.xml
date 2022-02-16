@@ -10,8 +10,9 @@
             <outputDirectory>/dependencies</outputDirectory>
 			<scope>runtime</scope>
 			<excludes>
-				<exclude>org.springframework.boot:*</exclude>
-				<exclude>com.matthey.pmm:limits-reporting:1.0</exclude>
+				<exclude>*limits-reporting-1.0.jar*</exclude>
+				<exclude>*junit*</exclude>
+				<exclude>*hamcrest*</exclude>
 			</excludes>
         </dependencySet>
     </dependencySets>
