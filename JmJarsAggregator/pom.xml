@@ -37,6 +37,7 @@
             <groupId>com.matthey.pmm</groupId>
             <artifactId>limits-reporting</artifactId>
             <version>1.0</version>
+            <type>pom</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
