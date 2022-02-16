@@ -11,6 +11,7 @@
 		<module>endur-scripts</module>
 		<module>ejm-endur-api</module>
         <module>trade-booking</module>
+		<module>endur-connector-shared</module>
 		<module>BoltOns\LimitsReporting</module> 
 		<module>mtm-reporting</module>
 		<module>jde-corrections</module>		

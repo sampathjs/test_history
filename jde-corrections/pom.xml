@@ -5,7 +5,7 @@
         <groupId>com.matthey.pmm</groupId>
         <artifactId>endur-common</artifactId>
         <version>1.0.0</version>
-		<relativePath>../endur-common</relativePath>		
+        <relativePath>../endur-common</relativePath>
     </parent>
     <artifactId>jde-corrections</artifactId>
     <version>1.0.0</version>
