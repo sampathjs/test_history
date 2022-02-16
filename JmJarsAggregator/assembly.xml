@@ -13,6 +13,7 @@
 				<exclude>*limits-reporting-1.0.jar*</exclude>
 				<exclude>*junit*</exclude>
 				<exclude>*hamcrest*</exclude>
+				<exclude>*json-simple-1.1.1.jar*</exclude>
 			</excludes>
         </dependencySet>
     </dependencySets>
