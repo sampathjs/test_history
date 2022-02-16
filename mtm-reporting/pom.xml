@@ -5,6 +5,7 @@
         <groupId>com.matthey.pmm</groupId>
         <artifactId>endur-common</artifactId>
         <version>1.0.0</version>
+        <relativePath>../endur-common</relativePath>
     </parent>
     <artifactId>mtm-reporting</artifactId>
     <version>1.0.0</version>
