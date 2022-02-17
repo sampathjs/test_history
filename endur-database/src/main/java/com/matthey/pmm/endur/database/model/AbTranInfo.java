@@ -23,6 +23,7 @@ public class AbTranInfo {
     }
 
     @Id
+    @Column(name = "tran_num")
     private int tranNum;
     @Id
     @ManyToOne(fetch = FetchType.LAZY)

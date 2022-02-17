@@ -13,6 +13,7 @@ import java.util.Set;
 public class AbTran {
 
     @Id
+    @Column(name = "tran_num")
     private int tranNum;
 
     private int tranGroup;
