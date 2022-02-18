@@ -35,6 +35,6 @@ public class LiquibaseSchemaTest {
 
     @Test
     public void contextLoads() {
-        System.out.println("running");
+        
     }
 }

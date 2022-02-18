@@ -3,7 +3,7 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-	http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+	http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
 
     <changeSet author="Boris Liberman" id="Endur Core Schema Init">
 
@@ -85,7 +85,7 @@
         </createTable>
 
         <createTable tableName="currency" schemaName="dbo">
-            <column name="ame" type="varchar"/>
+            <column name="`name`" type="varchar"/>
             <column name="id_number" type="int">
                 <constraints primaryKey="true"/>
             </column>

@@ -1,0 +1,1 @@
+INSERT INTO dbo.USER_JM_negative_threshold ("`value`") VALUES (-1);

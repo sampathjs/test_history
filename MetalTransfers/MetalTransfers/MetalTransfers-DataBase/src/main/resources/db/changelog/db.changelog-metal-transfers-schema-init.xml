@@ -27,7 +27,7 @@
 
         <createTable tableName="USER_jm_tax_sub_type_transfers" schemaName="dbo">
             <column name="active" type="varchar">
-                <constraints primaryKey="true"/>
+<!--                <constraints primaryKey="true"/>-->
             </column>
             <column name="from_account_country" type="varchar"/>
             <column name="to_account_country" type="varchar"/>
@@ -39,7 +39,7 @@
             <column name="tax_subtype" type="varchar"/>
         </createTable>
         <createTable tableName="USER_JM_negative_threshold">
-            <column name="value" type="float">
+            <column name="`value`" type="float">
                 <constraints primaryKey="true"/>
             </column>
         </createTable>

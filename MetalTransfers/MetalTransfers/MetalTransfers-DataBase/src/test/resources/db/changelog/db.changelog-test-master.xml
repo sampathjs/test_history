@@ -3,8 +3,18 @@
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
-                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+	http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
 
     <include file="db/changelog/db.changelog-metal-transfers-schema-init.xml"/>
     <include file="db/changelog/db.changelog-endur-core-schema-init.xml"/>
+    <include file="db/changelog/db.changelog-test-data-init-account.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-currency.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-idx_unit.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-party.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-personnel.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-tran_info_types.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-USER_jm_form.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-USER_jm_loco.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-USER_JM_negative_threshold.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-USER_jm_tax_sub_type_transfers.sql"/>
 </databaseChangeLog>

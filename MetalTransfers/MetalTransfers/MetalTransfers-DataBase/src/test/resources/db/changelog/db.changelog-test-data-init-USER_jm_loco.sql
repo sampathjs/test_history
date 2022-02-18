@@ -1,0 +1,16 @@
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (1, N'Germiston SA', N'No', N' ', N' ', N'Sponge', N'SA', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (2, N'Hong Kong', N'Yes', N'JM PMM HK', N'PMM', N'Sponge', N'HK', 1);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (8, N'London Plate', N'Yes', N'Non-PMM', N'Non-PMM', N'Int', N'UK', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (9, N'None', N'No', N' ', N' ', N' ', N' ', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (10, N'Royston', N'Yes', N'JM PMM UK', N'PMM', N'Sponge', N'UK', 1);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (11, N'Tanaka Japan', N'No', N' ', N' ', N' ', N'JP', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (12, N'Umicore Belgium', N'Yes', N'Non-PMM', N'Non-PMM', N'Sponge', N'BE', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (13, N'Vale', N'Yes', N'Non-PMM', N'Non-PMM', N'Sponge', N'UK', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (14, N'Valley Forge', N'Yes', N'JM PMM US', N'PMM', N'Sponge', N'US', 1);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (15, N'Zurich', N'Yes', N'Non-PMM', N'Non-PMM', N'Int', N'CH', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (16, N'Shanghai', N'Yes', N'JM PMM CN', N'PMM', N'Sponge', N'CN', 1);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (17, N'Brandenberger', N'No', N' ', N'Non-PMM', N'Int', N'CH', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (7, N'LME', N'No', N' ', N' ', N' ', N'UK', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (0, N'Brinks', N'Yes', N'JM PMM UK', N'Non-PMM', N'Sponge', N'HK', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (18, N'CNT', N'Yes', N'JM PMM UK', N'Non-PMM', N'Int', N'US', 0);
+INSERT INTO dbo.USER_jm_loco (loco_id, loco_name, is_transfer_loco, int_BU, is_PMM, default_form, country, is_pmm_id) VALUES (19, N'Umicore Germany', N'No', N'Non-PMM', N'Non-PMM', N'Sponge', N'DE', 0);
