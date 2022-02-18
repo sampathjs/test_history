@@ -98,38 +98,38 @@ public class EndurTradeBooking {
     	for (Order order : orderWithOpenFills) {
     		for (Fill fill : order.getFills()) {
     			if (fill.getFillStatus().getId() == DefaultReference.FILL_STATUS_OPEN.getEntity().id()) {
-    				processOpenFill (order, fill);
+    				processOpenFill ("Enter Valid Auth", order, fill);
     			}
     		}
     	}
     	Logger.info("************************************************* Finished processing of open fill requests **********************************************");    	
     }
 
-	private void processOpenFill(Order order, Fill fill) {
+	private void processOpenFill(String auth, Order order, Fill fill) {
 		Logger.info("For order #" + order.getOrderId() + " the fill #" + fill.getId() + " has been identified to be in status open");
 		Logger.info("Generating Deal Creation Action Plan");
 		TransactionTo dealCreationActionPlan;
 		if (order instanceof LimitOrder) {
 			dealCreationActionPlan = createLimitOrderDealCreationPlan ((LimitOrder)order, fill);
 		} else {
-			dealCreationActionPlan = createReferenceOrderDealCreationPlan ((ReferenceOrder)order, fill);
+			dealCreationActionPlan = createReferenceOrderDealCreationPlan (auth, (ReferenceOrder)order, fill);
 		}
 		Logger.info("Deal Creation Action Plan has been generated.");
 		Logger.debug(dealCreationActionPlan);
 		String fileName = createFileName (order, fill);
 		Logger.info("The deal creation plan is going to be submitted as file '" + fileName + "' for client '" + clientName + "' to Endur");
-		submitDealBookingRequest(order, fill, dealCreationActionPlan, fileName);
+		submitDealBookingRequest(auth, order, fill, dealCreationActionPlan, fileName);
 	}
 
 	private String createFileName(Order order, Fill fill) {
 		return "" + order.getOrderId() + "_" + fill.getId() + ".trade";
 	}
 
-	private void submitDealBookingRequest(Order order, Fill fill, TransactionTo dealCreationActionPlan, String fileName) {
+	private void submitDealBookingRequest(String auth, Order order, Fill fill, TransactionTo dealCreationActionPlan, String fileName) {
 		// update fill and order to transition
 		fill.setFillStatus(refRepo.findById(DefaultReference.FILL_STATUS_PROCESSING.getEntity().id()).get());
 		Logger.info("Updating Order Fill to Status" + fill.getFillStatus().getValue());
-		updateFill(order, fill);
+		updateFill(auth, order, fill);
 		// now request Endur to book the trade
 		try {
 			Long endurTradeId = endurConnector.postWithResponse("/shared/tradeBookingJson?clientName={clientName}&&fileName={fileName}&&overwrite=false",
@@ -155,18 +155,18 @@ public class EndurTradeBooking {
 			fill.setErrorMessage(ex.toString());
 		} finally {
 			// update fill and order to new status
-			updateFill(order, fill);			
+			updateFill(auth, order, fill);			
 		}
 	}
 
-	private void updateFill(Order order, Fill fill) {
+	private void updateFill(String auth, Order order, Fill fill) {
 		try {
 			if (order instanceof LimitOrder) {
 				serviceConnector.put(TomsService.API_PREFIX + "/limitOrder/{limitOrderId}/fill/{fillId}", fillConverter.toTo(fill), 
-						order.getOrderId(), fill.getId());
+						auth, order.getOrderId(), fill.getId());
 			} else if (order instanceof ReferenceOrder) {
 				serviceConnector.put(TomsService.API_PREFIX + "/referenceOrder/{referenceOrderId}/fill/{fillId}", fillConverter.toTo(fill), 
-						order.getOrderId(), fill.getId());
+						auth, order.getOrderId(), fill.getId());
 			}			
 		} catch (HttpClientErrorException | HttpServerErrorException  | UnknownHttpStatusCodeException ex) {
 			Logger.error("Unable to update fill status to '" + fill.getFillStatus().getValue() + "' for "
@@ -179,7 +179,7 @@ public class EndurTradeBooking {
 		}
 	}
 
-	private TransactionTo createReferenceOrderDealCreationPlan(ReferenceOrder order, Fill fill) {
+	private TransactionTo createReferenceOrderDealCreationPlan(String auth, ReferenceOrder order, Fill fill) {
 		Logger.info("Order Type is ReferenceOrder, creating reference order deal creation action plan");
 		Logger.info("Contract Type of reference order is " + order.getContractType().getValue());
 		List<LegTo> legs = new ArrayList<>(order.getLegs().size());
@@ -187,7 +187,7 @@ public class EndurTradeBooking {
 		int globalOrderIdLegAttributes = 6;
 		for (ReferenceOrderLeg leg : order.getLegs()) {
 			LegToBuilder legBuilder = new LegToBuilder();
-			IndexEntity projIndex = derivedDataService.getReferenceOrderLegIndexFromTickerRefSourceRule(order, leg);
+			IndexEntity projIndex = derivedDataService.getReferenceOrderLegIndexFromTickerRefSourceRule(auth, order, leg);
 			legBuilder.withLegId(legNo++);
 			List<PropertyTo> legProperties = new ArrayList<>();
 			List<PropertyTo> resetProperties = new ArrayList<>();

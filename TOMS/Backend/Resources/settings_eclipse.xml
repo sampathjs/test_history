@@ -1,0 +1,22 @@
+<settings>
+	<mirrors>
+		<mirror>
+			<id>jm</id>
+			<name>JM Internal</name>
+			<url>http://gbroenopl01.johnsonmatthey.com:8081/artifactory/libs-release</url>
+			<mirrorOf>*</mirrorOf>
+		</mirror>
+	</mirrors>	 
+  <profiles>
+    <profile>
+      <id>default</id>
+      <properties>
+        <buildUi>none</buildUi>
+        <buildUiNPM>none</buildUiNPM>
+      </properties>
+    </profile>
+  </profiles>	
+  <activeProfiles>
+	<activeProfile>default</activeProfile>
+  </activeProfiles>  
+</settings>

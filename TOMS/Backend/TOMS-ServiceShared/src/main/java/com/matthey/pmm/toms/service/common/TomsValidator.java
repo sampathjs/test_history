@@ -645,7 +645,8 @@ public class TomsValidator {
     	
 	}
 	
-	public void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, OrderTo oldLimitOrder) {
+	public void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, OrderTo oldLimitOrder,
+			String auth) {
 		validateOrderFields (clazz, method, argument, order, isNew, oldLimitOrder);
 		// validate input data
 		SimpleDateFormat sdfDate = new SimpleDateFormat (TomsService.DATE_FORMAT);
@@ -738,11 +739,12 @@ public class TomsValidator {
 				throw new IllegalStateChangeException(clazz, method, argument, "<not in database>", toStatusName.getValue(), "Pending");				
 			}
     	}
-    	applyCounterPartyTickerRules(clazz, method, argument, order);
-    	applyTickerPortfolioRules(clazz, method, argument, order);
+    	applyCounterPartyTickerRules(clazz, method, argument, order, auth);
+    	applyTickerPortfolioRules(clazz, method, argument, order, auth);
 	}
 	
-	public void validateReferenceOrderFields (Class clazz, String method, String argument, ReferenceOrderTo order, boolean isNew, OrderTo oldReferenceOrder) {
+	public void validateReferenceOrderFields (Class clazz, String method, String argument, ReferenceOrderTo order, boolean isNew, OrderTo oldReferenceOrder,
+			String auth) {
 		validateOrderFields (clazz, method, argument, order, isNew, oldReferenceOrder);
 	    
     	verifyDefaultReference (order.idContractType(),
@@ -798,12 +800,12 @@ public class TomsValidator {
 				throw new IllegalStateChangeException(clazz, method, argument, "<not in database>", toStatusName.getValue(), "Pending");				
 			}
     	}
-    	applyCounterPartyTickerRules(clazz, method, argument, order);
-    	applyTickerPortfolioRules(clazz, method, argument, order);
+    	applyCounterPartyTickerRules(clazz, method, argument, order, auth);
+    	applyTickerPortfolioRules(clazz, method, argument, order, auth);
     	for (Long legId : order.legIds()) {
     		ReferenceOrderLeg leg = referenceOrderLegRepo.findById(legId).get();
-    		applyTickerRefSourceRules(clazz, method, argument, order, leg);
-    		applyTickerFxRefSourceRules(clazz, method, argument, order, leg);
+    		applyTickerRefSourceRules(clazz, method, argument, order, leg, auth);
+    		applyTickerFxRefSourceRules(clazz, method, argument, order, leg, auth);
     	}
 	}
 	
@@ -1190,8 +1192,9 @@ public class TomsValidator {
 		}
 	}
 
-	private void applyCounterPartyTickerRules(Class clazz, String method, String argument, OrderTo order) {
-		List<CounterPartyTickerRuleTo> rules = derivedDataService.getCounterPartyTickerRules(order.idExternalBu());
+	private void applyCounterPartyTickerRules(Class clazz, String method, String argument, OrderTo order,
+			String auth) {
+		List<CounterPartyTickerRuleTo> rules = derivedDataService.getCounterPartyTickerRules(auth, order.idExternalBu());
     	List<CounterPartyTickerRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idMetalForm() == (order.idMetalForm()!=null?order.idMetalForm():0l)
     			&&	     x.idMetalLocation() == (order.idMetalLocation() != null?order.idMetalLocation():0l) 
@@ -1202,8 +1205,9 @@ public class TomsValidator {
     	}
 	}
 	
-	private void applyTickerPortfolioRules(Class clazz, String method, String argument, OrderTo order) {
-		List<TickerPortfolioRuleTo> rules = derivedDataService.getTickerPortfolioRules();
+	private void applyTickerPortfolioRules(Class clazz, String method, String argument, OrderTo order,
+			String auth) {
+		List<TickerPortfolioRuleTo> rules = derivedDataService.getTickerPortfolioRules(auth);
     	List<TickerPortfolioRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idParty() == order.idInternalBu()
     			&&	     x.idPortfolio() == (order.idIntPortfolio() != null?order.idIntPortfolio():0l) 
@@ -1214,8 +1218,9 @@ public class TomsValidator {
     	}
 	}
 	
-	private void applyTickerRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg) {
-		List<TickerRefSourceRuleTo> rules =  derivedDataService.getTickerRefSourceRules();
+	private void applyTickerRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg,
+			String auth) {
+		List<TickerRefSourceRuleTo> rules =  derivedDataService.getTickerRefSourceRules(auth);
     	List<TickerRefSourceRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idRefSource() == (leg.getRefSource() != null?leg.getRefSource().getId():0)
     			&&       x.idTicker() == (order.idTicker() != null?order.idTicker():0l))
@@ -1225,7 +1230,8 @@ public class TomsValidator {
     	}
 	}
 
-	private void applyTickerFxRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg) {
+	private void applyTickerFxRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg,
+			String auth) {
 		Reference ticker = order.idTicker()!=null?refRepo.findById(order.idTicker()).get():null;
 		if (ticker == null || leg.getSettleCurrency() == null) {
 			return;
@@ -1235,7 +1241,7 @@ public class TomsValidator {
 		if (fxCurrency.getId() == leg.getSettleCurrency().getId() ) {
 			return;
 		}
-		List<TickerFxRefSourceRuleTo> rules = derivedDataService.getTickerFxRefSourceRules();
+		List<TickerFxRefSourceRuleTo> rules = derivedDataService.getTickerFxRefSourceRules(auth);
 
     	List<TickerFxRefSourceRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idRefSource() == (leg.getFxIndexRefSource() != null?leg.getFxIndexRefSource().getId():0l)

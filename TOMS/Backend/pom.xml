@@ -116,7 +116,11 @@
                                 <ignoreNonCompile>true</ignoreNonCompile>
                                 <ignoredDependencies>
                                     <dependency>org.springframework*</dependency>
-                                </ignoredDependencies>
+                                    <dependency>com.okta.spring:okta-spring-boot-starter:jar:1.2.0</dependency>
+                                    <dependency>io.springfox:springfox*</dependency>
+                                    <dependency>org.tinylog:*</dependency>
+                                    <dependency>com.matthey.pmm:*</dependency>
+                                </ignoredDependencies>                                
                             </configuration>
                         </execution>
                     </executions>

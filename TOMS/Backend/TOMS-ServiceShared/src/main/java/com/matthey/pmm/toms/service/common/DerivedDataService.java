@@ -41,8 +41,9 @@ public class DerivedDataService {
 	@Autowired 
 	protected IndexRepository indexRepo;
 	
-	public IndexEntity getReferenceOrderLegIndexFromTickerRefSourceRule (final ReferenceOrder referenceOrder, ReferenceOrderLeg leg) {
-		List<TickerRefSourceRuleTo> rules = getTickerRefSourceRules();
+	public IndexEntity getReferenceOrderLegIndexFromTickerRefSourceRule (final String auth, 
+			final ReferenceOrder referenceOrder, ReferenceOrderLeg leg) {
+		List<TickerRefSourceRuleTo> rules = getTickerRefSourceRules(auth);
     	List<TickerRefSourceRuleTo> filteredRules = rules.stream()
         		.filter(x -> x.idRefSource() == (leg.getRefSource() != null?leg.getRefSource().getId():0)
         			&&       x.idTicker() == (referenceOrder.getTicker() != null?referenceOrder.getTicker().getId():0l))
@@ -57,29 +58,32 @@ public class DerivedDataService {
 	}
 	
 	
-	public List<TickerRefSourceRuleTo> getTickerRefSourceRules() {
+	public List<TickerRefSourceRuleTo> getTickerRefSourceRules(String auth) {
 		List<TickerRefSourceRuleTo> rules = Arrays.asList(
-	    		serviceConnector.get(API_PREFIX + "/tickerRefSourceRules", TickerRefSourceRuleTo[].class));
+	    		serviceConnector.get(API_PREFIX + "/tickerRefSourceRules", TickerRefSourceRuleTo[].class,
+	    				auth));
 		return rules;
 	}
 
-	public List<TickerPortfolioRuleTo> getTickerPortfolioRules() {
+	public List<TickerPortfolioRuleTo> getTickerPortfolioRules(String auth) {
 		List<TickerPortfolioRuleTo> rules = Arrays.asList(
-	    		serviceConnector.get(API_PREFIX + "/tickerPortfolioRules", TickerPortfolioRuleTo[].class));
+	    		serviceConnector.get(API_PREFIX + "/tickerPortfolioRules", TickerPortfolioRuleTo[].class,
+	    				auth));
 		return rules;
 	}
 
-	public List<TickerFxRefSourceRuleTo> getTickerFxRefSourceRules() {
+	public List<TickerFxRefSourceRuleTo> getTickerFxRefSourceRules(String auth) {
 		List<TickerFxRefSourceRuleTo> rules = Arrays.asList(
-	    		serviceConnector.get(API_PREFIX + "/tickerFxRefSourceRules", TickerFxRefSourceRuleTo[].class));
+	    		serviceConnector.get(API_PREFIX + "/tickerFxRefSourceRules", TickerFxRefSourceRuleTo[].class,
+	    				auth));
 		return rules;
 	}
 	
 
-	public List<CounterPartyTickerRuleTo> getCounterPartyTickerRules(long idExternalBu) {
+	public List<CounterPartyTickerRuleTo> getCounterPartyTickerRules(String auth, long idExternalBu) {
 		List<CounterPartyTickerRuleTo> rules = Arrays.asList(
 	    		serviceConnector.get(API_PREFIX + "/counterPartyTickerRules?idCounterparty={idCounterparty}", CounterPartyTickerRuleTo[].class, 
-	    				idExternalBu));
+	    				auth, idExternalBu));
 		return rules;
 	}
 }

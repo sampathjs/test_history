@@ -209,17 +209,5 @@ public class MockApplication implements WebMvcConfigurer {
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
-    }
-    
-//    @Bean
-//    @Primary
-//    public ObjectMapper objectMapper() {
-//        return new ObjectMapper()
-//          .registerModule(new GuavaModule());
-//    }
-//    
-//    @Bean
-//    public Module guavaModule() {
-//        return new GuavaModule();
-//    }
+    }    
 }

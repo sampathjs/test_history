@@ -3,6 +3,7 @@ package com.matthey.pmm.toms.service.mock;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 @Configuration
@@ -18,8 +19,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 //                .csrf()
 //                .disable();
         http.authorizeRequests()
-        	.anyRequest().access("hasIpAddress('::1') or hasIpAddress('127.0.0.1')")
-        	.and().csrf().disable();
+        	.anyRequest().authenticated()
+        	.and()
+        	.oauth2ResourceServer().jwt();
+        	//.anyRequest().access("hasIpAddress('::1') or hasIpAddress('127.0.0.1')")
+//        	.and().csrf().disable();
         http.headers().frameOptions().disable();
+        http.csrf().disable();
     }
 }

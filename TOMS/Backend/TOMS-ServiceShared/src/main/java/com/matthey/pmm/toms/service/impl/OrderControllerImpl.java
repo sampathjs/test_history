@@ -37,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -348,9 +349,10 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Override
 	@ApiOperation("Creation of a new Limit Order")
 	@Transactional
-	public long postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
+	public long postLimitOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
+			@ApiParam(value = "The new Limit Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
     	// validation checks
-    	validator.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null);
+    	validator.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null, auth);
 	
 		LimitOrder managedEntity = limitOrderConverter.toManagedEntity(newLimitOrder);
 		managedEntity.setCreatedAt(new Date());
@@ -362,14 +364,15 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Override
     @ApiOperation("Update of an existing Limit Order")
 	@Transactional
-	public void updateLimitOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder) {
+	public void updateLimitOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
+			@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder) {
     	// identify the existing limit order
     	Optional<LimitOrder> oldLimitOrderManaged = limitOrderRepo.findLatestByOrderId(existingLimitOrder.id());    	
     	if (oldLimitOrderManaged.isEmpty()) {
     		throw new UnknownEntityException (this.getClass(), "updateLimitOrder", "existingLimitOrder.id" , "Limit Order", "" + existingLimitOrder.id());
     	}
     	validator.validateLimitOrderFields (this.getClass(), "updateLimitOrder", "existingLimitOrder", existingLimitOrder, false, 
-    			limitOrderConverter.toTo(oldLimitOrderManaged.get()));
+    			limitOrderConverter.toTo(oldLimitOrderManaged.get()), auth);
 
     	existingLimitOrder = ImmutableLimitOrderTo.builder()
     			.from(existingLimitOrder)
@@ -528,9 +531,10 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Override
     @ApiOperation("Creation of a new Reference Order")
 	@Transactional
-	public long postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {
+	public long postReferenceOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
+			@ApiParam(value = "The new Reference Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {
     	// validation checks
-    	validator.validateReferenceOrderFields (this.getClass(), "postReferenceOrder", "newReferenceOrder", newReferenceOrder, true, null);
+    	validator.validateReferenceOrderFields (this.getClass(), "postReferenceOrder", "newReferenceOrder", newReferenceOrder, true, null, auth);
 	
 		ReferenceOrder managedEntity = referenceOrderConverter.toManagedEntity(newReferenceOrder);
 		managedEntity.setCreatedAt(new Date());
@@ -542,14 +546,15 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Override
     @ApiOperation("Update of an existing Reference Order")
     @Transactional
-	public void updateReferenceOrder (@ApiParam(value = "The Reference Order to update. Order ID has to denote an existing Reference Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder) {
+	public void updateReferenceOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
+			@ApiParam(value = "The Reference Order to update. Order ID has to denote an existing Reference Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder) {
     	Optional<ReferenceOrder> oldOrderManaged = referenceOrderRepo.findLatestByOrderId(existingReferenceOrder.id());
     	
     	if (oldOrderManaged.isEmpty()) {
     		throw new UnknownEntityException (this.getClass(), "updateReferenceOrder", "existingReferenceOrder.id" , "Referencet Order", "" + existingReferenceOrder.id());
     	}
     	validator.validateReferenceOrderFields (this.getClass(), "updateReferenceOrder", "existingReferenceOrder", existingReferenceOrder, false, 
-    			referenceOrderConverter.toTo(oldOrderManaged.get()));
+    			referenceOrderConverter.toTo(oldOrderManaged.get()), auth);
     	existingReferenceOrder = ImmutableReferenceOrderTo.builder()
     			.from(existingReferenceOrder)
     			.version(existingReferenceOrder.version()+1)

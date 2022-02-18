@@ -28,8 +28,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
 import com.matthey.pmm.toms.enums.v1.DefaultOrderStatus;
 import com.matthey.pmm.toms.enums.v1.DefaultReference;
@@ -51,6 +60,7 @@ import com.matthey.pmm.toms.service.exception.IllegalStateChangeException;
 import com.matthey.pmm.toms.service.exception.IllegalValueException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
 import com.matthey.pmm.toms.service.mock.MockOrderController;
+import com.matthey.pmm.toms.service.mock.SecurityConfiguration;
 import com.matthey.pmm.toms.service.mock.testdata.TestBunit;
 import com.matthey.pmm.toms.service.mock.testdata.TestLimitOrder;
 import com.matthey.pmm.toms.service.mock.testdata.TestReferenceOrder;
@@ -65,13 +75,15 @@ import com.matthey.pmm.toms.transport.OrderTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderLegTo;
 import com.matthey.pmm.toms.transport.ReferenceOrderTo;
 
+import org.tinylog.Logger;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @AutoConfigureTestDatabase(replace=Replace.NONE)
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT, classes={TestServiceApplication.class}) 
 @ContextConfiguration
 public class OrderControllerTest {
 	private static final int NUMBER_OF_ORDERS_TO_BOOK = 10;
-	
+			
 	@Autowired
 	protected MockOrderController orderController;
 	
@@ -95,13 +107,15 @@ public class OrderControllerTest {
 	
 	@Autowired
 	protected LimitOrderConverter limitOrderConverter;
+	
+	@Autowired
+	private AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientServiceAndManager;
 
 	
 	protected List<LimitOrderTo> limitOrderToBeDeleted;
 	protected List<ReferenceOrderTo> referenceOrderToBeDeleted;
 	protected Map<ReferenceOrderTo, ReferenceOrderLegTo> referenceOrderLegToBeDeleted;
 	protected Map<ReferenceOrderTo, ReferenceOrderLegTo> referenceOrderLegToBeRestored;
-	
 	
 	@Before
 	public void initTest () {
@@ -128,6 +142,33 @@ public class OrderControllerTest {
 		}		
 	}
 	
+	private String getAuth() {
+		//TODO: implement actual service account auth
+
+		////////////////////////////////////////////////////
+		//  STEP 1: Retrieve the authorized JWT
+		////////////////////////////////////////////////////
+		Authentication principal = new AnonymousAuthenticationToken
+			    ("key", "anonymous", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
+		
+		// Build an OAuth2 request for the Okta provider
+		OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId("okta")
+				.principal(principal)
+				.build();
+
+		// Perform the actual authorization request using the authorized client service and authorized client
+		// manager. This is where the JWT is retrieved from the Okta servers.
+		OAuth2AuthorizedClient authorizedClient = this.authorizedClientServiceAndManager.authorize(authorizeRequest);
+
+		// Get the token from the authorized client object
+		OAuth2AccessToken accessToken = authorizedClient.getAccessToken();		
+		
+		String authString =  "Bearer " + accessToken.getTokenValue();
+		Logger.info("Generated Auth String: " + authString);
+		return authString;
+//		return "";
+	}
+	
 	@Transactional
 	protected long submitNewLimitOrder (LimitOrderTo orderTo) {
 		LimitOrderTo withResetOrderIdAndVersion = ImmutableLimitOrderTo.builder()
@@ -135,7 +176,7 @@ public class OrderControllerTest {
 				.id(0l)
 				.version(0)
 				.build();
-		long ret = orderController.postLimitOrder(withResetOrderIdAndVersion);
+		long ret = orderController.postLimitOrder(getAuth(), withResetOrderIdAndVersion);
 		LimitOrderTo withOrderIdAndVersion = ImmutableLimitOrderTo.builder()
 				.from(orderTo)
 				.id(ret)
@@ -152,7 +193,7 @@ public class OrderControllerTest {
 				.id(0l)
 				.version(0)
 				.build();
-		long ret = orderController.postReferenceOrder(withResetOrderIdAndVersion);
+		long ret = orderController.postReferenceOrder(getAuth(), withResetOrderIdAndVersion);
 		ReferenceOrderTo withOrderIdAndVersion = ImmutableReferenceOrderTo.builder()
 				.from(orderTo)
 				.id(ret)
@@ -164,7 +205,7 @@ public class OrderControllerTest {
 	
 	@Transactional
 	protected LimitOrderTo updateLimitOrder (LimitOrderTo toBeSaved) {
-		orderController.updateLimitOrder(toBeSaved);
+		orderController.updateLimitOrder(getAuth(), toBeSaved);
 		LimitOrderTo versionInc = ImmutableLimitOrderTo.builder()
 				.from(toBeSaved)
 				.version(toBeSaved.version()+1)
@@ -175,7 +216,7 @@ public class OrderControllerTest {
 	
 	@Transactional
 	protected ReferenceOrderTo updateReferenceOrder (ReferenceOrderTo toBeSaved) {
-		orderController.updateReferenceOrder(toBeSaved);
+		orderController.updateReferenceOrder(getAuth(), toBeSaved);
 		ReferenceOrderTo versionInc = ImmutableReferenceOrderTo.builder()
 				.from(toBeSaved)
 				.version(toBeSaved.version()+1)
@@ -296,10 +337,10 @@ public class OrderControllerTest {
 				.id(TestReferenceOrder.TEST_ORDER_1A.getEntity().id())
 				.idOrderStatus(DefaultOrderStatus.LIMIT_ORDER_CONFIRMED.getEntity().id())
 				.build();
-		assertThatThrownBy ( () -> { orderController.updateLimitOrder(withUpdatedReference); })
+		assertThatThrownBy ( () -> { orderController.updateLimitOrder(getAuth(), withUpdatedReference); })
 			.isInstanceOf(UnknownEntityException.class);
 	}
-	
+
 	@Test
 	public void testUpdateReferenceOrderForIllegalOrderIdFails() {
 		ReferenceOrderTo withUpdatedReference = ImmutableReferenceOrderTo.builder()
@@ -307,7 +348,7 @@ public class OrderControllerTest {
 				.id(TestLimitOrder.TEST_ORDER_1A.getEntity().id())
 				.idOrderStatus(DefaultOrderStatus.REFERENCE_ORDER_CONFIRMED.getEntity().id())
 				.build();
-		assertThatThrownBy ( () -> { orderController.updateReferenceOrder(withUpdatedReference); })
+		assertThatThrownBy ( () -> { orderController.updateReferenceOrder(getAuth(), withUpdatedReference); })
 			.isInstanceOf(UnknownEntityException.class);
 	}
 	

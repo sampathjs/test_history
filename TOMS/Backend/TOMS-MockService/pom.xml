@@ -21,7 +21,8 @@
       		  </property>
     		</activation>
     		<properties>
-   				<buildUi>prepare-package</buildUi>
+   				<buildUi>compile</buildUi>
+   				<buildUiNPM>prepare-package</buildUiNPM>
     		</properties>
 		</profile>
 	</profiles>
@@ -49,27 +50,11 @@
             <artifactId>tinylog-api</artifactId>
             <version>2.4.1</version>
         </dependency>
-<!--         <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-        </dependency>
         <dependency>
-            <groupId>com.google.errorprone</groupId>
-            <artifactId>error_prone_annotations</artifactId>
-        </dependency> 
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>         
-         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency> -->
-<!--        	<dependency>
-           	<groupId>org.reflections</groupId>
-           	<artifactId>reflections</artifactId>
-           	<version>0.10.2</version>
-       </dependency> -->
+            <groupId>com.okta.spring</groupId>
+            <artifactId>okta-spring-boot-starter</artifactId>
+            <version>1.2.0</version>
+        </dependency>        
        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -162,33 +147,18 @@
             <scope>compile</scope>
             <version>1.5.20</version>
             <type>jar</type>
-        </dependency>        
+        </dependency>
 		<dependency>
 			<groupId> org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 			<version>3.8.8</version>
-		</dependency>	
+		</dependency>
         <dependency>
             <groupId>jakarta.transaction</groupId>
             <artifactId>jakarta.transaction-api</artifactId>
 			<scope>compile</scope>
-		</dependency>		
-<!--         <dependency>
-            <groupId>com.fasterxml</groupId>
-            <artifactId>classmate</artifactId>
-			<version>1.5.1</version>
-			<scope>compile</scope>
-			<type>jar</type>
-		</dependency> -->			
-<!--         <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-guava</artifactId>
-        </dependency> -->
-<!--         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>-->        
-    </dependencies>    
+		</dependency>
+    </dependencies>
     <build>
         <plugins>
 		    <plugin>
@@ -212,19 +182,57 @@
 		              </resource>
 		            </resources>              
 		          </configuration>            
-		        </execution>		        
+		        </execution>
+		        <execution>
+		          <id>copy frontend to src/main/resources</id>
+		          <phase>${buildUiNPM}</phase>
+		          <goals>
+		            <goal>copy-resources</goal>
+		          </goals>
+		          <configuration>
+		            <outputDirectory>${basedir}/src/main/resources</outputDirectory>
+		            <resources>          
+		              <resource>
+		                <directory>../../UI/build</directory>
+		                <filtering>true</filtering>
+		                <excludes>
+		                	<exclude>.env</exclude>
+		                </excludes>
+		              </resource>
+		            </resources>              
+		          </configuration>            
+		        </execution>
+		        <execution>
+		          <id>copy frontend index.html to src/main/resources/templates</id>
+		          <phase>${buildUiNPM}</phase>
+		          <goals>
+		            <goal>resources</goal>
+		          </goals>
+		          <configuration>
+		            <outputDirectory>${basedir}/src/main/resources/templates</outputDirectory>
+		            <resources>          
+		              <resource>
+		                <directory>../../UI/build</directory>
+                		<includes>
+                    		<include>index.html</include>
+                		</includes>		                
+		              </resource>
+		            </resources>              
+		          </configuration>            
+		        </execution>
 		      </executions>
 		    </plugin>        
  			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.12.1</version>				
 			    <executions>
 			        <execution>
 			            <id>install node and npm</id>
 			            <goals>
 			                <goal>install-node-and-npm</goal>
 			            </goals>
-			            <phase>${buildUi}</phase>
+			            <phase>${buildUiNPM}</phase>
 			        </execution>
 	                <execution>
 	                    <id>npm install</id>
@@ -253,58 +261,13 @@
 				   <npmVersion>8.3.1</npmVersion>
 				 </configuration>
 			</plugin>
-		    <plugin>
-		      <artifactId>maven-resources-plugin</artifactId>
-		      <version>2.6</version>
-		      <executions>
-		        <execution>
-		          <id>copy frontend to src/main/resources</id>
-		          <phase>${buildUi}</phase>
-		          <goals>
-		            <goal>copy-resources</goal>
-		          </goals>
-		          <configuration>
-		            <outputDirectory>${basedir}/src/main/resources</outputDirectory>
-		            <resources>          
-		              <resource>
-		                <directory>../../UI/build</directory>
-		                <filtering>true</filtering>
-		                <excludes>
-		                	<exclude>.env</exclude>
-		                </excludes>
-		              </resource>
-		            </resources>              
-		          </configuration>            
-		        </execution>
-		        <execution>
-		          <id>copy frontend index.html to src/main/resources/templates</id>
-		          <phase>${buildUi}</phase>
-		          <goals>
-		            <goal>resources</goal>
-		          </goals>
-		          <configuration>
-		            <outputDirectory>${basedir}/src/main/resources/templates</outputDirectory>
-		            <resources>          
-		              <resource>
-		                <directory>../../UI/build</directory>
-                		<includes>
-                    		<include>index.html</include>
-                		</includes>		                
-		              </resource>
-		            </resources>              
-		          </configuration>            
-		        </execution>
-		      </executions>
-		    </plugin>			
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.1</version>
-            </plugin>
+            </plugin>      
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M3</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
