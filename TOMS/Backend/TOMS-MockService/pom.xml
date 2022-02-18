@@ -21,8 +21,11 @@
       		  </property>
     		</activation>
     		<properties>
+   				<npmInstallNode>generate-sources</npmInstallNode>
+   				<buildUiNPMGenerateResources>generate-resources</buildUiNPMGenerateResources>
+   				<buildUiPreBuild>process-resources</buildUiPreBuild>
    				<buildUi>compile</buildUi>
-   				<buildUiNPM>prepare-package</buildUiNPM>
+   				<buildUiPostBuild>prepare-package</buildUiPostBuild>
     		</properties>
 		</profile>
 	</profiles>
@@ -167,7 +170,7 @@
 		      <executions>
 		        <execution>
 		          <id>copy .env</id>
-		          <phase>${buildUi}</phase>
+		          <phase>${buildUiPreBuild}</phase>
 		          <goals>
 		            <goal>copy-resources</goal>
 		          </goals>
@@ -185,7 +188,7 @@
 		        </execution>
 		        <execution>
 		          <id>copy frontend to src/main/resources</id>
-		          <phase>${buildUiNPM}</phase>
+		          <phase>${buildUiPostBuild}</phase>
 		          <goals>
 		            <goal>copy-resources</goal>
 		          </goals>
@@ -204,7 +207,7 @@
 		        </execution>
 		        <execution>
 		          <id>copy frontend index.html to src/main/resources/templates</id>
-		          <phase>${buildUiNPM}</phase>
+		          <phase>${buildUiPostBuild}</phase>
 		          <goals>
 		            <goal>resources</goal>
 		          </goals>
@@ -232,14 +235,14 @@
 			            <goals>
 			                <goal>install-node-and-npm</goal>
 			            </goals>
-			            <phase>${buildUiNPM}</phase>
+			            <phase>${npmInstallNode}</phase>
 			        </execution>
 	                <execution>
 	                    <id>npm install</id>
 	                    <goals>
 	                        <goal>npm</goal>
 	                    </goals>
-			            <phase>${buildUi}</phase>
+			            <phase>${buildUiNPMGenerateResources}</phase>
 	                    <configuration>
 	                        <arguments>install react-scripts --save</arguments>
 	                    </configuration>
