@@ -15,7 +15,6 @@ public class Currency {
 
     @Id
     private int idNumber;
-//    @Column(name = "\"name\"")
     private String name;
     private int defaultIndex;
     private int spotIndex;
