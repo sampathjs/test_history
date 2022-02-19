@@ -122,6 +122,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.bitbucket.tbrugz</groupId>
+            <artifactId>sqldump</artifactId>
+            <version>0.9.17</version>
+        </dependency>
+
     </dependencies>
 
 </project>
