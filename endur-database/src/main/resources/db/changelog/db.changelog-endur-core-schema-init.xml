@@ -85,7 +85,7 @@
         </createTable>
 
         <createTable tableName="currency" schemaName="dbo">
-            <column name="`name`" type="varchar"/>
+            <column name="name" type="varchar"/>
             <column name="id_number" type="int">
                 <constraints primaryKey="true"/>
             </column>

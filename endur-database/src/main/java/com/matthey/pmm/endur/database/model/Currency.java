@@ -2,6 +2,7 @@ package com.matthey.pmm.endur.database.model;
 
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -14,6 +15,7 @@ public class Currency {
 
     @Id
     private int idNumber;
+//    @Column(name = "\"name\"")
     private String name;
     private int defaultIndex;
     private int spotIndex;
