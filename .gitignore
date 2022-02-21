@@ -4,4 +4,7 @@
 **/Builds
 **/build
 **/node
-**/.class
+**/*.class
+**/.settings
+**/*.log
+**/node_modules
