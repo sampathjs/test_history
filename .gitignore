@@ -1,0 +1,7 @@
+**/target/
+**/.classpath
+**/.project
+**/Builds
+**/build
+**/node
+**/.class
