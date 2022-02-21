@@ -14,18 +14,18 @@ public class AbTran {
 
     @Id
     @Column(name = "tran_num")
-    private int tranNum;
+    private Integer tranNum;
 
-    private int tranGroup;
-    private int dealTrackingNum;
-    private int tranType;
-    private int tranStatus;
-    private int assetType;
-    private int insNum;
-    private int insType;
-    private int insClass;
-    private int toolset;
-    private short buySell;
+    private Integer tranGroup;
+    private Integer dealTrackingNum;
+    private Integer tranType;
+    private Integer tranStatus;
+    private Integer assetType;
+    private Integer insNum;
+    private Integer insType;
+    private Integer insClass;
+    private Integer toolset;
+    private Short buySell;
     private String reference;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -52,24 +52,24 @@ public class AbTran {
     @JoinColumn(name = "external_portfolio")
     private Portfolio externalPortfolio;
 
-    private int internalContact;
-    private int externalContact;
+    private Integer internalContact;
+    private Integer externalContact;
     private String book;
     private LocalDateTime tradeDate;
     private LocalDateTime inputDate;
     private LocalDateTime settleDate;
-    private float position;
-    private float price;
-    private float rate;
+    private Float position;
+    private Float price;
+    private Float rate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "currency")
     private Currency currency;
 
-    private int cflowType;
-    private int versionNumber;
-    private float proceeds;
-    private float mvalue;
+    private Integer cflowType;
+    private Integer versionNumber;
+    private Float proceeds;
+    private Float mvalue;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -77,32 +77,34 @@ public class AbTran {
     private Personnel personnel;
 
     private LocalDateTime lastUpdate;
-    private int insSubType;
-    private int brokerId;
+    private Integer insSubType;
+    private Integer brokerId;
     private LocalDateTime startDate;
     private LocalDateTime maturityDate;
     private LocalDateTime perpetualPosDate;
     private LocalDateTime tradeTime;
-    private int offsetTranNum;
-    private int offsetTranType;
-    private int tradeFlag;
-    private int currentFlag;
-    private int fxYldBasis1;
-    private int fxYldBasis2;
-    private short unit;
-    private int lockUserId;
-    private int lockType;
-    private int idxGroup;
-    private int idxSubgroup;
-    private int templateTranNum;
-    private int otcClearingBrokerId;
-    private int baseInsType;
-    private int longTradingStrategy;
-    private int extTradingStrategy;
-    private int passThruId;
-    private int regulatoryReporting;
-    private int altTranStatus;
-    private int marketPxIndexId;
+    private Integer offsetTranNum;
+    private Integer offsetTranType;
+    private Integer tradeFlag;
+    private Integer currentFlag;
+    @Column(name = "fx_yld_basis_1")
+    private Integer fxYldBasis1;
+    @Column(name = "fx_yld_basis_2")
+    private Integer fxYldBasis2;
+    private Short unit;
+    private Integer lockUserId;
+    private Integer lockType;
+    private Integer idxGroup;
+    private Integer idxSubgroup;
+    private Integer templateTranNum;
+    private Integer otcClearingBrokerId;
+    private Integer baseInsType;
+    private Integer intTradingStrategy;
+    private Integer extTradingStrategy;
+    private Integer passThruId;
+    private Integer regulatoryReporting;
+    private Integer altTranStatus;
+    private Integer marketPxIndexId;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "tran_num", referencedColumnName = "tran_num")

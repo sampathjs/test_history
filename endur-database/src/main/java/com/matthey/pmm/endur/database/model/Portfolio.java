@@ -13,14 +13,14 @@ import java.time.LocalDateTime;
 public class Portfolio {
 
     @Id
-    private int idNumber;
+    private Integer idNumber;
     private String name;
     private String longName;
-    private int portfolioType;
-    private int restricted;
-    private int authoriserId;
+    private Integer portfolioType;
+    private Integer restricted;
+    private Integer authoriserId;
     private LocalDateTime lastUpdate;
-    private int portfolioVersion;
-    private int requiresStrategy;
+    private Integer portfolioVersion;
+    private Integer requiresStrategy;
 
 }

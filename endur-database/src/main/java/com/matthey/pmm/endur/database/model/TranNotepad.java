@@ -19,7 +19,7 @@ public class TranNotepad {
     @Data
     public static class TranNotepadPrimaryKey implements Serializable {
         private AbTran abTran;
-        private int noteType;
+        private Integer noteType;
     }
 
     @Id
@@ -27,14 +27,14 @@ public class TranNotepad {
     @JoinColumn(name = "tran_num")
     private AbTran abTran;
     @Id
-    private int noteType;
-    private int lineNum;
+    private Integer noteType;
+    private Integer lineNum;
     private String lineText;
-    private int userId;
-    private int commentNum;
+    private Integer userId;
+    private Integer commentNum;
     private LocalDateTime commentDate;
     private LocalDateTime timeStamp;
-    private int insNum;
+    private Integer insNum;
     private LocalDateTime commentEndDate;
 
 }

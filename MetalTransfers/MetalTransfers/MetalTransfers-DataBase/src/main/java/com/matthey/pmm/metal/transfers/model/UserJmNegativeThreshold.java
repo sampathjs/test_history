@@ -13,6 +13,6 @@ import javax.persistence.Table;
 public class UserJmNegativeThreshold {
 
     @Id
-    private float value;
+    private Float value;
 
 }

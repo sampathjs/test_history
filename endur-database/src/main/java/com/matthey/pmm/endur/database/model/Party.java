@@ -13,17 +13,17 @@ import java.time.LocalDateTime;
 public class Party {
 
     @Id
-    private int partyId;
-    private int intExt;
-    private int partyClass;
-    private int partyStatus;
+    private Integer partyId;
+    private Integer intExt;
+    private Integer partyClass;
+    private Integer partyStatus;
     private String shortName;
     private String longName;
-    private int inputterId;
-    private int authoriserId;
+    private Integer inputterId;
+    private Integer authoriserId;
     private LocalDateTime lastUpdate;
-    private int partyVersion;
-    private int defaultPortfolioId;
-    private int agencyActivities;
-    private int linkedPartyId;
+    private Integer partyVersion;
+    private Integer defaultPortfolioId;
+    private Integer agencyActivities;
+    private Integer linkedPartyId;
 }

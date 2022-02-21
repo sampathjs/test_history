@@ -31,5 +31,5 @@ spring:
 
 logging:
   level:
-    liquibase: DEBUG
-    org.h2: DEBUG
+    root: WARN
+    com.matthey: DEBUG

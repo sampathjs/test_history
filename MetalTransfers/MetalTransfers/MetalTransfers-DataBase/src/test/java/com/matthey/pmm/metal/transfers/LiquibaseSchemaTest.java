@@ -20,6 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import tbrugz.sqldump.SQLDump;
 
 import javax.naming.NamingException;
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -43,12 +44,27 @@ public class LiquibaseSchemaTest {
     @Autowired
     UserJmFormRepository userJmFormRepository;
 
+    @Autowired
+    AbTranRepository abTranRepository;
+
     @Test
+    @Transactional
     public void contextLoads() throws Exception {
         log.info("context loaded");
-        val currencies = currencyRepository.findAll();
-        currencies.forEach(c -> log.info("got currency {}", c.getName()));
-        SQLDump.main(new String[]{"-propfile=src/test/resources/sqldump/sqldump.properties"});
+
+        val transactions = abTranRepository.findAll();
+        transactions.forEach(t -> {
+           log.info("got transaction {}", t.getTranNum());
+           val tranInfos = t.getAbTranInfos();
+           tranInfos.forEach(ti -> {
+               log.info("---- got tran info {}", ti.getValue());
+           });
+
+        });
+
+//        val currencies = currencyRepository.findAll();
+//        currencies.forEach(c -> log.info("got currency {}", c.getName()));
+        //SQLDump.main(new String[]{"-propfile=src/test/resources/sqldump/sqldump.properties"});
 
         log.info("dump completed");
     }

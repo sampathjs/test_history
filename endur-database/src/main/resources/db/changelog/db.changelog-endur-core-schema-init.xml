@@ -12,7 +12,7 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="tran_group" type="int"/>
-            <column name="deal_tracking_num" type="int"/>
+                <column name="deal_tracking_num" type="int"/>
             <column name="tran_type" type="tinyint"/>
             <column name="tran_status" type="tinyint"/>
             <column name="asset_type" type="tinyint"/>
@@ -79,7 +79,7 @@
             <column name="type_id" type="int">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="vv" type="varchar"/>
+            <column name="value" type="varchar"/>
             <column name="personnel_id" type="int"/>
             <column name="last_update" type="datetime"/>
         </createTable>

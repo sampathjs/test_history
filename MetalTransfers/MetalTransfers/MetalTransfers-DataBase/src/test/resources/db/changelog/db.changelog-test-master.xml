@@ -5,8 +5,10 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
 	http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
 
-    <include file="db/changelog/db.changelog-metal-transfers-schema-init.xml"/>
     <include file="db/changelog/db.changelog-endur-core-schema-init.xml"/>
+    <include file="db/changelog/db.changelog-metal-transfers-schema-init.xml"/>
+    <include file="db/changelog/db.changelog-test-data-init-ab_tran.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-ab_tran_info.sql"/>
     <include file="db/changelog/db.changelog-test-data-init-account.sql"/>
     <include file="db/changelog/db.changelog-test-data-init-currency.sql"/>
     <include file="db/changelog/db.changelog-test-data-init-idx_unit.sql"/>

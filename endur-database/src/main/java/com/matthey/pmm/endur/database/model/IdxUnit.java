@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
 public class IdxUnit {
 
     @Id
-    private int unitId;
+    private Integer unitId;
     private String unitLabel;
-    private int unitTypeId;
-    private int userId;
+    private Integer unitTypeId;
+    private Integer userId;
     private LocalDateTime lastUpdate;
-    private int versionNumber;
-    private int massTypeId;
-    private int kilogramMassUnit;
-    private int m3VolumeUnit;
+    private Integer versionNumber;
+    private Integer massTypeId;
+    private Integer kilogramMassUnit;
+    private Integer m3VolumeUnit;
 }

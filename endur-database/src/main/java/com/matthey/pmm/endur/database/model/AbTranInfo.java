@@ -18,18 +18,19 @@ public class AbTranInfo {
     @AllArgsConstructor
     @Data
     public static class AbTranInfoPrimaryKey implements Serializable {
-        private int tranNum;
+        private Integer tranNum;
         private TranInfoType tranInfoType;
     }
 
     @Id
     @Column(name = "tran_num")
-    private int tranNum;
+    private Integer tranNum;
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id")
     private TranInfoType tranInfoType;
 
+    @Column(name = "\"value\"")
     private String value;
 
     @ManyToOne(fetch = FetchType.LAZY)

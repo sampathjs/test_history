@@ -11,45 +11,45 @@ import java.time.LocalDateTime;
 public class Account {
 
     @Id
-    private int accountId;
-    private int accountType;
+    private Integer accountId;
+    private Integer accountType;
     private String accountName;
     private String accountNumber;
-    private int holderId;
+    private Integer holderId;
     private String description;
-    private int userId;
+    private Integer userId;
     private LocalDateTime lastUpdate;
-    private int accountVersion;
-    private int accountStatus;
-    private int accountClass;
-    private short onBalSheetFlag;
-    private short allowMultiUnits;
-    private int linkedAccountId;
+    private Integer accountVersion;
+    private Integer accountStatus;
+    private Integer accountClass;
+    private Short onBalSheetFlag;
+    private Short allowMultiUnits;
+    private Integer linkedAccountId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portfolio_id")
     private Portfolio portfolio;
     
-    private int clearingFlag;
+    private Integer clearingFlag;
     private String accountLegalName;
-    private int accountCountry;
-    private int treasuryManager;
-    private int businessUnitOwner;
+    private Integer accountCountry;
+    private Integer treasuryManager;
+    private Integer businessUnitOwner;
     private LocalDateTime dateOpened;
     private LocalDateTime dateClosed;
     private String generalLedgerAccount;
-    private int baseCurrency;
-    private int sweepEnabledFlag;
-    private int nostroMemoFlag;
-    private int plinkAccountId;
+    private Integer baseCurrency;
+    private Integer sweepEnabledFlag;
+    private Integer nostroMemoFlag;
+    private Integer plinkAccountId;
     private String accountIban;
-    private int balReportingTypeId;
-    private int balReconcileFlag;
-    private int autoBalanceFlag;
+    private Integer balReportingTypeId;
+    private Integer balReconcileFlag;
+    private Integer autoBalanceFlag;
     private LocalDateTime lastStmtEndDate;
-    private int nextStmtEndDateSeq;
-    private int stmtHoliday;
-    private int stmtDateAdjustMethod;
-    private int stmtFormat;
+    private Integer nextStmtEndDateSeq;
+    private Integer stmtHoliday;
+    private Integer stmtDateAdjustMethod;
+    private Integer stmtFormat;
 
 }
