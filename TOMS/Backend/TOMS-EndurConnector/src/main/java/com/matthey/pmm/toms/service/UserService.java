@@ -70,6 +70,7 @@ public class UserService extends AbstractToDiffService<UserTo> {
 						.email(endurSideData.getString("email", row))
 						.firstName(endurSideData.getString("first_name", row))
 						.lastName(endurSideData.getString("last_name", row))
+						.systemName(endurSideData.getString("name", row))
 						.roleId(role.getEntity().id())
 						.idDefaultInternalBu(defaultInternalBu)
 						.idDefaultInternalPortfolio(defaultInternalPortfolio)
@@ -155,6 +156,7 @@ public class UserService extends AbstractToDiffService<UserTo> {
 				|| !updatedTo.tradeableInternalPartyIds().containsAll(knownTo.tradeableInternalPartyIds())
 				|| !knownTo.tradeablePortfolioIds().containsAll(updatedTo.tradeablePortfolioIds())
 				|| !updatedTo.tradeablePortfolioIds().containsAll(knownTo.tradeablePortfolioIds())
+				|| !updatedTo.systemName().equals(knownTo.systemName())
 				;
 	}
 

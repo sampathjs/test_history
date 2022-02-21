@@ -102,6 +102,13 @@ public abstract class UserTo {
 		required = true,
 		allowableValues = "20001, 20006, 20007, 20008, 20755")    
     public abstract Long idDefaultInternalBu();
+    
+    @Auxiliary
+    @Nullable
+	@ApiModelProperty(value = "A unique string for technical identification of the user with the login system. Example: WaetcJ01",
+		allowEmptyValue = false,
+		required = true)    
+    public abstract String systemName();
 
     @Auxiliary
     @Nullable

@@ -18,37 +18,43 @@ public enum TestUser {
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
 			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
-			null, null),
+			null, null,
+			"Service User ID"),
 	DENNIS_WILDISH(20035, "dennis.wildish@matthey.com", "Dennis", "Wildish", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
 			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
-			TestBunit.JM_PMM_UK, DefaultReference.PORTFOLIO_UK_PALLADIUM),
+			TestBunit.JM_PMM_UK, DefaultReference.PORTFOLIO_UK_PALLADIUM,
+			"wildidc"),
 	JENS_WAECHTER(23113, "jens.waetcher@matthey.com", "Jens", "Wächter", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
 			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
-			null, null),
+			null, null,
+			"WaetcJ01"),
 	MURALI_KRISHNAN(24208, "Murali.Krishnan@matthey.com", "Murali", "Krishnan", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
 			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
-			null, null),
+			null, null,
+			"Not known"),
 	ARINDAM_RAY(20014, "Arindam.Ray@matthey.com", "Arindam", "Ray", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
 			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
-			null, null),
+			null, null,
+			"RayA01"),
 	NIVEDITH_SAJJA(20073, "Nivedith.Sajja3@matthey.com", "Nivedith", "Sajja", DefaultReference.USER_ROLE_ADMIN.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
 			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
-			null, null),
+			null, null,
+			"SajjaN03"),
 	JACOB_SMITH(20026, "Jacob.Smith@matthey.com", "Jacob", "Smith", DefaultReference.USER_ROLE_PMM_FO.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Arrays.asList(TestLenit.JM_PLC.getEntity(), TestBunit.JM_PMM_UK.getEntity()),
@@ -66,7 +72,8 @@ public enum TestUser {
 					DefaultReference.PORTFOLIO_UK_GAINS_AND_LOSSES.getEntity(), DefaultReference.PORTFOLIO_UK_MIGRATION.getEntity(),	
 					DefaultReference.PORTFOLIO_UK_UNDHEDGED.getEntity(), DefaultReference.PORTFOLIO_UK_AVERAGING.getEntity(),
 					DefaultReference.PORTFOLIO_UK_PHYSICAL_OFFSET.getEntity(), DefaultReference.PORTFOLIO_UK_NICKEL.getEntity()),
-			TestBunit.JM_PMM_UK, DefaultReference.PORTFOLIO_UK_PLATINUM),
+			TestBunit.JM_PMM_UK, DefaultReference.PORTFOLIO_UK_PLATINUM,
+			"smithj07"),
 	
 	PAT_MCCOURT(20944, "Pat.McCourt@jmusa.com", "Patrick", "McCourt", DefaultReference.USER_ROLE_PMM_FO.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
@@ -81,13 +88,15 @@ public enum TestUser {
 					DefaultReference.PORTFOLIO_US_SILVER.getEntity(), DefaultReference.PORTFOLIO_US_GAINS_AND_LOSSES.getEntity(),
 					DefaultReference.PORTFOLIO_US_UNHEDGED.getEntity(), DefaultReference.PORTFOLIO_US_AVERAGING.getEntity(),
 					DefaultReference.PORTFOLIO_US_PHYSICAL_OFFSET.getEntity()),
-			TestBunit.JM_PMM_US, DefaultReference.PORTFOLIO_US_PLATINUM),
+			TestBunit.JM_PMM_US, DefaultReference.PORTFOLIO_US_PLATINUM,
+			"mccoupt"),
 	ANDREW_BAYNES (23211, "Andrew.Baynes@matthey.com", "Andrew", "Baynes", DefaultReference.USER_ROLE_PMM_TRADER.getEntity(),
 			DefaultReference.LIFECYCLE_STATUS_AUTHORISED_ACTIVE,
 			Stream.concat(TestLenit.asListInternal().stream(), TestBunit.asListInternal().stream()).collect(Collectors.toList()), 
 			Stream.concat(TestLenit.asListExternal().stream(), TestBunit.asListExternal().stream()).collect(Collectors.toList()),
 			DefaultReference.asListByType(DefaultReferenceType.PORTFOLIO),
-			TestBunit.JM_PMM_US, DefaultReference.PORTFOLIO_US_PLATINUM),
+			TestBunit.JM_PMM_US, DefaultReference.PORTFOLIO_US_PLATINUM,
+			"BayneA01"),
 	;
 	
 	private final UserTo user;
@@ -98,7 +107,8 @@ public enum TestUser {
 			List<PartyTo> tradeableCounterPartyIds,
 			List<ReferenceTo> tradeablePortfolioIds,
 			TestBunit defaultInternalBu, 
-			DefaultReference defaultInternalPortfolio) {
+			DefaultReference defaultInternalPortfolio,
+			String systemName) {
 		user = ImmutableUserTo.builder()
 				.id(id)
 				.email(email)
@@ -111,6 +121,7 @@ public enum TestUser {
 				.tradeablePortfolioIds(tradeablePortfolioIds != null?tradeablePortfolioIds.stream().map(x -> x.id()).collect(Collectors.toList()):Arrays.asList())
 				.idDefaultInternalBu(defaultInternalBu != null?defaultInternalBu.getEntity().id():null)
 				.idDefaultInternalPortfolio(defaultInternalPortfolio != null?defaultInternalPortfolio.getEntity().id():null)
+				.systemName(systemName)
 				.build();
 	}
 

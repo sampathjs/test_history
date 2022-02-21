@@ -76,7 +76,8 @@ public class UserConverterTest {
 				Arrays.asList(), // tradeableParties
 				Arrays.asList(), // tradeablePortfolios
 				partyConverter.toManagedEntity(TestBunit.JM_PMM_CN.getEntity()), 
-				referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity()));	
+				referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity()),
+				"System Name");	
 		testUserForUpdate = userRepo.save(testUserForUpdate);
 		assertThat(testUserForUpdate.getId()).isNotNull();
 		assertThat(testUserForUpdate.getId()).isNotZero();
@@ -104,7 +105,8 @@ public class UserConverterTest {
 				Arrays.asList(), // tradeableParties
 				Arrays.asList(), // tradeablePortfolios
 				partyConverter.toManagedEntity(TestBunit.JM_PMM_CN.getEntity()), 
-				referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity()));	
+				referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity()),
+				"System Name");	
 		testUserForUpdate = userRepo.save(testUserForUpdate);
 		assertThat(testUserForUpdate.getId()).isNotNull();
 		assertThat(testUserForUpdate.getId()).isNotZero();

@@ -267,6 +267,9 @@
 			<column name="last_name" type="varchar(255)">
 				<constraints nullable="true" />
 			</column>
+			<column name="system_name" type="varchar(255)">
+				<constraints nullable="false" />
+			</column>			
 			<column name="role_id" type="int">
 				<constraints nullable="false" />
 			</column>

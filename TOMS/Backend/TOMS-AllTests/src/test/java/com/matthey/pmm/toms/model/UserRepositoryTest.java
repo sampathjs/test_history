@@ -53,7 +53,8 @@ public class UserRepositoryTest extends AbstractRepositoryTestBase<User, Long, U
 					Arrays.asList(referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_UK_GOLD.getEntity()), // tradeablePortfolios
 							referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity())),
 					partyConverter.toManagedEntity(TestBunit.JM_PMM_CN.getEntity()), 
-					referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity()));
+					referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity()),
+					"System Name");
 			testUserForUpdate = repo.save(testUserForUpdate);
 			newUserId = testUserForUpdate.getId();
 			assertThat(testUserForUpdate.getTradeableParties()).containsExactly(partyConverter.toManagedEntity(TestBunit.TANAKA_KIKINZOKU_KOGYO_KK___BU.getEntity()), 
@@ -84,7 +85,8 @@ public class UserRepositoryTest extends AbstractRepositoryTestBase<User, Long, U
 							Arrays.asList(referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_UK_GOLD.getEntity()), // tradeablePortfolios
 									referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity())),
 							partyConverter.toManagedEntity(TestBunit.JM_PMM_CN.getEntity()), 
-							referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity())),
+							referenceCon.toManagedEntity(DefaultReference.PORTFOLIO_US_GOLD.getEntity()),
+							"System Name"),
 					new User(3333334l, "test2@matthey.com", 
 							"Firstname2", "Lastname2",
 							referenceCon.toManagedEntity(DefaultReference.USER_ROLE_EXTERNAL.getEntity()), 
@@ -92,7 +94,8 @@ public class UserRepositoryTest extends AbstractRepositoryTestBase<User, Long, U
 							null, // tradeableParties
 							null, // tradeablePortfolios
 							null, // default Bunit
-							null)); // default Portfolio  
+							null, // default Portfolio
+							"System Name")); // system name  
 			return users;
 		};
 	}

@@ -90,6 +90,7 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 				.roleId(entity.getRole().getId())
 				.idDefaultInternalBu(entity.getDefaultInternalBu() != null?entity.getDefaultInternalBu().getId():null)
 				.idDefaultInternalPortfolio(entity.getDefaultInternalPortfolio() != null?entity.getDefaultInternalPortfolio().getId():null)
+				.systemName(entity.getSystemName())
 				.build();
 	}
 	
@@ -109,6 +110,7 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 			entity.get().setFirstName(to.firstName());
 			entity.get().setLastName(to.lastName());
 			entity.get().setRole(role);
+			entity.get().setSystemName(to.systemName());
 			Set<Long> tradeablePartyIds= entityRepo.findTradeablePartiesIdById(entity.get().getId());
 			Set<Long> tradeablePortfolioIds= entityRepo.findTradeablePortfolioIdById(entity.get().getId());
 			Set<Long> allTradeablePartiesOnTo = new HashSet<>(to.tradeableCounterPartyIds());
@@ -143,7 +145,7 @@ public class UserConverter extends EntityToConverter<User, UserTo> {
 				.collect(Collectors.toList());
 				
 		User newEntity = new User (to.id(), to.email(), to.firstName(), to.lastName(), role, lifecycleStatus, tradeableParties, 
-				tradeablePortfolios, defaultInternalBu, defaultInternalPortfolio);
+				tradeablePortfolios, defaultInternalBu, defaultInternalPortfolio, to.systemName());
 		newEntity = entityRepo.save(newEntity);
 		Logger.debug("New User Entity: " + newEntity);
 		return newEntity;
