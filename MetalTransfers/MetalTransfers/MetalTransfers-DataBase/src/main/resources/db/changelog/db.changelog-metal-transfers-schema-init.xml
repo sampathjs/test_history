@@ -19,16 +19,16 @@
             <column name="country" type="varchar"/>
             <column name="is_pmm_id" type="int"/>
         </createTable>
+        <createIndex tableName="USER_jm_loco" indexName="user_jm_loco_name">
+            <column name="loco_name"/>
+        </createIndex>
         <createTable tableName="USER_jm_form" schemaName="dbo">
             <column name="form" type="varchar">
                 <constraints primaryKey="true"/>
             </column>
         </createTable>
-
         <createTable tableName="USER_jm_tax_sub_type_transfers" schemaName="dbo">
-            <column name="active" type="varchar">
-<!--                <constraints primaryKey="true"/>-->
-            </column>
+            <column name="active" type="varchar"/>
             <column name="from_account_country" type="varchar"/>
             <column name="to_account_country" type="varchar"/>
             <column name="to_account_region" type="varchar"/>
@@ -43,6 +43,5 @@
                 <constraints primaryKey="true"/>
             </column>
         </createTable>
-
     </changeSet>
 </databaseChangeLog>

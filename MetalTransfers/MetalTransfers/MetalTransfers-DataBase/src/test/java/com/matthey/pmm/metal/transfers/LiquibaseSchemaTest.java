@@ -59,7 +59,6 @@ public class LiquibaseSchemaTest {
            tranInfos.forEach(ti -> {
                log.info("---- got tran info {}", ti.getValue());
            });
-
         });
 
 //        val currencies = currencyRepository.findAll();
