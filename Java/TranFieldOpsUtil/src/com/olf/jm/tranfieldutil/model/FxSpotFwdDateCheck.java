@@ -1,7 +1,6 @@
 package com.olf.jm.tranfieldutil.model;
 
 import com.olf.jm.logging.Logging;
-import com.olf.openjvs.DBaseTable;
 import com.olf.openjvs.IContainerContext;
 import com.olf.openjvs.IScript;
 import com.olf.openjvs.OCalendar;
@@ -9,94 +8,102 @@ import com.olf.openjvs.OException;
 import com.olf.openjvs.Table;
 import com.olf.openjvs.Transaction;
 import com.olf.openjvs.enums.TRANF_FIELD;
-import com.olf.openjvs.fnd.UtilBase;
 import com.openlink.util.constrepository.ConstRepository;
 
 /*
  * History:
  * 2020-06-05	V1.0	dnagy	- Initial Version
  */
- 
+
 public class FxSpotFwdDateCheck implements IScript {
-	
+
 	public static final int SPOTDAYS = 2;
 	private ConstRepository repository = null;
-    private static final String CONTEXT = "FrontOffice";
+	private static final String CONTEXT = "FrontOffice";
 	private static final String SUBCONTEXT = "FxSpotFwdDateCheck";
-	
+
 	public String cashflowtype = "", fxDate = "", fxForm = "", fxTradePrice = "";
 	public String fxLoco = "", fxAutoSI = "", enduser = "", isfunding = "", jmfxrate = "", liquidity = "", fxDealt = "";
 
 	public void execute(IContainerContext context) throws OException {
 
-       	initLogging();
-                		
+		initLogging();
+
 		Logging.info("Starting " + getClass().getSimpleName());
-		
+
 		String cashflow_tobe = "";
-		
+
 		Table argt = context.getArgumentsTable();
 		Transaction tran = argt.getTran("tran", 1);
+		int fieldId = argt.getInt("field", 1);
+		TRANF_FIELD fieldName = TRANF_FIELD.fromInt(fieldId);
 
 		try {
-			
+
 			fxDate = tran.getField(TRANF_FIELD.TRANF_FX_DATE.toInt());
 			cashflowtype = tran.getField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt());
-			
-			if ( "Spot".equals(cashflowtype) || "Forward".equals(cashflowtype) ) {
 
-				String baseCcy = tran.getField(TRANF_FIELD.TRANF_BASE_CURRENCY.toInt());
-				String termCcy = tran.getField(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.toInt());
-				
-				baseCcy = baseCcy.substring(0,3);
-				termCcy = termCcy.substring(0,3);
-				
-				String sqlBase = "SELECT default_index FROM currency WHERE name = '" + baseCcy + "'";
-				String sqlTerm = "SELECT default_index FROM currency WHERE name = '" + termCcy + "'";
-				
-				Table baseCcyTbl = Table.tableNew();
-				Table termCcyTbl = Table.tableNew();
-				
-				DBaseTable.execISql(baseCcyTbl, sqlBase);
-				DBaseTable.execISql(termCcyTbl, sqlTerm);
-			
-				int ibaseIndex = baseCcyTbl.getInt(1, 1);
-				int itermIndex = termCcyTbl.getInt(1, 1);	
-				
-				baseCcyTbl.destroy();
-				termCcyTbl.destroy();
-				
-				int trading_date = UtilBase.getTradingDate();
-				int ccy1_spot = OCalendar.jumpGBDForIndex(trading_date, SPOTDAYS, ibaseIndex);
-				int ccy2_spot = OCalendar.jumpGBDForIndex(trading_date, SPOTDAYS, itermIndex);
-				int calc_spot = Math.max(ccy1_spot, ccy2_spot);
-				
+			if ("Spot".equals(cashflowtype) || "Forward".equals(cashflowtype)) {
+
+				/*
+				 * String baseCcy =
+				 * tran.getField(TRANF_FIELD.TRANF_BASE_CURRENCY.toInt());
+				 * String termCcy =
+				 * tran.getField(TRANF_FIELD.TRANF_BOUGHT_CURRENCY.toInt());
+				 * 
+				 * baseCcy = baseCcy.substring(0,3); termCcy =
+				 * termCcy.substring(0,3);
+				 * 
+				 * String sqlBase =
+				 * "SELECT default_index FROM currency WHERE name = '" + baseCcy
+				 * + "'"; String sqlTerm =
+				 * "SELECT default_index FROM currency WHERE name = '" + termCcy
+				 * + "'";
+				 * 
+				 * Table baseCcyTbl = Table.tableNew(); Table termCcyTbl =
+				 * Table.tableNew();
+				 * 
+				 * DBaseTable.execISql(baseCcyTbl, sqlBase);
+				 * DBaseTable.execISql(termCcyTbl, sqlTerm);
+				 * 
+				 * int ibaseIndex = baseCcyTbl.getInt(1, 1); int itermIndex =
+				 * termCcyTbl.getInt(1, 1);
+				 * 
+				 * baseCcyTbl.destroy(); termCcyTbl.destroy();
+				 */
+
+				/*
+				 * int trading_date = UtilBase.getTradingDate(); int ccy1_spot =
+				 * OCalendar.jumpGBDForIndex(trading_date, SPOTDAYS,
+				 * ibaseIndex); int ccy2_spot =
+				 * OCalendar.jumpGBDForIndex(trading_date, SPOTDAYS,
+				 * itermIndex); int calc_spot = Math.max(ccy1_spot, ccy2_spot);
+				 */
+
+				int calc_spot = OCalendar.parseStringWithHolId("2d", 20022);
+
 				if ("Spot".equals(cashflowtype) && (OCalendar.parseString(fxDate) > calc_spot)) {
 					cashflow_tobe = "Forward";
 				} else if ("Forward".equals(cashflowtype) && (OCalendar.parseString(fxDate) <= calc_spot)) {
 					cashflow_tobe = "Spot";
 				}
+
 				savefields(tran);
-				int retval = tran.setField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(), 0, "", cashflow_tobe);
+				if (!fieldName.equals(TRANF_FIELD.TRANF_TICKER)) {
+					tran.setField(TRANF_FIELD.TRANF_CFLOW_TYPE.toInt(), 0, "", cashflow_tobe);
+				}
 				setfields(tran);
-				
 			}
-		
-		} 
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			String message = "Exception caught:" + e.getMessage();
 			Logging.error(message);
 		} finally {
 			Logging.info("End " + getClass().getSimpleName());
 			Logging.close();
 		}
-			
-		
-
 	}
-	
-	public void savefields (Transaction tran) {
+
+	public void savefields(Transaction tran) {
 		try {
 			fxDate = tran.getField(TRANF_FIELD.TRANF_FX_DATE.toInt());
 			fxForm = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Form", 0, 0, 0, 0);
@@ -108,15 +115,13 @@ public class FxSpotFwdDateCheck implements IScript {
 			isfunding = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Is Funding Trade", 0, 0, 0, 0);
 			jmfxrate = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "JM FX Rate", 0, 0, 0, 0);
 			liquidity = tran.getField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Liquidity", 0, 0, 0, 0);
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			String message = "Exception caught:" + e.getMessage();
 			Logging.error(message);
 		}
 	}
-	
-	public void setfields (Transaction tran) {
+
+	public void setfields(Transaction tran) {
 		try {
 			tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Trade Price", fxTradePrice);
 			tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Form", fxForm);
@@ -128,21 +133,18 @@ public class FxSpotFwdDateCheck implements IScript {
 			tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Liquidity", liquidity);
 			tran.setField(TRANF_FIELD.TRANF_FX_DATE.toInt(), 0, "", fxDate);
 			tran.setField(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0, "", fxDealt);
-		}
-		catch (Exception e)
-		{
+		} catch (Exception e) {
 			String message = "Exception caught:" + e.getMessage();
 			Logging.error(message);
 		}
 	}
-    
-    private void initLogging () {   
+
+	private void initLogging() {
 		try {
-	    	repository = new ConstRepository(CONTEXT, SUBCONTEXT);
-	    	Logging.init(this.getClass(), repository.getContext(), repository.getSubcontext());
+			repository = new ConstRepository(CONTEXT, SUBCONTEXT);
+			Logging.init(this.getClass(), repository.getContext(), repository.getSubcontext());
 		} catch (OException ex) {
-			throw new RuntimeException (ex);
+			throw new RuntimeException(ex);
 		}
-    }
-	
+	}
 }
