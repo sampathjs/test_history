@@ -451,8 +451,8 @@ public class ITSMReport implements IScript {
 						"   Recent_UnAuthorized_Outside_User_Data AS (  "+
 						"   SELECT   p.id_number,  ps.name user_status ,pt.name user_type    FROM  personnel p "+
 						"   JOIN personnel_status ps ON (  ps.id_number =p.status ) "+
-						"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type AND p.fax <> 'Server User') ) ,  "+
-						"  	JOIN Version_data_outside vd on ( vd.id_number = p.id_number )  "+
+						"   JOIN personnel_type pt ON (pt.id_number =p.personnel_type AND p.fax <> 'Server User')   "+
+						"  	JOIN Version_data_outside vd on ( vd.id_number = p.id_number ) ) , "+
 						"   Session_data AS (  "+
 						"   SELECT max(si.end_time) last_login_date,p.id_number personnel_id  "+
 						"   FROM    personnel p    "+
