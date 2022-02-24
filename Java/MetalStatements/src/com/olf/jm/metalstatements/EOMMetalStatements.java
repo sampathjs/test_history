@@ -50,6 +50,7 @@ import com.olf.jm.logging.Logging;
  * 2017-02-07	V1.6	jwaechter	- Added another error check to skip business units without an 
  *                                    authorized legal entity.
  * 2017-02-08	V1.7	jwaechter	- fixed condition to skip business units
+ * 2022-01-12	V1.8	AzmatA		-Block counterparty email functionality
  */
 @ScriptCategory({ EnumScriptCategory.Generic })
 public class EOMMetalStatements extends AbstractGenericScript {
@@ -67,6 +68,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 	
 	private static Map<String, Set<String>> allowedLocationsForInternalBu = null;
 	private ConstRepository constRep = null;
+	private String excludeIntBU;
 	
 	@Override
 	public Table execute(Context context, ConstTable table) {
@@ -74,6 +76,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 		int timeTaken = 0; 
 		try {
 			constRep = new ConstRepository(EOMMetalStatementsShared.CONTEXT, EOMMetalStatementsShared.SUBCONTEXT);
+			excludeIntBU = constRep.getStringValue("exclude_IntBU");
 			String abOutDir = context.getSystemSetting("AB_OUTDIR") + "\\error_logs";
 			secondsPastMidnight = Util.timeGetServerTime();
 			EOMMetalStatementsShared.init (constRep, abOutDir);
@@ -195,7 +198,7 @@ public class EOMMetalStatements extends AbstractGenericScript {
 			}
 		}
 		
-		if (numofFailures == 0) {
+		if (numofFailures == 0 && !excludeIntBU.contains(sdf.getName(EnumReferenceTable.Party, holder_id)) ) {
 			sendEmailForBU(context, list, partyId);
 		}
 		
