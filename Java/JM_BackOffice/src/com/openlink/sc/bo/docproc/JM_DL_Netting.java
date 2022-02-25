@@ -325,31 +325,36 @@ public class JM_DL_Netting implements IScript {
 						double pymtAmount = argt.getDouble (strColNamePymtAmt, row);
 						String pymtCcy = argt.getString(strColNamePymtCcy, row);
 						double currAmt = argt.getDouble("curr_settle_amount", row);
-						int internalBU = argt.getInt("internal_bunit", row); 
+						int internalBU = argt.getInt("internal_bunit", row);
+						boolean flag = false;
 						
-						if (eventType == taxSettlementId && "GBP".equals(baseCcy) && settleCcy != gbpId && !(vatDocNum == null || vatDocNum.trim().equals(""))) {
+						if (eventType == taxSettlementId && "GBP".equals(baseCcy) && settleCcy != gbpId && !(vatDocNum == null || vatDocNum.trim().equals("")) && !flag) {
 							pymtAmount = Str.inputAsDouble(baseAmt);
 							argt.setDouble (strColNamePymtAmt, row, pymtAmount);
 							pymtCcy = baseCcy;
 							argt.setString (strColNamePymtCcy , row, pymtCcy);
+							flag = true;
 						} 
 						
-						if (eventType == taxSettlementId && settleCcy != zarId && internalBU == jmPmLdt) { 
+						if (eventType == taxSettlementId && settleCcy != zarId && internalBU == jmPmLdt && !flag) { 
 							pymtAmount = Str.inputAsDouble(baseAmt);
 							argt.setDouble (strColNamePymtAmt, row, pymtAmount);
 							pymtCcy = baseCcy;
 							argt.setString (strColNamePymtCcy , row, pymtCcy);
+							flag = true;
 						} 
 														
-						if (actualAmt != 0.0d) {
+						if (actualAmt != 0.0d && !flag) {
 							pymtAmount = actualAmt;
 							argt.setDouble (strColNamePymtAmt , row, pymtAmount);	
 							pymtCcy = Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, settleCcy);
-							argt.setString (strColNamePymtCcy , row, pymtCcy);							
+							argt.setString (strColNamePymtCcy , row, pymtCcy);	
+							flag = true;
 						} 
-						if ((pymtCcy == null || pymtCcy.trim().equals("")) &&  pymtAmount == 0.0d) {
+						if ((pymtCcy == null || pymtCcy.trim().equals("")) &&  pymtAmount == 0.0d && !flag) {
 							argt.setDouble (strColNamePymtAmt , row, currAmt);														
-							argt.setString (strColNamePymtCcy , row, Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, settleCcy));							
+							argt.setString (strColNamePymtCcy , row, Ref.getName(SHM_USR_TABLES_ENUM.CURRENCY_TABLE, settleCcy));
+							flag = true;
 						}
 					}
 				}

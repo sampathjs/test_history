@@ -17,6 +17,7 @@ package com.openlink.jm.bo;
  *  25.03.20  YadavP03  memory leaks, remove console prints & formatting changes
  *  09.04.21  DNagy     additional fields for Payments and Statements Automation project
  *  24.06.21  Prashanth EPI-1687	additional fields for Payments and Statements Automation project
+ *  25.10.21  Kedar     Added logic to remove invoice numbers where Cash & VAT settlement Amount is zero.
  */
 
 
@@ -189,11 +190,12 @@ public class JM_DL_Metal implements IScript {
 				sql = "SELECT distinct ate.tran_num"
 					+ ", acc1.account_number "+ARGT_COL_NAME_INT_METAL_ACCOUNT
 					+ ", acc2.account_number "+ARGT_COL_NAME_EXT_METAL_ACCOUNT
-					+ " FROM ab_tran_event ate"
-					+ " JOIN "+qtbl+" qr ON ate.tran_num=qr.query_result AND qr.unique_id="+qid
+					+ " FROM ab_tran ab "
+					+ " JOIN "+qtbl+" qr ON ab.tran_num=qr.query_result AND qr.unique_id="+qid + " AND ab.toolset NOT IN (36)"
+					+ " JOIN ab_tran_event ate ON ate.tran_num = ab.tran_num "					
 					+ " JOIN ab_tran_event_settle ates ON ate.event_num=ates.event_num"
-					+ " LEFT join account acc1 ON acc1.account_id=ates.int_account_id AND acc1.account_status=1 and acc1.account_class="+acm
-					+ " LEFT join account acc2 ON acc2.account_id=ates.ext_account_id AND acc2.account_status=1 and acc2.account_class="+acm
+					+ " JOIN account acc1 ON acc1.account_id=ates.int_account_id AND acc1.account_status=1 and acc1.account_class="+acm
+					+ " JOIN account acc2 ON acc2.account_id=ates.ext_account_id AND acc2.account_status=1 and acc2.account_class="+acm
 					+ " JOIN parameter p_same ON p_same.ins_num = ate.ins_num AND ate.ins_para_seq_num = p_same.param_seq_num"
 					+ " JOIN parameter p_all ON p_all.ins_num = ate.ins_num AND p_all.param_group = p_same.param_group"
 					+ " WHERE ate.event_type in (14,98)"
@@ -202,12 +204,15 @@ public class JM_DL_Metal implements IScript {
 				tbl = Table.tableNew("queried");
 				long currentTime = System.currentTimeMillis();
 				DBaseTable.execISql(tbl, sql);
+								
 				Logging.info("Query(for Our and CP Metal\nAccount)- completed in " + (System.currentTimeMillis()-currentTime) + " ms");
 				if (tbl.getNumRows() > 0) {
 					//For metal account remove ins_para_seq_num from where match criteria 
 					argt.select(tbl, ARGT_COL_NAME_INT_METAL_ACCOUNT+","+ARGT_COL_NAME_EXT_METAL_ACCOUNT, 
 							"tran_num EQ $tran_num");
 				}
+				
+				
 				
 			} finally {
 				if (Table.isTableValid(tbl) == 1) {
@@ -331,6 +336,23 @@ public class JM_DL_Metal implements IScript {
 			boDataLodUtil.populateAnyOtherBalance();
 			
 			boDataLodUtil.populateStpStatus();
+			
+			int rowCount = argt.getNumRows();
+			argt.addCol("no_invoice", COL_TYPE_ENUM.COL_INT);
+			
+			for(int i = 1; i <= rowCount; i++){
+				
+				String invoiceNum = argt.getString("stldoc_info_type_20003", i);
+				
+				if(invoiceNum != null && !invoiceNum.isEmpty()){
+					argt.setInt("no_invoice", i, 1);
+				}
+			}
+			
+			argt.addFormulaColumn("iif(COL('no_invoice') == 0 && COL('curr_settle_amount') == 0.0, 0, 1)", COL_TYPE_ENUM.COL_INT.toInt(), "delete", "delete");
+			argt.deleteWhereValue("delete", 0);
+			argt.deleteFormulaColumn("delete");
+			argt.delCol("no_invoice");
 			
 			if (qid > -1) {
 				Query.clear(qid);

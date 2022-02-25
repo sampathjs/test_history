@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "endur.connector.url",
+      "type": "java.lang.String",
+      "description": "the URL for Endur Connector."
+    }
+  ]
+}

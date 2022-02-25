@@ -15,8 +15,9 @@ import com.olf.jm.SapInterface.util.Utility;
 import com.olf.jm.sapTransfer.businessObjects.enums.EnumSapTransferRequest;
 import com.olf.openjvs.OCalendar;
 import com.olf.openjvs.OException;
-import com.olf.openrisk.io.IOFactory;
+import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.Table;
+import com.openlink.util.constrepository.ConstRepository;
 import com.olf.jm.logging.Logging;
 
 /**
@@ -30,6 +31,10 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 
 	/** The Constant FIELD_ERROR_DESCRIPTION. */
 	private static final String FIELD_ERROR_DESCRIPTION = "Comparison between Value Date and Approval Date failed.";
+	
+	private static final String CONTEXT =  "SAP";
+	private static final String SUB_CONTEXT =  "BackDatedSAPTransfer";
+	private static final String BLOCK_BUNIT =  "block_bunit" ;
 
 	public BackDatedTransferValidator(Context context) {
 		super(context);
@@ -157,6 +162,9 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 	 * Method to retrieve the latest Month for whichi Metal transfers statement
 	 * has been run.
 	 * 
+	 * Block Backdated SAP transfer if the metal statement is already run for Business unit present in
+	 * User_const_reporsitory for context 'SAP' and subcontext 'BackDatedSAPTransfer' 
+	 * 
 	 * @return Table - containing the Month and Year for which latest metal
 	 *         transfer statements has been run.
 	 * 
@@ -165,7 +173,22 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 		Table metalStmtRun = null;
 		int jdStmtRunDate = 0;
 		try {
-			String sql = " SELECT TOP 1 statement_period" + " FROM USER_jm_monthly_metal_statement" + " ORDER BY metal_statement_production_date  DESC";
+			
+			ConstRepository constRep = new ConstRepository(CONTEXT,SUB_CONTEXT);
+			
+			String bunit = constRep.getStringValue(BLOCK_BUNIT).trim();
+			
+			Logging.info("\n Block Backdated SAP transfer if the metal statement is already run for Business unit : " + bunit 
+					+". Please check the entry in User_const_reporsitory for context 'SAP' and subcontext 'BackDatedSAPTransfer' ");
+			
+			String sql = " SELECT TOP 1 statement_period " 
+						+ " FROM USER_jm_monthly_metal_statement" ;		
+			
+				if(!(bunit.isEmpty() || bunit == null || bunit.equals(" "))){						
+				sql = sql + " WHERE internal_bunit = " + context.getStaticDataFactory().getId(EnumReferenceTable.Party, bunit);
+				}
+				sql = sql +  " ORDER BY metal_statement_production_date  DESC";
+				
 			Logging.debug("Running SQL \n. " + sql);
 			metalStmtRun = Utility.runSql(sql);
 			if (metalStmtRun.getRowCount() < 1) {
@@ -199,3 +222,4 @@ public class BackDatedTransferValidator extends FieldValidatorBase implements
 	}
 
 }
+

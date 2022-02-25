@@ -46,10 +46,16 @@ public abstract class AbstractEJMController {
             case "BSTransaction":
             case "DTRTransaction":
                 return "Transactions";
+            case "GenericAction":
+                return "GenericAction";
+            case "EmailConfirmationAction":
+                return "EmailConfirmationAction";
             case "Transaction":
                 return "Listing";
             case "SpecificationSummary":
                 return "Specifications";
+            case "String":
+            	return "Response";
             default:
                 throw new RuntimeException("invalid data class: " + dataClass.getSimpleName());
         }

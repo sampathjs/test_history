@@ -189,23 +189,33 @@ public class BODataLoadUtil {
 			}
 		}
 		
-		sql = 	    "\nSELECT qr.query_result as tran_num"
-				+   "\n, sh.doc_status as "+ARGT_COL_NAME_CONFIRM_STATUS
-				+   "\nFROM " + qtbl + " qr"
-				+   "\n  INNER JOIN stldoc_document_type sdt ON sdt.doc_type_desc = 'Confirm'"
-				+   "\n  INNER JOIN ins_sub_type ist_far ON ist_far.name = 'FX-NEARLEG'"
-				+   "\n  INNER JOIN ins_sub_type ist_near ON ist_near.name = 'FX-FARLEG'"
-				+   "\n  INNER JOIN stldoc_header sh "
-				+   "\n    ON sh.doc_type=sdt.doc_type"
-				+   "\n  INNER JOIN stldoc_details sd "
-				+   "\n    ON sd.document_num=sh.document_num"
-				+   "\n      AND (sd.tran_num+1)=qr.query_result"
-				+   "\n      AND sd.ins_sub_type = ist_near.id_number"
-				+   "\n  INNER JOIN ab_tran ab "
-				+   "\n    ON qr.query_result=ab.tran_num"
-				+   "\n      AND ab.ins_sub_type = ist_far.id_number"
-				+   "\nWHERE qr.unique_id="+qid
-				; 
+		sql = "WITH FL AS \n" + "(  \n" + "SELECT \n" 
+		        + "   AB.TRAN_NUM AS TRAN_NUM  \n" 
+				+ "FROM \n"
+				+ "   AB_TRAN AB  \n" 
+				+ "   INNER JOIN \n" +  qtbl  + " QR  \n"
+				+ "      ON QR.QUERY_RESULT = AB.TRAN_NUM  \n" 
+				+ "   INNER JOIN \n" + "      INS_SUB_TYPE IST_FAR  \n"
+				+ "      ON IST_FAR.NAME = 'FX-FARLEG'  \n"
+				+ "      AND AB.INS_SUB_TYPE = IST_FAR.ID_NUMBER  \n"
+				+ "WHERE \n" + "   QR.UNIQUE_ID = " + qid +") \n" 
+				+ "SELECT  \n" + "   FL.tran_num, \n"
+				+ "   SH.DOC_STATUS AS  " + ARGT_COL_NAME_CONFIRM_STATUS  + "\n" 
+				+ "FROM \n" + "   STLDOC_DETAILS SD  \n"
+				+ "   INNER JOIN \n"
+				+ "      STLDOC_DOCUMENT_TYPE SDT  \n"
+				+ "      ON SDT.DOC_TYPE_DESC = 'Confirm' \n"
+				+ "   INNER JOIN \n" 
+				+ "      INS_SUB_TYPE IST_FAR  \n"
+				+ "      ON IST_FAR.NAME = 'FX-NEARLEG'  \n" 
+				+ "      AND SD.INS_SUB_TYPE = IST_FAR.ID_NUMBER  \n"
+				+ "   INNER JOIN \n" + "      FL  \n" 
+				+ "      ON FL.TRAN_NUM - 1 = SD.TRAN_NUM  \n"
+				+ "   INNER JOIN \n" + "      STLDOC_HEADER SH  \n" 
+				+ "      ON SD.DOCUMENT_NUM = SH.DOCUMENT_NUM \n"
+				+ "      AND SH.DOC_TYPE = SDT.DOC_TYPE  \n" 
+				+ "ORDER BY \n"
+				+ "   SD.TRAN_NUM ASC  \n";
 				// = Confirm doc and FX far leg => here the confirm is retrieved from the near leg
 		try {
 			tbl = Table.tableNew(sql);
@@ -261,7 +271,7 @@ public class BODataLoadUtil {
 		sql.append("\n    WHERE ates.currency_id IN (SELECT id_number from currency where precious_metal = 1) ");
 		sql.append("\n      AND ates.ext_account_id IN ( SELECT ext_account_id FROM metal_accounts)");
 		sql.append("\n ) SELECT DISTINCT sd.tran_num, sd.external_bunit, sd.document_num, sd.event_type");
-		sql.append("\n       , sd.cflow_type, mes.ext_account_id ");
+		sql.append("\n       , sd.cflow_type, mes.ext_account_id, me.currency ");
 		sql.append("\n       , CASE WHEN sd.tran_currency NOT IN (SELECT id_number FROM currency WHERE precious_metal = 1) ");
 		sql.append("\n              THEN 'N/A - deal'");
 		sql.append("\n              WHEN mes.ext_account_id IN (SELECT a.account_id FROM account a ");
@@ -295,8 +305,13 @@ public class BODataLoadUtil {
 		if (dealMetalBalance.getNumRows() > 0) {
 			argumentTable.select(dealMetalBalance, ARGT_COL_NAME_DEAL_METAL_BALANCE + ", " 
 					+ ARGT_COL_NAME_DEAL_METAL_BALANCE_VALUE, "tran_num EQ $tran_num AND document_num EQ $document_num"
-					+ " AND event_type EQ $event_type AND cflow_type EQ $cflow_type");
+					+ " AND event_type EQ $event_type AND cflow_type EQ $cflow_type AND currency EQ $tran_currency");
 		}
+		
+		argumentTable.clearGroupBy();
+		argumentTable.addGroupBy("event_num");
+		argumentTable.groupBy();
+		argumentTable.distinctRows();
 	}
 	
 	
@@ -358,7 +373,7 @@ public class BODataLoadUtil {
 		Table maNegBal = Table.tableNew();
 		currentTime = System.currentTimeMillis();
 		Logging.info("Query for negative metal account balance for every account linked to each counterparty: "
-				+ maInScopeSql.toString());
+				+ maNegBalSql.toString());
 		DBaseTable.execISql(maNegBal, maNegBalSql.toString());
 		Logging.info("Query for negative metal account balance for every account linked to each counterparty - "
 				+ "completed in " + (System.currentTimeMillis() - currentTime) + " ms");

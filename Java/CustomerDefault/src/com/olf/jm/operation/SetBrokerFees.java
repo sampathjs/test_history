@@ -53,6 +53,7 @@ public class SetBrokerFees extends AbstractTradeProcessListener {
                 // retrieve broker, base ccy, efp_dealnum
                 int intBrokerId = tranPtr.getFieldInt(TRANF_FIELD.TRANF_BROKER_ID, 0);
                 String strBroker = tranPtr.getField(TRANF_FIELD.TRANF_BROKER_ID, 0);
+                int intIdxSubGroup = 0;
 
                 if (intBrokerId > 0) {
 
@@ -66,7 +67,7 @@ public class SetBrokerFees extends AbstractTradeProcessListener {
                         strBaseCcy = tranPtr.getField(TRANF_FIELD.TRANF_TRAN_CURRENCY);
 
                         String strIndex = tranPtr.getField(TRANF_FIELD.TRANF_PROJ_INDEX);
-                        int intIdxSubGroup = Index.getSubgroupByName(strIndex);
+                        intIdxSubGroup = Index.getSubgroupByName(strIndex);
 
                         String strSQL = "select code from idx_subgroup where id_number = " + intIdxSubGroup;
                         com.olf.openjvs.Table tblCode = com.olf.openjvs.Table.tableNew();
@@ -95,6 +96,8 @@ public class SetBrokerFees extends AbstractTradeProcessListener {
 
                     String strSettleDate = tranPtr.getField(TRANF_FIELD.TRANF_SETTLE_DATE);
                     String strTradeDate = tranPtr.getField(TRANF_FIELD.TRANF_TRADE_DATE);
+                    String strFXDate = tranPtr.getField(TRANF_FIELD.TRANF_FX_DATE);
+                    String strFXFarDate = tranPtr.getField(TRANF_FIELD.TRANF_FX_FAR_DATE);
 
                     int intSettleDate = OCalendar.parseString(strSettleDate);
                     int intTradeDate = OCalendar.parseString(strTradeDate);
@@ -134,7 +137,7 @@ public class SetBrokerFees extends AbstractTradeProcessListener {
                         strBoughtCcy = tranPtr.getField(TRANF_FIELD.TRANF_BOUGHT_CURRENCY);
 
                         if (strUnit.equals("notional")) {
-
+                        	double timePeriod = 1.0d;
                             dblQty = tranPtr.getFieldDouble(TRANF_FIELD.TRANF_FX_D_AMT.toInt(), 0);
                             dblTradePrice = tranPtr.getFieldDouble(TRANF_FIELD.TRANF_FX_DEALT_RATE.toInt(), 0);
                             if (strBoughtCcy != null && !strBoughtCcy.isEmpty() && !strBoughtCcy.equals("USD")) {
@@ -146,8 +149,20 @@ public class SetBrokerFees extends AbstractTradeProcessListener {
                                         + "= fx_rate ( USD/" + strBoughtCcy + ") " + dblFxRate + " * dblTradePrice "
                                         + dblTradePrice / dblFxRate + " (" + strBoughtCcy + "/" + strBaseCcy + ")");
                             }
+                            String cflowType = tranPtr.getField(TRANF_FIELD.TRANF_CFLOW_TYPE);
+                            Logging.info("cflowType = " + cflowType);
+                            if ("Swap".equalsIgnoreCase(cflowType)){
+                                int intFXDate = OCalendar.parseString(strFXDate);
+                                int intFXFarDate = OCalendar.parseString(strFXFarDate);
 
-                            dblFeeAmt = dblTradePrice * dblQty * dblRate;
+                            	int numGBDBetweenForIndex = intFXFarDate - intFXDate;
+                            	timePeriod = (double) numGBDBetweenForIndex / 360;
+                            	Logging.info("numGBDBetweenForIndex = " + numGBDBetweenForIndex +
+                            			", strFXDate = " + strFXDate + 
+                            			", strFXFarDate = " + strFXFarDate + 
+                            			", timePeriod = " + timePeriod);
+                             }
+                            dblFeeAmt = dblTradePrice * dblQty * dblRate * timePeriod;
                             Logging.info("Notional : Fee Amt = TradePrice * Qty * Rate : " + dblFeeAmt + " = "
                                     + dblTradePrice + " * " + dblQty + " * " + dblRate);
 

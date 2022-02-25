@@ -11,6 +11,7 @@ import com.olf.openjvs.enums.TRANF_FIELD;
 /*
  * History:
  * 2020-06-15	V1.0	dnagy	- Initial Version
+ * 2021-10-19	V1.1	TomarR01 - EPI-1938 keep funding flag as it is but set it to "No" if not time swap
  */
 
 public class FxSwapCashflowAssignTranField implements IScript {
@@ -89,7 +90,12 @@ public class FxSwapCashflowAssignTranField implements IScript {
 						tran.setField(TRANF_FIELD.TRANF_AUX_TRAN_INFO.toInt(), 1, "Auto SI Shortlist", farAutoSI);
 						
 						tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "End User", enduser);
-						tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Is Funding Trade", isfunding);
+						
+						if(cashflow_tobe.equalsIgnoreCase("Swap"))		// funding flag should be "Yes" only on Time swap				
+							tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Is Funding Trade", isfunding);
+						else
+							tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Is Funding Trade", "No");
+							
 						tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "JM FX Rate", jmfxrate);
 						tran.setField(TRANF_FIELD.TRANF_TRAN_INFO.toInt(), 0, "Liquidity", liquidity);
 

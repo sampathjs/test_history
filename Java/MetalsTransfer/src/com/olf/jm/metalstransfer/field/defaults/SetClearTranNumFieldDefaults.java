@@ -7,8 +7,6 @@ import com.olf.jm.logging.Logging;
 import com.olf.jm.metalstransfer.field.setter.DealRefFieldSetter;
 import com.olf.jm.metalstransfer.field.setter.PortfolioFieldSetter;
 import com.olf.openrisk.staticdata.Field;
-import com.olf.openrisk.staticdata.ReferenceChoice;
-import com.olf.openrisk.staticdata.ReferenceChoices;
 import com.olf.openrisk.trading.EnumInsType;
 import com.olf.openrisk.trading.EnumTransactionFieldId;
 import com.olf.openrisk.trading.Transaction;
@@ -30,7 +28,8 @@ import com.olf.openrisk.trading.Transaction;
  * | Rev | Date        | Change Id     | Author          | Description                                                                     |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  * | 001 | 07-Sep-2016 |               | S. Curran       | Initial version   
- * | 002 | 14-Sep-2020 |               | GuptaN02		 | Set default value to No for tran info Assignment Approved                                                               |
+ * | 002 | 14-Sep-2020 |               | GuptaN02		 | Set default value to No for tran info Assignment Approved       
+ * | 003 | 10-Sep-2021 |               | RodriR02		 | Clearing tran should clear the JM FX Rate field on the deal                                                           |
  * -----------------------------------------------------------------------------------------------------------------------------------------
  */
 public class SetClearTranNumFieldDefaults extends SetInitialFieldDefaults{
@@ -117,7 +116,11 @@ public class SetClearTranNumFieldDefaults extends SetInitialFieldDefaults{
 			if (instrumentTypeInt == EnumInsType.PrecExchFuture.getValue()) {
 				clearField(tran, "Linked Deal");
 			}
-
+			// Clearing field JM FX Rate
+			Field JM_FX_Rate_field = tran.getField("JM FX Rate");
+			if (JM_FX_Rate_field != null && JM_FX_Rate_field.isApplicable() && JM_FX_Rate_field.isWritable()) {
+				JM_FX_Rate_field.setValue("");
+			}
 		}
 
 	}

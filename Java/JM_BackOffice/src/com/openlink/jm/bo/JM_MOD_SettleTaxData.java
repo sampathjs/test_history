@@ -99,6 +99,7 @@
  * 0.89 reviewed applyCflowTypeMapping
  * 0.90 reviewed JM custom version created from OLI_MOD_SettleTaxData
  * 0.91 memory leaks, remove console prints & formatting changes 
+ * 0.92 Rohit Tomar	- PBI 0408 | Fix for not to update event info while preview the document 
  */
 package com.openlink.jm.bo;
 
@@ -142,6 +143,7 @@ public class JM_MOD_SettleTaxData extends OLI_MOD_ModuleBase implements IScript 
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables;
 	protected static boolean _formatDoubles = false;
+	protected boolean _isPreview = false;
 	
 	protected static int _doublePrec = -1;
 	protected static String _vatCashflowType    = "VAT";
@@ -248,6 +250,11 @@ public class JM_MOD_SettleTaxData extends OLI_MOD_ModuleBase implements IScript 
 		{
 			Table argt = context.getArgumentsTable();
 			retrieveSettingsFromConstRep();
+			
+			int previewFlag = argt.getInt("PreviewFlag", 1);
+			
+			if(previewFlag == 1)
+				_isPreview = true;
 
 			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
 			{
@@ -2012,7 +2019,9 @@ public class JM_MOD_SettleTaxData extends OLI_MOD_ModuleBase implements IScript 
 			where = "event_type EQ " + EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt();
 			tbl.select(tblEvent, what, where);
 			calculateProvAmount(tbl);
-			saveSavedSettleVolume(tbl);
+			
+			if(!_isPreview)
+				saveSavedSettleVolume(tbl);
 
 		//	what = "prov_perc (Prov_Perc), prov_price (Prov_Price), prov_amount (Prov_Amount)";
 			what = "prov_perc (Prov_Perc), prov_price (Prov_Price), prov_amount (Prov_Amount), prep_amount (Prep_Amount)";
@@ -2523,7 +2532,7 @@ public class JM_MOD_SettleTaxData extends OLI_MOD_ModuleBase implements IScript 
 				if (!canFxRate)     Logging.warn ("Event Info Field '" + _event_info_fx_rate + "' doesn't exist. Check configuration.");
 				
 
-				if (canBaseAmount||canBaseCcy||canFxRate)
+				if ((canBaseAmount||canBaseCcy||canFxRate) && !_isPreview)
 				{
 					double amount;
 					boolean doSave;

@@ -366,7 +366,7 @@ class DocOutput extends BaseClass //implements IScript
 			throw new OException("Aborted - file not created in time - "+fileName);
 	}
 
-	private boolean isCancellationDoc() throws OException
+	protected boolean isCancellationDoc() throws OException
 	{
 		if (_constRepo_StldocStatusCancelled == null || _constRepo_StldocStatusCancelled.trim().length() == 0)
 		{

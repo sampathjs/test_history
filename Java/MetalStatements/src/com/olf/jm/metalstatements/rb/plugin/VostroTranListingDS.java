@@ -1,5 +1,14 @@
 package com.olf.jm.metalstatements.rb.plugin;
 
+/* History
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | Rev | Date        | Change Id     | Author          | Description                                                                     |
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ * | 001 | 			   |               | 		         | Initial version.                                                                |
+ * | 002 | 18-Oct-2021 |   EPI-1933    | Rohit Tomar     | Added Logic to pick 1st line always  of the deal comments                       |              
+ * -----------------------------------------------------------------------------------------------------------------------------------------
+ */
+
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.table.Table;
 import com.olf.openrisk.trading.EnumTranStatus;
@@ -131,7 +140,7 @@ public class VostroTranListingDS extends MetalStatementsDataSource {
 								+ " LEFT JOIN (SELECT max(tn2.comment_num) as comment_num, tran_num, note_type FROM tran_notepad tn2 GROUP BY tran_num, note_type) max_comment" 
 										+ " ON (max_comment.tran_num = ab.tran_num "
 											+ "	AND max_comment.note_type = (CASE WHEN ab.buy_sell = 0 THEN 20001 WHEN ab.buy_sell = 1 THEN 20002 END)) \n"
-								+ " LEFT JOIN tran_notepad tn ON (max_comment.tran_num = tn.tran_num AND max_comment.note_type = tn.note_type AND tn.comment_num = max_comment.comment_num) \n"
+								+ " LEFT JOIN tran_notepad tn ON (max_comment.tran_num = tn.tran_num AND max_comment.note_type = tn.note_type AND tn.comment_num = max_comment.comment_num and tn.line_num = 0) \n" // EPI-1933 fix to remove duplicate rows because of multiple deal comments 
 							
 								+ "INNER JOIN ( \n"
 									+ " SELECT uc.factor, uc.dest_unit_id FROM unit_conversion uc WHERE uc.src_unit_id = " + IDX_UNIT_TOZ + " \n"
@@ -163,3 +172,4 @@ public class VostroTranListingDS extends MetalStatementsDataSource {
 	}
 
 }
+
