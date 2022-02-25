@@ -67,6 +67,14 @@ public class LiquibaseSchemaTest {
            log.info("--- personnel: {}", p.getPersonnel().getIdNumber());
         });
 
+        val p = mtProcesses.get(0).getPersonnel();
+        val t = mtProcesses.get(0).getLastUpdatedTime();
+
+        val rp = userJmMtProcessRepository.findTransfersByUserAndSinceDate(p, t.minusDays(1));
+        rp.forEach(fp -> {
+            log.info("### FOUND {}", fp.getRunId());
+        });
+
 //        val currencies = currencyRepository.findAll();
 //        currencies.forEach(c -> log.info("got currency {}", c.getName()));
         //SQLDump.main(new String[]{"-propfile=src/test/resources/sqldump/sqldump.properties"});
