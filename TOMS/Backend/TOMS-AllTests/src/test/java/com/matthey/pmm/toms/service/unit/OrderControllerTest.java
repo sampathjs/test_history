@@ -51,6 +51,7 @@ import com.matthey.pmm.toms.repository.LimitOrderRepository;
 import com.matthey.pmm.toms.repository.OrderRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
+import com.matthey.pmm.toms.service.common.OktaClient;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderLegConverter;
@@ -109,16 +110,16 @@ public class OrderControllerTest {
 	protected LimitOrderConverter limitOrderConverter;
 	
 	@Autowired
-	private AuthorizedClientServiceOAuth2AuthorizedClientManager authorizedClientServiceAndManager;
-
+	protected OktaClient oktaClient;
 	
 	protected List<LimitOrderTo> limitOrderToBeDeleted;
 	protected List<ReferenceOrderTo> referenceOrderToBeDeleted;
 	protected Map<ReferenceOrderTo, ReferenceOrderLegTo> referenceOrderLegToBeDeleted;
-	protected Map<ReferenceOrderTo, ReferenceOrderLegTo> referenceOrderLegToBeRestored;
+	protected Map<ReferenceOrderTo, ReferenceOrderLegTo> referenceOrderLegToBeRestored;	
 	
 	@Before
 	public void initTest () {
+		Logger.info("Init test");
 		limitOrderToBeDeleted = new ArrayList<>(5);
 		referenceOrderToBeDeleted = new ArrayList<>(5);
 		referenceOrderLegToBeDeleted = new HashMap<>();
@@ -140,34 +141,10 @@ public class OrderControllerTest {
 		for (Map.Entry<ReferenceOrderTo, ReferenceOrderLegTo> entry : 	referenceOrderLegToBeRestored.entrySet()) {
 			refOrderLegConverter.toManagedEntity(entry.getValue());
 		}		
+		Logger.info("Cleaned up test");
 	}
 	
-	private String getAuth() {
-		//TODO: implement actual service account auth
 
-		////////////////////////////////////////////////////
-		//  STEP 1: Retrieve the authorized JWT
-		////////////////////////////////////////////////////
-		Authentication principal = new AnonymousAuthenticationToken
-			    ("key", "anonymous", AuthorityUtils.createAuthorityList("ROLE_ANONYMOUS"));
-		
-		// Build an OAuth2 request for the Okta provider
-		OAuth2AuthorizeRequest authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId("okta")
-				.principal(principal)
-				.build();
-
-		// Perform the actual authorization request using the authorized client service and authorized client
-		// manager. This is where the JWT is retrieved from the Okta servers.
-		OAuth2AuthorizedClient authorizedClient = this.authorizedClientServiceAndManager.authorize(authorizeRequest);
-
-		// Get the token from the authorized client object
-		OAuth2AccessToken accessToken = authorizedClient.getAccessToken();		
-		
-		String authString =  "Bearer " + accessToken.getTokenValue();
-		Logger.info("Generated Auth String: " + authString);
-		return authString;
-//		return "";
-	}
 	
 	@Transactional
 	protected long submitNewLimitOrder (LimitOrderTo orderTo) {
@@ -176,7 +153,7 @@ public class OrderControllerTest {
 				.id(0l)
 				.version(0)
 				.build();
-		long ret = orderController.postLimitOrder(getAuth(), withResetOrderIdAndVersion);
+		long ret = orderController.postLimitOrder(withResetOrderIdAndVersion);
 		LimitOrderTo withOrderIdAndVersion = ImmutableLimitOrderTo.builder()
 				.from(orderTo)
 				.id(ret)
@@ -193,7 +170,7 @@ public class OrderControllerTest {
 				.id(0l)
 				.version(0)
 				.build();
-		long ret = orderController.postReferenceOrder(getAuth(), withResetOrderIdAndVersion);
+		long ret = orderController.postReferenceOrder(withResetOrderIdAndVersion);
 		ReferenceOrderTo withOrderIdAndVersion = ImmutableReferenceOrderTo.builder()
 				.from(orderTo)
 				.id(ret)
@@ -205,7 +182,7 @@ public class OrderControllerTest {
 	
 	@Transactional
 	protected LimitOrderTo updateLimitOrder (LimitOrderTo toBeSaved) {
-		orderController.updateLimitOrder(getAuth(), toBeSaved);
+		orderController.updateLimitOrder(toBeSaved);
 		LimitOrderTo versionInc = ImmutableLimitOrderTo.builder()
 				.from(toBeSaved)
 				.version(toBeSaved.version()+1)
@@ -216,7 +193,7 @@ public class OrderControllerTest {
 	
 	@Transactional
 	protected ReferenceOrderTo updateReferenceOrder (ReferenceOrderTo toBeSaved) {
-		orderController.updateReferenceOrder(getAuth(), toBeSaved);
+		orderController.updateReferenceOrder(toBeSaved);
 		ReferenceOrderTo versionInc = ImmutableReferenceOrderTo.builder()
 				.from(toBeSaved)
 				.version(toBeSaved.version()+1)
@@ -337,7 +314,7 @@ public class OrderControllerTest {
 				.id(TestReferenceOrder.TEST_ORDER_1A.getEntity().id())
 				.idOrderStatus(DefaultOrderStatus.LIMIT_ORDER_CONFIRMED.getEntity().id())
 				.build();
-		assertThatThrownBy ( () -> { orderController.updateLimitOrder(getAuth(), withUpdatedReference); })
+		assertThatThrownBy ( () -> { orderController.updateLimitOrder(withUpdatedReference); })
 			.isInstanceOf(UnknownEntityException.class);
 	}
 
@@ -348,7 +325,7 @@ public class OrderControllerTest {
 				.id(TestLimitOrder.TEST_ORDER_1A.getEntity().id())
 				.idOrderStatus(DefaultOrderStatus.REFERENCE_ORDER_CONFIRMED.getEntity().id())
 				.build();
-		assertThatThrownBy ( () -> { orderController.updateReferenceOrder(getAuth(), withUpdatedReference); })
+		assertThatThrownBy ( () -> { orderController.updateReferenceOrder(withUpdatedReference); })
 			.isInstanceOf(UnknownEntityException.class);
 	}
 	

@@ -149,13 +149,11 @@ public interface TomsOrderService {
 
     @ApiOperation("Creation of a new Limit Order")
 	@PostMapping(path = "/limitOrder", consumes=MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public long postLimitOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-			@ApiParam(value = "The new Limit Order. Order ID has to be -1. The actual assigned Order ID is going to be returned. Version ID has to be 0", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder);
+	public long postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID has to be -1. The actual assigned Order ID is going to be returned. Version ID has to be 0", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder);
     
     @ApiOperation("Update of an existing Limit Order")
 	@PutMapping("/limitOrder")
-	public void updateLimitOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-			@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update. The version ID has to match the latest one for that order.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder);
+	public void updateLimitOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update. The version ID has to match the latest one for that order.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder);
 
     // reference order
     @Cacheable({"ReferenceOrder"})
@@ -224,13 +222,11 @@ public interface TomsOrderService {
         
     @ApiOperation("Creation of a new Reference Order")
 	@PostMapping(path = "/referenceOrder" , consumes=MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public long postReferenceOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-			@ApiParam(value = "The new Reference Order, ID has to be -1. The actual assigned ID is going to be returned. Version ID has to be 0", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder);
+	public long postReferenceOrder (@ApiParam(value = "The new Reference Order, ID has to be -1. The actual assigned ID is going to be returned. Version ID has to be 0", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder);
     
     @ApiOperation("Update of an existing Reference Order")
 	@PutMapping("/referenceOrder")
-	public void updateReferenceOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-			@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update. The version ID has to match the latest one for that order.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder);
+	public void updateReferenceOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update. The version ID has to match the latest one for that order.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder);
 
     // reference order legs
     @Cacheable({"ReferenceOrderLeg"})

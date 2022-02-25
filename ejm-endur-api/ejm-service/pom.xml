@@ -268,21 +268,6 @@
 	      </executions>
 	    </plugin>            
 	    <plugin>
-		    <artifactId>maven-clean-plugin</artifactId>
-		    <version>3.1.0</version>
-		    <configuration>
-		      <filesets>
-		        <fileset>
-		          <directory>../../Builds/ejm-service</directory>
-		          <includes>
-		            <include>**</include>
-		          </includes>
-		          <followSymlinks>false</followSymlinks>
-		        </fileset>
-		      </filesets>
-		    </configuration>
-	    </plugin>            
-	    <plugin>
 	      <artifactId>maven-antrun-plugin</artifactId>
 	      <version>1.8</version>
 	      <executions>

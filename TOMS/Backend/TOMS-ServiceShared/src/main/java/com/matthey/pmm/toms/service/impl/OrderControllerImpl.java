@@ -53,6 +53,7 @@ import com.matthey.pmm.toms.repository.ReferenceOrderLegRepository;
 import com.matthey.pmm.toms.repository.ReferenceOrderRepository;
 import com.matthey.pmm.toms.service.TomsOrderService;
 import com.matthey.pmm.toms.service.TomsService;
+import com.matthey.pmm.toms.service.common.OktaClient;
 import com.matthey.pmm.toms.service.common.TomsValidator;
 import com.matthey.pmm.toms.service.conversion.LimitOrderConverter;
 import com.matthey.pmm.toms.service.conversion.ReferenceOrderConverter;
@@ -98,12 +99,14 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Autowired
 	protected OrderStatusRepository orderStatusRepo;
 
-	
 	@Autowired
 	protected ReferenceOrderConverter referenceOrderConverter;	
 
 	@Autowired
-	protected ReferenceOrderLegConverter referenceOrderLegConverter;	
+	protected ReferenceOrderLegConverter referenceOrderLegConverter;
+	
+	@Autowired
+	protected OktaClient oktaClient;
 		
 	@Value("#{${search.mapping.abstractOrder}}")  
 	private Map<String,String> abstractOrderSearchMap;
@@ -349,10 +352,9 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Override
 	@ApiOperation("Creation of a new Limit Order")
 	@Transactional
-	public long postLimitOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-			@ApiParam(value = "The new Limit Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
+	public long postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
     	// validation checks
-    	validator.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null, auth);
+    	validator.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null, oktaClient.getNewAuth());
 	
 		LimitOrder managedEntity = limitOrderConverter.toManagedEntity(newLimitOrder);
 		managedEntity.setCreatedAt(new Date());
@@ -364,15 +366,14 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Override
     @ApiOperation("Update of an existing Limit Order")
 	@Transactional
-	public void updateLimitOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-			@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder) {
+	public void updateLimitOrder (@ApiParam(value = "The Limit Order to update. Order ID has to denote an existing Limit Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) LimitOrderTo existingLimitOrder) {
     	// identify the existing limit order
     	Optional<LimitOrder> oldLimitOrderManaged = limitOrderRepo.findLatestByOrderId(existingLimitOrder.id());    	
     	if (oldLimitOrderManaged.isEmpty()) {
     		throw new UnknownEntityException (this.getClass(), "updateLimitOrder", "existingLimitOrder.id" , "Limit Order", "" + existingLimitOrder.id());
     	}
     	validator.validateLimitOrderFields (this.getClass(), "updateLimitOrder", "existingLimitOrder", existingLimitOrder, false, 
-    			limitOrderConverter.toTo(oldLimitOrderManaged.get()), auth);
+    			limitOrderConverter.toTo(oldLimitOrderManaged.get()), oktaClient.getNewAuth());
 
     	existingLimitOrder = ImmutableLimitOrderTo.builder()
     			.from(existingLimitOrder)
@@ -531,10 +532,9 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Override
     @ApiOperation("Creation of a new Reference Order")
 	@Transactional
-	public long postReferenceOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-			@ApiParam(value = "The new Reference Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {
+	public long postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {
     	// validation checks
-    	validator.validateReferenceOrderFields (this.getClass(), "postReferenceOrder", "newReferenceOrder", newReferenceOrder, true, null, auth);
+    	validator.validateReferenceOrderFields (this.getClass(), "postReferenceOrder", "newReferenceOrder", newReferenceOrder, true, null, oktaClient.getNewAuth());
 	
 		ReferenceOrder managedEntity = referenceOrderConverter.toManagedEntity(newReferenceOrder);
 		managedEntity.setCreatedAt(new Date());
@@ -546,15 +546,14 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Override
     @ApiOperation("Update of an existing Reference Order")
     @Transactional
-	public void updateReferenceOrder (@RequestHeader(value = "Authorization", defaultValue = "") String auth,
-			@ApiParam(value = "The Reference Order to update. Order ID has to denote an existing Reference Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder) {
+	public void updateReferenceOrder (@ApiParam(value = "The Reference Order to update. Order ID has to denote an existing Reference Order in a valid state for update.", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo existingReferenceOrder) {
     	Optional<ReferenceOrder> oldOrderManaged = referenceOrderRepo.findLatestByOrderId(existingReferenceOrder.id());
     	
     	if (oldOrderManaged.isEmpty()) {
     		throw new UnknownEntityException (this.getClass(), "updateReferenceOrder", "existingReferenceOrder.id" , "Referencet Order", "" + existingReferenceOrder.id());
     	}
     	validator.validateReferenceOrderFields (this.getClass(), "updateReferenceOrder", "existingReferenceOrder", existingReferenceOrder, false, 
-    			referenceOrderConverter.toTo(oldOrderManaged.get()), auth);
+    			referenceOrderConverter.toTo(oldOrderManaged.get()), oktaClient.getNewAuth());
     	existingReferenceOrder = ImmutableReferenceOrderTo.builder()
     			.from(existingReferenceOrder)
     			.version(existingReferenceOrder.version()+1)

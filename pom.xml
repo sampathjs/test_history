@@ -21,9 +21,11 @@
         <module>endur-connector</module>
         <module>JmJarsAggregator</module>
     </modules>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <log4j2.version>2.17.0</log4j2.version>
+		<maven.clover.outputDirectory>Builds\Clover</maven.clover.outputDirectory>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -64,7 +66,7 @@
 						<generateHtml>true</generateHtml>
 						<generateJson>false</generateJson>								
 					</configuration>
-      			</plugin>				
+      			</plugin>
          	</plugins>
         </pluginManagement>
     </build>
@@ -87,7 +89,7 @@
 					</reports>
 				  </reportSet>
 				</reportSets>
-			</plugin>		
+			</plugin>
 		</plugins>
 	</reporting>	
 </project>

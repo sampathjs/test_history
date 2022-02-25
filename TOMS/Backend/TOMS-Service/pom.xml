@@ -92,11 +92,31 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>tinylog-impl</artifactId>
-            <version>2.4.1</version>
-        </dependency>    
+		<dependency>
+			<groupId>org.tinylog</groupId>
+			<artifactId>tinylog-api</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tinylog</groupId>
+			<artifactId>tinylog-impl</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tinylog</groupId>
+			<artifactId>slf4j-tinylog</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tinylog</groupId>
+			<artifactId>jcl-tinylog</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.tinylog</groupId>
+			<artifactId>log4j1.2-api</artifactId>
+			<version>2.4.1</version>
+		</dependency>
         <dependency>
             <groupId>com.okta.spring</groupId>
             <artifactId>okta-spring-boot-starter</artifactId>
@@ -193,6 +213,24 @@
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-spring-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jcl-over-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>jul-to-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>log4j-over-slf4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>            
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
@@ -280,12 +318,10 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
@@ -354,7 +390,27 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-            </plugin>      
+       	        <executions>
+                      <execution>
+                          <id>analyze</id>
+                          <goals>
+                              <goal>analyze-only</goal>
+                          </goals>
+                          <configuration>
+                              <failOnWarning>true</failOnWarning>
+                              <ignoreNonCompile>true</ignoreNonCompile>
+                              <ignoredDependencies>
+                                  <dependency>org.springframework*</dependency>
+                                  <dependency>com.okta.spring:okta-spring-boot-starter:jar:1.2.0</dependency>
+                                  <dependency>io.springfox:springfox*</dependency>
+                                  <dependency>org.tinylog:*</dependency>
+                                  <dependency>net.bytebuddy:*:*</dependency>
+                                  <dependency>com.matthey.pmm:*</dependency>                                   
+                              </ignoredDependencies>                                 
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin>      
 			<plugin>
             	<groupId>org.springframework.boot</groupId>
             	<artifactId>spring-boot-maven-plugin</artifactId>
@@ -447,6 +503,7 @@
                     		<include>application.properties</include>
                     		<include>toms-service.exe</include>
                     		<include>toms-service.xml</include>
+                    		<include>tinylog.properties</include>
                 		</includes>		                
 		              </resource>
 		            </resources>              
@@ -499,21 +556,6 @@
 		      </executions>
 		    </plugin>
 		    <plugin>
-			    <artifactId>maven-clean-plugin</artifactId>
-			    <version>3.1.0</version>
-			    <configuration>
-			      <filesets>
-			        <fileset>
-			          <directory>../../../Builds/TOMS/Toms_Endur_API</directory>
-			          <includes>
-			            <include>**</include>
-			          </includes>
-			          <followSymlinks>false</followSymlinks>
-			        </fileset>
-			      </filesets>
-			    </configuration>
-		    </plugin>
-		    <plugin>
 		      <artifactId>maven-antrun-plugin</artifactId>
 		      <version>1.8</version>
 		      <executions>
@@ -545,6 +587,17 @@
 		            <configuration>
 		              <sourceFile>../../../Builds/TOMS/Toms_Endur_API/TOMS-service/service-wrapper.exe</sourceFile>
 		              <destinationFile>../../../Builds/TOMS/Toms_Endur_API/TOMS-service/toms-service.exe</destinationFile>
+		            </configuration>
+		          </execution>
+		          <execution>
+		            <id>Rename TOMS-Service-1.0.0-exec.jar to TOMS-Service-1.0.0.jar</id>
+		            <phase>install</phase>
+		            <goals>
+		              <goal>rename</goal>
+		            </goals>
+		            <configuration>
+		              <sourceFile>../../../Builds/TOMS/Toms_Endur_API/TOMS-service/TOMS-Service-1.0.0-exec.jar</sourceFile>
+		              <destinationFile>../../../Builds/TOMS/Toms_Endur_API/TOMS-service/TOMS-Service-1.0.0.jar</destinationFile>
 		            </configuration>
 		          </execution>
 		        </executions>

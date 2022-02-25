@@ -25,6 +25,7 @@ import com.matthey.pmm.toms.repository.OrderRepository;
 import com.matthey.pmm.toms.repository.ReferenceRepository;
 import com.matthey.pmm.toms.service.TomsService;
 import com.matthey.pmm.toms.service.common.DerivedDataService;
+import com.matthey.pmm.toms.service.common.OktaClient;
 import com.matthey.pmm.toms.service.conversion.FillConverter;
 import com.matthey.pmm.toms.service.logic.ServiceConnector;
 import com.matthey.pmm.tradebooking.DebugShowTo.DebugShowToBuilder;
@@ -59,10 +60,12 @@ public class EndurTradeBooking {
 
     @Autowired
     private ServiceConnector serviceConnector;
-
     
     @Autowired
     private DerivedDataService derivedDataService;
+    
+    @Autowired
+    private OktaClient oktaClient;
     
     @Value(value = "${toms.endur.service.tradebooking.clientname:OrderManagementSystem}")
     private String clientName;
@@ -98,7 +101,7 @@ public class EndurTradeBooking {
     	for (Order order : orderWithOpenFills) {
     		for (Fill fill : order.getFills()) {
     			if (fill.getFillStatus().getId() == DefaultReference.FILL_STATUS_OPEN.getEntity().id()) {
-    				processOpenFill ("Enter Valid Auth", order, fill);
+    				processOpenFill (oktaClient.getNewAuth(), order, fill);
     			}
     		}
     	}

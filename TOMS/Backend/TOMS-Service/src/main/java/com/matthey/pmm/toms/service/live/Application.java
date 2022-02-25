@@ -37,11 +37,10 @@ import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-@SpringBootApplication(scanBasePackages = {"com.matthey.pmm.toms.service.live", "com.matthey.pmm.toms.service.common",
+@SpringBootApplication(scanBasePackages = {"com.matthey.pmm.toms.service", "com.matthey.pmm.toms.service.common",
 		"com.matthey.pmm.toms.service.conversion", 
 		"com.matthey.pmm.toms.service.shared",
-		"com.matthey.pmm.toms.model", "com.matthey.pmm.toms.repository",
-		"com.matthey.pmm.toms.service.logic"})
+		"com.matthey.pmm.toms.model", "com.matthey.pmm.toms.repository"})
 @EnableSwagger2
 @EnableJpaRepositories(basePackages = {"com.matthey.pmm.toms.repository"})
 @EntityScan (basePackages = {"com.matthey.pmm.toms.model"})
@@ -110,7 +109,6 @@ public class Application implements WebMvcConfigurer {
 
     @Bean
     public Docket api() {
-    	String s = DbConstants.SCHEMA_NAME;
         return new Docket(DocumentationType.SWAGGER_2).select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
