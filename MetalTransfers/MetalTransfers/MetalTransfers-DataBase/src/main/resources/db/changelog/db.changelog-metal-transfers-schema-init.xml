@@ -7,6 +7,19 @@
 
     <changeSet author="Boris Liberman" id="Metal Transfers Schema Init">
 
+        <createTable tableName="USER_jm_mt_process" schemaName="dbo">
+            <column name="run_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="strategy_id" type="int"/>
+            <column name="tran_num" type="int"/>
+            <column name="tran_status" type="varchar"/>
+            <column name="version" type="int"/>
+            <column name="personnel_id" type="int"/>
+            <column name="internal_status" type="varchar"/>
+            <column name="message" type="varchar"/>
+            <column name="last_updated_time" type="datetime"/>
+        </createTable>
         <createTable tableName="USER_jm_loco" schemaName="dbo">
             <column name="loco_id" type="int">
                 <constraints primaryKey="true"/>

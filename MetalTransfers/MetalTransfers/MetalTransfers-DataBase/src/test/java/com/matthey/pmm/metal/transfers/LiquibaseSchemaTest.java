@@ -1,9 +1,9 @@
 package com.matthey.pmm.metal.transfers;
 
-import com.matthey.pmm.endur.database.repository.AbTranRepository;
 import com.matthey.pmm.endur.database.repository.CurrencyRepository;
+import com.matthey.pmm.metal.transfers.repository.MtAbTranRepository;
 import com.matthey.pmm.metal.transfers.repository.UserJmFormRepository;
-import lombok.Data;
+import com.matthey.pmm.metal.transfers.repository.UserJmMtProcessRepository;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -17,12 +17,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import tbrugz.sqldump.SQLDump;
 
-import javax.naming.NamingException;
 import javax.transaction.Transactional;
-import java.io.IOException;
-import java.sql.SQLException;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = LiquibaseSchemaTest.LbSchemaTestConfig.class)
@@ -45,20 +41,30 @@ public class LiquibaseSchemaTest {
     UserJmFormRepository userJmFormRepository;
 
     @Autowired
-    AbTranRepository abTranRepository;
+    MtAbTranRepository mtAbTranRepository;
+
+    @Autowired
+    UserJmMtProcessRepository userJmMtProcessRepository;
 
     @Test
     @Transactional
     public void contextLoads() throws Exception {
         log.info("context loaded");
 
-        val transactions = abTranRepository.findAll();
+        val transactions = mtAbTranRepository.findAll();
         transactions.forEach(t -> {
            log.info("got transaction {}", t.getTranNum());
            val tranInfos = t.getAbTranInfos();
            tranInfos.forEach(ti -> {
                log.info("---- got tran info {}", ti.getValue());
            });
+        });
+
+        val mtProcesses = userJmMtProcessRepository.findAll();
+        mtProcesses.forEach(p -> {
+           log.info("got process {}", p.getRunId());
+           log.info("--- tran: {}", p.getAbTran().getTranNum());
+           log.info("--- personnel: {}", p.getPersonnel().getIdNumber());
         });
 
 //        val currencies = currencyRepository.findAll();
