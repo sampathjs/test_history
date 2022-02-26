@@ -2,6 +2,7 @@ package com.matthey.pmm.endur.database.model;
 
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -21,5 +22,6 @@ public class IdxUnit {
     private Integer versionNumber;
     private Integer massTypeId;
     private Integer kilogramMassUnit;
+    @Column(name = "m3_volume_unit")
     private Integer m3VolumeUnit;
 }

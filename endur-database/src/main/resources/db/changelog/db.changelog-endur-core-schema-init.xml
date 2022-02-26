@@ -140,6 +140,17 @@
             <column name="agency_activities" type="int"/>
             <column name="linked_party_id" type="int"/>
         </createTable>
+        
+        <createTable tableName="party_portfolio">
+            <column name="party_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="portfolio_id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="user_id" type="int"/>
+            <column name="version_number" type="int"/>
+        </createTable>
 
         <createTable tableName="personnel" schemaName="dbo">
             <column name="id_number" type="int">

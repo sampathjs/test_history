@@ -1,9 +1,10 @@
 package com.matthey.pmm.metal.transfers;
 
+import com.matthey.pmm.endur.database.model.Account;
+import com.matthey.pmm.endur.database.model.IdxUnit;
+import com.matthey.pmm.endur.database.model.Portfolio;
 import com.matthey.pmm.endur.database.repository.CurrencyRepository;
-import com.matthey.pmm.metal.transfers.repository.MtAbTranRepository;
-import com.matthey.pmm.metal.transfers.repository.UserJmFormRepository;
-import com.matthey.pmm.metal.transfers.repository.UserJmMtProcessRepository;
+import com.matthey.pmm.metal.transfers.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import tbrugz.sqldump.SQLDump;
 
 import javax.transaction.Transactional;
 
@@ -46,9 +48,22 @@ public class LiquibaseSchemaTest {
     @Autowired
     UserJmMtProcessRepository userJmMtProcessRepository;
 
+    @Autowired
+    MtAccountRepository mtAccountRepository;
+
+    @Autowired
+    MtIdxUnitRepository mtIdxUnitRepository;
+
+    @Autowired
+    MtPortfolioRepository mtPortfolioRepository;
+
+    @Autowired
+    MtPartyRepository mtPartyRepository;
+
     @Test
     @Transactional
     public void contextLoads() throws Exception {
+
         log.info("context loaded");
 
         val transactions = mtAbTranRepository.findAll();
@@ -70,15 +85,31 @@ public class LiquibaseSchemaTest {
         val p = mtProcesses.get(0).getPersonnel();
         val t = mtProcesses.get(0).getLastUpdatedTime();
 
-        val rp = userJmMtProcessRepository.findTransfersByUserAndSinceDate(p, t.minusDays(1));
+        val rp = userJmMtProcessRepository.findTransfersByUserAndSinceDateTime(p, t.minusDays(1));
         rp.forEach(fp -> {
             log.info("### FOUND {}", fp.getRunId());
         });
 
+        val accounts = mtAccountRepository.findByUserId(20026);
+        for (Account account : accounts) {
+            log.info("aaaa    found account {}", account.getAccountId());
+        }
+
+        val units = mtIdxUnitRepository.findPreciousMetalsIdxUnits();
+        for (IdxUnit idxUnit : units) {
+            log.info("uuuu found unit {}", idxUnit.getUnitLabel());
+        }
+
+        val party = mtPartyRepository.findById(20036).get();
+        val portfolios = mtPortfolioRepository.findPortfoliosByBusinessUnit(party);
+        for(Portfolio portfolio : portfolios) {
+            log.info("ppppp found portfolio {}", portfolio.getName() );
+        }
+
+
 //        val currencies = currencyRepository.findAll();
 //        currencies.forEach(c -> log.info("got currency {}", c.getName()));
-        //SQLDump.main(new String[]{"-propfile=src/test/resources/sqldump/sqldump.properties"});
-
-        log.info("dump completed");
+//        SQLDump.main(new String[]{"-propfile=src/test/resources/sqldump/sqldump.properties"});
+//        log.info("dump completed");
     }
 }

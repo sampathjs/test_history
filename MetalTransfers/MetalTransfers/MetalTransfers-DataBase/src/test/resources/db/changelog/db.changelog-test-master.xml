@@ -14,6 +14,8 @@
     <include file="db/changelog/db.changelog-test-data-init-idx_unit.sql"/>
     <include file="db/changelog/db.changelog-test-data-init-party.sql"/>
     <include file="db/changelog/db.changelog-test-data-init-personnel.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-portfolio.sql"/>
+    <include file="db/changelog/db.changelog-test-data-init-party_portfolio.sql"/>
     <include file="db/changelog/db.changelog-test-data-init-tran_info_types.sql"/>
     <include file="db/changelog/db.changelog-test-data-init-USER_jm_mt_process.sql"/>
     <include file="db/changelog/db.changelog-test-data-init-USER_jm_form.sql"/>
