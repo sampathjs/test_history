@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 **/target/
 **/.classpath
 **/.project
@@ -8,3 +9,14 @@
 **/.settings
 **/*.log
 **/node_modules
+=======
+**/build
+**/Builds
+**/target
+**/JM_JARS
+**/*.class
+**/*.olfversion
+**/.settings
+**/.classpath
+**/.project
+>>>>>>> f4519d312c2b7ea2fc59b33cd7c190b91bc98e45

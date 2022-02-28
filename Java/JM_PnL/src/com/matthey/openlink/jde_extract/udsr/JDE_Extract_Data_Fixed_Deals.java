@@ -154,7 +154,7 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 	 */
 	private Table generateComFutDataTable(Table transData, Table tranLegResults, Table marketData) throws OException {
 		Table workData = createOutputTable();	
-		workData.select(transData, "deal_num, tran_ptr", "toolset EQ " + TOOLSET_ENUM.COM_FUT_TOOLSET.toInt());
+		workData.select(transData, "deal_num, tran_num, tran_ptr", "toolset EQ " + TOOLSET_ENUM.COM_FUT_TOOLSET.toInt());
 		
 		// Payment Date is stored as Double, not Integer, so we'll need to convert later
 		workData.addCol("pymt_date_d", COL_TYPE_ENUM.COL_DOUBLE);
@@ -219,7 +219,7 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 	 */
 	private Table generateFXDataTable(Table transData, Table marketData) throws OException {
 		Table workData = createOutputTable();	
-		workData.select(transData, "deal_num, tran_ptr, trade_price, ins_sub_type, near_leg_tran_num", "toolset EQ " + TOOLSET_ENUM.FX_TOOLSET.toInt());
+		workData.select(transData, "deal_num, tran_num, tran_ptr, trade_price, ins_sub_type, near_leg_tran_num", "toolset EQ " + TOOLSET_ENUM.FX_TOOLSET.toInt());
 		
 		// Iterate backwards, as we may delete current row in place
 		int rows = workData.getNumRows();
@@ -641,6 +641,7 @@ public class JDE_Extract_Data_Fixed_Deals implements IScript {
 	 */
 	protected void setOutputFormat(Table workData) throws OException {		
 		workData.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
+		workData.addCol("tran_num", COL_TYPE_ENUM.COL_INT);
 		workData.addCol("fixings_complete", COL_TYPE_ENUM.COL_STRING);
 
 		workData.addCol("from_currency", COL_TYPE_ENUM.COL_INT);

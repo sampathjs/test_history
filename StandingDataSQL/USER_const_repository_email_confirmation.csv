@@ -1,0 +1,5 @@
+"BackOffice","JM_Gen_Output_Param","ActionUrlPattern",2,"https://endurejm-uat.johnsonmatthey.com:8448/ejm/genericActionHandler/response?actionId=%ActionId%",0.00000000,0,
+"BackOffice","JM_Gen_Output_Param","EmailConfirmationConsumer",2,"/emailConfirmation/response",0.00000000,0,
+"BackOffice","JM_Gen_Output_Param","EmailConfirmationInitialStatus",2,"Open",0.00000000,0,
+"BackOffice","JM_Gen_Output_Param","ExpiryAfterDays",2,"30",0.00000000,0,
+"BackOffice","JM_Gen_Output_Param","MillisecondsForHash",2,"2000",0.00000000,0,

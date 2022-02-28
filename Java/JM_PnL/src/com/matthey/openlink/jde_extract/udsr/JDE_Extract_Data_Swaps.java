@@ -138,7 +138,7 @@ public class JDE_Extract_Data_Swaps implements IScript {
 		Table workData = createOutputTable();	
 			
 		workData.select(marketData, "deal_num, deal_leg, deal_pdc, deal_reset_id", "deal_reset_id LT " + PNL_FixingsMarketDataRecorder.S_FX_RESET_OFFSET);
-		workData.select(transData, "fixings_complete, tran_ptr, toolset", "deal_num EQ $deal_num");
+		workData.select(transData, "tran_num, fixings_complete, tran_ptr, toolset", "deal_num EQ $deal_num");
 				
 		prepareMarketDataMap(marketData);
 		int rows = workData.getNumRows();
@@ -491,6 +491,7 @@ public class JDE_Extract_Data_Swaps implements IScript {
 	 */
 	protected void setOutputFormat(Table workData) throws OException {
 		workData.addCol("deal_num", COL_TYPE_ENUM.COL_INT);
+		workData.addCol("tran_num", COL_TYPE_ENUM.COL_INT);
 		workData.addCol("deal_leg", COL_TYPE_ENUM.COL_INT);
 		workData.addCol("deal_pdc", COL_TYPE_ENUM.COL_INT);
 		workData.addCol("deal_reset_id", COL_TYPE_ENUM.COL_INT);

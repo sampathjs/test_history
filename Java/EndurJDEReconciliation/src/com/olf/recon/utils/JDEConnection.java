@@ -63,7 +63,7 @@ public class JDEConnection
 	 */
 	public CallableStatement prepareCall(String procName, String param1, String param2, String param3)
 	{
-		String call = "{CALL " + dbName + "." + procName + "('" + param1 + "', '" + param2 + "', '" + param3 + "')}";
+		String call = "{CALL " + dbName + "/" + procName + "('" + param1 + "', '" + param2 + "', '" + param3 + "')}";
 		Logging.info("call Statement: " + call);
 		CallableStatement cs = null;
 		try

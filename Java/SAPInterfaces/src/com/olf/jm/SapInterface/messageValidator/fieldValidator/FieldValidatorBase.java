@@ -6,9 +6,9 @@ import com.olf.embedded.application.Context;
 import com.olf.jm.SapInterface.businessObjects.ISapEndurTrade;
 import com.olf.jm.SapInterface.messageValidator.ValidatorException;
 import com.olf.jm.SapInterface.util.DateUtils;
+import com.olf.jm.logging.Logging;
 import com.olf.openrisk.staticdata.EnumReferenceTable;
 import com.olf.openrisk.table.Table;
-import com.olf.jm.logging.Logging;
 
 
 
@@ -19,12 +19,13 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 	
 	/** The context the script is running in. */
 	protected Context context = null;
-	
+	private static final String CONTEXT =  "SAP";
+	private static final String SUB_CONTEXT =  "FieldValidatorBase";	
 	/**
 	 * Instantiates a new field validator base.
 	 */
 	public FieldValidatorBase() {
-		
+		Logging.init(getClass(), CONTEXT, SUB_CONTEXT);
 	}
 	
 	/**
@@ -34,6 +35,7 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 	 */
 	public FieldValidatorBase(final Context currentContext) {
 		context = currentContext;
+		Logging.init(getClass(), CONTEXT, SUB_CONTEXT);
 	}	
 	
 	/* (non-Javadoc)
@@ -179,3 +181,4 @@ public abstract class FieldValidatorBase implements IFieldValidator {
 	}
 
 }
+

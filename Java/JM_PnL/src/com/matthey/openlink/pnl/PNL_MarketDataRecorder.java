@@ -1,4 +1,5 @@
 package com.matthey.openlink.pnl;
+import com.matthey.openlink.generic.ConstRepoRetrieval;
 import com.matthey.openlink.jde_extract.IJdeDataManager;
 import com.matthey.openlink.jde_extract.JDE_Data_Manager;
 import com.olf.openjvs.OException;
@@ -21,7 +22,7 @@ public class PNL_MarketDataRecorder extends PNLMarketDataRecorderBase {
 
 	@Override
 	public String getInterestCurveName() {
-		return  "LIBOR.USD";
+		return  ConstRepoRetrieval.getLiborIndexName();
 	}
 
 	@Override

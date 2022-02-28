@@ -36,10 +36,6 @@ import com.olf.jm.autosipopulation.persistence.LogicResultApplicatorTranInfoFiel
 import com.olf.openjvs.OException;
 import com.olf.openrisk.application.Session;
 import com.olf.openrisk.backoffice.SettlementInstruction;
-import com.olf.openrisk.scheduling.Batch;
-import com.olf.openrisk.scheduling.EnumNomfField;
-import com.olf.openrisk.scheduling.Nomination;
-import com.olf.openrisk.scheduling.Nominations;
 import com.olf.openrisk.staticdata.Currency;
 import com.olf.openrisk.staticdata.DeliveryType;
 import com.olf.openrisk.staticdata.EnumReferenceObject;
@@ -97,7 +93,9 @@ import com.olf.jm.logging.Logging;
  *                                    from the China pre receipt templates with the exception from the 
  *                                    exception in case those deal have already been linked to a 
  *                                    COMM-STOR deal.
- * 2020-10-01   V1.20    Prashanth  - Dispatch workflow Changes For status IN Progress
+ * 2020-10-01   V1.20   Prashanth   - Dispatch workflow Changes For status IN Progress
+ * 2021-02-26   V1.21   Prashanth   - EPI-1825   - Fix for missing SI for FX deals booked via SAP and re-factoring logs
+ * 
  */
 
 /**
@@ -277,15 +275,13 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		EnumRunMode rmode = EnumRunMode.PRE;
 		init (context);	
 		try {
-			Logging.info(this.getClass().getName() + " started in pre process run\n"); 
-			//gatherSettleInsAndAcctData (context); // gather static data
+			Logging.info(this.getClass().getName() + " started pre process run for tran status change");
 			preciousMetalList = DBHelper.retrievePreciousMetalList (context);
-			
 			for (PreProcessingInfo<EnumTranStatus> ppi : infoArray) {
 				logicResultApplicators = new ArrayList<>();
 				Transaction tran = ppi.getTransaction();
 				Transaction offset = ppi.getOffsetTransaction();
-				
+				Logging.info("Processing for transaction with tran num %s and version numnber %s", tran.getTransactionId(), tran.getVersionNumber());
 				int insType = tran.getInstrumentTypeObject().getId();
 				Set<Integer> partyIds = new HashSet<>();
 				addPartyIdsForTran(tran, partyIds);
@@ -310,8 +306,10 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 								ra.applyLogic();
 							}
 						}
+						Logging.info("Skip running post process for receipt deals with tran status %s and receipt status %s", ppi.getTargetStatus(), receiptStatus );
 						runPostProcess = false;
 					} else {
+						Logging.info("Skip running post process for deals in status %s", ppi.getTargetStatus());
 						// do nothing for other deals than comm phys if processing to status new or proposed
 					}
 				} else if (ppi.getTargetStatus() == EnumTranStatus.Validated || ppi.getTargetStatus() == EnumTranStatus.Amended){
@@ -339,7 +337,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				}
 			}
 			
-			Logging.info(this.getClass().getName() + " ended in pre process run\n");
+			Logging.info(this.getClass().getName() + " ended in pre process run for tran status change");
 			context.logStatus("succeed=" + succeed);
 			
 		} catch (RuntimeException ex) {
@@ -347,7 +345,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			for (StackTraceElement ste : ex.getStackTrace()) {
 				Logging.error(ste.toString());
 			}
-			Logging.error(this.getClass().getName() + " ended with status failed\n");
+			Logging.error(this.getClass().getName() + " ended with status failed in pre process run for tran status change");
 			context.logStatus("Failed");
 			throw ex;
 		}		
@@ -395,12 +393,13 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		EnumRunMode rmode = EnumRunMode.POST;
 		init (session);
 		try {
-			Logging.info(this.getClass().getName() + " started in post process run\n"); 
+			Logging.info(this.getClass().getName() + " started post process run for tran status change");
 			preciousMetalList = DBHelper.retrievePreciousMetalList (session);
 			for (PostProcessingInfo<EnumTranStatus> pi : infoArray) {
 				Transaction tran = null;
 				try {
 					tran = session.getTradingFactory().retrieveTransactionById(pi.getTransactionId());
+					Logging.info("Processing for transaction with tran num %s and version numnber %s", tran.getTransactionId(), tran.getVersionNumber());
 					if (isRelevantForPostProcess (tran) && !isDispatchStatusInprogress(tran)) {
 						Table clDataTranGroup = null;
 						for (TableRow row : clientData.getRows()) {
@@ -421,7 +420,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				}
 			}
 			
-			Logging.info(this.getClass().getName() + " ended in post process run\n");
+			Logging.info(this.getClass().getName() + " ended in post process run for tran status change");
 			session.logStatus("succeed=" + succeed);
 			
 		} catch (RuntimeException ex) {
@@ -429,7 +428,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			for (StackTraceElement ste : ex.getStackTrace()) {
 				Logging.error(ste.toString());
 			}
-			Logging.error(this.getClass().getName() + " ended with status failed\n");
+			Logging.error(this.getClass().getName() + " ended with status failed for tran status change");
 			session.logStatus("Failed");
 			throw ex;
 		}finally{
@@ -446,13 +445,15 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		EnumRunMode rmode = EnumRunMode.PRE;
 		init (context);
 		try {
-			Logging.info(this.getClass().getName() + " started in pre process run\n"); 
-			//gatherSettleInsAndAcctData (context); // gather static data
+			Logging.info(this.getClass().getName() + " started pre process run for tran incremental save");
+			
 			preciousMetalList = DBHelper.retrievePreciousMetalList (context);
 			
 			for (PreProcessingInfo<EnumTranStatusInternalProcessing> ppi : infoArray) {
 				logicResultApplicators = new ArrayList<>();
 				Transaction tran = ppi.getTransaction();
+				Logging.info("Processing for transaction with tran num %s and version numnber %s", tran.getTransactionId(), tran.getVersionNumber());
+				
 				int dealTrackingNum = tran.getDealTrackingId();
 				Field dispatchStatusField = tran.getField(TranInfoField.DISPATCH_STATUS.getName());
 				String oldDispatchStatus = DBHelper.retrieveDispatchStatus (context, dealTrackingNum);
@@ -463,6 +464,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 						&& dispatchStatusField.isApplicable() && dispatchStatusField.isReadable()) {
 					String dispatchStatus = dispatchStatusField.getValueAsString();
 					if (dealTrackingNum != 0 && dispatchStatusField != null) {
+						Logging.info("Skip assing SI process for dispatch deals in case of tran info save or change in dispatch status");
 						continue;
 					}
 				}
@@ -484,7 +486,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 					runPostProcess = true;
 				}
 			}
-			Logging.info(this.getClass().getName() + " ended in pre process run\n");
+			Logging.info(this.getClass().getName() + " ended in pre process run for tran incremental save");
 			context.logStatus("succeed=" + succeed);
 			
 		} catch (RuntimeException ex) {
@@ -492,7 +494,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			for (StackTraceElement ste : ex.getStackTrace()) {
 				Logging.error(ste.toString());
 			}
-			Logging.error(this.getClass().getName() + " ended with status failed\n");
+			Logging.error(this.getClass().getName() + " ended with status failed in pre process run for tran incremental save\n");
 			context.logStatus("Failed");
 			throw ex;
 		}
@@ -517,12 +519,13 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		EnumRunMode rmode = EnumRunMode.POST; 
 		init (session);
 		try {
-			Logging.info(this.getClass().getName() + " started in post process run\n"); 
+			Logging.info(this.getClass().getName() + " started post process run for tran incremental save"); 
 			preciousMetalList = DBHelper.retrievePreciousMetalList (session);
 			for (PostProcessingInfo<EnumTranStatusInternalProcessing> pi : infoArray) {
 				Transaction tran = null;
 				try {
 					tran = session.getTradingFactory().retrieveTransactionById(pi.getTransactionId());
+					Logging.info("Processing for transaction with tran num %s and version numnber %s", tran.getTransactionId(), tran.getVersionNumber());
 					if(isDispatchStatusInprogress(tran)){
 						continue;
 					}
@@ -540,7 +543,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 				}
 			}
 			
-			Logging.info(this.getClass().getName() + " ended in post process run\n");
+			Logging.info(this.getClass().getName() + " ended post process run for tran incremental save");
 			session.logStatus("succeed=" + succeed);
 			
 		} catch (RuntimeException ex) {
@@ -548,7 +551,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			for (StackTraceElement ste : ex.getStackTrace()) {
 				Logging.error(ste.toString());
 			}
-			Logging.error(this.getClass().getName() + " ended with status failed\n");
+			Logging.error(this.getClass().getName() + " ended with status failed in post process run for tran incremental save");
 			session.logStatus("Failed");
 			throw ex;
 		}finally{
@@ -563,7 +566,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		if(dispatchStatusField != null && dispatchStatusField.isApplicable() && dispatchStatusField.isReadable()) {
 			String dispatchStatus = dispatchStatusField.getValueAsString();
 			if(DISPATCH_STATUS_IN_PROGRESS.equalsIgnoreCase(dispatchStatus)) {
-				Logging.info("Settlement Instruction will not be updated to the deal for Dispatch Status %s", dispatchStatus);
+				Logging.info("Settlement Instruction will not be updated to the deal with tran num %s version numnber %s since Dispatch Status is %s", tran.getTransactionId(), tran.getVersionNumber(), dispatchStatus);
 				isDSInProgress = true;
 			}
 		}
@@ -606,12 +609,12 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		String offsetTranType = (offsetTranTypeField != null && offsetTranTypeField.isApplicable())?
 				offsetTranTypeField.getValueAsString():"";		
 		for (DealEvent event : tran.getDealEvents() ) {
-			setSettlementInstructionsAccordingToClientData(session, event, clientData, offsetTranType);
+			setSettlementInstructionsAccordingToClientData(session, event, clientData, offsetTranType, tran);
 		}
 	}
 	
 	private void setSettlementInstructionsAccordingToClientData(final Session session, 
-			final DealEvent event, final Table clientData, String offsetTranTypeTransaction) {
+			final DealEvent event, final Table clientData, String offsetTranTypeTransaction, final Transaction tran) {
 		int legNumE = event.getField("Para Seq Num").getValueAsInt();
 		int ccyIdE = event.getField("Settle CCY").getValueAsInt();
 		int extBusinessUnitE = event.getField("External Business Unit").getValueAsInt();
@@ -654,9 +657,13 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 						+ " is same as new value. It will not be updated");
 				continue;
 			}
-			Logging.info("Saving " + intExt +" SI #" + settleIdR + " on deal event #" + event.getId());
-			event.setValue(settleFieldId, settleIdR);
-			session.getBackOfficeFactory().saveSettlementInstructions(event);
+			Logging.info("Saving %s SI #%s on deal for tran num=%s, tran version=%s, event #%s", intExt, settleIdR, tran.getTransactionId(), tran.getVersionNumber(), event.getId());
+			try {
+				event.setValue(settleFieldId, settleIdR);
+				session.getBackOfficeFactory().saveSettlementInstructions(event);
+			} catch (Exception e) {
+				Logging.info("Failed to set SI for tran num=%s, tran version=%s because of error %s", tran.getTransactionId(), tran.getVersionNumber(), e.getMessage());
+			}
 		}
 	}
 
@@ -1199,6 +1206,17 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 					}
 					dd.setSavedUnsavedExt(SavedUnsaved.SAVED);
 				}
+				
+				// For FX deals from SAP, set savedUnsaved to Unsaved - since FX deals from SAP 
+				// are moced from quote to validated status. Also tran info fields SI-Phys and 
+				// SI-phys Internal are not relavent for Fx deals.
+				String sapOrderId = tran.getField("SAP_Order_ID").isApplicable()
+						? tran.getField("SAP_Order_ID").getValueAsString() : "";
+				if (tran.getInstrumentId() == EnumInsType.FxInstrument.getValue()
+						&& (sapOrderId != null && sapOrderId.length() > 0)) {
+					dd.setSavedUnsavedInt(SavedUnsaved.UNSAVED);
+					dd.setSavedUnsavedExt(SavedUnsaved.UNSAVED);
+				}
 				allDecisionData.add(dd);
 			}
 			
@@ -1229,6 +1247,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 			if (memSettle != null) {
 				memSettle.dispose();
 			}
+			Logging.info("Transaction details: tran num %s and version numnber %s", tran.getTransactionId(), tran.getVersionNumber());
 			Logging.info("Finished retrieving transaction data (inside gatherTranDataAndApplyLogic() method)...");
 		}
 	}
@@ -1261,7 +1280,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		for (SettlementInstruction si : sis) {
 			coreSIs.add(new Pair<>(si.getId(), si.getName()));
 		}
-		Logging.info("Core Code settlement instructions for tran #" + tran.getTransactionId() + ", ccy=" + c.getName()
+		Logging.info("Core Code settlement instructions for tran #" + tran.getTransactionId() + ", tran version=" + tran.getVersionNumber() + ", ccy=" + c.getName()
 				+ ", party=" + p.getName() + ", delivery type=" + d.getName() + "\n" + coreSIs);
 		return coreSIs;
 	}
@@ -1432,7 +1451,7 @@ public class AssignSettlementInstruction extends AbstractTradeProcessListener {
 		} catch (OException e) {
 			throw new RuntimeException (e);
 		}		
-		Logging.info("\n\n********************* Start of new run ***************************");
+		Logging.info("********************* Start of new run ***************************");
 
 		try {
 			UIManager.setLookAndFeel( // for dialogs that are used in pre process runs

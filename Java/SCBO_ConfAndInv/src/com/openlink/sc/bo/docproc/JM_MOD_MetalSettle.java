@@ -42,6 +42,7 @@ import java.util.List;
  * 2020-05-12	V1.15	agrawa01	- Bug fixes for grouping of Transfer Charges
  * 2020-05-12	V1.16	fernani01	- Bug fixes for split settlement in setMetalDesc()
  * 2020-09-01	V1.17	Jyotsna		- Problem 2952 | Bug fixes for rounding errors on  Tax amount
+ * 2021-09-23	V1.18	Rohit Tomar	- PBI 0408 | Fix for not to update event info while preview the document 
 */
 
 //@com.olf.openjvs.PluginCategory(com.olf.openjvs.enums.SCRIPT_CATEGORY_ENUM.SCRIPT_CAT_STLDOC_MODULE)
@@ -51,6 +52,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 	protected ConstRepository _constRepo;
 	protected static boolean _viewTables = false;
 	protected static boolean _formatDoubles = false;
+	protected boolean _isPreview = false;
 	protected static int _doublePrec = -1;
 	protected static String _vatCashflowType    = "VAT";
 	protected static String _vatLegTranInfo     = "VAT-Leg dummy";
@@ -170,7 +172,12 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		{
 			Table argt = context.getArgumentsTable();
 			retrieveSettingsFromConstRep();
-
+			
+			int previewFlag = argt.getInt("PreviewFlag", 1);
+			
+			if(previewFlag == 1)
+				_isPreview = true;
+				
 			if (argt.getInt("GetItemList", 1) == 1) // if mode 1
 			{
 				//Generates user selectable item list
@@ -2695,7 +2702,9 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 		where = "event_type EQ " + EVENT_TYPE_ENUM.EVENT_TYPE_TAX_SETTLE.toInt();
 		tbl.select(tblEvent, what, where);
 		calculateProvAmount(tbl);
-		saveSavedSettleVolume(tbl);
+		
+		if(!_isPreview)
+			saveSavedSettleVolume(tbl);
 
 	//	what = "prov_perc (Prov_Perc), prov_price (Prov_Price), prov_amount (Prov_Amount)";
 		what = "prov_perc (Prov_Perc), prov_price (Prov_Price), prov_amount (Prov_Amount), prep_amount (Prep_Amount)";
@@ -3183,7 +3192,7 @@ public class JM_MOD_MetalSettle extends OLI_MOD_ModuleBase implements IScript
 			if (!canFxRate)     Logging.warn ("Event Info Field '" + _event_info_fx_rate + "' doesn't exist. Check configuration.");
 			tblEI.destroy ();
 
-			if (canBaseAmount||canBaseCcy||canFxRate)
+			if ((canBaseAmount||canBaseCcy||canFxRate) && !_isPreview)
 			{
 				double amount;
 				boolean doSave;

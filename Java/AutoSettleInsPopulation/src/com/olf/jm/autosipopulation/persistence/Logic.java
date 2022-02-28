@@ -33,6 +33,7 @@ import com.olf.jm.logging.Logging;
  * 2016-03-22   jwaechter   V1.7	- fixed copy and paste issue in "applyGeneralLogic":
  *                                    for case possibleIntSIs.size() == 1 && possibleExtSIs.size() > 1
  *                                    it checked if internal settlement instructions are unsaved only.
+ * 2021-02-26   Prashanth   V1.8    - EPI-1825   - Fix for missing SI for FX deals booked via SAP and re-factoring logs
  *                                      
  */
 
@@ -72,7 +73,7 @@ public class Logic {
 	private List<LogicResult> applyGeneralLogic() {
 		List<LogicResult> results = new ArrayList<> (allDecisionData.size());
 		for (DecisionData dd : allDecisionData) {
-			Logging.info("Processing decision data:\n " + dd);
+			Logging.info("Processing decision data:\n" + dd.toString());
 			
 			List<SettleInsAndAcctData> possibleIntSIs = (dd.isCashTran())?getMatchingSettleInsCashTran(dd, dd.getIntPartyId()):
 				getMatchingSettleInsNonCashTran(dd, dd.getIntPartyId());
@@ -90,6 +91,7 @@ public class Logic {
 				dd.setSavedUnsavedExt(SavedUnsaved.UNSAVED);
 			}
 			
+			Logging.info("Internal SI status before updating = %s, External SI status before updating = %s", dd.getSavedUnsavedInt(), dd.getSavedUnsavedExt());
 			if (dd.getSavedUnsavedInt() == SavedUnsaved.UNSAVED || dd.getSavedUnsavedExt() == SavedUnsaved.UNSAVED) {
 				int ccyId = dd.getCcyId();
 				if (ccyId == -1) {
@@ -242,6 +244,9 @@ public class Logic {
 						result = new LogicResult(intSi, extSi, dd);						
 					}
 				}
+				Logging.info("Possible Internal SIs = " + possibleIntSIs.size());
+				Logging.info("Possible External SIs " + possibleExtSIs.size());
+				Logging.info("Result = " + result.toString());
 				Logging.info("Processed Decision data with calculated LogicResult:\n " + result);
 				results.add(result);
 			}
@@ -386,44 +391,44 @@ public class Logic {
 		for (SettleInsAndAcctData siad : settleInsAndAccountData) {
 			if (siad.getSiPartyId() != partyId)
 			{
-				Logging.debug("SI " + siad + " does not match because it does not have expected party ID " + partyId);	
+//				Logging.debug("SI " + siad + " does not match because it does not have expected party ID " + partyId);	
 				continue;
 			}
 			if (!siad.getDeliveryInfo().contains(curDel))
 			{
-				Logging.debug("SI " + siad + " does not match because its set of assigned delivery IDs does not contain expected delivery  ID " + curDel);	
+//				Logging.debug("SI " + siad + " does not match because its set of assigned delivery IDs does not contain expected delivery  ID " + curDel);	
 				continue;
 			}
 			if (dd.isCommPhys()) {
 				if (!siad.getForm().equals(dd.getFormPhys())) {
-					Logging.debug("SI " + siad + " does not match because its COMM-PHYS and the form is not form phys" + dd.getFormPhys());	
+//					Logging.debug("SI " + siad + " does not match because its COMM-PHYS and the form is not form phys" + dd.getFormPhys());	
 					continue;					
 				}	
 			} else {
 				if (!siad.getForm().equals(dd.getForm())) {
-					Logging.debug("SI " + siad + " does not match because its not COMM-PHYS and the form is not form " + dd.getForm());	
+//					Logging.debug("SI " + siad + " does not match because its not COMM-PHYS and the form is not form " + dd.getForm());	
 					continue;					
 				}					
 			}
 			
 			if (dd.isUseShortList() && !siad.isUseShortList()) {
-				Logging.debug("SI " + siad + " is for short list only and transaction is not marked as short list");
+//				Logging.debug("SI " + siad + " is for short list only and transaction is not marked as short list");
 				continue;				
 			}
 			
 			if (!siad.getLoco().equals(dd.getLoco()))
 			{
-				Logging.debug("SI " + siad + " does not match because its loco is not " + dd.getLoco());	
+//				Logging.debug("SI " + siad + " does not match because its loco is not " + dd.getLoco());	
 				continue;
 			}
 			if (!siad.containsInstrument(dd.getInsType()))
 			{
-				Logging.debug("SI " + siad + " does not match because it is not assigned to instrument type " + dd.getInsType());	
+//				Logging.debug("SI " + siad + " does not match because it is not assigned to instrument type " + dd.getInsType());	
 				continue;
 			}				
 			if (dd.isCommPhys()) {
 				if (!siad.getAllocationType().equals(dd.getAllocationType())) {
-					Logging.debug("SI " + siad + " does not match because it is a COMM-PHYS and the allocation type is not " + dd.getAllocationType());	
+//					Logging.debug("SI " + siad + " does not match because it is a COMM-PHYS and the allocation type is not " + dd.getAllocationType());	
 					continue;
 				}
 			}
@@ -438,7 +443,7 @@ public class Logic {
 				Logging.info("Added SI " + si + " for ExtParty as it meets core code criteria");
 				matches.add(siad);					
 			} else {
-				Logging.debug("Removed SI " + si + " from list of possible SIs because it does not meet core code criteria");
+//				Logging.debug("Removed SI " + si + " from list of possible SIs because it does not meet core code criteria");
 			}
 		}
 		return matches;

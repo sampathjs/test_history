@@ -1,0 +1,5 @@
+.gitignore
+**/target/**
+/endur-connector-shared.iml
+.idea/**
+/target/

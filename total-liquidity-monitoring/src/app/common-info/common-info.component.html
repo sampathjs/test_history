@@ -1,0 +1,41 @@
+<mat-card class="mat-elevation-z6">
+	<mat-form-field>
+		<label>
+			<input [(ngModel)]="currentUser" [type]="'text'" matInput readonly placeholder="User" />
+		</label>
+	</mat-form-field>
+	<mat-form-field>
+		<label>
+			<input [(ngModel)]="comments" [type]="'text'" matInput placeholder="Comments" />
+		</label>
+	</mat-form-field>
+	<mat-form-field>
+		<mat-label>Group</mat-label>
+		<mat-select [(value)]="selectedGroup" required>
+			<mat-option *ngFor="let group of groups" [value]="group">{{group.name}}</mat-option>
+		</mat-select>
+	</mat-form-field>
+	<mat-form-field>
+		<label>
+			<input
+				[value]="selectedGroup ? selectedGroup.companyCode : ''"
+				[type]="'text'"
+				matInput
+				readonly
+				placeholder="Company Code"
+			/>
+		</label>
+	</mat-form-field>
+	<mat-form-field>
+		<mat-label>Balance Date</mat-label>
+		<mat-select [(value)]="selectedBalanceDate" required>
+			<mat-option *ngFor="let balanceDate of balanceDates" [value]="balanceDate">{{balanceDate}}</mat-option>
+		</mat-select>
+	</mat-form-field>
+	<mat-form-field>
+		<mat-label>Metal Unit of Measure</mat-label>
+		<mat-select [(value)]="selectedUnit" required>
+			<mat-option *ngFor="let unit of units" [value]="unit">{{unit}}</mat-option>
+		</mat-select>
+	</mat-form-field>
+</mat-card>
