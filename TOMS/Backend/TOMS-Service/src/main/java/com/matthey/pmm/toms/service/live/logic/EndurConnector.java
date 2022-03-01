@@ -11,14 +11,20 @@ import org.springframework.web.client.RestTemplate;
 
 import org.tinylog.Logger;
 
+import com.matthey.pmm.toms.service.RestTemplateProvider;
+
 @Component
 public class EndurConnector {
 
     private final RestTemplate restTemplate;
     private final String baseUrl;
 
-    public EndurConnector(RestTemplate restTemplate, @Value("${endur.connector.url}") String baseUrl) {
-        this.restTemplate = restTemplate;
+    public EndurConnector(RestTemplateProvider restTemplateProvider, @Value("${endur.connector.url}") String baseUrl) {
+        if (baseUrl.toLowerCase().contains("https")) {
+        	this.restTemplate = restTemplateProvider.oAuth2ForwarderRestTemplateForSecureConnection();        	
+        } else {
+        	this.restTemplate = restTemplateProvider.oAuth2ForwarderRestTemplateForUnsecureConnection();        	        	
+        }
         checkArgument(new UrlValidator(UrlValidator.ALLOW_LOCAL_URLS).isValid(baseUrl),
                       "invalid Endur connector URL: " + baseUrl);
         Logger.info("Endur connector URL: {}", baseUrl);

@@ -77,7 +77,6 @@ import com.matthey.pmm.toms.service.exception.TickerFxRefSourceRuleCheckExceptio
 import com.matthey.pmm.toms.service.exception.TickerPortfolioRuleCheckException;
 import com.matthey.pmm.toms.service.exception.TickerRefSourceRuleCheckException;
 import com.matthey.pmm.toms.service.exception.UnknownEntityException;
-import com.matthey.pmm.toms.service.logic.ServiceConnector;
 import com.matthey.pmm.toms.transport.CounterPartyTickerRuleTo;
 import com.matthey.pmm.toms.transport.CreditCheckTo;
 import com.matthey.pmm.toms.transport.DatabaseFileTo;
@@ -645,8 +644,7 @@ public class TomsValidator {
     	
 	}
 	
-	public void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, OrderTo oldLimitOrder,
-			String auth) {
+	public void validateLimitOrderFields (Class clazz, String method, String argument, LimitOrderTo order, boolean isNew, OrderTo oldLimitOrder) {
 		validateOrderFields (clazz, method, argument, order, isNew, oldLimitOrder);
 		// validate input data
 		SimpleDateFormat sdfDate = new SimpleDateFormat (TomsService.DATE_FORMAT);
@@ -739,12 +737,11 @@ public class TomsValidator {
 				throw new IllegalStateChangeException(clazz, method, argument, "<not in database>", toStatusName.getValue(), "Pending");				
 			}
     	}
-    	applyCounterPartyTickerRules(clazz, method, argument, order, auth);
-    	applyTickerPortfolioRules(clazz, method, argument, order, auth);
+    	applyCounterPartyTickerRules(clazz, method, argument, order);
+    	applyTickerPortfolioRules(clazz, method, argument, order);
 	}
 	
-	public void validateReferenceOrderFields (Class clazz, String method, String argument, ReferenceOrderTo order, boolean isNew, OrderTo oldReferenceOrder,
-			String auth) {
+	public void validateReferenceOrderFields (Class clazz, String method, String argument, ReferenceOrderTo order, boolean isNew, OrderTo oldReferenceOrder) {
 		validateOrderFields (clazz, method, argument, order, isNew, oldReferenceOrder);
 	    
     	verifyDefaultReference (order.idContractType(),
@@ -800,12 +797,12 @@ public class TomsValidator {
 				throw new IllegalStateChangeException(clazz, method, argument, "<not in database>", toStatusName.getValue(), "Pending");				
 			}
     	}
-    	applyCounterPartyTickerRules(clazz, method, argument, order, auth);
-    	applyTickerPortfolioRules(clazz, method, argument, order, auth);
+    	applyCounterPartyTickerRules(clazz, method, argument, order);
+    	applyTickerPortfolioRules(clazz, method, argument, order);
     	for (Long legId : order.legIds()) {
     		ReferenceOrderLeg leg = referenceOrderLegRepo.findById(legId).get();
-    		applyTickerRefSourceRules(clazz, method, argument, order, leg, auth);
-    		applyTickerFxRefSourceRules(clazz, method, argument, order, leg, auth);
+    		applyTickerRefSourceRules(clazz, method, argument, order, leg);
+    		applyTickerFxRefSourceRules(clazz, method, argument, order, leg);
     	}
 	}
 	
@@ -1192,9 +1189,8 @@ public class TomsValidator {
 		}
 	}
 
-	private void applyCounterPartyTickerRules(Class clazz, String method, String argument, OrderTo order,
-			String auth) {
-		List<CounterPartyTickerRuleTo> rules = derivedDataService.getCounterPartyTickerRules(auth, order.idExternalBu());
+	private void applyCounterPartyTickerRules(Class clazz, String method, String argument, OrderTo order) {
+		List<CounterPartyTickerRuleTo> rules = derivedDataService.getCounterPartyTickerRules(order.idExternalBu());
     	List<CounterPartyTickerRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idMetalForm() == (order.idMetalForm()!=null?order.idMetalForm():0l)
     			&&	     x.idMetalLocation() == (order.idMetalLocation() != null?order.idMetalLocation():0l) 
@@ -1205,9 +1201,8 @@ public class TomsValidator {
     	}
 	}
 	
-	private void applyTickerPortfolioRules(Class clazz, String method, String argument, OrderTo order,
-			String auth) {
-		List<TickerPortfolioRuleTo> rules = derivedDataService.getTickerPortfolioRules(auth);
+	private void applyTickerPortfolioRules(Class clazz, String method, String argument, OrderTo order) {
+		List<TickerPortfolioRuleTo> rules = derivedDataService.getTickerPortfolioRules();
     	List<TickerPortfolioRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idParty() == order.idInternalBu()
     			&&	     x.idPortfolio() == (order.idIntPortfolio() != null?order.idIntPortfolio():0l) 
@@ -1218,9 +1213,8 @@ public class TomsValidator {
     	}
 	}
 	
-	private void applyTickerRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg,
-			String auth) {
-		List<TickerRefSourceRuleTo> rules =  derivedDataService.getTickerRefSourceRules(auth);
+	private void applyTickerRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg) {
+		List<TickerRefSourceRuleTo> rules =  derivedDataService.getTickerRefSourceRules();
     	List<TickerRefSourceRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idRefSource() == (leg.getRefSource() != null?leg.getRefSource().getId():0)
     			&&       x.idTicker() == (order.idTicker() != null?order.idTicker():0l))
@@ -1230,8 +1224,7 @@ public class TomsValidator {
     	}
 	}
 
-	private void applyTickerFxRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg,
-			String auth) {
+	private void applyTickerFxRefSourceRules(Class clazz, String method, String argument, ReferenceOrderTo order, ReferenceOrderLeg leg) {
 		Reference ticker = order.idTicker()!=null?refRepo.findById(order.idTicker()).get():null;
 		if (ticker == null || leg.getSettleCurrency() == null) {
 			return;
@@ -1241,7 +1234,7 @@ public class TomsValidator {
 		if (fxCurrency.getId() == leg.getSettleCurrency().getId() ) {
 			return;
 		}
-		List<TickerFxRefSourceRuleTo> rules = derivedDataService.getTickerFxRefSourceRules(auth);
+		List<TickerFxRefSourceRuleTo> rules = derivedDataService.getTickerFxRefSourceRules();
 
     	List<TickerFxRefSourceRuleTo> filteredRules = rules.stream()
     		.filter(x -> x.idRefSource() == (leg.getFxIndexRefSource() != null?leg.getFxIndexRefSource().getId():0l)

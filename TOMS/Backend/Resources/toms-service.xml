@@ -7,7 +7,7 @@
     <env name="MSSQL_JDBC_DRIVER_LOCATION" value=".\" />
     <env name="PATH" value="%PATH%;%MSSQL_JDBC_DRIVER_LOCATION%"/>
     <executable>%JAVA_11_HOME%\bin\java</executable>
-    <arguments>-jar -Dtinylog.configuration=tinylog.properties toms-service-1.0.0.jar</arguments>
+    <arguments>-jar -Dtinylog.configuration=".\tinylog.properties" toms-service-1.0.0.jar</arguments>
     <startmode>Manual</startmode>
     <log mode="reset" />
 </service>

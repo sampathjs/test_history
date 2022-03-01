@@ -104,10 +104,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 
 	@Autowired
 	protected ReferenceOrderLegConverter referenceOrderLegConverter;
-	
-	@Autowired
-	protected OktaClient oktaClient;
-		
+			
 	@Value("#{${search.mapping.abstractOrder}}")  
 	private Map<String,String> abstractOrderSearchMap;
 	
@@ -354,7 +351,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Transactional
 	public long postLimitOrder (@ApiParam(value = "The new Limit Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) LimitOrderTo newLimitOrder) {
     	// validation checks
-    	validator.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null, oktaClient.getNewAuth());
+    	validator.validateLimitOrderFields (this.getClass(), "postLimitOrder", "newLimitOrder", newLimitOrder, true, null);
 	
 		LimitOrder managedEntity = limitOrderConverter.toManagedEntity(newLimitOrder);
 		managedEntity.setCreatedAt(new Date());
@@ -373,7 +370,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     		throw new UnknownEntityException (this.getClass(), "updateLimitOrder", "existingLimitOrder.id" , "Limit Order", "" + existingLimitOrder.id());
     	}
     	validator.validateLimitOrderFields (this.getClass(), "updateLimitOrder", "existingLimitOrder", existingLimitOrder, false, 
-    			limitOrderConverter.toTo(oldLimitOrderManaged.get()), oktaClient.getNewAuth());
+    			limitOrderConverter.toTo(oldLimitOrderManaged.get()));
 
     	existingLimitOrder = ImmutableLimitOrderTo.builder()
     			.from(existingLimitOrder)
@@ -534,7 +531,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
 	@Transactional
 	public long postReferenceOrder (@ApiParam(value = "The new Reference Order. Order ID and version have to be 0. The actual assigned Order ID is going to be returned", example = "", required = true) @RequestBody(required=true) ReferenceOrderTo newReferenceOrder) {
     	// validation checks
-    	validator.validateReferenceOrderFields (this.getClass(), "postReferenceOrder", "newReferenceOrder", newReferenceOrder, true, null, oktaClient.getNewAuth());
+    	validator.validateReferenceOrderFields (this.getClass(), "postReferenceOrder", "newReferenceOrder", newReferenceOrder, true, null);
 	
 		ReferenceOrder managedEntity = referenceOrderConverter.toManagedEntity(newReferenceOrder);
 		managedEntity.setCreatedAt(new Date());
@@ -553,7 +550,7 @@ public abstract class OrderControllerImpl implements TomsOrderService {
     		throw new UnknownEntityException (this.getClass(), "updateReferenceOrder", "existingReferenceOrder.id" , "Referencet Order", "" + existingReferenceOrder.id());
     	}
     	validator.validateReferenceOrderFields (this.getClass(), "updateReferenceOrder", "existingReferenceOrder", existingReferenceOrder, false, 
-    			referenceOrderConverter.toTo(oldOrderManaged.get()), oktaClient.getNewAuth());
+    			referenceOrderConverter.toTo(oldOrderManaged.get()));
     	existingReferenceOrder = ImmutableReferenceOrderTo.builder()
     			.from(existingReferenceOrder)
     			.version(existingReferenceOrder.version()+1)

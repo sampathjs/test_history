@@ -46,7 +46,7 @@ public class OktaClient {
 		// Get the token from the authorized client object
 		OAuth2AccessToken accessToken = authorizedClient.getAccessToken();		
 		
-		String authValue =  "Bearer " + accessToken.getTokenValue();
+		String authValue =  accessToken.getTokenValue();
 		Logger.info("Generated Auth String: " + authValue);
 		return authValue;
 	}

@@ -94,11 +94,6 @@
     <dependencies>
 		<dependency>
 			<groupId>org.tinylog</groupId>
-			<artifactId>tinylog-api</artifactId>
-			<version>2.4.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.tinylog</groupId>
 			<artifactId>tinylog-impl</artifactId>
 			<version>2.4.1</version>
 		</dependency>
@@ -241,14 +236,14 @@
             <artifactId>mail</artifactId>
             <version>1.5.0-b01</version>
         </dependency> -->
-        <dependency>
+         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-        </dependency>
+        </dependency> 
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-core</artifactId>
@@ -405,7 +400,8 @@
                                   <dependency>io.springfox:springfox*</dependency>
                                   <dependency>org.tinylog:*</dependency>
                                   <dependency>net.bytebuddy:*:*</dependency>
-                                  <dependency>com.matthey.pmm:*</dependency>                                   
+                                  <dependency>com.matthey.pmm:*</dependency>     
+                                  <dependency>org.apache.httpcomponents:*:*</dependency>                              
                               </ignoredDependencies>                                 
                           </configuration>
                       </execution>
